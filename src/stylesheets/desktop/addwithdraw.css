@@ -1,0 +1,160 @@
+.button-container {
+	display:flex;
+	justify-content:center;
+	gap:0.5rem;
+}
+
+
+.add-withdraw-button {	
+	font-family:Avenir;
+	font-weight:600;
+	padding:1.75rem;
+    cursor: pointer;
+	border:1px solid rgb(228, 226, 225);
+    border-radius: 1rem;
+    font-size: 1rem;
+	box-shadow:rgba(0, 0, 0, 0.06) 0px 2px 6px 0px, rgba(0, 0, 0, 0.06) 0px 2px 6px 0px;
+	background-color:white;
+	width:100%;
+	color:rgb(50, 48, 47);
+	
+}
+
+
+.add-withdraw-button:hover {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px 0px, rgba(0, 0, 0, 0.1) 0px 3px 8px 0px;
+}
+
+.background-overlay {
+	
+	position:fixed;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+	z-index:1000;
+    background-color: rgba(0, 0, 0, 0.48);
+	
+}
+
+.modal-dialog {
+	display:flex;
+	flex-direction:column;
+	position:fixed;
+	top:50%;
+	left:50%;
+	transform:translate(-50%, -50%);
+	z-index: 1001;
+	background-color: white;
+	border-radius:1rem;
+	width:100%;
+	max-width:550px;	
+	min-height:50vh;
+	max-height:70vh;
+	
+	padding:2rem;
+	font-family:avenir;
+		
+}
+
+.modal-form {
+	display:flex;
+	flex-direction:column;
+	flex:1;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  padding:1rem;
+  border-radius:50%;
+}
+
+.close-button:hover {
+  background-color: #e0e0e0; 
+}
+
+.modal-amount-container {
+	display:flex;
+	flex-direction:column;
+	flex:1;
+	position:relative;
+	justify-content:center;
+	
+}
+
+.modal-submit {
+	display:flex;
+	justify-content:center;
+	margin-bottom:0.5rem;
+}
+
+.modal-amount-label {
+	position:absolute;
+	transform:scale3d(0.777778, 0.777778, 1);
+	transform-origin:left top;
+	left:16px;
+	top:8px;
+	
+}
+
+.modal-currency {
+	padding:28px 16px 8px 4px;
+}
+
+.modal-amount-container-two {
+	display:flex;
+	justify-content:center;
+}
+
+.modal-amount-container-three {
+	display:flex;
+	width:75%;
+	border:1px solid rgb(50,47,48);
+	border-radius:0.5rem;
+	align-items:center;
+	position:relative;
+    font-family: BlinkMacSystemFont;
+	
+}
+
+.modal-dollar {
+	padding:28px 4px 8px 16px;
+}
+
+
+
+.modal-amount-input {
+	padding:28px 4px 8px 0px;
+	border:none;
+	flex:1;
+	border-radius:0.5rem;
+	outline:none;
+    font-size: 16px;
+    font-family: BlinkMacSystemFont;
+    font-weight: 500;
+}
+
+.modal-amount-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.aw-submit {
+	font-family:BlinkMacSystemFont;
+	font-weight:500;
+	background:rgb(50, 48, 47);
+	border-radius:4rem;
+	padding:1rem;
+	color:white;
+	width:37.75%;
+	
+}
+
+.aw-submit:hover {
+	background-color:#535050;
+	transition:0.4s;
+}
+

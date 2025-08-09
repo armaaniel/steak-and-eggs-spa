@@ -1,0 +1,76 @@
+.port-value-heading {
+	color:rgb(50, 48, 47);
+	font-family:Avenir;
+}
+
+.home-right {
+	display:flex;
+	flex-direction:column;
+	width:400px;
+	row-gap:2rem;	
+		
+}
+
+.home-left {
+	display:flex;
+	flex-direction:column;
+	flex:1;
+	row-gap:1.5rem;
+    animation: fadeIn 125ms ease-in;
+}
+.chart {
+	height:37.5vh;
+}
+
+.portfolio-value {
+	font-family:Avenir;
+	color:rgb(50, 48, 47);	
+}
+
+.cash-balance {
+	font-family:Avenir;
+	color:rgb(50, 48, 47);
+	opacity:0;
+	transition:50ms opacity ease-in	
+}
+
+.cash-balance.loaded {
+	opacity:1;
+}
+
+.port-value {	
+	display:flex;
+}
+
+.holdings {
+	font-family:Avenir;	
+}
+
+.balance-container {
+	display:flex;
+	border:1px solid rgb(228, 226, 225);
+	padding:1.5rem;
+	box-shadow:rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
+	border-radius:1rem;
+	background-color:white;
+	font-family:avenir;	
+}
+
+.recharts-default-tooltip {
+	align-items:center;
+	font-family:avenir;
+}
+
+.chart svg {
+  outline: none
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+

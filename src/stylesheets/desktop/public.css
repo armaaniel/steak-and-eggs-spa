@@ -1,0 +1,62 @@
+.logo-desktop {
+	width:182px;
+}
+
+.nav {
+	display:flex;
+	flex-direction:row;
+	padding:1.5rem 2.5rem 10px 9px;
+	justify-content:space-between;
+}
+
+.nav-text {
+	font-family:BlinkMacSystemFont;
+	font-weight:500;
+	color:#32302f;
+	text-decoration:none;
+	margin-top:0.25rem;
+}
+
+.nav-left {
+	display:flex;
+}
+
+.login-link {
+	font-family:BlinkMacSystemFont;
+	font-weight:500;
+	background:white;
+	border-radius:4rem;
+	border:1px solid;
+	padding:0.75rem 1.5rem;
+	color:black;
+	text-decoration:none;
+	
+}
+
+.signup-link {
+	font-family:BlinkMacSystemFont;
+	font-weight:500;
+	background:rgb(50, 48, 47);
+	border-radius:4rem;
+	padding:0.75rem 1.5rem;
+	color:white;
+	text-decoration:none;
+}
+
+.nav-right {
+	display:flex;
+	align-items:center;
+	column-gap:1rem;
+	margin-top:0.25rem;
+}
+
+.signup-link:hover {
+	background-color:#535050;
+	transition:0.4s;
+}
+
+.login-link:hover {
+	background-color:#D4D3D2;
+	transition:0.4s;
+	
+}

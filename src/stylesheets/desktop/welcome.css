@@ -1,0 +1,41 @@
+.welcome-main-desktop {
+	display:flex;
+	flex-direction:column;
+	flex:1;
+	justify-content:center;
+	align-items:center;
+	background-color:#AFD8DF;
+}
+
+.welcome-heading-desktop {
+	color:rgb(50, 48, 47);
+	font-family:avenir;
+	font-size:3rem;
+	padding:3rem;
+}
+
+.welcome-start-desktop {
+	width:25%;
+	display:flex;
+	justify-content:center;
+	
+}
+
+.get-started-desktop {
+	display:flex;
+	justify-content:center;
+	width:50%;
+	font-family:BlinkMacSystemFont;
+	font-weight:500;
+	background:rgb(50, 48, 47);
+	border-radius:4rem;
+	padding:1rem;
+	color:white;
+	text-decoration:none;
+}
+
+.get-started-desktop:hover {
+	background-color:#535050;
+	transition:0.4s;
+}
+	

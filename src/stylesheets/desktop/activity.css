@@ -1,0 +1,89 @@
+.page-button {
+	padding:0.5rem 1rem;
+	background-color:white;
+	border-color:rgb(233,236,239);
+	border-radius:4px;
+	border-style:solid;
+	border-width:1px;
+	font-weight:600;
+	text-decoration:none;
+	cursor:pointer;
+}
+
+.page-button:disabled {
+	color:rgb(222,226,230);
+}
+
+.page-span {
+	align-self:center;
+}
+
+.activity-container {
+	display:flex;
+	flex-direction:column;
+	width:100%;
+	row-gap:1rem;
+}
+
+.pagination-container {
+	display:flex;
+	justify-content:center;
+	font-family:BlinkMacSystemFont;
+	color:rgb(64,68,82);
+	column-gap:1rem;
+}
+
+.activity-row {
+	text-align:left;
+	font-family:BlinkMacSystemFont;
+	color:rgb(64,68,82);
+	font-weight:400;
+}
+
+.activity-row-heading {
+	text-align:left;
+	font-family:BlinkMacSystemFont;
+	color:rgb(64,68,82);
+	font-weight:400;
+	padding:0.25rem 0rem;
+	user-select: none;
+}
+
+.activity-row-heading:nth-child(1) { width: 20%; }
+.activity-row-heading:nth-child(2) { width: 20%; }
+.activity-row-heading:nth-child(3) { width: 20%; }
+.activity-row-heading:nth-child(4) { width: 20%; }
+.activity-row-heading:nth-child(5) { width: 20%; }
+
+
+
+
+.activity-row:hover {
+	background-color:#F5F5F5;
+	
+}
+
+.activity-stock-table {
+	width:100%;
+	font-family:avenir;
+	border-collapse:separate;	
+	background-color:white;
+	border-spacing: 0 8px;	
+	opacity:0;
+    transition: opacity 100ms;
+	
+}
+
+.activity-stock-table.loaded {
+    opacity: 1;
+}
+
+
+.activity-cell {
+	padding:0.25rem 0rem;
+}
+
+.activity-row-heading:hover {
+	background-color:#EAECEF;
+}
+

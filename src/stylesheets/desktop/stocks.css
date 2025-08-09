@@ -1,0 +1,95 @@
+.stocks-left {
+	display:flex;
+	flex-direction:column;
+	flex:1;
+	row-gap:1.5rem;
+    animation: fadeIn 100ms ease;
+}
+.stocks-right {
+	display:flex;
+	flex-direction:column;
+	width:400px;
+	row-gap:2rem;	
+    animation: fadeIn 50ms ease-in;		
+}
+
+.stock-heading-container {
+	display:flex;
+	column-gap:0.5rem;
+	align-items:center;
+	padding:8px 8px 6px 8px;	
+}
+
+.stock-name-two {
+color:rgb(97, 94, 92);
+font-family:avenir;
+opacity:0;
+}
+
+.stock-name-two.loaded {
+	opacity:1;
+}
+
+.position {
+	display:flex;
+	flex-direction:column;
+	row-gap:1rem;		
+}
+
+.position-two {
+	display:flex;
+	flex-direction:column;
+	row-gap:1rem;
+    animation: fadeIn 100ms ease-in;
+	
+}
+
+.market-data {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.5rem;
+}
+
+.market-data-container {
+	display:flex;
+}
+
+.company-data {
+	display:flex;
+	flex-direction:column;
+	row-gap:1.5rem;
+}
+
+.company-data-container {
+	display:flex;
+}
+
+.data-name {
+	font-family:futura;	
+}
+
+.data-value {
+	font-family:avenir;
+	font-weight:200;
+	opacity:0;
+	transition:opacity 100ms ease-in;
+	min-height:22px;
+}
+
+.data-value.loaded {
+	opacity:1;
+}
+
+.market-data-container > div {
+	flex:1;
+}
+
+.company-data-container > div {
+	flex:1;
+}
+
+.stock-description {
+	display:flex;
+	flex-direction:column;
+	row-gap:1.5rem;
+}

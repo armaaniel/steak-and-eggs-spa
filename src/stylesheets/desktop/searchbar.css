@@ -1,0 +1,121 @@
+.nav-search-div {
+	flex:1;
+	border-radius:0.75rem;
+	background-color:#fcfcfc;
+	border:1px solid rgb(228, 226, 225);
+	position:relative;
+
+}
+
+.nav-search-div:hover {
+	border-color:rgb(50, 48, 47);
+}
+
+.nav-search-div:focus-within {
+	border-color:rgb(50, 48, 47);
+	outline:1px solid rgb(50, 48, 47);
+}
+
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.search-svg-div {
+	display:flex;
+	align-items:center;
+	padding:0px 8px 0px 12px;
+}
+
+
+.search-results-container {
+	display:flex;
+	flex-direction:column;
+	position:absolute;
+	width:100%;
+	z-index:100;
+	background-color:white;
+	border-radius:0.5rem;
+	box-shadow:rgba(0,0,0,0.06)0px 0px 2px 1px;
+	border:1px solid #ECEDEE;
+	max-height:400px;
+	overflow:hidden auto;
+	margin-top:2px;
+}
+
+.search-input-container {
+	flex:1;	
+	position:relative;
+	display:flex;
+	flex-direction:row;
+}
+
+.search-input-container:focus-within label {
+	top:7px;
+	transform: scale3d(0.777778, 0.777778, 1);
+	
+}
+
+.search-input {
+	font-family:BlinkMacSystemFont;
+	padding:24px 8px 8px 0px;
+	border:none;
+	outline:none;
+	flex:1;
+	border-radius:0.75rem;	
+}
+
+
+.search-label {
+	position:absolute;
+	pointer-events:none;
+	font-family:Avenir;
+	transform-origin: left top;
+	transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), top 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+	top: 50%;
+	transform: translateY(-45%);
+}
+
+.search-input:not(:placeholder-shown) + label {
+    top: 7px;
+	transform:scale3d(0.777778, 0.777778, 1);
+}
+
+.nav-search-div-two {
+	display:flex;
+}
+
+.search-results {
+    list-style-type: none;
+	
+}
+
+.search-result-item {
+	font-family:BlinkMacSystemFont;
+	font-weight:400;
+	
+}
+.search-result-item:hover {
+	background-color:#F5F5F5;
+    cursor: pointer;
+	
+}
+
+.search-link-text {
+	display:block;
+	padding:1rem;
+    text-decoration: none;
+	color:rgb(64,68,82);
+}
+
+.no-search-result {
+	font-family:BlinkMacSystemFont;
+	font-weight:400;
+	padding:1rem;
+}
+	
+
+
+
