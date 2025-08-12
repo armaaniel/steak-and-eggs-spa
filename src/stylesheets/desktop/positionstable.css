@@ -22,14 +22,14 @@
 	padding-bottom:0.5rem;
 }
 
-.symbol-cell {
-	border-radius:0.5rem;
+.shares-cell {
+	border-radius:0px;
 	
 }
 
 .portfolio-row:hover {
 	background-color:#F5F5F5;
-	
+		
 }
 
 .symbol-name {
@@ -40,7 +40,7 @@
    align-items: center;
    color:inherit;
    padding:8px;
-  
+   cursor:pointer;  
 }
 
 .stock-symbol {
@@ -53,6 +53,11 @@
 }
 
 .stock-name {
+color:rgb(97, 94, 92);
+font-family:avenir;
+}
+
+.stock-shares {
 color:rgb(97, 94, 92);
 font-family:avenir;
 animation: fadeIn 100ms ease-out;

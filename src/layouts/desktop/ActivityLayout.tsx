@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Navigate, NavLink} from 'react-router-dom'
+import { Outlet, NavLink} from 'react-router-dom'
 import Navbar from '../../components/desktop/Navbar'
 import '../../stylesheets/desktop/authenticated.css'
 
 
-function Authenticated() {
+function ActivityLayout() {
 	
 	const [isVerifying, setIsVerifying] = useState(true)
 	
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	
 	const token = localStorage.getItem('authToken')	
-	
+		
 	useEffect(() => {
 		async function verifyUser() {
 			
@@ -57,12 +57,12 @@ function Authenticated() {
 		<Navbar />
 	</header>
 	
-	<main className='home'>
-		<Outlet />
+	<main className='home-activity'>
+	<Outlet />
 	</main>
 	
 	</>
 	)
 }
 
-export default Authenticated;
+export default ActivityLayout;

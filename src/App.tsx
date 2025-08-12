@@ -3,6 +3,7 @@ import Welcome from './pages/desktop/Welcome'
 import Public from './layouts/desktop/Public'
 import Authenticated from './layouts/desktop/Authenticated'
 import Stock from './layouts/desktop/Stock'
+import ActivityLayout from './layouts/desktop/ActivityLayout'
 import Login from './pages/desktop/Login'
 import Home from './pages/desktop/Home'
 import Signup from './pages/desktop/Signup'
@@ -25,6 +26,9 @@ function App() {
 			
 			<Route element={<Authenticated/>}>
 			<Route path='/home' element={<Home />} />
+			</Route>
+			
+			<Route element={<ActivityLayout/>}>
 			<Route path='/activity' element={<Activity />} />
 			</Route>
 			

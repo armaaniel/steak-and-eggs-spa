@@ -2,12 +2,13 @@ import '../../stylesheets/desktop/stocks.css'
 import Chart from '../../components/desktop/Chart'
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import PositionsTable from '../../components/desktop/PositionsTable'
+import PositionTable from '../../components/desktop/PositionTable'
 import BuySell from '../../components/desktop/BuySell'
-
+import consumer from '../../consumer.js'
+import { toReadable, toCurrency }  from '../../utils.js'
 
 function Stocks() {
-	
+		
 	const {getUserData, position, setPosition, balance, setBalance} = useOutletContext();
 	
 	const exchangeNames = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
@@ -66,7 +67,7 @@ function Stocks() {
 	useEffect(() => {
 		async function getChartData() {
 			try {
-				const response = await fetch(`http://localhost:3000/stocks/${symbol}/chartdatatwo`, {
+				const response = await fetch(`http://localhost:3000/stocks/${symbol}/chartdata`, {
 					headers: {authToken: token}
 				})
 				const data = await response.json()
@@ -85,7 +86,7 @@ function Stocks() {
 		
 		async function getCompanyData() {
 			try {
-				const response = await fetch(`http://localhost:3000/stocks/${symbol}/companydatatwo`, {
+				const response = await fetch(`http://localhost:3000/stocks/${symbol}/companydata`, {
 					headers: {authToken:token}
 				})
 				const data = await response.json()
@@ -101,7 +102,7 @@ function Stocks() {
 	useEffect(() => {
 		async function getMarketData() {
 			try {
-				const response = await fetch (`http://localhost:3000/stocks/${symbol}/marketdatatwo`, {
+				const response = await fetch (`http://localhost:3000/stocks/${symbol}/marketdata`, {
 					headers: {authToken: token}
 				})
 				const data = await response.json()
@@ -130,6 +131,20 @@ function Stocks() {
 		getStockPrice();
 	}, [symbol])
 	
+	useEffect(() => {
+		const subscription = consumer.subscriptions.create({channel:"PriceChannel", symbol:symbol}, {
+			received(data) {
+				console.log(data)
+				setPrice(data)
+			}
+		})
+		
+		return () => subscription.unsubscribe()
+	}, [symbol]);
+	
+   
+	
+	
 	if (isVerifying) return null;
 	if (!isVerified) return <Navigate to='/home'/>;
 	
@@ -139,9 +154,11 @@ function Stocks() {
 	
 	<div className='stock-plus-chart'>
 	
+	<div className='stock-heading-price'>
+	
 		<div className='stock-heading-container'>
 	
-    		<img src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true`} 
+    		<img src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} 
 			height="40" width="40" onError={(e) => {e.target.src = '/fallback-logo.svg'}}/>
 	
     		<div className="stock-text">
@@ -150,6 +167,15 @@ function Stocks() {
    			</div>
 	
 		</div>
+		
+		<div className='stock-price-container'>
+	    <h2 className='stock-price-header'>${toCurrency(price)}</h2>
+	    <span className='stock-price-currency'>USD</span>
+		</div>
+		
+		</div>
+		
+		
 	
 		<div className='chart'>
 			<Chart chartData={chartData} dataKey={'close'} />
@@ -164,7 +190,7 @@ function Stocks() {
 			</div>
 		
 			<div className='positions-table'>
-				<PositionsTable positions={position} />
+				<PositionTable position={position} price={price}/>
 			</div>
 			</div>
 		)}
@@ -179,17 +205,17 @@ function Stocks() {
 		
 				<div>
 					<p className='data-name'>Open</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {marketData?.open}</p>
+					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.open)}</p>
 				</div>
 		
 				<div>
 					<p className='data-name'>High</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {marketData?.high}</p>
+					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.high)}</p>
 				</div>
 		
 				<div>
 					<p className='data-name'>Low</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {marketData?.low}</p>
+					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.low)}</p>
 				</div>
 				
 			</div>
@@ -198,7 +224,7 @@ function Stocks() {
 			
 				<div>
 					<p className='data-name'>Volume</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {marketData?.volume}</p>
+					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toReadable(marketData?.volume)}</p>
 				</div>
 				
 				<div>
@@ -219,25 +245,26 @@ function Stocks() {
 				<div className='company-data-container'>
 					<div>
 						<p className='data-name'>52 week high</p>
-			            <p className="data-value loaded">{companyData['52_week_high']}</p>
+			            <p className="data-value loaded">{toCurrency(companyData['52_week_high'])}</p>
 					</div>
 				
 					<div>
 						<p className='data-name'>52 week low</p>
-			            <p className="data-value loaded">{companyData['52_week_low']}</p>
+			            <p className="data-value loaded">{toCurrency(companyData['52_week_low'])}</p>
 					</div>
 			
 					<div>
 						<p className='data-name'>Market cap</p>
-			            <p className="data-value loaded">{companyData.market_capitalization}</p>
+			            <p className="data-value loaded">{toReadable(companyData.market_capitalization)}</p>
 					</div>
 				</div>
 				
-			
+				{companyData.description !== 'None' && (
 				<div className='stock-description'>
 					<h2 className='holdings'>Description</h2>
 			        <p className="data-value loaded">{companyData.description}</p>
 				</div>
+				)}
 				</>
 			
 				)}
@@ -249,7 +276,7 @@ function Stocks() {
 	</div>
 	
 	<div className='stocks-right'>
-		<BuySell getUserData={getUserData} balance={balance} price={price} position={position?.[0]?.shares || 0} 
+		<BuySell getUserData={getUserData} balance={balance} price={price} position={position} 
 		name={tickerData?.name} symbol={symbol} token={token}/>
 	</div>
 	</>

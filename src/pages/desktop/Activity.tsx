@@ -1,6 +1,7 @@
 import '../../stylesheets/desktop/activity.css'
 
 import {useState, useEffect} from 'react'
+import { toCurrency, toPnl }  from '../../utils.js'
 
 function Activity() {
 	
@@ -14,7 +15,7 @@ function Activity() {
 	
 	const [currentPage, setCurrentPage] = useState(1)
 	
-	const recordsPerPage = 16
+	const recordsPerPage = 15
 	
 	const back = () => {
 		setCurrentPage(currentPage - 1)
@@ -50,7 +51,7 @@ function Activity() {
 		getActivity();
 	}, [])
 	
-	const totalPages = Math.ceil(activityData?.length / recordsPerPage);
+	const totalPages = Math.ceil(activityData?.length / recordsPerPage || 1);
 	const currentPageTraces = activityData?.slice(startRecord, endRecord)
 	
 	//if (!activityData) return null
@@ -65,9 +66,11 @@ function Activity() {
 			<tr class='activity-row'>
 			<th class='activity-row-heading'>Transaction Type</th>
 			<th class='activity-row-heading'>Symbol</th>
-			<th class='activity-row-heading'>Date & Time</th>
 			<th class='activity-row-heading'>Quantity</th>	
+			<th class='activity-row-heading'>Market Price</th>	
 			<th class='activity-row-heading'>Value</th>	
+			<th class='activity-row-heading'>Realized PnL</th>	
+			<th class='activity-row-heading'>Date & Time</th>			
 				
 			</tr>
 		</thead>	
@@ -87,15 +90,23 @@ function Activity() {
 			</td>
 			
 			<td class='activity-cell'>
-			<p class="details-text">{transaction?.date}</p>
-			</td>
-			
-			<td class='activity-cell'>
 			<p class="details-text">{transaction?.quantity}</p>
 			</td>
 			
 			<td class='activity-cell'>
-			<p class="details-text">{transaction?.value}</p>
+			<p class="details-text">${toCurrency(transaction?.market_price)}</p>
+			</td>
+			
+			<td class='activity-cell'>
+			<p class="details-text">${toCurrency(transaction?.value)}</p>
+			</td>
+			
+			<td class='activity-cell'>
+			<p class="details-text">{toPnl(transaction?.realized_pnl)}</p>
+			</td>
+			
+			<td class='activity-cell'>
+			<p class="details-text">{transaction?.date}</p>
 			</td>
 			
 			</tr>
@@ -104,12 +115,13 @@ function Activity() {
 		
 		</tbody>
 		</table>
-				
+		{activityData && (
 		<div className='pagination-container'>
 			<button className='page-button' onClick={back} disabled={currentPage === 1}> Previous </button>
 			<span className='page-span'>Page {currentPage} of {totalPages}</span>
 			<button className='page-button' onClick={forward} disabled={currentPage === totalPages}> Next </button>
 		</div>	
+		)}
 		
 		</div>
 	

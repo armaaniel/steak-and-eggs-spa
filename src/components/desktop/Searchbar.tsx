@@ -27,7 +27,7 @@ const Searchbar = () => {
 	  if (debouncedSearchTerm) {
 	    async function searchStocks() {
 	      try {
-	        const response = await fetch(`http://localhost:3000/searchtwo?q=${debouncedSearchTerm}`, {
+	        const response = await fetch(`http://localhost:3000/search?q=${debouncedSearchTerm}`, {
 				headers: {'authToken': token}
 			})
 			
@@ -59,19 +59,19 @@ const Searchbar = () => {
 
     return (
 	
-	<div class='nav-search-div'>
-    	<div class='nav-search-div-two'>
-    		<div class='search-svg-div'>
+	<div className='nav-search-div'>
+    	<div className='nav-search-div-two'>
+    		<div className='search-svg-div'>
 			
     		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20">
 			<path d="m14 14-2.867-2.867m1.534-3.8A5.333 5.333 0 1 1 2 7.333a5.333 5.333 0 0 1 10.667 0Z" 
-		  	stroke="#32302F" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+		  	stroke="#32302F" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none">
           	</path>
        	 	</svg>
 			
     		</div>
 
-    		<div class='search-input-container'>
+    		<div className='search-input-container'>
     			<input type='search' className='search-input' placeholder=" " value={searchTerm} onChange={handleChange} />
 				<label htmlFor='search' className='search-label'>Search name or symbol</label>
   		  	</div>

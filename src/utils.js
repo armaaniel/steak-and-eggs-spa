@@ -1,0 +1,55 @@
+export const toReadable = (value) => {
+	const number = parseInt(value || 0)
+	
+	if (number >= 1_000_000_000_000) {
+		return `${(number / 1_000_000_000_000).toFixed(2)}T`
+	} else if (number >= 1_000_000_000) {
+		return `${(number / 1_000_000_000).toFixed(2)}B`
+	} else if (number >= 1_000_000) {
+		return `${(number / 1_000_000).toFixed(2)}M`
+	} else {
+		return number.toLocaleString()
+	}
+}
+
+export const toPnl = (value) => {
+	if (value === null) {
+		return '-'
+	}
+	
+	const number = parseFloat(value)
+	
+	 if (number < 1 && number !== 0) {
+		return `$${number.toLocaleString('en-us', {maximumFractionDigits:4})}`
+	} else {
+		return `$${number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})}`
+	}
+}		
+	
+export const toCurrency = (value) => {
+	const number = parseFloat(value)
+	
+	if (isNaN(number)) {
+		return null
+	}
+	
+	if (number < 1 && number !== 0) {
+		return number.toLocaleString('en-us', {maximumFractionDigits:4})
+	} else {
+		return number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})
+	}
+}
+
+export const toPortfolio = (value) => {
+	const number = parseFloat(value)
+	
+	if (isNaN(number)) {
+		return null
+	}
+	
+	if (number < 1 && number !== 0) {
+		return `${number.toLocaleString('en-us', {maximumFractionDigits:4})} USD`
+	} else {
+		return `${number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})} USD`
+	}
+}

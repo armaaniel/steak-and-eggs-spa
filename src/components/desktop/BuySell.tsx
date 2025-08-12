@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toCurrency }  from '../../utils.js'
 import '../../stylesheets/desktop/buysell.css'
 
 const BuySell = ({getUserData, balance, position, price, name, symbol, token}) => {
@@ -9,9 +10,11 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
   
   const [error, setError] = useState(null)
       
-  const [quantity, setQuantity] = useState(null);
+  const [quantity, setQuantity] = useState('');
   
   const [orderData, setOrderData] = useState(null)
+  
+  const [pnl, setPnl] = useState(null)
               
   const estimatedCost = (quantity || 0) * price;
   
@@ -19,7 +22,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
   
   const hasInsufficientFunds = estimatedCost > balance;
   
-  const hasInsufficientQuantity = quantity > position
+  const hasInsufficientQuantity = quantity > (position?.shares || 0)
   
   const isQuantityInvalid = () => {
     if (quantity === '' || quantity <= 0 || !Number.isInteger(quantity)) {
@@ -50,6 +53,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
   const resetState = () => {
 	  setCurrentState({ action: "buy", step: 1 });
 	  setError(null)
+	  setQuantity('')
   }
 	  
   
@@ -67,9 +71,10 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		  if (response.ok) {
 			  const data = await response.json()
 			  setOrderData(data)
+			  console.log(data)
 			  getUserData();
 			  setCurrentState({...currentState, step: 3});
-			  setQuantity(null)
+			  setQuantity('')
 		  } else {
 			  const errorData = await response.json()
 			  setCurrentState({...currentState, step: 3});
@@ -145,7 +150,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		  	</div>
 			
 		  	<div>
-		  		<p> ${estimatedCost.toFixed(2)} USD </p>
+		  		<p> ${toCurrency(estimatedCost)} USD </p>
 		  	</div>
 			
 		</div>
@@ -172,7 +177,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		  	</div>
 			
 		  	<div>
-	  			{currentState.action === 'buy' ? <p> {parseFloat(balance).toFixed(2)} USD </p> : <p>{position}</p>}	
+	  			{currentState.action === 'buy' ? <p> ${toCurrency(balance)} USD </p> : <p>{position?.shares || 0}</p>}	
 		  	</div>
 			
 		</div>
@@ -202,11 +207,11 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		<div className='bs-containers'>
 		  	
 			<div className='bs-width-wrapper'>
-		  		<p>Order Type</p>
+		  		<p>Order</p>
 		  	</div>
 			
 		  	<div>
-		  		{currentState.action === 'buy' ? <p>Market Buy</p> : <p>Market Sell</p>}
+		  		{currentState.action === 'buy' ? <p>Market Buy {symbol}</p> : <p>Market Sell {symbol}</p>}
 		  	</div>
 			
 		</div>
@@ -230,7 +235,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		  	</div>
 			
 		  	<div>
-		  		<p> ${estimatedCost.toFixed(2)} USD </p>
+		  		<p> ${toCurrency(estimatedCost)} USD </p>
 		  	</div>
 			
 		</div>
@@ -238,7 +243,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		
 		
 		<form onSubmit={handleSubmit}>
-		  	<button type='submit' className='next' disabled={isSubmitting}>Submit</button>
+		  	<button type='submit' className='next-two' disabled={isSubmitting}>Submit</button>
 		</form>
 		
 	</div>
@@ -256,14 +261,16 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		<div className='bs-containers'>
 		  	
 			<div className='bs-width-wrapper'>
-		  		<p>Order Type</p>
+		  		<p>Order</p>
 		  	</div>
 			
 		  	<div>
-		  		{currentState.action === 'buy' ? <p>Market Buy</p> : <p>Market Sell</p>}
+		  		{currentState.action === 'buy' ? <p>Market Buy {orderData.symbol}</p> : <p>Market Sell {orderData.symbol}</p>}
 		  	</div>
 			
 		</div>
+		
+	
 		
 		<div className='bs-containers'>
 		
@@ -272,7 +279,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		  	</div>
 			
 		  	<div>
-		  		<p> ${parseFloat(orderData.value).toFixed(2)} USD </p>
+		  		<p> ${toCurrency(orderData.value)} USD </p>
 		  	</div>
 			
 		</div>
@@ -296,7 +303,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		  	</div>
 			
 		  	<div>
-		  		<p> ${parseFloat(orderData.value/orderData.quantity).toFixed(2)} USD </p>
+		  		<p> ${toCurrency(orderData.market_price)} USD </p>
 		  	</div>
 			
 		</div>

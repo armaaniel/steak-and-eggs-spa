@@ -13,11 +13,31 @@
     animation: fadeIn 50ms ease-in;		
 }
 
+.stock-price-currency {
+}
+
 .stock-heading-container {
 	display:flex;
 	column-gap:0.5rem;
 	align-items:center;
 	padding:8px 8px 6px 8px;	
+}
+
+.stock-heading-price {
+	display:flex;
+	flex-direction:column;
+	row-gap:1rem;
+}
+
+.stock-price-container {
+	display:flex;
+	align-items:center;
+	font-family:avenir;
+	margin-left:8px;
+}
+
+.stock-price-header {
+	margin-right:4px;
 }
 
 .stock-name-two {
