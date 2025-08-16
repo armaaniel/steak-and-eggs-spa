@@ -5,11 +5,13 @@ import AddButton from '../../components/desktop/AddButton'
 import WithdrawButton from '../../components/desktop/WithdrawButton'
 import { useState, useEffect } from 'react';
 import {toPortfolio} from '../../utils.js'
-import consumer from '../../consumer.js'
+import {getConsumer} from '../../consumer.js'
 
 function Home() {
 		
 	const [portfolio, setPortfolio] = useState(null)
+	
+	const [prices, setPrices] = useState({})
 					
 	const [chartData, setChartData] = useState([])
 		
@@ -47,22 +49,32 @@ function Home() {
 		}, [])
 		
 		useEffect(() => {
-			const subscription = consumer.subscriptions.create("PortfolioChannel", {
-				received(data) {
-					console.log(data)
-					setPortfolio(oldPortfolio => ({
-						...oldPortfolio,
-						aum:data.portfolio_value || oldPortfolio.aum,
-						positions: oldPortfolio.positions.map(position => ({
-							...position, 
-							price: data.stock_prices[position.symbol] || position.price
-						}))
-					}))
-				}
-			})
+			if (!portfolio?.positions) return
 			
-			return () => subscription.unsubscribe()
-		}, [])
+			const consumer = getConsumer()
+			const subscriptions = portfolio.positions.map(position => {
+				return consumer.subscriptions.create({channel: "PriceChannel", symbol: position.symbol}, 
+				{
+					received(data) {
+						setPrices(previous => ({...previous, [position.symbol]: data.price}))
+					}
+				}
+			)
+		})
+		return () => subscriptions.forEach(subscription => subscription.unsubscribe())
+	}, [portfolio?.positions])
+	
+	useEffect(() => {
+		if (!portfolio?.positions || Object.keys(prices).length === 0) return
+		
+		const stockValue = portfolio.positions.reduce((acc, position) => {
+			const price = prices[position.symbol] || position.price
+			return acc + (price * position.shares)
+		}, 0)
+		
+		setPortfolio(prev => ({...prev, aum: stockValue + prev.balance}))
+	}, [prices, portfolio?.positions, portfolio?.balance])
+			
 			
 		
 	return (
@@ -86,7 +98,9 @@ function Home() {
 			</div>
 		
 			<div className='positions-table'>
-				<PositionsTable positions={portfolio?.positions} />
+			{portfolio && (
+				<PositionsTable positions={portfolio?.positions} prices={prices} />
+				)}
 			</div>
 		
 		</div>

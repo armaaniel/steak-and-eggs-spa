@@ -4,12 +4,12 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import PositionTable from '../../components/desktop/PositionTable'
 import BuySell from '../../components/desktop/BuySell'
-import consumer from '../../consumer.js'
-import { toReadable, toCurrency }  from '../../utils.js'
+import {getConsumer} from '../../consumer.js'
+import { toReadable, toCurrency, toPercent }  from '../../utils.js'
 
 function Stocks() {
 		
-	const {getUserData, position, setPosition, balance, setBalance} = useOutletContext();
+	const {getUserData, userData, setUserData} = useOutletContext();
 	
 	const exchangeNames = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
 	
@@ -28,6 +28,10 @@ function Stocks() {
 	const [companyData, setCompanyData] = useState(null)
 	
     const [price, setPrice] = useState(null)
+	
+	const [open, setOpen] = useState(null)
+	
+	const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000));
 			
 	const [isVerifying, setIsVerifying] = useState(true)
 	
@@ -60,7 +64,7 @@ function Stocks() {
 			}
 		}
 		
-		tickerCheck()
+		tickerCheck();
 	}, [symbol])
 	
 	
@@ -80,7 +84,7 @@ function Stocks() {
 	}, [symbol])
 	
 	useEffect(() => {
-		if (!tickerData || tickerData.ticker_type === 'ETF') {
+		if (!tickerData || tickerData.ticker_type === 'ETF' || tickerData.ticker_type === 'ETV') {
 			return
 		}
 		
@@ -122,7 +126,8 @@ function Stocks() {
 					headers: {authToken: token}
 				})
 				const data = await response.json();
-				setPrice(data)
+				setPrice(data.price)
+				setOpen(data.open)
 				console.log(data)
 			} catch (error) {
 				console.log(error)
@@ -132,6 +137,7 @@ function Stocks() {
 	}, [symbol])
 	
 	useEffect(() => {
+		const consumer = getConsumer()
 		const subscription = consumer.subscriptions.create({channel:"PriceChannel", symbol:symbol}, {
 			received(data) {
 				console.log(data)
@@ -142,8 +148,13 @@ function Stocks() {
 		return () => subscription.unsubscribe()
 	}, [symbol]);
 	
-   
-	
+	useEffect(() => {
+		const timeStamp = setInterval(() => {
+			setAsOf(new Date(Date.now() - 15 * 60 * 1000));
+		}, 15000)
+		
+		return () => clearInterval(timeStamp)
+	}, [])	
 	
 	if (isVerifying) return null;
 	if (!isVerified) return <Navigate to='/home'/>;
@@ -167,13 +178,22 @@ function Stocks() {
    			</div>
 	
 		</div>
+				
+		<div className={`stock-price-container ${price ? 'loaded' : ''}`}>
+			<h2 className='stock-price-header'>${toCurrency(price)}</h2>
+	    	<span className='stock-price-currency'>USD</span>
+			
+			<div>
+	    		<span className='stock-price-currency'>{asOf.toLocaleTimeString()}</span>
+			</div>
+			
+			<div>
+	    		<span className='stock-price-currency'>{toPercent(price, open)}</span>
+			</div>
 		
-		<div className='stock-price-container'>
-	    <h2 className='stock-price-header'>${toCurrency(price)}</h2>
-	    <span className='stock-price-currency'>USD</span>
 		</div>
 		
-		</div>
+	</div>
 		
 		
 	
@@ -183,14 +203,14 @@ function Stocks() {
 		
 		</div>
 		
-		{position && (
+		{userData.position && (
 			<div className='position-two'>
 			<div className="holdings">
 				<h2> Holdings </h2>
 			</div>
 		
 			<div className='positions-table'>
-				<PositionTable position={position} price={price}/>
+				<PositionTable position={userData.position} price={price}/>
 			</div>
 			</div>
 		)}
@@ -240,33 +260,22 @@ function Stocks() {
 			</div>	
 			
 			<div className='company-data'>
-			{companyData && (
+			{tickerData.ticker_type === 'CS' && (
 				<>
 				<div className='company-data-container'>
-					<div>
-						<p className='data-name'>52 week high</p>
-			            <p className="data-value loaded">{toCurrency(companyData['52_week_high'])}</p>
-					</div>
 				
-					<div>
-						<p className='data-name'>52 week low</p>
-			            <p className="data-value loaded">{toCurrency(companyData['52_week_low'])}</p>
-					</div>
-			
 					<div>
 						<p className='data-name'>Market cap</p>
-			            <p className="data-value loaded">{toReadable(companyData.market_capitalization)}</p>
+			            <p className={`data-value ${companyData ? 'loaded' : ''}`}>{toReadable(companyData?.market_cap)}</p>
 					</div>
+					
 				</div>
 				
-				{companyData.description !== 'None' && (
 				<div className='stock-description'>
 					<h2 className='holdings'>Description</h2>
-			        <p className="data-value loaded">{companyData.description}</p>
+			        <p className={`data-value ${companyData ? 'loaded' : ''}`}>{companyData?.description}</p>
 				</div>
-				)}
 				</>
-			
 				)}
 			</div>		
 			
@@ -276,7 +285,7 @@ function Stocks() {
 	</div>
 	
 	<div className='stocks-right'>
-		<BuySell getUserData={getUserData} balance={balance} price={price} position={position} 
+		<BuySell getUserData={getUserData} balance={userData.balance} price={price} position={userData.position} 
 		name={tickerData?.name} symbol={symbol} token={token}/>
 	</div>
 	</>

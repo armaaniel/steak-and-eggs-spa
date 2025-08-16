@@ -51,7 +51,7 @@ function Signup() {
 			<div className='ls-container'>
 				<div className='ls-form-container'>
 				
-				<h2 className='ls-heading'> Signup </h2>
+				<h2 className='ls-heading'> Sign Up </h2>
 				
 				<form className= 'ls-form' onSubmit={handleSubmit}>
 					<div className='ls-input-container'>
@@ -66,7 +66,7 @@ function Signup() {
 						<label htmlFor='password' className='ls-label'>Password</label>
 					</div>
 					
-					<input type = 'submit' value='Signup' className='ls-submit'/>
+					<input type = 'submit' value='Sign Up' className='ls-submit'/>
 				</form>
 				
 				<p className='ls-footer'>Already have an account? <Link to="/login" className='ls-signup'> 

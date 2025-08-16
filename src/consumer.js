@@ -1,5 +1,20 @@
 import { createConsumer } from "@rails/actioncable"
 
-const token = localStorage.getItem('authToken')
+let globalConsumer = null
 
-export default createConsumer(`ws://localhost:3000/cable?token=${token}`)
+export const getConsumer = () => {
+	if (!globalConsumer) {
+		const token = localStorage.getItem('authToken')
+		globalConsumer = createConsumer(`ws://localhost:3000/cable?token=${token}`)
+		}
+	return globalConsumer
+}
+
+export const resetConsumer = () => {
+	if (globalConsumer) {
+		globalConsumer.disconnect()
+		globalConsumer = null
+	}
+}
+	
+	

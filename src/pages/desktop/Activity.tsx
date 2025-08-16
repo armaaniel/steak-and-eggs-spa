@@ -63,7 +63,7 @@ function Activity() {
 			
 	<table class={`activity-stock-table ${isLoaded ? 'loaded' : ''}`}>
 		<thead>
-			<tr class='activity-row'>
+			<tr class='activity-header-row'>
 			<th class='activity-row-heading'>Transaction Type</th>
 			<th class='activity-row-heading'>Symbol</th>
 			<th class='activity-row-heading'>Quantity</th>	

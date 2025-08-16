@@ -1,5 +1,6 @@
 import { useNavigate, NavLink } from 'react-router-dom'
 import Searchbar from '../../components/desktop/Searchbar'
+import {resetConsumer} from '../../consumer.js'
 import logo from '../../assets/logo.svg'
 
 function Navbar() {
@@ -7,8 +8,9 @@ function Navbar() {
 	const navigate = useNavigate();
 	
 	const handleLogout = () => {
-		localStorage.removeItem('authToken')
-		navigate('/')
+		localStorage.removeItem('authToken');
+		resetConsumer();
+		navigate('/');
 	}
 	
 	return (

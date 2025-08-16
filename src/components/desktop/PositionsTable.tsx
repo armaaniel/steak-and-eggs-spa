@@ -1,27 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'
-import { toCurrency }  from '../../utils.js'
+import { toCurrency, toTwo }  from '../../utils.js'
 import '../../stylesheets/desktop/positionstable.css'
 
 
-const PositionsTable = ({ positions }) => {	
+const PositionsTable = ({ positions, prices }) => {	
  
  return (
      <table className="portfolio">
        <thead>
          <tr className="heading-row">
-           <th className="positions-header">Positions</th>
-           <th className="quantity-header">Total Value</th>
-           <th className="quantity-header">Today's Price</th>
-           <th className="quantity-header">Average Price</th>
-           <th className="quantity-header">Unrealized PnL</th>
+           <th className="quantity-header-one">Positions</th>
+           <th className="quantity-header-one">Total Value</th>
+           <th className="quantity-header-one">Average Price</th>
+           <th className="quantity-header-one">Today's Price</th>
+           <th className="quantity-header-one">Unrealized PnL</th>
 		   
 		   
          </tr>
        </thead>
-       
+	   
+	   {!positions && (
+		   <tbody>
+		   <tr><td>No positions yet</td></tr>
+		   </tbody>
+		   )}
+	   
        <tbody>
          {positions?.map((position) => (
+
            <tr key={position.symbol} className="portfolio-row">
              
              <td className="shares-cell">
@@ -41,23 +48,13 @@ const PositionsTable = ({ positions }) => {
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
                  <div className='stock-text'>
-                   <p className='stock-symbol'>${toCurrency(position.price * position.shares)} </p>
+                   <p className='stock-symbol'>${toCurrency((prices[position.symbol] || position.price) * position.shares)} </p>
                    <p key={position.shares} className='stock-shares'>{position.shares} shares</p>
                  </div>
 				 
                </Link>
              </td>
-             
-             <td className="shares-cell">
-               <Link to={`/stocks/${position.symbol}`} className="symbol-name">
-			   
-                 <div className='stock-text'>
-				 <p className='stock-name'>${toCurrency(position.price)}</p>
-                 </div>
-				 
-               </Link>
-             </td>
-			 
+             			 
              <td className="shares-cell">
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
@@ -72,16 +69,24 @@ const PositionsTable = ({ positions }) => {
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
                  <div className='stock-text'>
-				 <p className='stock-name'>${toCurrency((position.price-position.average_price)*position.shares)}</p>
+				 <p className='stock-name'>${toCurrency(prices[position.symbol] || position.price)}</p>
                  </div>
 				 
                </Link>
              </td>
 			 
-			 
-             
+             <td className="shares-cell">
+               <Link to={`/stocks/${position.symbol}`} className="symbol-name">
+			   
+                 <div className='stock-text'>
+				 <p className='stock-name'>${toCurrency(((prices[position.symbol] || position.price)-position.average_price)*position.shares)}</p>
+                 </div>
+				 
+               </Link>
+             </td>
+          
            </tr>
-         ))}
+		   ))}
        </tbody>
      </table>
  );

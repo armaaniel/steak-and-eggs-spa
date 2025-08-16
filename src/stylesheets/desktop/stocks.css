@@ -13,9 +13,6 @@
     animation: fadeIn 50ms ease-in;		
 }
 
-.stock-price-currency {
-}
-
 .stock-heading-container {
 	display:flex;
 	column-gap:0.5rem;
@@ -34,16 +31,28 @@
 	align-items:center;
 	font-family:avenir;
 	margin-left:8px;
+	column-gap:4px;
+	opacity:0;
+	transition:100ms opacity;
 }
 
-.stock-price-header {
-	margin-right:4px;
+.stock-price-container.loaded {
+	opacity:1;
 }
 
 .stock-name-two {
 color:rgb(97, 94, 92);
 font-family:avenir;
 opacity:0;
+}
+
+.stock-percent {
+	opacity:0;
+	transition:100ms opacity;
+}
+
+.stock-percent.loaded {
+	opacity:1;
 }
 
 .stock-name-two.loaded {

@@ -50,6 +50,13 @@
 	border-bottom:1px solid rgb(233,236,239)
 }
 
+.activity-header-row {
+	text-align:left;
+	font-family:Avenir;
+	color:rgb(64,68,82);
+	border-bottom:1px solid rgb(233,236,239)
+}
+
 .activity-row-heading {
 	text-align:left;
 	font-family:Avenir;

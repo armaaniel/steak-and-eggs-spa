@@ -5,7 +5,7 @@ import '../../stylesheets/desktop/positionstable.css'
 
 const PositionTable = ({ position, price }) => {
 	
-	const unrealizedPnL = (price-position.average_price)*position.shares;
+	const pnl = (price-position.average_price)*position.shares;
  
  return (
      <table className="portfolio">
@@ -47,7 +47,7 @@ const PositionTable = ({ position, price }) => {
              	<div className="symbol-name">
 			   
                  <div className='stock-text'>
-				 	<p className='stock-name'>${toCurrency(unrealizedPnL)}</p>
+				 	<p className='stock-name'>${toCurrency(pnl)}</p>
                  </div>
 				 
                </div>

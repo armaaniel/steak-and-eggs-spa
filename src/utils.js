@@ -12,6 +12,10 @@ export const toReadable = (value) => {
 	}
 }
 
+export const toTwo = (value) => {
+	return parseFloat(value).toFixed(2)
+}
+
 export const toPnl = (value) => {
 	if (value === null) {
 		return '-'
@@ -39,6 +43,21 @@ export const toCurrency = (value) => {
 		return number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})
 	}
 }
+
+export const toPercent = (price, open) => {
+	if (!price || !open) return null;
+	
+	const percentage = ((price - open) / open) * 100;
+	
+	const decimals = Math.abs(percentage) < 0.01 ? 4 : 2;
+	
+	if (percentage < 0) {
+		return `${percentage.toLocaleString('en-us', {minimumFractionDigits:decimals, maximumFractionDigits:decimals})}%`
+	} else {
+		return `+${percentage.toLocaleString('en-us', {minimumFractionDigits:decimals, maximumFractionDigits:decimals})}%`
+	}
+}
+	
 
 export const toPortfolio = (value) => {
 	const number = parseFloat(value)

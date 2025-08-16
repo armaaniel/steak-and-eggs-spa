@@ -13,13 +13,16 @@ const Searchbar = () => {
 	
     const [showResults, setShowResults] = useState(false);
 	
-    const handleChange = (e) => {
-        setSearchTerm(e.target.value);
-    };
+    const handleChange = (e) => setSearchTerm(e.target.value)
 
-    const handleSelect = () => {
-        setSearchTerm('');
-    };
+    const handleSelect = () => setSearchTerm('')
+	
+	const handleBlur = () => {
+		
+		setTimeout(() => {
+			setShowResults(false)
+		}, 120)
+	}
 	
 	const token = localStorage.getItem('authToken')
 
@@ -72,14 +75,14 @@ const Searchbar = () => {
     		</div>
 
     		<div className='search-input-container'>
-    			<input type='search' className='search-input' placeholder=" " value={searchTerm} onChange={handleChange} />
+    			<input type='search' className='search-input' placeholder=" " value={searchTerm} onChange={handleChange} onBlur={handleBlur} />
 				<label htmlFor='search' className='search-label'>Search name or symbol</label>
   		  	</div>
 			
 		</div>
   		
 		{debouncedSearchTerm && showResults && (
-			<div className="search-results-container">
+			<div className="search-results-container" >
 			<ul className="search-results">
 
 			{searchResults.map((stock) => (

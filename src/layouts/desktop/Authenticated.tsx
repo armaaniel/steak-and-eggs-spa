@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Navigate, NavLink} from 'react-router-dom'
+import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
 import '../../stylesheets/desktop/authenticated.css'
 
@@ -28,10 +29,12 @@ function Authenticated() {
 						setIsAuthenticated(true)
 					} else {
 						localStorage.removeItem('authToken')
+						resetConsumer()
 					}
 			} catch (error) {
 				console.log(error)
 				localStorage.removeItem('authToken')
+				resetConsumer()
 			} finally {
 				setIsVerifying(false)
 			}

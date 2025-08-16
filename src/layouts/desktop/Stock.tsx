@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Outlet, Navigate, NavLink } from 'react-router-dom'
+import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
 import '../../stylesheets/desktop/authenticated.css'
 
@@ -11,9 +12,7 @@ function Stock() {
 	
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	
-	const [balance, setBalance] = useState(null)
-	
-	const [position, setPosition] = useState(null)
+	const [userData, setUserData] = useState(null)
 	
 	const {symbol} = useParams();
 	
@@ -25,9 +24,8 @@ function Stock() {
 	            headers: {authToken: token}
 	        })
 	        const data = await response.json()
-        
-	        setPosition(data.position)
-			setBalance(data.balance)
+			
+			setUserData(data)
 	    } catch (error) {
 	        console.error(error)
 	    }
@@ -52,18 +50,19 @@ function Stock() {
 				
 				])
 				const data = await response2.json()
-		        setBalance(data.balance)
-				setPosition(data.position)
+		        setUserData(data)
 				console.log(data)
 				
 					if (response1.ok && response2.ok) {
 						setIsAuthenticated(true)
 					} else {
 						localStorage.removeItem('authToken')
+						resetConsumer()
 					}
 			} catch (error) {
 				console.log(error)
 				localStorage.removeItem('authToken')
+				resetConsumer()
 			} finally {
 				setIsVerifying(false)
 			}
@@ -90,7 +89,7 @@ function Stock() {
 	</header>
 	
 	<main className='home'>
-	<Outlet context={{getUserData, position, setPosition, balance, setBalance}} />
+	<Outlet context={{getUserData, userData, setUserData}} />
 	</main>
 	
 	</>

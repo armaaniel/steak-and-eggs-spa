@@ -1,6 +1,8 @@
 import '../../stylesheets/desktop/addwithdraw.css'
 import { createPortal } from 'react-dom'
 import React, { useState } from 'react'
+import { toCurrency }  from '../../utils.js'
+
 
 const AddButton = ({getPortfolioData, getChartData}) => {
     
@@ -22,7 +24,7 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 	}
 	
 	const handleChange = (e) => {
-		setAmount(e.target.value)
+		setAmount(e.target.value.toLocaleString())
 	}
 	
 	async function handleSubmit(e) {

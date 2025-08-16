@@ -3,7 +3,7 @@
 	border-radius:1rem;
 	padding:0rem 1rem;
 	background:white;
-    max-height: 375px;
+    max-height: 375px;	
     overflow-y: auto;
 }
 
@@ -13,8 +13,8 @@
 	border-collapse:separate;	
 	background-color:white;
 	border-spacing: 0 16px;	
-	
 }
+
 
 .portfolio th {
 	border-bottom:1px solid rgb(228, 226, 225);
@@ -57,6 +57,14 @@ color:rgb(97, 94, 92);
 font-family:avenir;
 }
 
+.stock-name.negative {
+	color:#D8726F
+}
+
+.stock-name.positive {
+	color:#4A7812
+}
+
 .stock-shares {
 color:rgb(97, 94, 92);
 font-family:avenir;
@@ -69,3 +77,20 @@ animation: fadeIn 100ms ease-out;
   top: 0;
   background-color: white;
 }
+
+.quantity-header:nth-child(1){width:41%;}
+.quantity-header:nth-child(2){width:29%;}
+.quantity-header:nth-child(3){width:29%;}
+
+
+
+
+.quantity-header-one:nth-child(1){width:50%;}
+.quantity-header-one:nth-child(2){width:12.5%;}
+.quantity-header-one:nth-child(3){width:12.5%;}
+.quantity-header-one:nth-child(4){width:12.5%;}
+.quantity-header-one:nth-child(5){width:12.5%;}
+
+
+
+

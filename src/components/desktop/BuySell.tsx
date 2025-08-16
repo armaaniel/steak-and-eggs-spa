@@ -55,6 +55,12 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 	  setError(null)
 	  setQuantity('')
   }
+  
+  const handleKeyDown = (e) => {
+	  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
+		  e.preventDefault()
+	  }
+  }
 	  
   
   async function handleSubmit(e) {
@@ -138,7 +144,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 			
           	<div className='shares-input-form'>
             	<input type="number" placeholder="0" name="quantity" min ='0' step="1" className='shares-input' 
-				value={quantity} onChange={updateQuantity}/>
+				value={quantity} onChange={updateQuantity} onKeyDown={handleKeyDown}/>
           	</div>
 			
 		</div>

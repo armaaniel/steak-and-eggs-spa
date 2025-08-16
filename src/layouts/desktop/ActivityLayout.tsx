@@ -28,10 +28,12 @@ function ActivityLayout() {
 						setIsAuthenticated(true)
 					} else {
 						localStorage.removeItem('authToken')
+						resetConsumer()
 					}
 			} catch (error) {
 				console.log(error)
 				localStorage.removeItem('authToken')
+				resetConsumer()
 			} finally {
 				setIsVerifying(false)
 			}
