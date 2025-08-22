@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { toCurrency }  from '../../utils.js'
+import { toCurrency, toPercent }  from '../../utils.js'
 import '../../stylesheets/desktop/positionstable.css'
 
 
-const PositionTable = ({ position, price }) => {
+const PositionTable = ({ position, price, open }) => {
 	
 	const pnl = (price-position.average_price)*position.shares;
+ 	const pnlChange = toPercent(price, position.average_price)
+ 	const pnlIsPositive = pnlChange && pnlChange.startsWith('+');
  
  return (
      <table className="portfolio">
@@ -48,6 +50,7 @@ const PositionTable = ({ position, price }) => {
 			   
                  <div className='stock-text'>
 				 	<p className='stock-name'>${toCurrency(pnl)}</p>
+   				 	<p className={`stock-name ${pnlIsPositive ? 'positive' : 'negative'}`}>{toPercent(price, position.average_price)}</p>
                  </div>
 				 
                </div>

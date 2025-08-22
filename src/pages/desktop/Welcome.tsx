@@ -6,14 +6,13 @@ function Welcome() {
 	
 	return (
 	
-	<div className='welcome-main-desktop'>
-	
+	<div className='welcome-main-desktop'>	
 	
 		<h1 class='welcome-heading-desktop'> The best place to paper trade </h1>
 		
 		<div className='welcome-start-desktop'>
 		
-			<Link to='/signup' className='get-started-desktop'>
+			<Link to='/signup' className='login-link signup desktop'>
 				Get Started
 			</Link>	
 		

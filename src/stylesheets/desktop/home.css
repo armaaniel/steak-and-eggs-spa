@@ -31,7 +31,7 @@
 	font-family:Avenir;
 	color:rgb(50, 48, 47);
 	opacity:0;
-	transition:50ms opacity ease-in	
+	transition:50ms opacity ease-in;
 }
 
 .cash-balance.loaded {

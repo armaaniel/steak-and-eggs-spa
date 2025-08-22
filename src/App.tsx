@@ -9,8 +9,8 @@ import Home from './pages/desktop/Home'
 import Signup from './pages/desktop/Signup'
 import Stocks from './pages/desktop/Stocks'
 import Activity from './pages/desktop/Activity'
-
-
+import HowItWorks from './pages/desktop/HowItWorks'
+import NotFound from './pages/desktop/NotFound'
 
 
 
@@ -22,6 +22,7 @@ function App() {
 		<Routes>	
 			<Route element={<Public/>}>
 	  		<Route path ='/' element={<Welcome />} />
+	  		<Route path ='/how-it-works' element={<HowItWorks />} />
 			</Route>
 			
 			<Route element={<Authenticated/>}>
@@ -38,6 +39,8 @@ function App() {
 			
 	  		<Route path ='/login' element={<Login />} />
 	  		<Route path ='/signup' element={<Signup />} />
+			
+	        <Route path="*" element={<NotFound />} />
 			
 		</Routes>
 	</BrowserRouter>

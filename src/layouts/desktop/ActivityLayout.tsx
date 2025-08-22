@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink} from 'react-router-dom'
+import { Outlet, NavLink, Navigate} from 'react-router-dom'
 import Navbar from '../../components/desktop/Navbar'
 import '../../stylesheets/desktop/authenticated.css'
-
+import {resetConsumer} from '../../consumer.js'
 
 function ActivityLayout() {
 	
@@ -31,7 +31,6 @@ function ActivityLayout() {
 						resetConsumer()
 					}
 			} catch (error) {
-				console.log(error)
 				localStorage.removeItem('authToken')
 				resetConsumer()
 			} finally {

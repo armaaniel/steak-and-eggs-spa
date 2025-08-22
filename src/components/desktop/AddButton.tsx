@@ -1,35 +1,37 @@
 import '../../stylesheets/desktop/addwithdraw.css'
 import { createPortal } from 'react-dom'
 import React, { useState } from 'react'
-import { toCurrency }  from '../../utils.js'
-
+import { NumericFormat } from 'react-number-format'
 
 const AddButton = ({getPortfolioData, getChartData}) => {
     
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [amount, setAmount] = useState('')
+	const [error, setError] = useState(null)
 	
 	const token = localStorage.getItem('authToken')
 	
-	
 	const openDialog = () => setIsOpen(true);
-	const closeDialog = () => setIsOpen(false);
-	
-	
-	const handleKeyDown = (e) => {
-		if (e.key === 'e' || e.key === 'E' || e.key === "+" || e.key === '-') {
-			e.preventDefault()
-		}
+	const closeDialog = () => {
+		setIsOpen(false);
+		setError(null)
+		setAmount('')
 	}
 	
-	const handleChange = (e) => {
-		setAmount(e.target.value.toLocaleString())
+	const handleChange = (values) => {
+		setAmount(values.value)
+	}
+	
+    const handleAllowed = values => {
+		if (values.floatValue === undefined) return true;
+		return values.floatValue <= 1000000000
 	}
 	
 	async function handleSubmit(e) {
 		e.preventDefault();
 		setIsSubmitting(true)
+		setError(null)
 		try {
 			const response = await fetch('http://localhost:3000/deposit', {
 				method: 'POST', 
@@ -41,15 +43,16 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 				getPortfolioData()
 				getChartData()
 				closeDialog()
-				} else {
-				console.log(response.status)
-				}
-			} catch (error) {
-				console.log(error)
-			} finally {
-				setIsSubmitting(false)
+			} else {
+				const errorData = await response.json()
+				setError(errorData.error)
 			}
+		} catch (error) {
+			setError("Unable to process deposit, please try again")
+		} finally {
+			setIsSubmitting(false)
 		}
+	}
 				
 	return (
 		
@@ -68,25 +71,26 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 			<div className='modal-dialog'>
 			
 				<div className='modal-header'>
-					<h2>Add Funds</h2>
+					<h2>Add Funds</h2>	
+					{error && (<div className='insufficient'>{error}</div>)}				
 				</div>
-					
-				<form className = 'modal-form' onSubmit={handleSubmit}>
-						
+									
+				<form className = 'modal-form' onSubmit={handleSubmit}>				
+		
 					<div className='modal-amount-container'>
 						<div className='modal-amount-container-two'>
 							<div className='modal-amount-container-three'>
 							<span className='modal-dollar'>$</span>
-								<input type='number' name='amount' value={amount} onChange={handleChange} onKeyDown={handleKeyDown} min='0.01' step='0.01' 
-								className='modal-amount-input'/>
-								<label className='modal-amount-label' htmlFor='amount'>Amount</label>
-								<span className='modal-currency'>USD</span>
+							<label className='modal-amount-label' htmlFor='amount'>Amount</label>
+							<NumericFormat value={amount} onValueChange={handleChange} thousandSeparator={true} decimalScale={2}
+							className='modal-amount-input' allowNegative={false} placeholder={0.00} suffix=' USD' 
+						    isAllowed={handleAllowed}/>
 							</div>
 						</div>
 					</div>
 					
 					<div className='modal-submit'>
-						<button type='submit' className='aw-submit' disabled={isSubmitting}>
+						<button type='submit' className={`aw-submit ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting}>
 							Submit
 						</button>
 					</div>
@@ -104,5 +108,9 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 		</>
 	);
 };
+
+/* <input type='number' name='amount' value={amount} onChange={handleChange} onKeyDown={handleKeyDown} min='0.01' step='0.01' 
+								className='modal-amount-input'/>
+								<label className='modal-amount-label' htmlFor='amount'>Amount</label> */
 
 export default AddButton;

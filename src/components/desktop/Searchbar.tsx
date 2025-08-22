@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDebounce } from 'use-debounce';
 import { Link } from 'react-router-dom'
 import '../../stylesheets/desktop/searchbar.css'
@@ -13,24 +13,36 @@ const Searchbar = () => {
 	
     const [showResults, setShowResults] = useState(false);
 	
+	const [error, setError] = useState(null)
+	
+	const searchRef = useRef(null)
+	
     const handleChange = (e) => setSearchTerm(e.target.value)
 
     const handleSelect = () => setSearchTerm('')
 	
-	const handleBlur = () => {
-		
-		setTimeout(() => {
-			setShowResults(false)
-		}, 120)
-	}
-	
 	const token = localStorage.getItem('authToken')
+	
+	useEffect(() => {
+		const handleClick = (event) => {
+			if (searchRef.current && !searchRef.current.contains(event.target)) {
+				setShowResults(false)
+			}
+		}
+			
+			document.addEventListener('mousedown', handleClick)
+			
+			return () => {
+				document.removeEventListener('mousedown', handleClick)
+			}
+		}, [])
 
 	useEffect(() => { 
 	  if (debouncedSearchTerm) {
 	    async function searchStocks() {
+			setError(null)
 	      try {
-	        const response = await fetch(`http://localhost:3000/search?q=${debouncedSearchTerm}`, {
+			  const response = await fetch(`http://localhost:3000/search?q=${debouncedSearchTerm}`, {
 				headers: {'authToken': token}
 			})
 			
@@ -40,23 +52,24 @@ const Searchbar = () => {
 				    window.location.href = '/login'
 				    return
 				}
-				return
+				throw new Error(`${response.status}`)
 			}
 					
-			
 	        const data = await response.json()
-        
 	        setSearchResults(data)
 	        setShowResults(true);
 	
 	      } catch (error) {
-	        console.log(error)
+			setError("Something went wrong, please try again later")
+			setSearchResults([])
+  	        setShowResults(true);
 	      }
 	    }
 	    searchStocks();
 	  } else {
 	    setSearchResults([]);
 	    setShowResults(false);
+		setError(null)
 	  }
 	}, [debouncedSearchTerm]);
 
@@ -75,14 +88,14 @@ const Searchbar = () => {
     		</div>
 
     		<div className='search-input-container'>
-    			<input type='search' className='search-input' placeholder=" " value={searchTerm} onChange={handleChange} onBlur={handleBlur} />
+    			<input type='search' className='search-input' placeholder=" " value={searchTerm} onChange={handleChange} />
 				<label htmlFor='search' className='search-label'>Search name or symbol</label>
   		  	</div>
 			
 		</div>
   		
 		{debouncedSearchTerm && showResults && (
-			<div className="search-results-container" >
+			<div className="search-results-container" ref={searchRef}>
 			<ul className="search-results">
 
 			{searchResults.map((stock) => (
@@ -97,11 +110,18 @@ const Searchbar = () => {
 			))}
 			</ul>
 			
-		{searchResults.length === 0 && (
+		{searchResults.length === 0 && !error && (
 			<div className="no-search-result">
 				No stocks found
 			</div>
 		)}
+		
+		{error && (
+			<div className="no-search-result">
+				{error}
+			</div>
+		)}
+			
 			</div>
 		)}
 		

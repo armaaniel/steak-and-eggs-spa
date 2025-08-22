@@ -6,6 +6,7 @@ import PositionTable from '../../components/desktop/PositionTable'
 import BuySell from '../../components/desktop/BuySell'
 import {getConsumer} from '../../consumer.js'
 import { toReadable, toCurrency, toPercent }  from '../../utils.js'
+import NotFoundTwo from '../../components/desktop/NotFoundTwo'
 
 function Stocks() {
 		
@@ -13,7 +14,7 @@ function Stocks() {
 	
 	const exchangeNames = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
 	
-	const {symbol} = useParams();
+	let {symbol} = useParams();
 	
 	const navigate = useNavigate();
 	
@@ -33,37 +34,45 @@ function Stocks() {
 	
 	const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000));
 			
-	const [isVerifying, setIsVerifying] = useState(true)
+	const [isVerifying, setIsVerifying] = useState(true)	
 	
-	const [isVerified, setIsVerified] = useState(false)
+	const [imageLoaded, setImageLoaded] = useState(false);
 	
+	const [tickerNotFound, setTickerNotFound] = useState(null)
+	
+	const percentChange = toPercent(price, open);
+	
+	const isPositive = percentChange && percentChange.startsWith('+');
+	
+	useEffect(() => {
+	    if (symbol !== symbol.toUpperCase()) {
+			symbol = symbol.toUpperCase()
+	      navigate(`/stocks/${symbol}`, { replace: true });
+	      return;
+	    }
+	}, [symbol])
 		
 	useEffect(() => {
 		async function tickerCheck() {
 			setCompanyData(null)
 			setMarketData(null) 
+			setTickerNotFound(null)
 			try {
 				const response = await fetch(`http://localhost:3000/stocks/${symbol}/tickerdata`, {
 					headers: {authToken:token}
 				})
-				
 				if (response.ok) {
 					const data = await response.json()
 					setTickerData(data)
-					setIsVerified(true)
-					console.log(data)
 				} else {
-					navigate('/home')
-				}
-					
+					setTickerNotFound(true)
+				}		
 			} catch (error) {
-				console.log(error)
 				navigate('/home')
 			} finally {
 				setIsVerifying(false)
 			}
 		}
-		
 		tickerCheck();
 	}, [symbol])
 	
@@ -77,7 +86,8 @@ function Stocks() {
 				const data = await response.json()
 				setChartData(data)
 			} catch (error) {
-				console.error(error)
+				const today = new Date();
+				setChartData([{date: today.toLocaleDateString(), close: 0}, {date: today.toLocaleDateString(), close: 0}]);
 			}
 		}
 		getChartData();
@@ -95,9 +105,8 @@ function Stocks() {
 				})
 				const data = await response.json()
 				setCompanyData(data)
-				console.log(data)
 			} catch (error) {
-				console.error(error)
+				setCompanyData({market_cap:'N/A', description:'N/A'})
 			}
 		}
 		getCompanyData();	
@@ -111,9 +120,8 @@ function Stocks() {
 				})
 				const data = await response.json()
 				setMarketData(data)
-				console.log(data)
 			} catch (error) {
-				console.error(error)
+				setMarketData({open:'N/A', high:'N/A', low:'N/A', volume:'N/A'})
 			} 
 		}
 		getMarketData();
@@ -128,9 +136,9 @@ function Stocks() {
 				const data = await response.json();
 				setPrice(data.price)
 				setOpen(data.open)
-				console.log(data)
 			} catch (error) {
-				console.log(error)
+				setPrice('N/A')
+				setOpen('N/A')
 			}
 		}
 		getStockPrice();
@@ -157,7 +165,7 @@ function Stocks() {
 	}, [])	
 	
 	if (isVerifying) return null;
-	if (!isVerified) return <Navigate to='/home'/>;
+	if (tickerNotFound) return <NotFoundTwo />
 	
 	return (
 	<>
@@ -169,8 +177,12 @@ function Stocks() {
 	
 		<div className='stock-heading-container'>
 	
-    		<img src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} 
-			height="40" width="40" onError={(e) => {e.target.src = '/fallback-logo.svg'}}/>
+		<div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
+		  <img src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} 
+		    height="40" width="40" onLoad={() => setImageLoaded(true)} onError={(e) => {
+		      e.target.src = '/fallback-logo.svg'
+			  setImageLoaded(true)}}/>
+		</div>
 	
     		<div className="stock-text">
       		  	<p className="stock-symbol">{symbol}</p>
@@ -188,17 +200,15 @@ function Stocks() {
 			</div>
 			
 			<div>
-	    		<span className='stock-price-currency'>{toPercent(price, open)}</span>
+	    		<span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{percentChange}</span>
 			</div>
 		
 		</div>
 		
 	</div>
 		
-		
-	
 		<div className='chart'>
-			<Chart chartData={chartData} dataKey={'close'} />
+			<Chart chartData={chartData} dataKey={'value'} />
 		</div>
 		
 		</div>
@@ -210,7 +220,7 @@ function Stocks() {
 			</div>
 		
 			<div className='positions-table'>
-				<PositionTable position={userData.position} price={price}/>
+				<PositionTable position={userData.position} price={price} open={open}/>
 			</div>
 			</div>
 		)}
@@ -260,7 +270,7 @@ function Stocks() {
 			</div>	
 			
 			<div className='company-data'>
-			{tickerData.ticker_type === 'CS' && (
+			{tickerData?.ticker_type === 'CS' && (
 				<>
 				<div className='company-data-container'>
 				

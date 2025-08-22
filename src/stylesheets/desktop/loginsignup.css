@@ -5,6 +5,32 @@
 	height:100%;
 }
 
+.ls-error-container {
+	display:flex;
+	justify-content:center;
+}
+
+.ls-error {
+	display:flex;
+	position:relative;
+	padding-right:20px;
+}
+
+.ls-error-close {
+	position:absolute;
+	background: none;
+	border: none;
+	right:0px;
+	transform:translateY(-50%);
+	top:50%;
+	padding:6px;
+	border-radius:50%;
+}
+
+.ls-error-close:hover {
+  background-color: #e0e0e0; 
+}
+
 .login-left {
 	width:50%;
 	height:100%;	
@@ -44,7 +70,7 @@
 	border:1.5px solid rgb(228, 226, 225);
 	background-color:white;
 	width:65%;
-	gap:2rem;
+	gap:1rem;
 	border-radius:1rem;
 	padding:2rem 1.5rem 1.5rem 1.5rem;
 
@@ -53,6 +79,10 @@
 	text-align:center;
 	color:rgb(50, 48, 47);
 	font-family:avenir;
+}
+
+.ls-heading.error {
+	animation: fadeIn 100ms ease-in;
 }
 
 .ls-form {
@@ -86,18 +116,19 @@
 	font-family:futura;
 	font-size:1rem;
 	margin-top:1rem;
-	transition:0.4s;	
+	transition:0.2s;	
 }
-
 .ls-submit:hover {
 	background-color:#535250;
 	cursor:pointer;
 }
 
+
 .ls-footer {
 	color:rgb(97, 94, 92);
 	font-family:avenir;
 	text-align:center;
+	margin-top:1rem;
 	
 }
 
@@ -135,6 +166,4 @@
 	color:rgb(97, 94, 92);
 	
 }
-
 	
-

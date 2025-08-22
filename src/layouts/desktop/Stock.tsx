@@ -24,10 +24,9 @@ function Stock() {
 	            headers: {authToken: token}
 	        })
 	        const data = await response.json()
-			
 			setUserData(data)
 	    } catch (error) {
-	        console.error(error)
+	        setUserData({position:null, balance:'N/A'})
 	    }
 	}	
 	
@@ -48,19 +47,16 @@ function Stock() {
 					headers: {authToken: token}
 				})
 				
-				])
-				const data = await response2.json()
-		        setUserData(data)
-				console.log(data)
-				
-					if (response1.ok && response2.ok) {
+				])				
+					if (response1.ok) {
+						const data = await response2.json()
+				        setUserData(data)
 						setIsAuthenticated(true)
 					} else {
 						localStorage.removeItem('authToken')
 						resetConsumer()
 					}
 			} catch (error) {
-				console.log(error)
 				localStorage.removeItem('authToken')
 				resetConsumer()
 			} finally {

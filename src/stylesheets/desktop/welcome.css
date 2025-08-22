@@ -20,22 +20,3 @@
 	justify-content:center;
 	
 }
-
-.get-started-desktop {
-	display:flex;
-	justify-content:center;
-	width:50%;
-	font-family:BlinkMacSystemFont;
-	font-weight:500;
-	background:rgb(50, 48, 47);
-	border-radius:4rem;
-	padding:1rem;
-	color:white;
-	text-decoration:none;
-}
-
-.get-started-desktop:hover {
-	background-color:#535050;
-	transition:0.4s;
-}
-	

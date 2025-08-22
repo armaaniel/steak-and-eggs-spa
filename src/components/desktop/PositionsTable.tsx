@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'
-import { toCurrency, toTwo }  from '../../utils.js'
+import { toCurrency, toTwo, toPercent }  from '../../utils.js'
 import '../../stylesheets/desktop/positionstable.css'
 
 
-const PositionsTable = ({ positions, prices }) => {	
+const PositionsTable = ({ positions, prices, error }) => {	
  
  return (
      <table className="portfolio">
@@ -15,20 +15,35 @@ const PositionsTable = ({ positions, prices }) => {
            <th className="quantity-header-one">Average Price</th>
            <th className="quantity-header-one">Today's Price</th>
            <th className="quantity-header-one">Unrealized PnL</th>
-		   
-		   
          </tr>
        </thead>
 	   
-	   {!positions && (
+	   {!positions && !error && (
 		   <tbody>
-		   <tr><td>No positions yet</td></tr>
+		   <tr className='portfolio-row'><td className='shares-cell' colSpan="100%">
+		   <p>No positions yet</p>
+		   </td></tr>
+		   </tbody>
+		   )}
+	   
+	   {!positions && error && (
+		   <tbody>
+		   <tr className='portfolio-row'><td className='shares-cell' colSpan="100%">
+		   <p>{error}</p>
+		   </td></tr>
 		   </tbody>
 		   )}
 	   
        <tbody>
-         {positions?.map((position) => (
-
+         {positions?.map((position) => {
+			 
+			 const price = prices[position.symbol] || position.price;
+			 const percentChange = toPercent(price, position.open)
+			 const changeIsPositive = percentChange && percentChange.startsWith('+');
+			 const pnlChange = toPercent(price, position.average_price)
+			 const pnlIsPositive = pnlChange && pnlChange.startsWith('+');
+			 
+		return (
            <tr key={position.symbol} className="portfolio-row">
              
              <td className="shares-cell">
@@ -48,7 +63,7 @@ const PositionsTable = ({ positions, prices }) => {
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
                  <div className='stock-text'>
-                   <p className='stock-symbol'>${toCurrency((prices[position.symbol] || position.price) * position.shares)} </p>
+                   <p className='stock-symbol'>${toCurrency(price * position.shares)} </p>
                    <p key={position.shares} className='stock-shares'>{position.shares} shares</p>
                  </div>
 				 
@@ -69,7 +84,9 @@ const PositionsTable = ({ positions, prices }) => {
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
                  <div className='stock-text'>
-				 <p className='stock-name'>${toCurrency(prices[position.symbol] || position.price)}</p>
+				 <p className='stock-name'>${toCurrency(price)}</p>
+				 <p className={`stock-name ${changeIsPositive ? 'positive' : 'negative'}`}>{percentChange}</p>
+				 
                  </div>
 				 
                </Link>
@@ -79,14 +96,15 @@ const PositionsTable = ({ positions, prices }) => {
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
                  <div className='stock-text'>
-				 <p className='stock-name'>${toCurrency(((prices[position.symbol] || position.price)-position.average_price)*position.shares)}</p>
+				 <p className='stock-name'>${toCurrency((price-position.average_price)*position.shares)}</p>
+				 <p className={`stock-name ${pnlIsPositive ? 'positive' : 'negative'}`}>{pnlChange}</p>
                  </div>
 				 
                </Link>
              </td>
           
            </tr>
-		   ))}
+		   )})}
        </tbody>
      </table>
  );

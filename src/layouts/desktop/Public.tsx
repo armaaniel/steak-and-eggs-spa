@@ -32,7 +32,7 @@ function Public() {
 		Log In
 	</Link>
 	
-	<Link to={token ? "/home" : "/signup"} className='signup-link'>
+	<Link to={token ? "/home" : "/signup"} className='login-link signup'>
 		Sign Up
 	</Link>
 	

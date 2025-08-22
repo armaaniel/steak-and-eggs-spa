@@ -4,6 +4,11 @@
 	gap:0.5rem;
 }
 
+.modal-header {
+	display:flex;
+	align-items:baseline;
+	column-gap:0.5rem;
+}
 
 .add-withdraw-button {	
 	font-family:Avenir;
@@ -150,11 +155,30 @@
 	padding:1rem;
 	color:white;
 	width:37.75%;
+	border:1px solid;
+	transition:0.2s all
 	
 }
 
 .aw-submit:hover {
 	background-color:#535050;
-	transition:0.4s;
 }
+
+.aw-submit.submitting:disabled {
+	background:rgb(50, 48, 47);
+	color:white;
+	cursor:default;
+}		
+
+.aw-submit:disabled {
+	background-color:white;
+	cursor:not-allowed;
+  	color:rgb(50, 48, 47);
+}
+
+.insufficient {
+	animation:fadeIn 100ms ease-in;
+}
+
+
 

@@ -20,7 +20,7 @@ function Authenticated() {
 				setIsVerifying(false)
 				return
 			}
-			
+
 			try {
 				const response = await fetch('http://localhost:3000/verifytoken', {
 					headers: {authToken: token}
@@ -32,7 +32,6 @@ function Authenticated() {
 						resetConsumer()
 					}
 			} catch (error) {
-				console.log(error)
 				localStorage.removeItem('authToken')
 				resetConsumer()
 			} finally {

@@ -39,13 +39,16 @@ function Activity() {
 				if (response.ok) {
 					const data = await response.json()
 					setActivityData(data)
-					setIsLoaded(true)
-					console.log(data)
 				} else {
-					const errorData = await response.json()
+					const data = await response.json()
+					setActivityData(data)
+					setError("Unable to fetch transactions, please try again")					
 				}
 			} catch (error) {
-				setError("Something went wrong, please try again later")
+				setError("Unable to fetch transactions, please try again")
+				setActivityData([])
+			} finally {
+				setIsLoaded(true)
 			}
 		}
 		getActivity();
@@ -53,60 +56,73 @@ function Activity() {
 	
 	const totalPages = Math.ceil(activityData?.length / recordsPerPage || 1);
 	const currentPageTraces = activityData?.slice(startRecord, endRecord)
-	
-	//if (!activityData) return null
-//	if (error) return
 											
 	return (
 	
 	<div className='activity-container'>
 			
-	<table class={`activity-stock-table ${isLoaded ? 'loaded' : ''}`}>
+	<table className={`activity-stock-table ${isLoaded ? 'loaded' : ''}`}>
 		<thead>
-			<tr class='activity-header-row'>
-			<th class='activity-row-heading'>Transaction Type</th>
-			<th class='activity-row-heading'>Symbol</th>
-			<th class='activity-row-heading'>Quantity</th>	
-			<th class='activity-row-heading'>Market Price</th>	
-			<th class='activity-row-heading'>Value</th>	
-			<th class='activity-row-heading'>Realized PnL</th>	
-			<th class='activity-row-heading'>Date & Time</th>			
+			<tr className='activity-header-row'>
+			<th className='activity-row-heading'>Transaction Type</th>
+			<th className='activity-row-heading'>Symbol</th>
+			<th className='activity-row-heading'>Quantity</th>	
+			<th className='activity-row-heading'>Market Price</th>	
+			<th className='activity-row-heading'>Value</th>	
+			<th className='activity-row-heading'>Realized PnL</th>	
+			<th className='activity-row-heading'>Date & Time</th>			
 				
 			</tr>
-		</thead>	
-	
+		</thead>
+		
+		{isLoaded && !error && activityData.length === 0 && (
+			<tbody>
+			<tr className='activity-row'><td className='activity-cell' colSpan="100%">
+			<p className='details-text'>No Activites Yet</p>
+			</td></tr>
+			</tbody>
+			)}
+		
+		{isLoaded && error && (
+			<tbody>
+			<tr className='activity-row'><td className='activity-cell' colSpan="100%">
+			<p className='details-text'>{error}</p>
+			</td></tr>
+			</tbody>
+			)}
+					
 		<tbody>
 		
 		{currentPageTraces?.map(transaction => (
 			
-			<tr key={transaction?.id} class ='activity-row'>
+			<tr key={transaction?.id} className='activity-row'>
 			
-			<td class='activity-cell'>
-			<p class="details-text">{transaction?.transaction_type}</p>
+			<td className='activity-cell'>
+			<p className="details-text">{transaction?.transaction_type}</p>
 			</td>
 			
-			<td class='activity-cell'>
-			<p class="details-text">{transaction?.symbol}</p>
+			<td className='activity-cell'>
+			<p className="details-text">{transaction?.symbol}</p>
 			</td>
 			
-			<td class='activity-cell'>
-			<p class="details-text">{transaction?.quantity}</p>
+			<td className='activity-cell'>
+			<p className="details-text">{transaction?.quantity?.toLocaleString()}</p>
 			</td>
 			
-			<td class='activity-cell'>
-			<p class="details-text">${toCurrency(transaction?.market_price)}</p>
+			<td className='activity-cell'>
+			<p className="details-text">${toCurrency(transaction?.market_price)}</p>
 			</td>
 			
-			<td class='activity-cell'>
-			<p class="details-text">${toCurrency(transaction?.value)}</p>
+			<td className='activity-cell'>
+			<p className="details-text">${toCurrency(transaction?.value)}</p>
 			</td>
 			
-			<td class='activity-cell'>
-			<p class="details-text">{toPnl(transaction?.realized_pnl)}</p>
+			<td className='activity-cell'>
+			<p className="details-text">{toPnl(transaction?.realized_pnl)}</p>
 			</td>
 			
-			<td class='activity-cell'>
-			<p class="details-text">{transaction?.date}</p>
+			<td className='activity-cell'>
+			<p className="details-text">{transaction?.date}</p>
 			</td>
 			
 			</tr>
@@ -115,6 +131,7 @@ function Activity() {
 		
 		</tbody>
 		</table>
+		
 		{activityData && (
 		<div className='pagination-container'>
 			<button className='page-button' onClick={back} disabled={currentPage === 1}> Previous </button>

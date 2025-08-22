@@ -1,5 +1,14 @@
 export const toReadable = (value) => {
-	const number = parseInt(value || 0)
+	
+	if (value === null || value === undefined) {
+		return null
+	}
+	
+	const number = parseInt(value)
+	
+	if (isNaN(number)) {
+		return 'N/A'
+	}
 	
 	if (number >= 1_000_000_000_000) {
 		return `${(number / 1_000_000_000_000).toFixed(2)}T`
@@ -17,11 +26,11 @@ export const toTwo = (value) => {
 }
 
 export const toPnl = (value) => {
-	if (value === null) {
+	const number = parseFloat(value)
+	
+	if (isNaN(number)) {
 		return '-'
 	}
-	
-	const number = parseFloat(value)
 	
 	 if (number < 1 && number !== 0) {
 		return `$${number.toLocaleString('en-us', {maximumFractionDigits:4})}`
@@ -31,21 +40,32 @@ export const toPnl = (value) => {
 }		
 	
 export const toCurrency = (value) => {
-	const number = parseFloat(value)
 	
-	if (isNaN(number)) {
+	if (value === null || value === undefined) {
 		return null
 	}
 	
-	if (number < 1 && number !== 0) {
+	const number = parseFloat(value)
+	
+	if (isNaN(number)) {
+		return 'N/A'
+	}
+	
+	if (number < 1 && number !== 0 && number >=-1) {
 		return number.toLocaleString('en-us', {maximumFractionDigits:4})
 	} else {
 		return number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})
 	}
 }
 
+
+
 export const toPercent = (price, open) => {
 	if (!price || !open) return null;
+	
+	if (isNaN(price)) {
+		return 'N/A%'
+	}
 	
 	const percentage = ((price - open) / open) * 100;
 	
@@ -60,10 +80,15 @@ export const toPercent = (price, open) => {
 	
 
 export const toPortfolio = (value) => {
+	
+	if (value === null || value === undefined) {
+		return null
+	}
+	
 	const number = parseFloat(value)
 	
 	if (isNaN(number)) {
-		return null
+		return 'N/A'
 	}
 	
 	if (number < 1 && number !== 0) {

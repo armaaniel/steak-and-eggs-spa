@@ -6,27 +6,41 @@ import WithdrawButton from '../../components/desktop/WithdrawButton'
 import { useState, useEffect } from 'react';
 import {toPortfolio} from '../../utils.js'
 import {getConsumer} from '../../consumer.js'
+import { useDebounce } from 'use-debounce';
 
 function Home() {
 		
 	const [portfolio, setPortfolio] = useState(null)
 	
 	const [prices, setPrices] = useState({})
+	
+	const [debouncedPrices] = useState(prices, 5000)
 					
 	const [chartData, setChartData] = useState([])
+	
+	const [error, setError] = useState(null)
 		
 	const token = localStorage.getItem('authToken')		
 
 		async function getPortfolioData() {
+			setError(null)
 			try {
 				const response = await fetch('http://localhost:3000/portfoliodata', {
 					headers: { authToken: token }
 				})
-				const data = await response.json()
-				setPortfolio(data)
-				console.log(data)
+				
+				if (response.ok) {
+					const data = await response.json()
+					setPortfolio(data)
+					console.log(data)
+				} else {
+					const data = await response.json()
+					setPortfolio(data)
+					setError("Unable to fetch positions, please try again")
+				}
 			} catch (error) {
-				console.error(error)
+				setPortfolio({aum:'N/A', balance: 'N/A'})
+				setError("Unable to fetch positions, please try again")
 			}
 		}
 		
@@ -37,9 +51,9 @@ function Home() {
 				})
 				const data = await response.json()
 				setChartData(data)
-				console.log(data)
 			} catch (error) {
-				console.error(error)
+				const today = new Date()
+				setChartData([{date: today.toLocaleDateString(), value: 0}, {date: today.toLocaleDateString(), value: 0}])
 			}
 		}
 		
@@ -56,7 +70,8 @@ function Home() {
 				return consumer.subscriptions.create({channel: "PriceChannel", symbol: position.symbol}, 
 				{
 					received(data) {
-						setPrices(previous => ({...previous, [position.symbol]: data.price}))
+						setPrices(previous => ({...previous, [position.symbol]: data}))
+						console.log(data)
 					}
 				}
 			)
@@ -72,11 +87,9 @@ function Home() {
 			return acc + (price * position.shares)
 		}, 0)
 		
-		setPortfolio(prev => ({...prev, aum: stockValue + prev.balance}))
-	}, [prices, portfolio?.positions, portfolio?.balance])
+		setPortfolio(prev => ({...prev, aum: stockValue + parseFloat(prev.balance || 0)}))
+	}, [debouncedPrices, portfolio?.positions, portfolio?.balance])
 			
-			
-		
 	return (
 	
 	<>
@@ -99,7 +112,7 @@ function Home() {
 		
 			<div className='positions-table'>
 			{portfolio && (
-				<PositionsTable positions={portfolio?.positions} prices={prices} />
+				<PositionsTable positions={portfolio?.positions} prices={prices} error={error} />
 				)}
 			</div>
 		
@@ -109,13 +122,13 @@ function Home() {
 	<div className='home-right'>
 			
 		<div className='balance-container'>
-		<h2 className='balance-header'>Cash Balance:&nbsp;</h2>
+		<h2 className='balance-header'>Cash:&nbsp;</h2>
 		<h2 className={`cash-balance ${portfolio ? 'loaded' : ''}`}>${toPortfolio(portfolio?.balance)}</h2>
 		</div>
 			
 		<div className='button-container'>
 			<AddButton getPortfolioData={getPortfolioData} getChartData={getChartData} />
-			<WithdrawButton getPortfolioData={getPortfolioData} getChartData={getChartData} />
+			<WithdrawButton getPortfolioData={getPortfolioData} getChartData={getChartData} balance={portfolio?.balance} />
 		</div>
 	
 	</div>

@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import logo from '../../assets/logo.svg'
@@ -6,14 +6,31 @@ import '../../stylesheets/desktop/loginsignup.css'
 
 function Signup() {
 	
+	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
+	const [error, setError] = useState(null)
 	
     const navigate = useNavigate();
 	
 	async function handleSubmit(e) { 
 		e.preventDefault()
+		setError(null)
+		const usernameError = validateUsername(username)
+		const passwordError = validatePassword(password)
+		
+		if (usernameError) {
+			setError(usernameError)
+			return
+		}
+		
+		if (passwordError) {
+			setError(passwordError)
+			return
+		}
+		
 		try {
+			setIsSubmitting(true)
 			const response = await fetch('http://localhost:3000/signup', {
 			method: 'POST', 
 			headers: {'Content-Type':'application/json'},
@@ -26,13 +43,30 @@ function Signup() {
 			navigate('/home')
 		} else {
 			const errorData = await response.json()
-			console.error('Signup Failed')
+			setTimeout(() => {
+				setError(errorData.error)
+			}, 100)
 		}
 	} catch (error) {
-		console.error('Error', error)
+		setError("Something went wrong, please try again")
+	} finally {
+		setIsSubmitting(false)
 	}
 }
+
+	const validateUsername = (username) => {
+		if (username.length > 20) return "Username must be 20 characters or less"
+		if (!/^[a-zA-Z0-9_]+$/.test(username)) return "Username can only contain letters, numbers, and underscores"
+		return null
+	}
 	
+	const validatePassword = (password) => {
+		if (password.length === 0) return "Password must contain at least 1 character"
+		return null
+	}
+	
+	const isValid = validateUsername(username) === null && password.length > 0
+		
 	return (
 	
 	<div className='ls-desktop'>
@@ -53,20 +87,32 @@ function Signup() {
 				
 				<h2 className='ls-heading'> Sign Up </h2>
 				
+				{error && !isSubmitting && (
+					<div className='ls-error-container'>
+						<div className='ls-error'>
+							<p className='ls-heading error'>{error}</p>
+							</div>
+					</div>
+				)}
+				
 				<form className= 'ls-form' onSubmit={handleSubmit}>
 					<div className='ls-input-container'>
 						<input type='text' name='username' className='ls-input' placeholder=' '
-						onChange={(e) => setUsername(e.target.value)}/>
+						onChange={(e) => {
+							setUsername(e.target.value)
+							setError(null)}}/>
 						<label htmlFor='username' className='ls-label'>Username</label>
 					</div>
 					
 					<div className='ls-input-container'>
 						<input type='password' name='password' className='ls-input' placeholder=' '
-						onChange={(e) => setPassword(e.target.value)}/>
+						onChange={(e) => { 
+							setPassword(e.target.value)
+							setError(null)}}/>
 						<label htmlFor='password' className='ls-label'>Password</label>
 					</div>
 					
-					<input type = 'submit' value='Sign Up' className='ls-submit'/>
+					<button type = 'submit' className='ls-submit' disabled={isSubmitting}>Sign Up</button>
 				</form>
 				
 				<p className='ls-footer'>Already have an account? <Link to="/login" className='ls-signup'> 
