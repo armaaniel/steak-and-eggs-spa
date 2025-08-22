@@ -6,20 +6,19 @@ import WithdrawButton from '../../components/desktop/WithdrawButton'
 import { useState, useEffect } from 'react';
 import {toPortfolio} from '../../utils.js'
 import {getConsumer} from '../../consumer.js'
-import { useDebounce } from 'use-debounce';
+import { useThrottledCallback } from 'use-debounce';
+
 
 function Home() {
 		
 	const [portfolio, setPortfolio] = useState(null)
 	
 	const [prices, setPrices] = useState({})
-	
-	const [debouncedPrices] = useState(prices, 5000)
-					
+						
 	const [chartData, setChartData] = useState([])
 	
 	const [error, setError] = useState(null)
-		
+			
 	const token = localStorage.getItem('authToken')		
 
 		async function getPortfolioData() {
@@ -79,7 +78,7 @@ function Home() {
 		return () => subscriptions.forEach(subscription => subscription.unsubscribe())
 	}, [portfolio?.positions])
 	
-	useEffect(() => {
+	const updatePortfolio = useThrottledCallback(() => {
 		if (!portfolio?.positions || Object.keys(prices).length === 0) return
 		
 		const stockValue = portfolio.positions.reduce((acc, position) => {
@@ -87,8 +86,15 @@ function Home() {
 			return acc + (price * position.shares)
 		}, 0)
 		
-		setPortfolio(prev => ({...prev, aum: stockValue + parseFloat(prev.balance || 0)}))
-	}, [debouncedPrices, portfolio?.positions, portfolio?.balance])
+		setPortfolio(prev => ({
+			...prev, 
+			aum: stockValue + parseFloat(prev.balance || 0)
+		}))
+	}, 5000, {trailing:false})
+	
+	useEffect(() => {
+		updatePortfolio()
+	}, [prices, portfolio?.positions, portfolio?.balance, updatePortfolio])
 			
 	return (
 	
