@@ -19,8 +19,8 @@ function Home() {
 	
 	const [error, setError] = useState(null)
 			
-	const token = localStorage.getItem('authToken')		
-
+	const token = localStorage.getItem('authToken')	
+	
 		async function getPortfolioData() {
 			setError(null)
 			try {

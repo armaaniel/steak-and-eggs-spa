@@ -9,8 +9,14 @@ import { toReadable, toCurrency, toPercent }  from '../../utils.js'
 import NotFoundTwo from '../../components/desktop/NotFoundTwo'
 
 function Stocks() {
+	
+	interface OutletContextType {
+		getUserData: () => void
+		userData: any
+		setUserData: (data: any) => void;
+	}
 		
-	const {getUserData, userData, setUserData} = useOutletContext();
+	const {getUserData, userData, setUserData} = useOutletContext<OutletContextType>();
 	
 	const exchangeNames = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
 	
@@ -179,10 +185,11 @@ function Stocks() {
 	
 		<div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
 		  <img src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} 
-		    height="40" width="40" onLoad={() => setImageLoaded(true)} onError={(e) => {
-		      e.target.src = '/fallback-logo.svg'
-			  setImageLoaded(true)}}/>
-		</div>
+		    height="40" width="40" onLoad={() => setImageLoaded(true)} 
+			onError={(e) => {
+				(e.target as HTMLImageElement).src = '/fallback-logo.svg'
+				setImageLoaded(true)}}/>
+			</div>
 	
     		<div className="stock-text">
       		  	<p className="stock-symbol">{symbol}</p>

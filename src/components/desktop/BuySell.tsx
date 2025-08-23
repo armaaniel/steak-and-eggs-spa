@@ -17,7 +17,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
   
   const [time, setTime] = useState(null)
                 
-  const estimatedCost = (quantity || 0) * price;
+  const estimatedCost = (Number(quantity) || 0) * price;
   
   const free = (estimatedCost === 0) || isNaN(estimatedCost)
   
@@ -132,7 +132,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 			
           	<div className='shares-input-form'>
 				<NumericFormat value={quantity} onValueChange={handleChange} thousandSeparator={true} decimalScale={2}
-				className='shares-input' allowNegative={false} placeholder={0.00}
+				className='shares-input' allowNegative={false} placeholder='0.00'
 				isAllowed={handleAllowed}/>
           	</div>
 			
@@ -153,11 +153,11 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		<div className='bs-next-parent'>
 			{currentState.action === 'buy' ? 
 			
-			<button className={`next ${isSubmitting ? submitting : ''}`} onClick={nextStep} disabled={hasInsufficientFunds || quantityInvalid || free}> 
+			<button className={`next ${isSubmitting ? 'submitting' : ''}`} onClick={nextStep} disabled={hasInsufficientFunds || quantityInvalid || free}> 
 				Next
 			</button>
 			:
-            <button className={`next ${isSubmitting ? submitting : ''}`} onClick={nextStep} disabled={hasInsufficientShares || quantityInvalid || free}>
+            <button className={`next ${isSubmitting ? 'submitting' : ''}`} onClick={nextStep} disabled={hasInsufficientShares || quantityInvalid || free}>
 				Next
 			</button>
 			}

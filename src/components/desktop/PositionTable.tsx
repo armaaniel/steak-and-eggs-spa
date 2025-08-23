@@ -26,7 +26,7 @@ const PositionTable = ({ position, price, open }) => {
              <td className="shares-cell">
              	<div className="symbol-name">
                 <img src={`https://img.logo.dev/ticker/${position.symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} height="32" width="32"
-			 onError={(e) => {e.target.src = '/fallback-logo.svg'}}/>
+			 onError={(e) => {(e.target as HTMLImageElement).src = '/fallback-logo.svg'}}/>
                  <div className='stock-text'>
                  	<p className='stock-symbol'>${toCurrency(price * position.shares)} </p>
                    <p key={position.shares} className='stock-shares'>{position.shares} shares</p>

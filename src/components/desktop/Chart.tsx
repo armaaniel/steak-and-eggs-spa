@@ -2,7 +2,12 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { LineChart, Line, Tooltip, ResponsiveContainer, YAxis } from 'recharts';
 
-const Chart = React.memo(({chartData, dataKey}) => {
+interface ChartProps {
+  chartData: any[];
+  dataKey: string;
+}
+
+const Chart = React.memo(({chartData, dataKey}: ChartProps) => {
 									
 	return (
 		

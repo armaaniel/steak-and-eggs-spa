@@ -8,7 +8,7 @@ function Welcome() {
 	
 	<div className='welcome-main-desktop'>	
 	
-		<h1 class='welcome-heading-desktop'> The best place to paper trade </h1>
+		<h1 className='welcome-heading-desktop'> The best place to paper trade </h1>
 		
 		<div className='welcome-start-desktop'>
 		

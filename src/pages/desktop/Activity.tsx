@@ -77,7 +77,7 @@ function Activity() {
 		
 		{isLoaded && !error && activityData.length === 0 && (
 			<tbody>
-			<tr className='activity-row'><td className='activity-cell' colSpan="100%">
+			<tr className='activity-row'><td className='activity-cell' colSpan={7}>
 			<p className='details-text'>No Activites Yet</p>
 			</td></tr>
 			</tbody>
@@ -85,7 +85,7 @@ function Activity() {
 		
 		{isLoaded && error && (
 			<tbody>
-			<tr className='activity-row'><td className='activity-cell' colSpan="100%">
+			<tr className='activity-row'><td className='activity-cell' colSpan={7}>
 			<p className='details-text'>{error}</p>
 			</td></tr>
 			</tbody>

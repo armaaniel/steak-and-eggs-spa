@@ -20,7 +20,7 @@ const PositionsTable = ({ positions, prices, error }) => {
 	   
 	   {!positions && !error && (
 		   <tbody>
-		   <tr className='portfolio-row'><td className='shares-cell' colSpan="100%">
+		   <tr className='portfolio-row'><td className='shares-cell' colSpan={5}>
 		   <p>No positions yet</p>
 		   </td></tr>
 		   </tbody>
@@ -28,7 +28,7 @@ const PositionsTable = ({ positions, prices, error }) => {
 	   
 	   {!positions && error && (
 		   <tbody>
-		   <tr className='portfolio-row'><td className='shares-cell' colSpan="100%">
+		   <tr className='portfolio-row'><td className='shares-cell' colSpan={5}>
 		   <p>{error}</p>
 		   </td></tr>
 		   </tbody>
@@ -50,7 +50,7 @@ const PositionsTable = ({ positions, prices, error }) => {
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
                  <img src={`https://img.logo.dev/ticker/${position.symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} height="32" width="32"
-				 onError={(e) => {e.target.src = '/fallback-logo.svg'}}/>
+				 onError={(e) => {(e.target as HTMLImageElement).src = '/fallback-logo.svg'}}/>
                  <div className="stock-text">
                    <p className="stock-symbol">{position.symbol}</p>
                    <p className="stock-name">{position.name}</p>

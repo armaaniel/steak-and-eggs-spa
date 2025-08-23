@@ -83,7 +83,7 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 							<span className='modal-dollar'>$</span>
 							<label className='modal-amount-label' htmlFor='amount'>Amount</label>
 							<NumericFormat value={amount} onValueChange={handleChange} thousandSeparator={true} decimalScale={2}
-							className='modal-amount-input' allowNegative={false} placeholder={0.00} suffix=' USD' 
+							className='modal-amount-input' allowNegative={false} placeholder='0.00' suffix=' USD' 
 						    isAllowed={handleAllowed}/>
 							</div>
 						</div>
