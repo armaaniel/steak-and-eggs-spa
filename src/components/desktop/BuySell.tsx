@@ -4,8 +4,10 @@ import { NumericFormat } from 'react-number-format'
 import '../../stylesheets/desktop/buysell.css'
 
 const BuySell = ({getUserData, balance, position, price, name, symbol, token}) => {
-	
+			
   const [currentState, setCurrentState] = useState({ action: "buy", step: 1 });
+  
+  const API = import.meta.env.VITE_API || 'localhost:3000'
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -60,7 +62,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 	  setError(null)
 	  const action = currentState.action
 	  try {
-		  const response = await fetch(`http://localhost:3000/stocks/${symbol}/${action}`, {
+		  const response = await fetch(`${API}/stocks/${symbol}/${action}`, {
 			  method: 'POST',
 			  headers: {'Content-Type': 'application/json', authToken: token},
 			  body: JSON.stringify({name: name, quantity: quantity})

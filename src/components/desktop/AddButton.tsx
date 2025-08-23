@@ -4,7 +4,9 @@ import React, { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 
 const AddButton = ({getPortfolioData, getChartData}) => {
-    
+	
+	const API = import.meta.env.VITE_API || 'localhost:3000'
+	    
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [amount, setAmount] = useState('')
@@ -33,7 +35,7 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 		setIsSubmitting(true)
 		setError(null)
 		try {
-			const response = await fetch('http://localhost:3000/deposit', {
+			const response = await fetch(`${API}/deposit`, {
 				method: 'POST', 
 				headers: {'Content-Type':'application/json', authToken: token},
 				body: JSON.stringify({amount: amount})
