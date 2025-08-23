@@ -5,6 +5,8 @@ import { toCurrency, toPnl }  from '../../utils.js'
 
 function Activity() {
 	
+	const API = import.meta.env.VITE_API || 'localhost:3000'
+	
 	const token = localStorage.getItem('authToken')
 	
 	const [activityData, setActivityData] = useState(null)
@@ -33,7 +35,7 @@ function Activity() {
 		async function getActivity() {
 			setError(null)
 			try {
-				const response = await fetch('http://localhost:3000/activitydata', {
+				const response = await fetch(`${API}/activitydata`, {
 					headers: {authToken: token}
 				})
 				if (response.ok) {

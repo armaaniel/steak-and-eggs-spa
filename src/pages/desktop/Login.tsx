@@ -6,6 +6,8 @@ import '../../stylesheets/desktop/loginsignup.css'
 
 function Login() {
 	
+	const API = import.meta.env.VITE_API || 'localhost:3000'
+	
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
@@ -18,7 +20,7 @@ function Login() {
 		setError(null)
 		try {
 			setIsSubmitting(true)
-			const response = await fetch('http://localhost:3000/login', {
+			const response = await fetch(`${API}/login`, {
 			method: 'POST', 
 			headers: {'Content-Type':'application/json'},
 			body: JSON.stringify({username:username, password:password})

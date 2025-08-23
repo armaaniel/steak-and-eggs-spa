@@ -10,6 +10,8 @@ import { useThrottledCallback } from 'use-debounce';
 
 
 function Home() {
+	
+	const API = import.meta.env.VITE_API || 'localhost:3000'
 		
 	const [portfolio, setPortfolio] = useState(null)
 	
@@ -24,7 +26,7 @@ function Home() {
 		async function getPortfolioData() {
 			setError(null)
 			try {
-				const response = await fetch('http://localhost:3000/portfoliodata', {
+				const response = await fetch(`${API}/portfoliodata`, {
 					headers: { authToken: token }
 				})
 				
@@ -45,7 +47,7 @@ function Home() {
 		
 		async function getChartData() {
 			try {
-				const response = await fetch('http://localhost:3000/portfoliochart', {
+				const response = await fetch(`${API}/portfoliochart`, {
 					headers: {authToken: token}
 				})
 				const data = await response.json()

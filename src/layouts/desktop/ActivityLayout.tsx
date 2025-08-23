@@ -6,6 +6,8 @@ import {resetConsumer} from '../../consumer.js'
 
 function ActivityLayout() {
 	
+	const API = import.meta.env.VITE_API || 'localhost:3000'
+	
 	const [isVerifying, setIsVerifying] = useState(true)
 	
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -21,7 +23,7 @@ function ActivityLayout() {
 			}
 			
 			try {
-				const response = await fetch('http://localhost:3000/verifytoken', {
+				const response = await fetch(`${API}/verifytoken`, {
 					headers: {authToken: token}
 				})
 					if (response.ok) {

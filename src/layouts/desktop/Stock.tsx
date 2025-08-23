@@ -5,8 +5,9 @@ import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
 import '../../stylesheets/desktop/authenticated.css'
 
-
 function Stock() {
+	
+	const API = import.meta.env.VITE_API || 'localhost:3000'
 	
 	const [isVerifying, setIsVerifying] = useState(true)
 	
@@ -20,7 +21,7 @@ function Stock() {
 	
 	async function getUserData() {
 	    try {
-	        const response = await fetch(`http://localhost:3000/stocks/${symbol}/userdata`, {
+	        const response = await fetch(`${API}/stocks/${symbol}/userdata`, {
 	            headers: {authToken: token}
 	        })
 	        const data = await response.json()
@@ -40,10 +41,10 @@ function Stock() {
 			
 			try {
 				const [response1, response2] = await Promise.all([
-				fetch('http://localhost:3000/verifytoken', {
+				fetch(`${API}/verifytoken`, {
 					headers: {authToken: token}
 				}),
-				fetch(`http://localhost:3000/stocks/${symbol}/userdata`, {
+				fetch(`${API}/stocks/${symbol}/userdata`, {
 					headers: {authToken: token}
 				})
 				

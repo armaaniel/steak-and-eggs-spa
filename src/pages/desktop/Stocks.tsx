@@ -10,6 +10,8 @@ import NotFoundTwo from '../../components/desktop/NotFoundTwo'
 
 function Stocks() {
 	
+	const API = import.meta.env.VITE_API || 'localhost:3000'
+	
 	interface OutletContextType {
 		getUserData: () => void
 		userData: any
@@ -64,7 +66,7 @@ function Stocks() {
 			setMarketData(null) 
 			setTickerNotFound(null)
 			try {
-				const response = await fetch(`http://localhost:3000/stocks/${symbol}/tickerdata`, {
+				const response = await fetch(`${API}/stocks/${symbol}/tickerdata`, {
 					headers: {authToken:token}
 				})
 				if (response.ok) {
@@ -86,7 +88,7 @@ function Stocks() {
 	useEffect(() => {
 		async function getChartData() {
 			try {
-				const response = await fetch(`http://localhost:3000/stocks/${symbol}/chartdata`, {
+				const response = await fetch(`${API}/stocks/${symbol}/chartdata`, {
 					headers: {authToken: token}
 				})
 				const data = await response.json()
@@ -106,7 +108,7 @@ function Stocks() {
 		
 		async function getCompanyData() {
 			try {
-				const response = await fetch(`http://localhost:3000/stocks/${symbol}/companydata`, {
+				const response = await fetch(`${API}/stocks/${symbol}/companydata`, {
 					headers: {authToken:token}
 				})
 				const data = await response.json()
@@ -121,7 +123,7 @@ function Stocks() {
 	useEffect(() => {
 		async function getMarketData() {
 			try {
-				const response = await fetch (`http://localhost:3000/stocks/${symbol}/marketdata`, {
+				const response = await fetch (`${API}/stocks/${symbol}/marketdata`, {
 					headers: {authToken: token}
 				})
 				const data = await response.json()
@@ -136,7 +138,7 @@ function Stocks() {
 	useEffect(() => {
 		async function getStockPrice() {
 			try {
-				const response = await fetch(`http://localhost:3000/stocks/${symbol}/stockprice`, {
+				const response = await fetch(`${API}/stocks/${symbol}/stockprice`, {
 					headers: {authToken: token}
 				})
 				const data = await response.json();
