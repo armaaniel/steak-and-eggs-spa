@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import '../../stylesheets/desktop/searchbar.css'
 
 const Searchbar = () => {
+	
+    const API = import.meta.env.VITE_API || 'localhost:3000'
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -42,7 +44,7 @@ const Searchbar = () => {
 	    async function searchStocks() {
 			setError(null)
 	      try {
-			  const response = await fetch(`http://localhost:3000/search?q=${debouncedSearchTerm}`, {
+			  const response = await fetch(`${API}/search?q=${debouncedSearchTerm}`, {
 				headers: {'authToken': token}
 			})
 			
