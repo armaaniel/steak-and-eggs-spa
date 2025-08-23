@@ -1,5 +1,4 @@
 import '../../stylesheets/desktop/howitworks.css'
-import logo from '../../assets/logo.svg'
 import { Link } from 'react-router-dom';
 
 function NotFound() {
@@ -13,7 +12,7 @@ function NotFound() {
 	<header>
 		<nav className='nav'>
 			<Link to={token ? "/home" : "/"}>
-				<img src={logo} className='logo-desktop' alt='Steak & Eggs logo'/>
+				<img src="/logo.svg" className='logo-desktop' alt='Steak & Eggs logo'/>
 			</Link>
 		</nav>
 	</header>
@@ -28,7 +27,7 @@ function NotFound() {
 			
 			<div>
 				<Link to={token ? "/home" : "/"}>
-					<img src={logo} className='logo-desktop four' alt='Steak & Eggs logo'/>
+					<img src="/logo.svg" className='logo-desktop four' alt='Steak & Eggs logo'/>
 				</Link>
 			</div>
 		</div>

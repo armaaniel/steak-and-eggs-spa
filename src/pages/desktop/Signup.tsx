@@ -1,7 +1,6 @@
 import {useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom'
-import logo from '../../assets/logo.svg'
 import '../../stylesheets/desktop/loginsignup.css'
 
 function Signup() {
@@ -76,7 +75,7 @@ function Signup() {
 		
 			<div className='ls-logo-desktop'>
 				<Link to="/">
-					<img src={logo} className='logo-desktop' alt='Steak & Eggs logo'/>
+					<img src="/logo.svg" className='logo-desktop' alt='Steak & Eggs logo'/>
 				</Link>
 			</div>
 			

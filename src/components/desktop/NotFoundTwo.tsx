@@ -1,5 +1,4 @@
 import '../../stylesheets/desktop/howitworks.css'
-import logo from '../../assets/logo.svg'
 import { Link } from 'react-router-dom';
 
 function NotFoundTwo() {
@@ -18,7 +17,7 @@ function NotFoundTwo() {
 			
 			<div>
 				<Link to={token ? "/home" : "/"}>
-					<img src={logo} className='logo-desktop four' alt='Steak & Eggs logo'/>
+					<img src='/logo.svg' className='logo-desktop four' alt='Steak & Eggs logo'/>
 				</Link>
 			</div>
 		</div>

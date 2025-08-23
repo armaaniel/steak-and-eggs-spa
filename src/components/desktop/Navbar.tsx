@@ -1,7 +1,6 @@
 import { useNavigate, NavLink } from 'react-router-dom'
 import Searchbar from '../../components/desktop/Searchbar'
 import {resetConsumer} from '../../consumer.js'
-import logo from '../../assets/logo.svg'
 
 function Navbar() {
 	
@@ -20,7 +19,7 @@ function Navbar() {
 
 		<div>
 			<NavLink to="/home">
-				<img src={logo} className='logo-desktop' alt='Steak & Eggs logo'/>
+				<img src="/logo.svg" className='logo-desktop' alt='Steak & Eggs logo'/>
 			</NavLink>
 		</div>
 	

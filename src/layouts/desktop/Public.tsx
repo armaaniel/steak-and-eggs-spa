@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import logo from '../../assets/logo.svg'
 import '../../stylesheets/desktop/public.css'
 
 function Public() {
@@ -16,7 +15,7 @@ function Public() {
 	<div className='nav-left'>
 	
 		<Link to="/">
-			<img src={logo} className='logo-desktop' alt='Steak & Eggs logo'/>
+			<img src="/logo.svg" className='logo-desktop' alt='Steak & Eggs logo'/>
 		</Link>
 		
 		
