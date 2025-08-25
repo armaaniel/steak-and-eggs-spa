@@ -11,6 +11,7 @@
 	flex-direction:row;
 	padding:1.5rem 2.5rem 10px 9px;
 	justify-content:space-between;
+	min-height:150px;
 }
 
 .nav-text {
