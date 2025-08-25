@@ -1,6 +1,6 @@
 import { createConsumer } from "@rails/actioncable"
 
-const API = import.meta.env.VITE_API || 'http://localhost:3000'
+const API = (import.meta.env.VITE_API || 'http://localhost:3000').replace(/\/$/, '')
 const WS = API.replace('https://', 'wss://').replace('http://', 'ws://')
 
 let globalConsumer = null
