@@ -6,7 +6,7 @@ import {resetConsumer} from '../../consumer.js'
 
 function ActivityLayout() {
 	
-	const API = import.meta.env.VITE_API || 'localhost:3000'
+	const API = import.meta.env.VITE_API
 	
 	const [isVerifying, setIsVerifying] = useState(true)
 	

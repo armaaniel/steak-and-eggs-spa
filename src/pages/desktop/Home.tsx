@@ -11,7 +11,7 @@ import { useThrottledCallback } from 'use-debounce';
 
 function Home() {
 	
-	const API = import.meta.env.VITE_API || 'localhost:3000'
+	const API = import.meta.env.VITE_API
 		
 	const [portfolio, setPortfolio] = useState(null)
 	

@@ -7,7 +7,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 			
   const [currentState, setCurrentState] = useState({ action: "buy", step: 1 });
   
-  const API = import.meta.env.VITE_API || 'localhost:3000'
+  const API = import.meta.env.VITE_API
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   

@@ -7,7 +7,7 @@ import '../../stylesheets/desktop/authenticated.css'
 
 function Stock() {
 	
-	const API = import.meta.env.VITE_API || 'localhost:3000'
+	const API = import.meta.env.VITE_API
 	
 	const [isVerifying, setIsVerifying] = useState(true)
 	

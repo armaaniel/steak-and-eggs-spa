@@ -5,7 +5,7 @@ import '../../stylesheets/desktop/loginsignup.css'
 
 function Login() {
 	
-	const API = import.meta.env.VITE_API || 'localhost:3000'
+	const API = import.meta.env.VITE_API
 	
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [username, setUsername] = useState('')

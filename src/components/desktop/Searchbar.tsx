@@ -5,7 +5,7 @@ import '../../stylesheets/desktop/searchbar.css'
 
 const Searchbar = () => {
 	
-    const API = import.meta.env.VITE_API || 'localhost:3000'
+    const API = import.meta.env.VITE_API
 
     const [searchTerm, setSearchTerm] = useState('');
 

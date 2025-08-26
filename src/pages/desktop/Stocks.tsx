@@ -10,7 +10,7 @@ import NotFoundTwo from '../../components/desktop/NotFoundTwo'
 
 function Stocks() {
 	
-	const API = import.meta.env.VITE_API || 'localhost:3000'
+	const API = import.meta.env.VITE_API
 	
 	interface OutletContextType {
 		getUserData: () => void

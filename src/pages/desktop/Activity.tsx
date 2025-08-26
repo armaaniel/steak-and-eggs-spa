@@ -5,7 +5,7 @@ import { toCurrency, toPnl }  from '../../utils.js'
 
 function Activity() {
 	
-	const API = import.meta.env.VITE_API || 'localhost:3000'
+	const API = import.meta.env.VITE_API
 	
 	const token = localStorage.getItem('authToken')
 	

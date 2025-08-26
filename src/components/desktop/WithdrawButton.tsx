@@ -5,7 +5,7 @@ import { NumericFormat } from 'react-number-format'
 
 const AddButton = ({getPortfolioData, getChartData, balance}) => {
 	
-    const API = import.meta.env.VITE_API || 'localhost:3000'
+    const API = import.meta.env.VITE_API
     
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
