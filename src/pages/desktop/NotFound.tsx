@@ -24,6 +24,8 @@ function NotFound() {
 		</nav>
 	</header>
 	
+	<main className='home two'>
+	
 	<div className='four-main'>
 	
 		<div className='howto-parent four'>
@@ -47,6 +49,7 @@ function NotFound() {
 		</div>
 			
 	</div>
+	</main>
 	</>
 	)
 }

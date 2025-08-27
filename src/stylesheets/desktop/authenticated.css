@@ -5,6 +5,10 @@
 	column-gap:1.5rem;
 }
 
+.home.two {
+	padding:15px 2.5rem 2rem 1rem;
+}
+
 .nav-auth {
 	display:flex;
 	flex-direction:row;
@@ -42,7 +46,7 @@
 }
 
 .nav-auth-text.active {
-	color:rgb(50, 48, 47);
+	color:black;
 }
 
 .nav-auth-text:hover {

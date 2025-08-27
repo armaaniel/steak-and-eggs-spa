@@ -9,7 +9,7 @@
 .nav {
 	display:flex;
 	flex-direction:row;
-	padding:1.5rem 2.5rem 10px 9px;
+	padding:25px 2.5rem 10px 9px;
 	justify-content:space-between;
 	min-height:150px;
 }
