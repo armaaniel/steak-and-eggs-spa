@@ -1,7 +1,9 @@
 import '../../stylesheets/desktop/activity.css'
-
 import {useState, useEffect} from 'react'
 import { toCurrency, toPnl }  from '../../utils.js'
+import { Navigate} from 'react-router-dom'
+import {resetConsumer} from '../../consumer.js'
+import Navbar from '../../components/desktop/Navbar'
 
 function Activity() {
 	
@@ -9,12 +11,12 @@ function Activity() {
 	
 	const token = localStorage.getItem('authToken')
 	
+	const [isLoading, setIsLoading] = useState(true)
+		
 	const [activityData, setActivityData] = useState(null)
 	
 	const [error, setError] = useState(null)
-	
-	const [isLoaded, setIsLoaded] = useState(null)
-	
+		
 	const [currentPage, setCurrentPage] = useState(1)
 	
 	const recordsPerPage = 15
@@ -31,8 +33,12 @@ function Activity() {
 	
     const endRecord = startRecord + recordsPerPage;
 	
+	if (!token) {
+		return <Navigate to='/login'/>
+	}
+	
 	useEffect(() => {
-		async function getActivity() {
+		async function getActivity() {	
 			setError(null)
 			try {
 				const response = await fetch(`${API}/activitydata`, {
@@ -41,6 +47,9 @@ function Activity() {
 				if (response.ok) {
 					const data = await response.json()
 					setActivityData(data)
+				} else if (response.status === 401) {
+					localStorage.removeItem('authToken')
+					resetConsumer()
 				} else {
 					const data = await response.json()
 					setActivityData(data)
@@ -50,7 +59,7 @@ function Activity() {
 				setError("Unable to fetch transactions, please try again")
 				setActivityData([])
 			} finally {
-				setIsLoaded(true)
+				setIsLoading(false)
 			}
 		}
 		getActivity();
@@ -61,9 +70,17 @@ function Activity() {
 											
 	return (
 	
-	<div className='activity-container'>
+	<>
+	
+	<header>
+		<Navbar/>
+	</header>
+	
+	<main className='home-activity'>
+	
+	<div className={`activity-container ${isLoading ? '' : 'loaded'}`}>
 			
-	<table className={`activity-stock-table ${isLoaded ? 'loaded' : ''}`}>
+	<table className='activity-stock-table'>
 		<thead>
 			<tr className='activity-header-row'>
 			<th className='activity-row-heading'>Transaction Type</th>
@@ -77,15 +94,15 @@ function Activity() {
 			</tr>
 		</thead>
 		
-		{isLoaded && !error && activityData.length === 0 && (
+		{!error && activityData?.length === 0 && (
 			<tbody>
 			<tr className='activity-row'><td className='activity-cell' colSpan={7}>
-			<p className='details-text'>No Activites Yet</p>
+			<p className='details-text'>No Activities Yet</p>
 			</td></tr>
 			</tbody>
 			)}
 		
-		{isLoaded && error && (
+		{error && (
 			<tbody>
 			<tr className='activity-row'><td className='activity-cell' colSpan={7}>
 			<p className='details-text'>{error}</p>
@@ -143,6 +160,10 @@ function Activity() {
 		)}
 		
 		</div>
+		
+		</main>
+		
+		</>
 	
 	)
 

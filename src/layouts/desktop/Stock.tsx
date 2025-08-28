@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Outlet, Navigate, NavLink } from 'react-router-dom'
 import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
+import NotFoundTwo from '../../components/desktop/NotFoundTwo'
 import '../../stylesheets/desktop/authenticated.css'
 
 function Stock() {
@@ -10,14 +11,22 @@ function Stock() {
 	const API = import.meta.env.VITE_API
 	
 	const [isVerifying, setIsVerifying] = useState(true)
-	
-	const [isAuthenticated, setIsAuthenticated] = useState(false)
-	
+		
 	const [userData, setUserData] = useState(null)
+	
+	const [tickerData, setTickerData] = useState(null)
+	
+	const [tickerNotFound, setTickerNotFound] = useState(null)
+	
+	const [error, setError] = useState(null)
 	
 	const {symbol} = useParams();
 	
 	const token = localStorage.getItem('authToken')
+	
+	if (!token) {
+		return <Navigate to='/login'/>
+	}
 	
 	async function getUserData() {
 	    try {
@@ -32,16 +41,11 @@ function Stock() {
 	}	
 	
 	useEffect(() => {
-		async function verifyUser() {
-
-			if (!token) {
-				setIsVerifying(false)
-				return
-			}
-			
-			try {
+		async function getData() {
+			setTickerNotFound(null)
+			try {				
 				const [response1, response2] = await Promise.all([
-				fetch(`${API}/verifytoken`, {
+				fetch(`${API}/stocks/${symbol}/tickerdata`, {
 					headers: {authToken: token}
 				}),
 				fetch(`${API}/stocks/${symbol}/userdata`, {
@@ -50,21 +54,32 @@ function Stock() {
 				
 				])				
 					if (response1.ok) {
-						const data = await response2.json()
-				        setUserData(data)
-						setIsAuthenticated(true)
-					} else {
+						const data = await response1.json()
+				        setTickerData(data)
+					} else if (response1.status === 401) {
 						localStorage.removeItem('authToken')
 						resetConsumer()
+						setUserData('')
+					} else {
+						setTickerNotFound(true)
 					}
+					
+					if (response2.status === 401) {
+						localStorage.removeItem('authToken')
+						resetConsumer()
+						setUserData('')
+					}
+					
+					const data2 = await response2.json()
+					setUserData(data2)
+						
 			} catch (error) {
-				localStorage.removeItem('authToken')
-				resetConsumer()
+				setError(error)
 			} finally {
 				setIsVerifying(false)
 			}
 		}
-		verifyUser();
+		getData();
 	}, [symbol]);
 	
 	if (isVerifying) { 
@@ -75,9 +90,24 @@ function Stock() {
 		</header>
 		)
 	}
+	
+	if (tickerNotFound || error) { 
+		return (
+		<>
 		
-	if (!isAuthenticated) return <Navigate to='/login'/>;
-					
+		<header>
+		<Navbar />
+		</header>
+		
+		<main className='home'>
+		<NotFoundTwo />
+		</main>
+		
+		</>
+		)
+	}
+
+							
 	return (
 	
 	<>
@@ -86,7 +116,7 @@ function Stock() {
 	</header>
 	
 	<main className='home'>
-	<Outlet context={{getUserData, userData, setUserData}} />
+	<Outlet context={{getUserData, userData, tickerData}} />
 	</main>
 	
 	</>

@@ -18,7 +18,7 @@ function Stocks() {
 		setUserData: (data: any) => void;
 	}
 		
-	const {getUserData, userData, setUserData} = useOutletContext<OutletContextType>();
+	const {tickerData, getUserData, userData} = useOutletContext<OutletContextType>();
 	
 	const exchangeNames = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
 	
@@ -27,9 +27,7 @@ function Stocks() {
 	const navigate = useNavigate();
 	
 	const token = localStorage.getItem('authToken')
-	
-	const [tickerData, setTickerData] = useState(null)
-	
+		
 	const [chartData, setChartData] = useState([])
 		
 	const [marketData, setMarketData] = useState(null)
@@ -41,13 +39,9 @@ function Stocks() {
 	const [open, setOpen] = useState(null)
 	
 	const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000));
-			
-	const [isVerifying, setIsVerifying] = useState(true)	
 	
 	const [imageLoaded, setImageLoaded] = useState(false);
-	
-	const [tickerNotFound, setTickerNotFound] = useState(null)
-	
+		
 	const percentChange = toPercent(price, open);
 	
 	const isPositive = percentChange && percentChange.startsWith('+');
@@ -60,30 +54,6 @@ function Stocks() {
 	    }
 	}, [symbol])
 		
-	useEffect(() => {
-		async function tickerCheck() {
-			setCompanyData(null)
-			setMarketData(null) 
-			setTickerNotFound(null)
-			try {
-				const response = await fetch(`${API}/stocks/${symbol}/tickerdata`, {
-					headers: {authToken:token}
-				})
-				if (response.ok) {
-					const data = await response.json()
-					setTickerData(data)
-				} else {
-					setTickerNotFound(true)
-				}		
-			} catch (error) {
-				navigate('/home')
-			} finally {
-				setIsVerifying(false)
-			}
-		}
-		tickerCheck();
-	}, [symbol])
-	
 	
 	useEffect(() => {
 		async function getChartData() {
@@ -102,11 +72,8 @@ function Stocks() {
 	}, [symbol])
 	
 	useEffect(() => {
-		if (!tickerData || tickerData.ticker_type === 'ETF' || tickerData.ticker_type === 'ETV') {
-			return
-		}
-		
 		async function getCompanyData() {
+			setCompanyData(null)
 			try {
 				const response = await fetch(`${API}/stocks/${symbol}/companydata`, {
 					headers: {authToken:token}
@@ -118,10 +85,11 @@ function Stocks() {
 			}
 		}
 		getCompanyData();	
-	}, [tickerData])
+	}, [symbol])
 	
 	useEffect(() => {
 		async function getMarketData() {
+			setMarketData(null) 
 			try {
 				const response = await fetch (`${API}/stocks/${symbol}/marketdata`, {
 					headers: {authToken: token}
@@ -171,9 +139,6 @@ function Stocks() {
 		
 		return () => clearInterval(timeStamp)
 	}, [])	
-	
-	if (isVerifying) return null;
-	if (tickerNotFound) return <NotFoundTwo />
 	
 	return (
 	<>

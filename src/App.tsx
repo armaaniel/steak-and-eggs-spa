@@ -1,9 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Welcome from './pages/desktop/Welcome'
 import Public from './layouts/desktop/Public'
-import Authenticated from './layouts/desktop/Authenticated'
 import Stock from './layouts/desktop/Stock'
-import ActivityLayout from './layouts/desktop/ActivityLayout'
 import Login from './pages/desktop/Login'
 import Home from './pages/desktop/Home'
 import Signup from './pages/desktop/Signup'
@@ -25,13 +23,9 @@ function App() {
 	  		<Route path ='/how-it-works' element={<HowItWorks />} />
 			</Route>
 			
-			<Route element={<Authenticated/>}>
 			<Route path='/home' element={<Home />} />
-			</Route>
 			
-			<Route element={<ActivityLayout/>}>
 			<Route path='/activity' element={<Activity />} />
-			</Route>
 			
 			<Route element={<Stock/>}>
 			<Route path='/stocks/:symbol' element={<Stocks />} />

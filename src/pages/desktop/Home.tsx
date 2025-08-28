@@ -1,12 +1,15 @@
 import '../../stylesheets/desktop/home.css'
+import '../../stylesheets/desktop/authenticated.css'
 import Chart from '../../components/desktop/Chart'
 import PositionsTable from '../../components/desktop/PositionsTable'
 import AddButton from '../../components/desktop/AddButton'
 import WithdrawButton from '../../components/desktop/WithdrawButton'
 import { useState, useEffect } from 'react';
 import {toPortfolio} from '../../utils.js'
-import {getConsumer} from '../../consumer.js'
+import {getConsumer, resetConsumer} from '../../consumer.js'
 import { useThrottledCallback } from 'use-debounce';
+import { Navigate } from 'react-router-dom'
+import Navbar from '../../components/desktop/Navbar'
 
 
 function Home() {
@@ -21,7 +24,11 @@ function Home() {
 	
 	const [error, setError] = useState(null)
 			
-	const token = localStorage.getItem('authToken')	
+	const token = localStorage.getItem('authToken')
+	
+	if (!token) {
+		return <Navigate to='/login'/>
+	}
 	
 		async function getPortfolioData() {
 			setError(null)
@@ -34,6 +41,10 @@ function Home() {
 					const data = await response.json()
 					setPortfolio(data)
 					console.log(data)
+				} else if (response.status === 401) {
+					localStorage.removeItem('authToken')
+					resetConsumer()
+					setError('')
 				} else {
 					const data = await response.json()
 					setPortfolio(data)
@@ -50,6 +61,13 @@ function Home() {
 				const response = await fetch(`${API}/portfoliochart`, {
 					headers: {authToken: token}
 				})
+				
+				if (response.status === 401) {
+					localStorage.removeItem('authToken')
+					resetConsumer()
+					setError('')
+				}
+				
 				const data = await response.json()
 				setChartData(data)
 			} catch (error) {
@@ -102,6 +120,12 @@ function Home() {
 	
 	<>
 	
+	<header>
+		<Navbar/>
+	</header>
+	
+	<main className='home'>
+	
 	<div className='home-left'>
 		<div className='port-value'>
 			<h2 className='port-value-heading'>Your Portfolio Value Is:&nbsp;</h2>
@@ -140,6 +164,8 @@ function Home() {
 		</div>
 	
 	</div>
+	
+	</main>
 	
 	</>
 	
