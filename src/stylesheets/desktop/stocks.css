@@ -3,7 +3,7 @@
 	flex-direction:column;
 	flex:1;
 	row-gap:1.5rem;
-    animation: fadeIn 100ms ease-in;
+    animation: fadeIn 80ms ease-in;
 }
 .stocks-right {
 	display:flex;
