@@ -16,7 +16,7 @@
 	flex-direction:column;
 	flex:1;
 	row-gap:1.5rem;
-    animation: fadeIn 125ms ease-in;
+    animation: fadeIn 100ms ease-in;
 }
 .chart {
 	height:36vh;

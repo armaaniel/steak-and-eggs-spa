@@ -112,7 +112,7 @@ const Searchbar = () => {
 			))}
 			</ul>
 			
-		{searchResults.length === 0 && !error && (
+		{searchResults.length === 0 && !error && showResults && (
 			<div className="no-search-result">
 				No stocks found
 			</div>
