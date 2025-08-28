@@ -129,7 +129,7 @@ function Home() {
 	<div className='home-left'>
 		<div className='port-value'>
 			<h2 className='port-value-heading'>Your Portfolio Value Is:&nbsp;</h2>
-			<h2 className='portfolio-value'>${toPortfolio(portfolio?.aum)}</h2>
+			<h2 className={`portfolio-value ${portfolio ? 'loaded' : ''}`}>{toPortfolio(portfolio?.aum)}</h2>
 		</div>
 		
 		<div className='chart'>
@@ -155,7 +155,7 @@ function Home() {
 			
 		<div className='balance-container'>
 		<h2 className='balance-header'>Cash:&nbsp;</h2>
-		<h2 className={`cash-balance ${portfolio ? 'loaded' : ''}`}>${toPortfolio(portfolio?.balance)}</h2>
+		<h2 className={`cash-balance ${portfolio ? 'loaded' : ''}`}>{toPortfolio(portfolio?.balance)}</h2>
 		</div>
 			
 		<div className='button-container'>

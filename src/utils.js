@@ -92,8 +92,8 @@ export const toPortfolio = (value) => {
 	}
 	
 	if (number < 1 && number !== 0) {
-		return `${number.toLocaleString('en-us', {maximumFractionDigits:4})} USD`
+		return `$${number.toLocaleString('en-us', {maximumFractionDigits:4})} USD`
 	} else {
-		return `${number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})} USD`
+		return `$${number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})} USD`
 	}
 }

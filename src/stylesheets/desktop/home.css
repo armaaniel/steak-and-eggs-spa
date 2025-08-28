@@ -25,6 +25,12 @@
 .portfolio-value {
 	font-family:Avenir;
 	color:rgb(50, 48, 47);	
+	opacity:0;
+	transition:80ms opacity ease-in;
+}
+
+.portfolio-value.loaded {
+	opacity:1;
 }
 
 .cash-balance {
