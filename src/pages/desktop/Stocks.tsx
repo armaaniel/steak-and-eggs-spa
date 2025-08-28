@@ -15,7 +15,7 @@ function Stocks() {
 	interface OutletContextType {
 		getUserData: () => void
 		userData: any
-		setUserData: (data: any) => void;
+		tickerData: any
 	}
 		
 	const {tickerData, getUserData, userData} = useOutletContext<OutletContextType>();
