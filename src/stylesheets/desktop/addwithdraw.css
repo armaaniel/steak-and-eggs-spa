@@ -156,7 +156,8 @@
 	color:white;
 	width:37.75%;
 	border:1px solid;
-	transition:0.2s
+	transition:0.2s all
+	
 }
 
 .aw-submit:hover {

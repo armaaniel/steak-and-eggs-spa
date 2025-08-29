@@ -122,7 +122,8 @@
 }
 
 .next.submitting:disabled {
-	cursor:wait;
+	color:rgb(50, 48, 47);
+	cursor:default;
 }
 
 .next:disabled {
