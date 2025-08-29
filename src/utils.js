@@ -32,7 +32,7 @@ export const toPnl = (value) => {
 		return '-'
 	}
 	
-	 if (number < 1 && number !== 0) {
+	if (number < 1 && number !== 0 && number >=-1) {
 		return `$${number.toLocaleString('en-us', {maximumFractionDigits:4})}`
 	} else {
 		return `$${number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})}`

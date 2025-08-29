@@ -105,6 +105,9 @@
 
 	
 .next {
+	font-family:BlinkMacSystemFont;
+	font-weight:500;
+	font-size:14px;
 	background:rgb(50, 48, 47);
 	border:1px solid;
 	border-radius:4rem;

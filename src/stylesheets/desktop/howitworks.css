@@ -9,7 +9,7 @@
 	font-family:Avenir;
 	font-weight:600;
 	font-size:1.5rem;
-	margin-top:40px;
+	margin-top:65px;
 }
 
 .howto-header.four {
@@ -28,7 +28,7 @@
 	display:flex;
 	flex-direction:column;
 	margin-left:75px;
-	row-gap:60px;
+	row-gap:32.5px;
 }
 
 .howto-parent.four {
