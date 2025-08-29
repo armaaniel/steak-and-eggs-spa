@@ -164,8 +164,7 @@
 }
 
 .aw-submit:disabled {
-	transition:10ms;
-	padding:1.1rem;
+	transition:40ms;
   	color:rgb(50, 48, 47);
 }
 
