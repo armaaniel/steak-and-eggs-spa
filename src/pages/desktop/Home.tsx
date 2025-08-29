@@ -67,7 +67,6 @@ function Home() {
 					resetConsumer()
 					setError('')
 				}
-				
 				const data = await response.json()
 				setChartData(data)
 			} catch (error) {
