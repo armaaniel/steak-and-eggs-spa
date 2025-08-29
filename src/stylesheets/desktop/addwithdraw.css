@@ -164,8 +164,7 @@
 }
 
 .aw-submit:disabled {
-	transition:40ms;
-  	color:rgb(50, 48, 47);
+	cursor:wait;
 }
 
 .insufficient {
