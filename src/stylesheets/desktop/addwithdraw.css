@@ -164,6 +164,7 @@
 }
 
 .aw-submit:disabled {
+	cursor:wait;
 }
 
 .insufficient {
