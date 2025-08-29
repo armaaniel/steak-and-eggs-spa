@@ -122,7 +122,6 @@
 }
 
 .next.submitting:disabled {
-	background:white;
   	color:rgb(50, 48, 47);
 	cursor:default;
 }

@@ -27,7 +27,7 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 	
     const handleAllowed = values => {
 		if (values.floatValue === undefined) return true;
-		return values.floatValue <= 1000000000
+		return values.formattedValue.length <= 17	
 	}
 	
 	async function handleSubmit(e) {
@@ -92,7 +92,7 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 					</div>
 					
 					<div className='modal-submit'>
-						<button type='submit' className={`aw-submit ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting}>
+						<button type='submit' className='aw-submit' disabled={isSubmitting}>
 							Submit
 						</button>
 					</div>

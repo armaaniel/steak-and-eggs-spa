@@ -156,23 +156,16 @@
 	color:white;
 	width:37.75%;
 	border:1px solid;
-	transition:0.2s all
-	
+	transition:0.2s
 }
 
 .aw-submit:hover {
 	background-color:#535050;
 }
 
-.aw-submit.submitting:disabled {
-	background:rgb(50, 48, 47);
-	color:white;
-	cursor:default;
-}		
-
 .aw-submit:disabled {
-	background-color:white;
-	cursor:not-allowed;
+	transition:10ms;
+	padding:1.1rem;
   	color:rgb(50, 48, 47);
 }
 
