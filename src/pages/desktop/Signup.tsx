@@ -120,7 +120,7 @@ function Signup() {
 						<label htmlFor='password' className='ls-label'>Password</label>
 					</div>
 					
-					<button type = 'submit' className='ls-submit' disabled={isSubmitting}>Sign Up</button>
+					<button type = 'submit' className='login-link signup login' disabled={isSubmitting}>Sign Up</button>
 				</form>
 				
 				<p className='ls-footer'>Already have an account? <Link to="/login" className='ls-signup'> 

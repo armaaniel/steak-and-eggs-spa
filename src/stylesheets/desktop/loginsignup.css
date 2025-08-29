@@ -106,23 +106,6 @@
 	outline:1px solid rgb(50, 48, 47);
 }
 
-.ls-submit {
-	background:rgb(50, 48, 47);
-	border-radius:4rem;
-	padding:0.75rem;
-	width:38%;
-	color:white;
-	align-self:center;
-	font-family:futura;
-	font-size:1rem;
-	margin-top:1rem;
-	transition:0.2s;	
-}
-.ls-submit:hover {
-	background-color:#535250;
-	cursor:pointer;
-}
-
 
 .ls-footer {
 	color:rgb(97, 94, 92);

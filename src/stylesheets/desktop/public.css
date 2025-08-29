@@ -52,6 +52,21 @@
 	border:none;
 }
 
+.login-link.signup.login {
+	width:38%;
+	align-self:center;
+	font-size:1rem;
+	margin-top:1rem;
+	transition:0.2s;
+}
+
+.login-link.signup.login:disabled {
+	background:white;
+	color:black;
+	transition:0.2s;
+	cursor:default;
+}
+	
 .login-link.signup.howto {
 	width:25%;
 	padding:1.1rem 1.25rem;
@@ -67,9 +82,11 @@
 
 .login-link.signup:hover {
 	background-color:#535050;
+	cursor:pointer;
 }
 
 .login-link:hover {
 	background-color:#D4D3D2;
+	cursor:pointer;
 	
 }

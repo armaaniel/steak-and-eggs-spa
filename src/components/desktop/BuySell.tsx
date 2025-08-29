@@ -155,11 +155,11 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		<div className='bs-next-parent'>
 			{currentState.action === 'buy' ? 
 			
-			<button className={`next ${isSubmitting ? 'submitting' : ''}`} onClick={nextStep} disabled={hasInsufficientFunds || quantityInvalid || free}> 
+			<button className='next' onClick={nextStep} disabled={hasInsufficientFunds || quantityInvalid || free}> 
 				Next
 			</button>
 			:
-            <button className={`next ${isSubmitting ? 'submitting' : ''}`} onClick={nextStep} disabled={hasInsufficientShares || quantityInvalid || free}>
+            <button className='next' onClick={nextStep} disabled={hasInsufficientShares || quantityInvalid || free}>
 				Next
 			</button>
 			}
@@ -179,9 +179,6 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 			</div>
 			
 		</div>
-		
-		
-		
 		  
 		{currentState.action === 'buy' && hasInsufficientFunds && (
 			<p>Insufficient funds for this purchase</p>
