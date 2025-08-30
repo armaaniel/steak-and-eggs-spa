@@ -173,4 +173,10 @@
 
 .est-cost {
 	white-space:nowrap;
-	}	
+}
+
+@media (max-width:768px) {
+	.bs-parent-container {
+		position:static
+	}
+}	

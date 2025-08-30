@@ -80,3 +80,19 @@
   }
 }
 
+@media (max-width:768px) {
+	.home {
+		flex-direction:column;
+		row-gap:2rem;
+	}
+	
+	.nav-auth {
+		flex-direction:column;
+		row-gap:0.5rem;
+	}
+	
+	.home-right {
+		row-gap:1rem;
+	}
+}
+

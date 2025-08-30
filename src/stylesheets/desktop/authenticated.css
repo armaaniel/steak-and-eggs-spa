@@ -4,7 +4,7 @@
 	padding:1rem 2.5rem 2rem 1rem;
 	column-gap:1.5rem;
 }
-
+	
 .home.two {
 	padding:15px 2.5rem 2rem 1rem;
 }
@@ -55,4 +55,35 @@
 
 .nav-auth-active:hover {
 	background-color:#F2F2F2
+}
+
+@media (max-width:768px) {
+	.logo-desktop {
+		width:150px;
+	}
+	
+	.nav {
+		align-items:center;
+		column-gap:0.25rem;
+		padding:25px 6px 10px 9px;
+		min-height:0px;
+	}
+	
+	.nav-right {
+		column-gap:0.25rem;
+		text-align:center
+	}
+	
+	.login-link {
+		padding:0.5rem 1.25rem;
+	}
+	
+	.welcome-start-desktop {
+		width:100%;
+	}
+	
+	.login-link.signup.howto {
+		width:50%;
+	}
+	
 }
