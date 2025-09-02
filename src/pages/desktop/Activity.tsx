@@ -3,6 +3,7 @@ import {useState, useEffect} from 'react'
 import { toCurrency, toPnl }  from '../../utils.js'
 import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
+import {Navigate} from 'react-router-dom'
 
 function Activity() {
 	
@@ -31,12 +32,7 @@ function Activity() {
     const startRecord = (currentPage - 1) * recordsPerPage;
 	
     const endRecord = startRecord + recordsPerPage;
-		
-	if (!token) {
-	  window.location.href = '/login'
-	  return null
-	}
-	
+					
 	useEffect(() => {
 		async function getActivity() {	
 			setError(null)
@@ -67,6 +63,8 @@ function Activity() {
 	
 	const totalPages = Math.ceil(activityData?.length / recordsPerPage || 1);
 	const currentPageTraces = activityData?.slice(startRecord, endRecord)
+	
+	if (!token) { return <Navigate to='/'/> }		
 											
 	return (
 	

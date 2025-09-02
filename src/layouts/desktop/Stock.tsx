@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { Outlet, NavLink } from 'react-router-dom'
 import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
@@ -23,11 +23,6 @@ function Stock() {
 	const {symbol} = useParams();
 	
 	const token = localStorage.getItem('authToken')
-	
-	if (!token) {
-	  window.location.href = '/login'
-	  return null
-	}
 	
 	async function getUserData() {
 	    try {
@@ -60,7 +55,6 @@ function Stock() {
 					} else if (response1.status === 401) {
 						localStorage.removeItem('authToken')
 						resetConsumer()
-						setUserData('')
 					} else {
 						setTickerNotFound(true)
 					}
@@ -82,6 +76,8 @@ function Stock() {
 		}
 		getData();
 	}, [symbol]);
+	
+	if (!token) { return <Navigate to='/login'/> }		
 	
 	if (isVerifying) { 
 		return (

@@ -9,6 +9,7 @@ import {toPortfolio} from '../../utils.js'
 import {getConsumer, resetConsumer} from '../../consumer.js'
 import { useThrottledCallback } from 'use-debounce';
 import Navbar from '../../components/desktop/Navbar'
+import { Navigate } from 'react-router-dom'
 
 
 function Home() {
@@ -23,13 +24,8 @@ function Home() {
 	
 	const [error, setError] = useState(null)
 			
-	const token = localStorage.getItem('authToken')
-			
-	if (!token) {
-	  window.location.href = '/login'
-	  return null
-	}
-
+	const token = localStorage.getItem('authToken')	
+		
 		async function getPortfolioData() {
 			setError(null)
 			try {
@@ -40,11 +36,9 @@ function Home() {
 				if (response.ok) {
 					const data = await response.json()
 					setPortfolio(data)
-					console.log(data)
 				} else if (response.status === 401) {
 					localStorage.removeItem('authToken')
 					resetConsumer()
-					setError('')
 				} else {
 					const data = await response.json()
 					setPortfolio(data)
@@ -65,7 +59,6 @@ function Home() {
 				if (response.status === 401) {
 					localStorage.removeItem('authToken')
 					resetConsumer()
-					setError('')
 				}
 				const data = await response.json()
 				setChartData(data)
@@ -115,6 +108,8 @@ function Home() {
 	useEffect(() => {
 		updatePortfolio()
 	}, [prices, portfolio?.positions, portfolio?.balance, updatePortfolio])
+	
+	if (!token) { return <Navigate to='/login'/> }		
 			
 	return (
 	
