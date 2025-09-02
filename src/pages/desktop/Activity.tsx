@@ -1,7 +1,6 @@
 import '../../stylesheets/desktop/activity.css'
 import {useState, useEffect} from 'react'
 import { toCurrency, toPnl }  from '../../utils.js'
-import { Navigate} from 'react-router-dom'
 import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
 
@@ -32,9 +31,10 @@ function Activity() {
     const startRecord = (currentPage - 1) * recordsPerPage;
 	
     const endRecord = startRecord + recordsPerPage;
-	
+		
 	if (!token) {
-		return <Navigate to='/login'/>
+	  window.location.href = '/login'
+	  return null
 	}
 	
 	useEffect(() => {

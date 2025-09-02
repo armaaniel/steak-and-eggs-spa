@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Outlet, Navigate, NavLink } from 'react-router-dom'
+import { Outlet, NavLink } from 'react-router-dom'
 import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
 import NotFoundTwo from '../../components/desktop/NotFoundTwo'
@@ -25,7 +25,8 @@ function Stock() {
 	const token = localStorage.getItem('authToken')
 	
 	if (!token) {
-		return <Navigate to='/login'/>
+	  window.location.href = '/login'
+	  return null
 	}
 	
 	async function getUserData() {

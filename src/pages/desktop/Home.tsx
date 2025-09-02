@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react';
 import {toPortfolio} from '../../utils.js'
 import {getConsumer, resetConsumer} from '../../consumer.js'
 import { useThrottledCallback } from 'use-debounce';
-import { Navigate } from 'react-router-dom'
 import Navbar from '../../components/desktop/Navbar'
 
 
@@ -25,11 +24,12 @@ function Home() {
 	const [error, setError] = useState(null)
 			
 	const token = localStorage.getItem('authToken')
-	
+			
 	if (!token) {
-		return <Navigate to='/login'/>
+	  window.location.href = '/login'
+	  return null
 	}
-	
+
 		async function getPortfolioData() {
 			setError(null)
 			try {
@@ -76,6 +76,7 @@ function Home() {
 		}
 		
 		useEffect(() => {
+					
 			getPortfolioData()
    			getChartData()
 		}, [])
