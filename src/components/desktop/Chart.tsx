@@ -5,7 +5,6 @@ import {toCurrency} from '../../utils.js'
 
 interface ChartProps {
   chartData: any[];
-  dataKey: string;
 }
 
 const Chart = React.memo(({chartData}: ChartProps) => {
