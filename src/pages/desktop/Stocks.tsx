@@ -182,7 +182,7 @@ function Stocks() {
 	</div>
 		
 		<div className='chart'>
-			<Chart chartData={chartData} dataKey={'value'} />
+			<Chart chartData={chartData} />
 		</div>
 		
 		</div>
