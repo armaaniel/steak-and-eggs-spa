@@ -12,7 +12,7 @@ import Navbar from '../../components/desktop/Navbar'
 import { Navigate } from 'react-router-dom'
 
 interface Portfolio {
-	aum: string
+	aum: string | number
 	balance: string
 	positions?: Position[]
 }
@@ -26,13 +26,12 @@ interface Position {
 	symbol: string
 }
 
-interface Prices {
-}
-
 interface ChartData{
 	date: string
 	value: number
 }
+
+type Prices = {[symbol:string]:number}
 
 function Home() {
 	
@@ -40,8 +39,8 @@ function Home() {
 		
 	const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
 	
-	const [prices, setPrices] = useState({}) // type later
-						
+	const [prices, setPrices] = useState<Prices>({})
+							
 	const [chartData, setChartData] = useState<ChartData[]>([])
 	
 	const [error, setError] = useState<string | null>(null)
