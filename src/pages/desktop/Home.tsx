@@ -11,18 +11,40 @@ import { useThrottledCallback } from 'use-debounce';
 import Navbar from '../../components/desktop/Navbar'
 import { Navigate } from 'react-router-dom'
 
+interface Portfolio {
+	aum: string
+	balance: string
+	positions?: Position[]
+}
+
+interface Position {
+	average_price: string
+	name: string
+	open: number
+	price: number
+	shares: number
+	symbol: string
+}
+
+interface Prices {
+}
+
+interface ChartData{
+	date: string
+	value: number
+}
 
 function Home() {
 	
 	const API = import.meta.env.VITE_API
 		
-	const [portfolio, setPortfolio] = useState(null)
+	const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
 	
-	const [prices, setPrices] = useState({})
+	const [prices, setPrices] = useState({}) // type later
 						
-	const [chartData, setChartData] = useState([])
+	const [chartData, setChartData] = useState<ChartData[]>([])
 	
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<string | null>(null)
 			
 	const token = localStorage.getItem('authToken')	
 		
