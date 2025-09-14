@@ -7,7 +7,7 @@ function Login() {
 	
 	const API = import.meta.env.VITE_API
 	
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 	const [error, setError] = useState(null)
