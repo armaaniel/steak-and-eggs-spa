@@ -5,19 +5,31 @@ import {resetConsumer} from '../../consumer.js'
 import Navbar from '../../components/desktop/Navbar'
 import {Navigate} from 'react-router-dom'
 
+interface Activity {
+	date: string
+	id: number
+	market_price: string
+	quantity: number
+	realized_pnl: string | null
+	symbol: string
+	transaction_type: "Buy" | "Sell" | "Deposit" | "Withdraw";
+	value: string
+}
+	
+
 function Activity() {
 	
 	const API = import.meta.env.VITE_API
 	
 	const token = localStorage.getItem('authToken')
 	
-	const [isLoading, setIsLoading] = useState(true)
+	const [isLoading, setIsLoading] = useState<boolean>(true)
 		
-	const [activityData, setActivityData] = useState(null)
+	const [activityData, setActivityData] = useState<Activity[] | null>(null)
 	
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<null | string>(null)
 		
-	const [currentPage, setCurrentPage] = useState(1)
+	const [currentPage, setCurrentPage] = useState<number>(1)
 	
 	const recordsPerPage = 15
 	
