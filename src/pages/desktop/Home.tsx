@@ -122,7 +122,7 @@ function Home() {
 		
 		setPortfolio(prev => ({
 			...prev, 
-			aum: stockValue + parseFloat(prev.balance || 0)
+			aum: stockValue + parseFloat(prev.balance || '0')
 		}))
 	}, 5000, {trailing:false})
 	
