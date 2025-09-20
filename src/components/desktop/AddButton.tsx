@@ -1,16 +1,23 @@
 import '../../stylesheets/desktop/addwithdraw.css'
 import { createPortal } from 'react-dom'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
+import type { NumberFormatValues } from 'react-number-format';
 
-const AddButton = ({getPortfolioData, getChartData}) => {
+
+interface Props {
+	getPortfolioData: () => Promise<void>
+	getChartData: () => Promise<void>
+}
+
+const AddButton = ({getPortfolioData, getChartData}: Props) => {
 	
 	const API = import.meta.env.VITE_API
 	    
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [amount, setAmount] = useState('')
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<null | string>(null)
 	
 	const token = localStorage.getItem('authToken')
 	
@@ -21,23 +28,23 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 		setAmount('')
 	}
 	
-	const handleChange = (values) => {
+	const handleChange = (values:NumberFormatValues) => {
 		setAmount(values.value)
 	}
 	
-    const handleAllowed = values => {
+    const handleAllowed = (values:NumberFormatValues) => {
 		if (values.floatValue === undefined) return true;
 		return values.formattedValue.length <= 17	
 	}
 	
-	async function handleSubmit(e) {
+	async function handleSubmit(e:React.FormEvent) {
 		e.preventDefault();
 		setIsSubmitting(true)
 		setError(null)
 		try {
 			const response = await fetch(`${API}/deposit`, {
 				method: 'POST', 
-				headers: {'Content-Type':'application/json', authToken: token},
+				headers: {'Content-Type':'application/json', authToken: token} as HeadersInit,
 				body: JSON.stringify({amount: amount})
 			})
 			if (response.ok) {
@@ -110,9 +117,5 @@ const AddButton = ({getPortfolioData, getChartData}) => {
 		</>
 	);
 };
-
-/* <input type='number' name='amount' value={amount} onChange={handleChange} onKeyDown={handleKeyDown} min='0.01' step='0.01' 
-								className='modal-amount-input'/>
-								<label className='modal-amount-label' htmlFor='amount'>Amount</label> */
 
 export default AddButton;

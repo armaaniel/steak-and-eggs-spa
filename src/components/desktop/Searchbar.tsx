@@ -2,6 +2,19 @@ import { useState, useEffect, useRef } from 'react';
 import { useDebounce } from 'use-debounce';
 import { Link } from 'react-router-dom'
 import '../../stylesheets/desktop/searchbar.css'
+import type { Error }  from '../../types.ts'
+
+interface SearchResults {
+	created_at: string
+	currency: string
+	exchange: string
+	id: number
+	name: string
+	symbol: string
+	ticker_type: string
+	updated_at: string
+}
+
 
 const Searchbar = () => {
 	
@@ -11,23 +24,23 @@ const Searchbar = () => {
 
     const [debouncedSearchTerm] = useDebounce(searchTerm, 150)
 	
-    const [searchResults, setSearchResults] = useState([]);
+    const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
 	
     const [showResults, setShowResults] = useState(false);
 	
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<Error>(null)
 	
-	const searchRef = useRef(null)
+	const searchRef = useRef<HTMLDivElement>(null)
 	
-    const handleChange = (e) => setSearchTerm(e.target.value)
+    const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)
 
     const handleSelect = () => setSearchTerm('')
 	
 	const token = localStorage.getItem('authToken')
 	
 	useEffect(() => {
-		const handleClick = (event) => {
-			if (searchRef.current && !searchRef.current.contains(event.target)) {
+		const handleClick = (event:MouseEvent) => {
+			if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
 				setShowResults(false)
 			}
 		}
@@ -45,7 +58,7 @@ const Searchbar = () => {
 			setError(null)
 	      try {
 			  const response = await fetch(`${API}/search?q=${debouncedSearchTerm}`, {
-				headers: {'authToken': token}
+				headers: {'authToken': token} as HeadersInit
 			})
 			
 			if (!response.ok) {

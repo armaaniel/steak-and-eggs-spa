@@ -4,23 +4,35 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import PositionTable from '../../components/desktop/PositionTable'
 import BuySell from '../../components/desktop/BuySell'
-import {getConsumer} from '../../consumer.js'
-import { toReadable, toCurrency, toPercent }  from '../../utils.js'
-import NotFoundTwo from '../../components/desktop/NotFoundTwo'
+import {getConsumer} from '../../consumer.ts'
+import { toReadable, toCurrency, toPercent }  from '../../utils.ts'
+import type { TickerData, UserData, ChartData, Price, Open }  from '../../types.ts'
+
+interface OutletType {
+	tickerData: TickerData
+	getUserData: () => Promise<void>
+	userData: UserData
+}
+
+interface MarketData {
+	high: number | string
+	open: number | string
+	low: number | string
+	volume: number | string
+}
+
+interface CompanyData {
+	description: string | null
+	market_cap: number | string | null
+}
 
 function Stocks() {
 	
 	const API = import.meta.env.VITE_API
-	
-	interface OutletContextType {
-		getUserData: () => void
-		userData: any
-		tickerData: any
-	}
 		
-	const {tickerData, getUserData, userData} = useOutletContext<OutletContextType>();
+	const {tickerData, getUserData, userData} = useOutletContext<OutletType>();
 	
-	const exchangeNames = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
+	const exchangeNames: {[key:string]:string} = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
 	
 	let {symbol} = useParams();
 	
@@ -28,15 +40,15 @@ function Stocks() {
 	
 	const token = localStorage.getItem('authToken')
 		
-	const [chartData, setChartData] = useState([])
+	const [chartData, setChartData] = useState<ChartData[]>([])
 		
-	const [marketData, setMarketData] = useState(null)
+	const [marketData, setMarketData] = useState<null | MarketData>(null)
 	
-	const [companyData, setCompanyData] = useState(null)
+	const [companyData, setCompanyData] = useState<null | CompanyData>(null)
 	
-    const [price, setPrice] = useState(null)
+    const [price, setPrice] = useState<Price>(null)
 	
-	const [open, setOpen] = useState(null)
+	const [open, setOpen] = useState<Open>(null)
 	
 	const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000));
 	
@@ -44,10 +56,10 @@ function Stocks() {
 		
 	const percentChange = toPercent(price, open);
 	
-	const isPositive = percentChange && percentChange.startsWith('+');
+	const isPositive = Boolean(percentChange && percentChange.startsWith('+'));
 	
 	useEffect(() => {
-	    if (symbol !== symbol.toUpperCase()) {
+	    if (symbol && symbol !== symbol.toUpperCase()) {
 			symbol = symbol.toUpperCase()
 	      navigate(`/stocks/${symbol}`, { replace: true });
 	      return;
@@ -57,15 +69,15 @@ function Stocks() {
 	
 	useEffect(() => {
 		async function getChartData() {
-			try {
+			try {				
 				const response = await fetch(`${API}/stocks/${symbol}/chartdata`, {
-					headers: {authToken: token}
+					headers: {authToken: token} as HeadersInit
 				})
 				const data = await response.json()
 				setChartData(data)
 			} catch (error) {
 				const today = new Date();
-				setChartData([{date: today.toLocaleDateString(), close: 0}, {date: today.toLocaleDateString(), close: 0}]);
+				setChartData([{date: today.toLocaleDateString(), value: 0}, {date: today.toLocaleDateString(), value: 0}]);
 			}
 		}
 		getChartData();
@@ -76,7 +88,7 @@ function Stocks() {
 			setCompanyData(null)
 			try {
 				const response = await fetch(`${API}/stocks/${symbol}/companydata`, {
-					headers: {authToken:token}
+					headers: {authToken:token} as HeadersInit
 				})
 				const data = await response.json()
 				setCompanyData(data)
@@ -92,7 +104,7 @@ function Stocks() {
 			setMarketData(null) 
 			try {
 				const response = await fetch (`${API}/stocks/${symbol}/marketdata`, {
-					headers: {authToken: token}
+					headers: {authToken: token} as HeadersInit
 				})
 				const data = await response.json()
 				setMarketData(data)
@@ -107,7 +119,7 @@ function Stocks() {
 		async function getStockPrice() {
 			try {
 				const response = await fetch(`${API}/stocks/${symbol}/stockprice`, {
-					headers: {authToken: token}
+					headers: {authToken: token} as HeadersInit
 				})
 				const data = await response.json();
 				setPrice(data.price)
@@ -123,8 +135,7 @@ function Stocks() {
 	useEffect(() => {
 		const consumer = getConsumer()
 		const subscription = consumer.subscriptions.create({channel:"PriceChannel", symbol:symbol}, {
-			received(data) {
-				console.log(data)
+			received(data:number) {
 				setPrice(data)
 			}
 		})
@@ -194,7 +205,7 @@ function Stocks() {
 			</div>
 		
 			<div className='positions-table'>
-				<PositionTable position={userData.position} price={price} open={open}/>
+				<PositionTable position={userData.position} price={price} />
 			</div>
 			</div>
 		)}
@@ -270,7 +281,7 @@ function Stocks() {
 	</div>
 	
 	<div className='stocks-right'>
-		<BuySell getUserData={getUserData} balance={userData.balance} price={price} position={userData.position} 
+		<BuySell getUserData={getUserData} balance={userData.balance} price={price} position={userData?.position} 
 		name={tickerData?.name} symbol={symbol} token={token}/>
 	</div>
 	</>

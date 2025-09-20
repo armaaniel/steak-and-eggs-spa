@@ -5,25 +5,18 @@ import PositionsTable from '../../components/desktop/PositionsTable'
 import AddButton from '../../components/desktop/AddButton'
 import WithdrawButton from '../../components/desktop/WithdrawButton'
 import { useState, useEffect } from 'react';
-import {toPortfolio} from '../../utils.js'
-import {getConsumer, resetConsumer} from '../../consumer.js'
+import {toPortfolio} from '../../utils.ts'
+import {getConsumer, resetConsumer} from '../../consumer.ts'
 import { useThrottledCallback } from 'use-debounce';
 import Navbar from '../../components/desktop/Navbar'
 import { Navigate } from 'react-router-dom'
+import type { Positions, Prices, Error }  from '../../types.ts'
+
 
 interface Portfolio {
 	aum: string | number
 	balance: string
-	positions?: Position[]
-}
-
-interface Position {
-	average_price: string
-	name: string
-	open: number
-	price: number
-	shares: number
-	symbol: string
+	positions?: Positions[]
 }
 
 interface ChartData{
@@ -31,27 +24,26 @@ interface ChartData{
 	value: number
 }
 
-type Prices = {[symbol:string]:number}
-
 function Home() {
 	
 	const API = import.meta.env.VITE_API
 		
-	const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
+	const [portfolio, setPortfolio] = useState<Portfolio | undefined>(undefined)
 	
 	const [prices, setPrices] = useState<Prices>({})
 							
 	const [chartData, setChartData] = useState<ChartData[]>([])
 	
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState<Error>(null)
 			
 	const token = localStorage.getItem('authToken')	
 		
 		async function getPortfolioData() {
 			setError(null)
+			if (!token) return
 			try {
 				const response = await fetch(`${API}/portfoliodata`, {
-					headers: { authToken: token }
+					headers: { authToken: token } 
 				})
 				
 				if (response.ok) {
@@ -72,6 +64,7 @@ function Home() {
 		}
 		
 		async function getChartData() {
+			if (!token) return
 			try {
 				const response = await fetch(`${API}/portfoliochart`, {
 					headers: {authToken: token}
@@ -102,9 +95,8 @@ function Home() {
 			const subscriptions = portfolio.positions.map(position => {
 				return consumer.subscriptions.create({channel: "PriceChannel", symbol: position.symbol}, 
 				{
-					received(data) {
-						setPrices(previous => ({...previous, [position.symbol]: data}))
-						console.log(data)
+					received(data:number) {
+						setPrices(prev => ({...prev, [position.symbol]: data}))
 					}
 				}
 			)
@@ -120,9 +112,7 @@ function Home() {
 			return acc + (price * position.shares)
 		}, 0)
 		
-		setPortfolio(prev => ({
-			...prev, 
-			aum: stockValue + parseFloat(prev.balance || '0')
+		setPortfolio(prev => ({...prev!, aum: stockValue + parseFloat(prev?.balance || '0')
 		}))
 	}, 5000, {trailing:false})
 	

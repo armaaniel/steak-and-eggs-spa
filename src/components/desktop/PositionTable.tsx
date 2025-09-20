@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { toCurrency, toPercent }  from '../../utils.js'
+import { toCurrency, toPercent }  from '../../utils.ts'
 import '../../stylesheets/desktop/positionstable.css'
+import type { Price, Position }  from '../../types.ts'
 
+interface Props {
+	price: Price
+	position: Position
+}
 
-const PositionTable = ({ position, price, open }) => {
+const PositionTable = ({ position, price }:Props) => {
 	
-	const pnl = (price-position.average_price)*position.shares;
+	const value = (parseFloat(price as any) * Number(position.shares))
+	
+	const pnl = (parseFloat(price as any) - parseFloat(position.average_price)) * Number(position.shares)
+	
  	const pnlChange = toPercent(price, position.average_price)
- 	const pnlIsPositive = pnlChange && pnlChange.startsWith('+');
+ 	const pnlIsPositive = Boolean(pnlChange && pnlChange.startsWith('+'));
  
  return (
      <table className="portfolio">
@@ -28,7 +35,7 @@ const PositionTable = ({ position, price, open }) => {
                 <img src={`https://img.logo.dev/ticker/${position.symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} height="32" width="32"
 			 onError={(e) => {(e.target as HTMLImageElement).src = '/fallback-logo.svg'}}/>
                  <div className='stock-text'>
-                 	<p className='stock-symbol'>${toCurrency(price * position.shares)} </p>
+                 	<p className='stock-symbol'>${toCurrency(value)} </p>
                    <p key={position.shares} className='stock-shares'>{position.shares} shares</p>
                  </div>
 				 

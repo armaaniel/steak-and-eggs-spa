@@ -1,7 +1,7 @@
 import '../../stylesheets/desktop/activity.css'
 import {useState, useEffect} from 'react'
-import { toCurrency, toPnl }  from '../../utils.js'
-import {resetConsumer} from '../../consumer.js'
+import { toCurrency, toPnl }  from '../../utils.ts'
+import {resetConsumer} from '../../consumer.ts'
 import Navbar from '../../components/desktop/Navbar'
 import {Navigate} from 'react-router-dom'
 
@@ -23,13 +23,13 @@ function Activity() {
 	
 	const token = localStorage.getItem('authToken')
 	
-	const [isLoading, setIsLoading] = useState<boolean>(true)
+	const [isLoading, setIsLoading] = useState(true)
 		
 	const [activityData, setActivityData] = useState<Activity[] | null>(null)
 	
 	const [error, setError] = useState<null | string>(null)
 		
-	const [currentPage, setCurrentPage] = useState<number>(1)
+	const [currentPage, setCurrentPage] = useState(1)
 	
 	const recordsPerPage = 15
 	
@@ -48,6 +48,7 @@ function Activity() {
 	useEffect(() => {
 		async function getActivity() {	
 			setError(null)
+			if (!token) return
 			try {
 				const response = await fetch(`${API}/activitydata`, {
 					headers: {authToken: token}
@@ -73,7 +74,7 @@ function Activity() {
 		getActivity();
 	}, [])
 	
-	const totalPages = Math.ceil(activityData?.length / recordsPerPage || 1);
+	const totalPages = Math.ceil((activityData?.length || 1) / recordsPerPage);
 	const currentPageTraces = activityData?.slice(startRecord, endRecord)
 	
 	if (!token) { return <Navigate to='/'/> }		

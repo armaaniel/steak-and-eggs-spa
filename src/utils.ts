@@ -1,11 +1,11 @@
-export const toReadable = (value) => {
+export const toReadable = (value:number | null | string | undefined) => {
 	
 	if (value === null || value === undefined) {
 		return null
 	}
 	
-	const number = parseInt(value)
-	
+	const number = Number(value)
+		
 	if (isNaN(number)) {
 		return 'N/A'
 	}
@@ -17,16 +17,12 @@ export const toReadable = (value) => {
 	} else if (number >= 1_000_000) {
 		return `${(number / 1_000_000).toFixed(2)}M`
 	} else {
-		return number.toLocaleString()
+		return value.toLocaleString()
 	}
 }
 
-export const toTwo = (value) => {
-	return parseFloat(value).toFixed(2)
-}
-
-export const toPnl = (value) => {
-	const number = parseFloat(value)
+export const toPnl = (value: string | null) => {
+	const number = parseFloat(value as any)
 	
 	if (isNaN(number)) {
 		return '-'
@@ -39,13 +35,13 @@ export const toPnl = (value) => {
 	}
 }		
 	
-export const toCurrency = (value) => {
+export const toCurrency = (value: number | string | null | undefined) => {
 	
 	if (value === null || value === undefined) {
 		return null
 	}
 	
-	const number = parseFloat(value)
+	const number = parseFloat(value as any)
 	
 	if (isNaN(number)) {
 		return 'N/A'
@@ -60,14 +56,17 @@ export const toCurrency = (value) => {
 
 
 
-export const toPercent = (price, open) => {
+export const toPercent = (price:string | null | number, open:string | null | number) => {
 	if (!price || !open) return null;
 	
-	if (isNaN(price)) {
+	const priceNum = Number(price)
+	const openNum = Number(open)
+	
+	if (isNaN(priceNum)) {
 		return 'N/A%'
 	}
 	
-	const percentage = ((price - open) / open) * 100;
+	const percentage = ((priceNum - openNum) / openNum) * 100;
 	
 	const decimals = Math.abs(percentage) < 0.01 ? 4 : 2;
 	
@@ -79,13 +78,13 @@ export const toPercent = (price, open) => {
 }
 	
 
-export const toPortfolio = (value) => {
+export const toPortfolio = (value: string | number | undefined) => {
 	
 	if (value === null || value === undefined) {
 		return null
 	}
 	
-	const number = parseFloat(value)
+	const number = parseFloat(value as any)
 	
 	if (isNaN(number)) {
 		return 'N/A'

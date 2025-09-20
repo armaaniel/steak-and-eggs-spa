@@ -1,6 +1,6 @@
 import { useNavigate, NavLink, Link } from 'react-router-dom'
 import Searchbar from '../../components/desktop/Searchbar'
-import {resetConsumer} from '../../consumer.js'
+import {resetConsumer} from '../../consumer.ts'
 
 function Navbar() {
 	

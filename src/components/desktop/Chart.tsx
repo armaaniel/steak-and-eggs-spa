@@ -1,13 +1,13 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import { LineChart, Line, Tooltip, ResponsiveContainer, YAxis } from 'recharts';
-import {toCurrency} from '../../utils.js'
+import {toCurrency} from '../../utils.ts'
+import type { ChartData }  from '../../types.ts'
 
-interface ChartProps {
-  chartData: any[];
+interface Props {
+	chartData: ChartData[]
 }
 
-const Chart = React.memo(({chartData}: ChartProps) => {
+const Chart = React.memo(({chartData}: Props) => {
 									
 	return (
 		
@@ -16,7 +16,7 @@ const Chart = React.memo(({chartData}: ChartProps) => {
 				<Line type="monotone" dataKey='value' stroke="#8884d8" strokeWidth={2} dot={false} />
       		<Tooltip cursor={false} position={{ x: 0, y: 0 }} labelFormatter={(index) => chartData[index].date}
 			contentStyle={{ border: 'none', background: 'none', display: 'flex', padding:'4px', gap:'8px' }} 
-			formatter={(value) => toCurrency(value as number)}/>
+			formatter={(value:number) => toCurrency(value)}/>
           <YAxis domain={[dataMin => (dataMin*0.95), dataMax => (dataMax * 1.05)]} hide={true} />
 			
     		</LineChart>		

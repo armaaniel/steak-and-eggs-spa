@@ -1,16 +1,25 @@
 import '../../stylesheets/desktop/addwithdraw.css'
 import { createPortal } from 'react-dom'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
+import type { NumberFormatValues } from 'react-number-format';
+import type {Error }  from '../../types.ts'
 
-const AddButton = ({getPortfolioData, getChartData, balance}) => {
+
+interface Props {
+	getPortfolioData: () => Promise<void>
+	getChartData: () => Promise<void>
+	balance: string | undefined
+}
+
+const WithdrawButton = ({getPortfolioData, getChartData, balance}:Props) => {
 	
     const API = import.meta.env.VITE_API
     
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [amount, setAmount] = useState('')
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<Error>(null)
 	
 	const token = localStorage.getItem('authToken')
 	
@@ -21,26 +30,26 @@ const AddButton = ({getPortfolioData, getChartData, balance}) => {
 		setAmount('')
 	}	
 	
-	const handleChange = (values) => {
+	const handleChange = (values:NumberFormatValues) => {
 		setAmount(values.value)
 	}
 	
-    const handleAllowed = values => {
+    const handleAllowed = (values:NumberFormatValues) => {
 		if (values.floatValue === undefined) return true;
 		return values.floatValue <= 1000000000000
 	}
 	
-	const insufficient = balance < parseFloat(amount)
+	const insufficient = isNaN(parseFloat(balance as any)) || parseFloat(balance as any) < parseFloat(amount) 
 	const invalidAmount = amount === ''
 	
-	async function handleSubmit(e) {
+	async function handleSubmit(e:React.FormEvent) {
 		e.preventDefault();
 		setIsSubmitting(true)
 		setError(null)
 		try {
 			const response = await fetch(`${API}/withdraw`, {
 				method: 'POST', 
-				headers: {'Content-Type':'application/json', authToken: token},
+				headers: {'Content-Type':'application/json', authToken: token} as HeadersInit,
 				body: JSON.stringify({amount: amount})
 			})
 			if (response.ok) {
@@ -116,4 +125,4 @@ const AddButton = ({getPortfolioData, getChartData, balance}) => {
 	);
 };
 
-export default AddButton;
+export default WithdrawButton;

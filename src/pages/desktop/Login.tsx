@@ -7,14 +7,14 @@ function Login() {
 	
 	const API = import.meta.env.VITE_API
 	
-	const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-	const [username, setUsername] = useState<string>('')
-	const [password, setPassword] = useState<string>('')
+	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [username, setUsername] = useState('')
+	const [password, setPassword] = useState('')
 	const [error, setError] = useState<null | string>(null)
 		
     const navigate = useNavigate();
 	
-	async function handleSubmit(e) { 
+	async function handleSubmit(e: React.FormEvent) { 
 		e.preventDefault()
 		setError(null)
 		try {

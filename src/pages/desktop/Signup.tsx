@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import '../../stylesheets/desktop/loginsignup.css'
@@ -10,11 +10,11 @@ function Signup() {
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<null | string>(null)
 	
     const navigate = useNavigate();
 	
-	async function handleSubmit(e) { 
+	async function handleSubmit(e:React.FormEvent) { 
 		e.preventDefault()
 		setError(null)
 		const usernameError = validateUsername(username)
@@ -55,19 +55,17 @@ function Signup() {
 	}
 }
 
-	const validateUsername = (username) => {
+	const validateUsername = (username:string) => {
 		if (username.length > 20) return "Username must be 20 characters or less"
 		if (!/^[a-zA-Z0-9_]+$/.test(username)) return "Username can only contain letters, numbers, and underscores"
 		return null
 	}
 	
-	const validatePassword = (password) => {
+	const validatePassword = (password:string) => {
 		if (password.length === 0) return "Password must contain at least 1 character"
 		return null
 	}
-	
-	const isValid = validateUsername(username) === null && password.length > 0
-		
+			
 	return (
 	
 	<div className='ls-desktop'>

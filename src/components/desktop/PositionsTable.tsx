@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'
-import { toCurrency, toTwo, toPercent }  from '../../utils.js'
+import { toCurrency, toPercent }  from '../../utils.ts'
 import '../../stylesheets/desktop/positionstable.css'
+import type { Positions, Prices, Error }  from '../../types.ts'
+
+interface Props {
+	positions?: Positions[]
+	prices: Prices
+	error: Error
+}
 
 
-const PositionsTable = ({ positions, prices, error }) => {	
+const PositionsTable = ({ positions, prices, error }: Props) => {	
  
  return (
      <table className="portfolio">
@@ -39,9 +45,9 @@ const PositionsTable = ({ positions, prices, error }) => {
 			 
 			 const price = prices[position.symbol] || position.price;
 			 const percentChange = toPercent(price, position.open)
-			 const changeIsPositive = percentChange && percentChange.startsWith('+');
+			 const changeIsPositive = Boolean(percentChange && percentChange.startsWith('+'));
 			 const pnlChange = toPercent(price, position.average_price)
-			 const pnlIsPositive = pnlChange && pnlChange.startsWith('+');
+			 const pnlIsPositive = Boolean(pnlChange && pnlChange.startsWith('+'));
 			 
 		return (
            <tr key={position.symbol} className="portfolio-row">
@@ -96,7 +102,7 @@ const PositionsTable = ({ positions, prices, error }) => {
                <Link to={`/stocks/${position.symbol}`} className="symbol-name">
 			   
                  <div className='stock-text'>
-				 <p className='stock-name'>${toCurrency((price-position.average_price)*position.shares)}</p>
+				 <p className='stock-name'>${toCurrency((price-parseFloat(position.average_price))*position.shares)}</p>
 				 <p className={`stock-name ${pnlIsPositive ? 'positive' : 'negative'}`}>{pnlChange}</p>
                  </div>
 				 

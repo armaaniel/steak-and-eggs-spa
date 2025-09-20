@@ -1,9 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { toCurrency }  from '../../utils.js'
+import { useState, useEffect } from "react";
+import { toCurrency }  from '../../utils.ts'
+import type { Position }  from '../../types.ts'
 import { NumericFormat } from 'react-number-format'
 import '../../stylesheets/desktop/buysell.css'
+import type { NumberFormatValues } from 'react-number-format';
+import type {Price}  from '../../types.ts'
 
-const BuySell = ({getUserData, balance, position, price, name, symbol, token}) => {
+
+
+interface Props {
+	getUserData: () => Promise<void>
+	balance: string
+	position: Position | undefined
+	price: Price
+	name: string
+	symbol: string | undefined
+	token: string | null
+}
+
+interface OrderData {
+	market_price: string
+	quantity: number
+	symbol: string
+	value: string
+}
+
+const BuySell = ({getUserData, balance, position, price, name, symbol, token}: Props) => {
 			
   const [currentState, setCurrentState] = useState({ action: "buy", step: 1 });
   
@@ -11,31 +33,38 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<null | string>(null)
       
   const [quantity, setQuantity] = useState('');
   
-  const [orderData, setOrderData] = useState(null)
+  const [orderData, setOrderData] = useState<null | OrderData>(null)
   
-  const [time, setTime] = useState(null)
+  const [time, setTime] = useState<null | string>(null)
+  
+  const calculateCost = (quantity:string, price:Price) => {
+	  if (price === null) return 'N/A'
+	  
+	  return (Number(quantity) || 0) * Number(price)
+  }
                 
-  const estimatedCost = (Number(quantity) || 0) * price;
+  const estimatedCost = calculateCost(quantity, price)
   
-  const free = (estimatedCost === 0) || isNaN(estimatedCost)
+  const free = (estimatedCost === 0) || isNaN(estimatedCost as any)
   
-  const hasInsufficientFunds = (estimatedCost > balance) || isNaN(balance);
+  const hasInsufficientFunds = (estimatedCost > balance) || isNaN(balance as any);
   
-  const hasInsufficientShares = quantity > (position?.shares || 0)
+  const hasInsufficientShares = Number(quantity) > (position?.shares || 0)
   
   const isQuantityInvalid = () => {
     if (quantity === '') return true;
 }
 
-  const handleChange = (values) => {
+
+  const handleChange = (values:NumberFormatValues) => {
 	  setQuantity(values.value)
   }
   
-  const handleAllowed = (values) => {
+  const handleAllowed = (values:NumberFormatValues) => {
 	  if (values.floatValue === undefined) return true;
 	  return values.floatValue <= 100000000000;
   }
@@ -56,7 +85,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 	  setQuantity('')
   }
   	  
-  async function handleSubmit(e) {
+  async function handleSubmit(e:React.FormEvent) {
 	  e.preventDefault();
 	  setIsSubmitting(true);
 	  setError(null)
@@ -64,7 +93,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 	  try {
 		  const response = await fetch(`${API}/stocks/${symbol}/${action}`, {
 			  method: 'POST',
-			  headers: {'Content-Type': 'application/json', authToken: token},
+			  headers: {'Content-Type': 'application/json', authToken: token} as HeadersInit,
 			  body: JSON.stringify({name: name, quantity: quantity})
 		  })
 		  if (response.ok) {
@@ -81,7 +110,6 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 		  getUserData()
 		  setTime(new Date().toLocaleTimeString())
 		  nextStep();
-		  
 	  }
   }
   	  
@@ -262,7 +290,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}) =
 	</div>
 	)}
 	
-	{currentState.step === 3 && !isSubmitting && !error && (
+	{currentState.step === 3 && !isSubmitting && orderData && (
 	<div className='bs-parent-container'>
 	
 		<div className='bs-success'>
