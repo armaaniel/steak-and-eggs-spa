@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import type { NumberFormatValues } from 'react-number-format';
-
+import type {Error}  from '../../types.ts'
 
 interface Props {
 	getPortfolioData: () => Promise<void>
@@ -12,12 +12,12 @@ interface Props {
 
 const AddButton = ({getPortfolioData, getChartData}: Props) => {
 	
-	const API = import.meta.env.VITE_API
-	    
+	const API:String = import.meta.env.VITE_API
+		    
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [amount, setAmount] = useState('')
-	const [error, setError] = useState<null | string>(null)
+	const [error, setError] = useState<Error>(null)
 	
 	const token = localStorage.getItem('authToken')
 	
@@ -75,7 +75,7 @@ const AddButton = ({getPortfolioData, getChartData}: Props) => {
 			
 		<div>
 			<div className='background-overlay'>
-			</div>
+		</div>
 				
 			<div className='modal-dialog'>
 			

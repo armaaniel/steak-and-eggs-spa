@@ -4,6 +4,8 @@ import { toCurrency, toPnl }  from '../../utils.ts'
 import {resetConsumer} from '../../consumer.ts'
 import Navbar from '../../components/desktop/Navbar'
 import {Navigate} from 'react-router-dom'
+import type { Error }  from '../../types.ts'
+
 
 interface Activity {
 	date: string
@@ -19,7 +21,7 @@ interface Activity {
 
 function Activity() {
 	
-	const API = import.meta.env.VITE_API
+	const API:String = import.meta.env.VITE_API
 	
 	const token = localStorage.getItem('authToken')
 	
@@ -27,7 +29,7 @@ function Activity() {
 		
 	const [activityData, setActivityData] = useState<Activity[] | null>(null)
 	
-	const [error, setError] = useState<null | string>(null)
+	const [error, setError] = useState<Error>(null)
 		
 	const [currentPage, setCurrentPage] = useState(1)
 	

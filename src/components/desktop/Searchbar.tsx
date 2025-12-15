@@ -18,7 +18,7 @@ interface SearchResults {
 
 const Searchbar = () => {
 	
-    const API = import.meta.env.VITE_API
+    const API:string = import.meta.env.VITE_API
 
     const [searchTerm, setSearchTerm] = useState('');
 

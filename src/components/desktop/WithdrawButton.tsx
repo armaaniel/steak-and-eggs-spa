@@ -14,8 +14,8 @@ interface Props {
 
 const WithdrawButton = ({getPortfolioData, getChartData, balance}:Props) => {
 	
-    const API = import.meta.env.VITE_API
-    
+    const API:string = import.meta.env.VITE_API
+	
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [amount, setAmount] = useState('')

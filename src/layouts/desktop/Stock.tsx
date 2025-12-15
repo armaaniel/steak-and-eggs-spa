@@ -9,8 +9,8 @@ import type { UserData, TickerData, Error }  from '../../types.ts'
 
 function Stock() {
 	
-	const API = import.meta.env.VITE_API
-	
+	const API:string = import.meta.env.VITE_API
+		
 	const [isVerifying, setIsVerifying] = useState(true)
 		
 	const [userData, setUserData] = useState<UserData | null>(null)

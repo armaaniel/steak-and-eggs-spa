@@ -9,7 +9,6 @@ interface Props {
 	error: Error
 }
 
-
 const PositionsTable = ({ positions, prices, error }: Props) => {	
  
  return (

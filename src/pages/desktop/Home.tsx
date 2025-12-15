@@ -26,10 +26,10 @@ interface ChartData{
 
 function Home() {
 	
-	const API = import.meta.env.VITE_API
+	const API:string = import.meta.env.VITE_API
 		
 	const [portfolio, setPortfolio] = useState<Portfolio | undefined>(undefined)
-	
+		
 	const [prices, setPrices] = useState<Prices>({})
 							
 	const [chartData, setChartData] = useState<ChartData[]>([])

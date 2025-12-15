@@ -28,7 +28,7 @@ interface CompanyData {
 
 function Stocks() {
 	
-	const API = import.meta.env.VITE_API
+	const API:string = import.meta.env.VITE_API
 		
 	const {tickerData, getUserData, userData} = useOutletContext<OutletType>();
 	

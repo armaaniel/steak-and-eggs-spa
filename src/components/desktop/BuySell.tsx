@@ -4,7 +4,7 @@ import type { Position }  from '../../types.ts'
 import { NumericFormat } from 'react-number-format'
 import '../../stylesheets/desktop/buysell.css'
 import type { NumberFormatValues } from 'react-number-format';
-import type {Price}  from '../../types.ts'
+import type {Price, Error}  from '../../types.ts'
 
 
 
@@ -29,11 +29,11 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}: P
 			
   const [currentState, setCurrentState] = useState({ action: "buy", step: 1 });
   
-  const API = import.meta.env.VITE_API
+  const API:String = import.meta.env.VITE_API
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [error, setError] = useState<null | string>(null)
+  const [error, setError] = useState<Error>(null)
       
   const [quantity, setQuantity] = useState('');
   
@@ -51,7 +51,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}: P
   
   const free = (estimatedCost === 0) || isNaN(estimatedCost as any)
   
-  const hasInsufficientFunds = (estimatedCost > balance) || isNaN(balance as any);
+  const hasInsufficientFunds = typeof estimatedCost === 'number' && estimatedCost > Number(balance);
   
   const hasInsufficientShares = Number(quantity) > (position?.shares || 0)
   
