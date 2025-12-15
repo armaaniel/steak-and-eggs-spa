@@ -175,7 +175,7 @@ const BuySell = ({getUserData, balance, position, price, name, symbol, token}: P
 		  	</div>
 			
 		  	<div>
-		  		<p> ${toCurrency(estimatedCost)} USD </p>
+		    	<p>{price === null ? '$0.00 USD' : `$${toCurrency(estimatedCost)} USD`}</p>
 		  	</div>
 			
 		</div>
