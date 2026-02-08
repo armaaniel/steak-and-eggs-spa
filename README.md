@@ -9,7 +9,7 @@ Backend repo: [steak-and-eggs](https://github.com/armaaniel/steak-and-eggs)
 - React/TypeScript frontend subscribes to ActionCable channels via a single WebSocket connection for real-time price updates
 - Portfolio value recalculates live as prices stream in, throttled to prevent excessive re-renders
 - Graceful loading states across all data fetching and page transitions
-- All API calls return graceful fallbacks on failure so the UI never crashes
+- All API calls return graceful fallbacks on failure for graceful degradation
 - User inputs validate against available balance and share counts, disabling submission until valid
 - Debounced search with cached results from Redis on the backend
 - Multi-step buy/sell order flow with confirmation and order receipt
