@@ -94,13 +94,11 @@ function AuthForm({ mode }: AuthFormProps) {
           <div className="ls-form-container">
             <h2 className="ls-heading">{isLogin ? 'Welcome Back' : 'Sign Up'}</h2>
 
-            {error && (
-              <div className={`ls-error-container ${isSubmitting || hasTyped ? 'hidden' : 'visible'}`}>
+						<div className={`ls-error-container ${error && !isSubmitting && !hasTyped ? 'visible' : 'hidden'}`}>
                 <div className="ls-error">
                   <p className="ls-heading error">{error}</p>
                 </div>
               </div>
-            )}
 
             <form className="ls-form" onSubmit={handleSubmit}>
               <div className="ls-input-container">
