@@ -8,5 +8,5 @@ const root = createRoot(document.body)
 root.render(
   <ApolloProvider client={client}>
     <App />
-  </ApolloProvider>
+  </ApolloProvider>,
 )

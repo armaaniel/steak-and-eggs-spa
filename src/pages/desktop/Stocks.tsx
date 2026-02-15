@@ -1,291 +1,269 @@
 import '../../stylesheets/desktop/stocks.css'
 import Chart from '../../components/desktop/Chart'
-import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import PositionTable from '../../components/desktop/PositionTable'
 import BuySell from '../../components/desktop/BuySell'
-import {getConsumer} from '../../consumer.ts'
-import { toReadable, toCurrency, toPercent }  from '../../utils.ts'
-import type { TickerData, UserData, ChartData, Price, Open }  from '../../types.ts'
+import { getConsumer } from '../../consumer.ts'
+import { toReadable, toCurrency, toPercent } from '../../utils.ts'
+import type { TickerData, UserData, ChartData, Price, Open } from '../../types.ts'
 
 interface OutletType {
-	tickerData: TickerData
-	getUserData: () => Promise<void>
-	userData: UserData
+  tickerData: TickerData
+  getUserData: () => Promise<void>
+  userData: UserData
 }
 
 interface MarketData {
-	high: number | string
-	open: number | string
-	low: number | string
-	volume: number | string
+  high: number | string
+  open: number | string
+  low: number | string
+  volume: number | string
 }
 
 interface CompanyData {
-	description: string | null
-	market_cap: number | string | null
+  description: string | null
+  market_cap: number | string | null
 }
 
 function Stocks() {
-	
-	const API:string = import.meta.env.VITE_API
-		
-	const {tickerData, getUserData, userData} = useOutletContext<OutletType>();
-	
-	const exchangeNames: {[key:string]:string} = {'XNAS':'NASDAQ', 'BATS':'BATS', 'XASE':'NYSE American', 'XNYS':'NYSE', 'ARCX':'NYSE Arca'}
-	
-	let {symbol} = useParams();
-	
-	const navigate = useNavigate();
-	
-	const token = localStorage.getItem('authToken')
-		
-	const [chartData, setChartData] = useState<ChartData[]>([])
-		
-	const [marketData, setMarketData] = useState<null | MarketData>(null)
-	
-	const [companyData, setCompanyData] = useState<null | CompanyData>(null)
-	
-    const [price, setPrice] = useState<Price>(null)
-	
-	const [open, setOpen] = useState<Open>(null)
-	
-	const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000));
-	
-	const [imageLoaded, setImageLoaded] = useState(false);
-		
-	const percentChange = toPercent(price, open);
-	
-	const isPositive = Boolean(percentChange && percentChange.startsWith('+'));
-	
-	useEffect(() => {
-	    if (symbol && symbol !== symbol.toUpperCase()) {
-			symbol = symbol.toUpperCase()
-	      navigate(`/stocks/${symbol}`, { replace: true });
-	      return;
-	    }
-	}, [symbol])
-		
-	
-	useEffect(() => {
-		async function getChartData() {
-			try {				
-				const response = await fetch(`${API}/stocks/${symbol}/chartdata`, {
-					headers: {authToken: token} as HeadersInit
-				})
-				const data = await response.json()
-				setChartData(data)
-			} catch (error) {
-				const today = new Date();
-				setChartData([{date: today.toLocaleDateString(), value: 0}, {date: today.toLocaleDateString(), value: 0}]);
-			}
-		}
-		getChartData();
-	}, [symbol])
-	
-	useEffect(() => {
-		async function getCompanyData() {
-			setCompanyData(null)
-			try {
-				const response = await fetch(`${API}/stocks/${symbol}/companydata`, {
-					headers: {authToken:token} as HeadersInit
-				})
-				const data = await response.json()
-				setCompanyData(data)
-			} catch (error) {
-				setCompanyData({market_cap:'N/A', description:'N/A'})
-			}
-		}
-		getCompanyData();	
-	}, [symbol])
-	
-	useEffect(() => {
-		async function getMarketData() {
-			setMarketData(null) 
-			try {
-				const response = await fetch (`${API}/stocks/${symbol}/marketdata`, {
-					headers: {authToken: token} as HeadersInit
-				})
-				const data = await response.json()
-				setMarketData(data)
-			} catch (error) {
-				setMarketData({open:'N/A', high:'N/A', low:'N/A', volume:'N/A'})
-			} 
-		}
-		getMarketData();
-	}, [symbol])
-	
-	useEffect(() => {
-		async function getStockPrice() {
-			try {
-				const response = await fetch(`${API}/stocks/${symbol}/stockprice`, {
-					headers: {authToken: token} as HeadersInit
-				})
-				const data = await response.json();
-				setPrice(data.price)
-				setOpen(data.open)
-			} catch (error) {
-				setPrice('N/A')
-				setOpen('N/A')
-			}
-		}
-		getStockPrice();
-	}, [symbol])
-	
-	useEffect(() => {
-		const consumer = getConsumer()
-		const subscription = consumer.subscriptions.create({channel:"PriceChannel", symbol:symbol}, {
-			received(data:number) {
-				setPrice(data)
-			}
-		})
-		
-		return () => subscription.unsubscribe()
-	}, [symbol]);
-	
-	useEffect(() => {
-		const timeStamp = setInterval(() => {
-			setAsOf(new Date(Date.now() - 15 * 60 * 1000));
-		}, 15000)
-		
-		return () => clearInterval(timeStamp)
-	}, [])	
-	
-	return (
-	<>
-	<div className='stocks-left'>
-	
-	<div className='stock-plus-chart'>
-	
-	<div className='stock-heading-price'>
-	
-		<div className='stock-heading-container'>
-	
-		<div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
-		  <img src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`} 
-		    height="40" width="40" onLoad={() => setImageLoaded(true)} 
-			onError={(e) => {
-				(e.target as HTMLImageElement).src = '/fallback-logo.svg'
-				setImageLoaded(true)}}/>
-			</div>
-	
-    		<div className="stock-text">
-      		  	<p className="stock-symbol">{symbol}</p>
-      			<p className={`stock-name-two ${tickerData ? 'loaded' : ''}`}>{tickerData?.name}</p>
-   			</div>
-	
-		</div>
-				
-		<div className={`stock-price-container ${price ? 'loaded' : ''}`}>
-			<h2 className='stock-price-header'>${toCurrency(price)}</h2>
-	    	<span className='stock-price-currency'>USD</span>
-			
-			<div>
-	    		<span className='stock-price-currency'>{asOf.toLocaleTimeString()}</span>
-			</div>
-			
-			<div>
-	    		<span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{percentChange}</span>
-			</div>
-		
-		</div>
-		
-	</div>
-		
-		<div className='chart'>
-			<Chart chartData={chartData} />
-		</div>
-		
-		</div>
-		
-		{userData.position && (
-			<div className='position-two'>
-			<div className="holdings">
-				<h2> Holdings </h2>
-			</div>
-		
-			<div className='positions-table'>
-				<PositionTable position={userData.position} price={price} />
-			</div>
-			</div>
-		)}
-		
-		<div className="holdings">
-			<h2> Market Details </h2>
-		</div>
-		
-		<div className='market-data'>
-		
-			<div className='market-data-container'>
-		
-				<div>
-					<p className='data-name'>Open</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.open)}</p>
-				</div>
-		
-				<div>
-					<p className='data-name'>High</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.high)}</p>
-				</div>
-		
-				<div>
-					<p className='data-name'>Low</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.low)}</p>
-				</div>
-				
-			</div>
-			
-			<div className='market-data-container'>
-			
-				<div>
-					<p className='data-name'>Volume</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {toReadable(marketData?.volume)}</p>
-				</div>
-				
-				<div>
-					<p className='data-name'>Currency</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> USD </p>
-				</div>
-				
-				<div>
-					<p className='data-name'>Exchange</p>
-					<p className={`data-value ${marketData ? 'loaded' : ''}`}> {exchangeNames[tickerData?.exchange]}</p>
-				</div>
-				
-			
-			</div>	
-			
-			<div className='company-data'>
-			{tickerData?.ticker_type === 'CS' && (
-				<>
-				<div className='company-data-container'>
-				
-					<div>
-						<p className='data-name'>Market cap</p>
-			            <p className={`data-value ${companyData ? 'loaded' : ''}`}>{toReadable(companyData?.market_cap)}</p>
-					</div>
-					
-				</div>
-				
-				<div className='stock-description'>
-					<h2 className='holdings'>Description</h2>
-			        <p className={`data-value ${companyData ? 'loaded' : ''}`}>{companyData?.description}</p>
-				</div>
-				</>
-				)}
-			</div>		
-			
-		</div>
-					
-		
-	</div>
-	
-	<div className='stocks-right'>
-		<BuySell getUserData={getUserData} balance={userData.balance} price={price} position={userData?.position} 
-		name={tickerData?.name} symbol={symbol} token={token}/>
-	</div>
-	</>
-	)
+  let { symbol } = useParams()
+  const navigate = useNavigate()
+  const { tickerData, getUserData, userData } = useOutletContext<OutletType>()
+
+  const API: string = import.meta.env.VITE_API
+  const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
+  const token = localStorage.getItem('authToken')
+
+  const [chartData, setChartData] = useState<ChartData[]>([])
+  const [marketData, setMarketData] = useState<null | MarketData>(null)
+  const [companyData, setCompanyData] = useState<null | CompanyData>(null)
+  const [price, setPrice] = useState<Price>(null)
+  const [open, setOpen] = useState<Open>(null)
+  const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000))
+  const [imageLoaded, setImageLoaded] = useState(false)
+
+  const percentChange = toPercent(price, open)
+  const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
+
+  useEffect(() => {
+    if (symbol && symbol !== symbol.toUpperCase()) {
+      symbol = symbol.toUpperCase()
+      navigate(`/stocks/${symbol}`, { replace: true })
+      return
+    }
+  }, [symbol])
+
+  useEffect(() => {
+    async function getChartData() {
+      try {
+        const response = await fetch(`${API}/stocks/${symbol}/chartdata`, {
+          headers: { authToken: token } as HeadersInit,
+        })
+        const data = await response.json()
+        setChartData(data)
+      } catch (error) {
+        const today = new Date()
+        setChartData([
+          { date: today.toLocaleDateString(), value: 0 },
+          { date: today.toLocaleDateString(), value: 0 },
+        ])
+      }
+    }
+    getChartData()
+  }, [symbol])
+
+  useEffect(() => {
+    async function getCompanyData() {
+      setCompanyData(null)
+      try {
+        const response = await fetch(`${API}/stocks/${symbol}/companydata`, {
+          headers: { authToken: token } as HeadersInit,
+        })
+        const data = await response.json()
+        setCompanyData(data)
+      } catch (error) {
+        setCompanyData({ market_cap: 'N/A', description: 'N/A' })
+      }
+    }
+    getCompanyData()
+  }, [symbol])
+
+  useEffect(() => {
+    async function getMarketData() {
+      setMarketData(null)
+      try {
+        const response = await fetch(`${API}/stocks/${symbol}/marketdata`, {
+          headers: { authToken: token } as HeadersInit,
+        })
+        const data = await response.json()
+        setMarketData(data)
+      } catch (error) {
+        setMarketData({ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
+      }
+    }
+    getMarketData()
+  }, [symbol])
+
+  useEffect(() => {
+    async function getStockPrice() {
+      try {
+        const response = await fetch(`${API}/stocks/${symbol}/stockprice`, {
+          headers: { authToken: token } as HeadersInit,
+        })
+        const data = await response.json()
+        setPrice(data.price)
+        setOpen(data.open)
+      } catch (error) {
+        setPrice('N/A')
+        setOpen('N/A')
+      }
+    }
+    getStockPrice()
+  }, [symbol])
+
+  useEffect(() => {
+    const consumer = getConsumer()
+    const subscription = consumer.subscriptions.create(
+      { channel: 'PriceChannel', symbol: symbol },
+      {
+        received(data: number) {
+          setPrice(data)
+        },
+      },
+    )
+
+    return () => subscription.unsubscribe()
+  }, [symbol])
+
+  useEffect(() => {
+    const timeStamp = setInterval(() => {
+      setAsOf(new Date(Date.now() - 15 * 60 * 1000))
+    }, 15000)
+
+    return () => clearInterval(timeStamp)
+  }, [])
+
+  return (
+    <>
+      <div className="stocks-left">
+        <div className="stock-plus-chart">
+          <div className="stock-heading-price">
+            <div className="stock-heading-container">
+              <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
+                <img
+                  src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`}
+                  height="40"
+                  width="40"
+                  onLoad={() => setImageLoaded(true)}
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).src = '/fallback-logo.svg'
+                    setImageLoaded(true)
+                  }}
+                />
+              </div>
+
+              <div className="stock-text">
+                <p className="stock-symbol">{symbol}</p>
+                <p className={`stock-name-two ${tickerData ? 'loaded' : ''}`}>{tickerData?.name}</p>
+              </div>
+            </div>
+
+            <div className={`stock-price-container ${price ? 'loaded' : ''}`}>
+              <h2 className="stock-price-header">${toCurrency(price)}</h2>
+              <span className="stock-price-currency">USD</span>
+
+              <div>
+                <span className="stock-price-currency">{asOf.toLocaleTimeString()}</span>
+              </div>
+
+              <div>
+                <span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{percentChange}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="chart">
+            <Chart chartData={chartData} />
+          </div>
+        </div>
+
+        {userData.position && (
+          <div className="position-two">
+            <div className="holdings">
+              <h2> Holdings </h2>
+            </div>
+
+            <div className="positions-table">
+              <PositionTable position={userData.position} price={price} />
+            </div>
+          </div>
+        )}
+
+        <div className="holdings">
+          <h2> Market Details </h2>
+        </div>
+
+        <div className="market-data">
+          <div className="market-data-container">
+            <div>
+              <p className="data-name">Open</p>
+              <p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.open)}</p>
+            </div>
+
+            <div>
+              <p className="data-name">High</p>
+              <p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.high)}</p>
+            </div>
+
+            <div>
+              <p className="data-name">Low</p>
+              <p className={`data-value ${marketData ? 'loaded' : ''}`}> {toCurrency(marketData?.low)}</p>
+            </div>
+          </div>
+
+          <div className="market-data-container">
+            <div>
+              <p className="data-name">Volume</p>
+              <p className={`data-value ${marketData ? 'loaded' : ''}`}> {toReadable(marketData?.volume)}</p>
+            </div>
+
+            <div>
+              <p className="data-name">Currency</p>
+              <p className={`data-value ${marketData ? 'loaded' : ''}`}> USD </p>
+            </div>
+
+            <div>
+              <p className="data-name">Exchange</p>
+              <p className={`data-value ${marketData ? 'loaded' : ''}`}> {exchangeNames[tickerData?.exchange]}</p>
+            </div>
+          </div>
+
+          <div className="company-data">
+            {tickerData?.ticker_type === 'CS' && (
+              <>
+                <div className="company-data-container">
+                  <div>
+                    <p className="data-name">Market cap</p>
+                    <p className={`data-value ${companyData ? 'loaded' : ''}`}>{toReadable(companyData?.market_cap)}</p>
+                  </div>
+                </div>
+
+                <div className="stock-description">
+                  <h2 className="holdings">Description</h2>
+                  <p className={`data-value ${companyData ? 'loaded' : ''}`}>{companyData?.description}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="stocks-right">
+        <BuySell getUserData={getUserData} balance={userData.balance} price={price} position={userData?.position} name={tickerData?.name} symbol={symbol} token={token} />
+      </div>
+    </>
+  )
 }
 
-export default Stocks;
+export default Stocks
