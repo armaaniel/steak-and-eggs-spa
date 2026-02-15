@@ -28,8 +28,8 @@ function Stocks() {
 
   const API: string = import.meta.env.VITE_API
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
-  const token = localStorage.getItem('authToken')
-
+	
+	const [token, setToken] = useState(localStorage.getItem('authToken'))
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
   const [userData, setUserData] = useState<UserData | null>(null)
@@ -54,6 +54,7 @@ function Stocks() {
       if (response.status === 401) {
         localStorage.removeItem('authToken')
         resetConsumer()
+				setToken(null)
         return
       }
       const data = await response.json()
@@ -88,6 +89,7 @@ function Stocks() {
         } else if (tickerResponse.status === 401) {
           localStorage.removeItem('authToken')
           resetConsumer()
+					setToken(null)
         } else {
           setTickerNotFound(true)
         }
@@ -107,6 +109,7 @@ function Stocks() {
 	      if (response.status === 401) {
 	        localStorage.removeItem('authToken')
 	        resetConsumer()
+					setToken(null)
 	        return
 	      }
         const data = await response.json()
@@ -132,6 +135,7 @@ function Stocks() {
 	      if (response.status === 401) {
 	        localStorage.removeItem('authToken')
 	        resetConsumer()
+					setToken(null)
 	        return
 	      }
         const data = await response.json()
@@ -153,6 +157,7 @@ function Stocks() {
 	      if (response.status === 401) {
 	        localStorage.removeItem('authToken')
 	        resetConsumer()
+					setToken(null)
 	        return
 	      }
         const data = await response.json()
@@ -173,6 +178,7 @@ function Stocks() {
 	      if (response.status === 401) {
 	        localStorage.removeItem('authToken')
 	        resetConsumer()
+					setToken(null)
 	        return
 	      }
         const data = await response.json()

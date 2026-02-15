@@ -25,8 +25,8 @@ interface ChartData {
 
 function Home() {
   const API: string = import.meta.env.VITE_API
-  const token = localStorage.getItem('authToken')
 
+	const [token, setToken] = useState(localStorage.getItem('authToken'))
   const [portfolio, setPortfolio] = useState<Portfolio | undefined>(undefined)
   const [prices, setPrices] = useState<Prices>({})
   const [chartData, setChartData] = useState<ChartData[]>([])
@@ -46,6 +46,7 @@ function Home() {
       } else if (response.status === 401) {
         localStorage.removeItem('authToken')
         resetConsumer()
+				setToken(null)
       } else {
         const data = await response.json()
         setPortfolio(data)
@@ -63,10 +64,11 @@ function Home() {
       const response = await fetch(`${API}/portfoliochart`, {
         headers: { authToken: token },
       })
-
       if (response.status === 401) {
         localStorage.removeItem('authToken')
         resetConsumer()
+				setToken(null)
+				return
       }
       const data = await response.json()
       setChartData(data)
