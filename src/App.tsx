@@ -30,9 +30,7 @@ function App() {
 
         <Route path="/activity" element={<Activity />} />
 
-        <Route element={<Stock />}>
-          <Route path="/stocks/:symbol" element={<Stocks />} />
-        </Route>
+        <Route path="/stocks/:symbol" element={<Stocks />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
