@@ -6,7 +6,7 @@
     max-height: 375px;
     overflow-y: auto;
 		opacity:0;
-		transition: 80ms opacity;
+		transition: 80ms opacity ease-in;
 }
 
 .positions-table.loaded {

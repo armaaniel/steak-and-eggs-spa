@@ -191,7 +191,7 @@ function Stocks() {
               <h2> Holdings </h2>
             </div>
 
-            <div className="positions-table">
+            <div className="positions-table loaded">
               <PositionTable position={userData.position} price={price} />
             </div>
           </div>
