@@ -31,12 +31,12 @@
 
 .portfolio-row-two {
 	opacity:0;
-	transition:opacity 80ms;
+	transition:opacity 80ms ease-in;
 }
 
 .portfolio-row-two.loaded {
 	opacity:1;
-	transition:opacity 80ms;
+	transition:opacity 80ms ease-in;
 }
 
 .portfolio-row-two:hover {
