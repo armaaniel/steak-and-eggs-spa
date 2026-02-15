@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 
 const httpLink = createHttpLink({
-  uri: 'http://steakneggs-prod.eba-fjpi7jhr.us-west-1.elasticbeanstalk.com/graphql',
+  uri: 'https://steakneggs-prod.eba-fjpi7jhr.us-west-1.elasticbeanstalk.com/graphql',
 });
 
 const client = new ApolloClient({
