@@ -146,7 +146,8 @@ function Home() {
               <h2 className="holdings"> Holdings </h2>
             </div>
 
-            <div className="positions-table">{portfolio && <PositionsTable positions={portfolio?.positions} prices={prices} error={error} />}</div>
+            <div className={`positions-table ${portfolio ? 'loaded' : ''}`}>
+							<PositionsTable positions={portfolio?.positions} prices={prices} error={error} />}</div>
           </div>
         </div>
 

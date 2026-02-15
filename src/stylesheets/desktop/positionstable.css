@@ -5,6 +5,13 @@
 	background:white;
     max-height: 375px;
     overflow-y: auto;
+		opacity:0;
+		transition: 80ms opacity;
+}
+
+.positions-table.loaded {
+	opacity: 1;
+	transition: 80ms opacity;
 }
 
 .portfolio {
@@ -31,12 +38,12 @@
 
 .portfolio-row-two {
 	opacity:0;
-	transition:opacity 150ms;
+	transition:opacity 80ms;
 }
 
 .portfolio-row-two.loaded {
 	opacity:1;
-	transition:opacity 150ms;
+	transition:opacity 80ms;
 }
 
 .portfolio-row-two:hover {
