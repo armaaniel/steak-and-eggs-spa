@@ -18,7 +18,7 @@ const PositionsTable = ({ positions, prices, error }: Props) => {
            <th className="quantity-header-one">Positions</th>
            <th className="quantity-header-one">Total Value</th>
            <th className="quantity-header-one">Average Price</th>
-           <th className="quantity-header-one">Today's Price</th>
+           <th className="quantity-header-one">Current Price</th>
            <th className="quantity-header-one">Unrealized PnL</th>
          </tr>
        </thead>

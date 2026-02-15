@@ -86,7 +86,7 @@ function Activity() {
 	<>
 	
 	<header>
-		<Navbar/>
+		<Navbar />
 	</header>
 	
 	<main className='home-activity'>

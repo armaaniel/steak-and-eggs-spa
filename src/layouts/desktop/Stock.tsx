@@ -85,7 +85,7 @@ function Stock() {
 		return (
 		
 		<header>
-		<Navbar />
+			<Navbar />
 		</header>
 		)
 	}
@@ -95,7 +95,7 @@ function Stock() {
 		<>
 		
 		<header>
-		<Navbar />
+			<Navbar/>
 		</header>
 		
 		<main className='home'>
@@ -111,7 +111,7 @@ function Stock() {
 	
 	<>
 	<header>
-	<Navbar />
+		<Navbar/>
 	</header>
 	
 	<main className='home'>

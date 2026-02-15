@@ -8,8 +8,14 @@ import Signup from './pages/desktop/Signup'
 import Stocks from './pages/desktop/Stocks'
 import Activity from './pages/desktop/Activity'
 import HowItWorks from './pages/desktop/HowItWorks'
+import AllRoutes from './pages/desktop/AllRoutes'
+import Endpoint from './pages/desktop/Endpoint'
+import Cache from './pages/desktop/Cache'
+import Latent from './pages/desktop/Latent'
+import Connections from './pages/desktop/Connections'
+import DCSummary from './layouts/desktop/DCSummary'
+import DCList from './layouts/desktop/DCList'
 import NotFound from './pages/desktop/NotFound'
-
 
 
 function App() {
@@ -33,6 +39,17 @@ function App() {
 			
 	  		<Route path ='/login' element={<Login />} />
 	  		<Route path ='/signup' element={<Signup />} />
+			
+			<Route element={<DCSummary/>}>
+			<Route path='/datacat' element={<AllRoutes />} />
+			</Route>
+			
+			<Route element={<DCList/>}>
+			<Route path='/datacat/:method/*' element={<Endpoint />} />
+			<Route path='/datacat/cache/:method/*' element={<Cache />} />
+			<Route path ='/datacat/latent/' element={<Latent />} />
+			<Route path ='/datacat/connections/' element={<Connections />} />
+			</Route>
 			
 	        <Route path="*" element={<NotFound />} />
 			

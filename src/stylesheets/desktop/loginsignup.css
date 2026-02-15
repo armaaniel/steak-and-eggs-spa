@@ -8,6 +8,13 @@
 .ls-error-container {
 	display:flex;
 	justify-content:center;
+	opacity:1;
+	transition: opacity 150ms;
+}
+
+.ls-error-container.hidden {
+	opacity:0;
+	transition:opacity 150ms;
 }
 
 .ls-error {

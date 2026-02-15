@@ -12,7 +12,6 @@ import Navbar from '../../components/desktop/Navbar'
 import { Navigate } from 'react-router-dom'
 import type { Positions, Prices, Error }  from '../../types.ts'
 
-
 interface Portfolio {
 	aum: string | number
 	balance: string
@@ -25,7 +24,7 @@ interface ChartData{
 }
 
 function Home() {
-	
+		
 	const API:string = import.meta.env.VITE_API
 		
 	const [portfolio, setPortfolio] = useState<Portfolio | undefined>(undefined)

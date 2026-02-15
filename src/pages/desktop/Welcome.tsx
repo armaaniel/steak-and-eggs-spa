@@ -6,6 +6,8 @@ function Welcome() {
 	
 	return (
 	
+	<>
+	
 	<div className='welcome-main-desktop'>	
 	
 		<h1 className='welcome-heading-desktop'> The best place to paper trade </h1>
@@ -19,6 +21,11 @@ function Welcome() {
 		</div>
 	
 	</div>
+	
+	
+	
+	
+	</>
 	
 	
 	

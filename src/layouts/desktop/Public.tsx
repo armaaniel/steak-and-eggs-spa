@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import '../../stylesheets/desktop/public.css'
 
 function Public() {
-	
+		
 	const token = localStorage.getItem('authToken')
+	
 	
 	return (
 	
@@ -25,6 +26,16 @@ function Public() {
 		</svg>
 		</Link>
 		
+		<Link to="/datacat" className='nav-text' state={{authBoolean:false}}>
+			<span>DataCat (APM)</span>
+		</Link>
+		
+		<a href="https://github.com/armaaniel" className="nav-text" target="_blank" rel="noopener noreferrer">
+		  <span>Github</span>
+		</a>
+		
+		
+				
 		
 	</div>
 	

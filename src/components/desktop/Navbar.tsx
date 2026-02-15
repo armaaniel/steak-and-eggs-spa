@@ -1,15 +1,13 @@
-import { useNavigate, NavLink, Link } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import Searchbar from '../../components/desktop/Searchbar'
 import {resetConsumer} from '../../consumer.ts'
 
 function Navbar() {
 	
-	const navigate = useNavigate();
-	
+		
 	const handleLogout = () => {
 		localStorage.removeItem('authToken');
 		resetConsumer();
-		navigate('/');
 	}
 	
 	return (
@@ -35,6 +33,10 @@ function Navbar() {
 	
 			<NavLink to="/activity" className='nav-auth-text'>
 				<span>Activity</span>
+			</NavLink>
+			
+			<NavLink to="/datacat" className='nav-auth-text' state={{authBoolean:true}}>
+				<span>DataCat</span>
 			</NavLink>
 		</div>
 	
