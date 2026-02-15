@@ -277,7 +277,7 @@ function Stocks() {
               </div>
               <div>
                 <p className="data-name">Exchange</p>
-                <p className={`data-value ${marketData ? 'loaded' : ''}`}>{exchangeNames[tickerData?.exchange]}</p>
+                <p className={`data-value ${marketData ? 'loaded' : ''}`}>{exchangeNames[tickerData?.exchange ?? '']}</p>
               </div>
             </div>
 

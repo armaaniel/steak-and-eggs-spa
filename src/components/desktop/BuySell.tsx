@@ -8,10 +8,10 @@ import type { Price, Error } from '../../types.ts'
 
 interface Props {
   getUserData: () => Promise<void>
-  balance: string
+  balance: string | undefined
   position: Position | undefined
   price: Price
-  name: string
+  name: string | undefined
   symbol: string | undefined
   token: string | null
 }

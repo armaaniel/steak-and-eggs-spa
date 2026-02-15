@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Welcome from './pages/desktop/Welcome'
 import Public from './layouts/desktop/Public'
-import Stock from './layouts/desktop/Stock'
 import Login from './pages/desktop/Login'
 import Home from './pages/desktop/Home'
 import Signup from './pages/desktop/Signup'
