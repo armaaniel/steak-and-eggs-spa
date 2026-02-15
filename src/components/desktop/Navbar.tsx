@@ -39,7 +39,7 @@ function Navbar() {
             <span>Activity</span>
           </NavLink>
 
-          <NavLink to="/datacat" className="nav-auth-text" state={{ authBoolean: true }}>
+          <NavLink to="/datacat" className="nav-auth-text">
             <span>DataCat</span>
           </NavLink>
         </div>

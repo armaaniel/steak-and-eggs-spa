@@ -1,16 +1,13 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import Sidebar from '../../components/desktop/Sidebar'
 import DCNavbar from '../../components/desktop/DCNavbar'
 import '../../stylesheets/desktop/datacat.css'
 
 function DCSummary() {
-  const location = useLocation()
-
-  const authBoolean = location.state?.authBoolean as boolean | undefined
-
+	
   return (
     <>
-      <DCNavbar authBoolean={authBoolean} />
+      <DCNavbar />
 
       <div className="dc-home-parent">
         <div className="dc-home-left">

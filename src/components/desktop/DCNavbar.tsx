@@ -1,6 +1,9 @@
 import { NavLink } from 'react-router-dom'
 
-const DCNavbar = ({ authBoolean }: { authBoolean?: boolean }) => {
+const DCNavbar = () => {
+	
+	const authBoolean = !!localStorage.getItem('authToken')
+	
   return (
     <div className="navbar">
       <NavLink to="/datacat" className="catlas-text">
