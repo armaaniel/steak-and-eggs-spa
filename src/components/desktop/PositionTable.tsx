@@ -8,9 +8,9 @@ interface Props {
 }
 
 const PositionTable = ({ position, price }: Props) => {
-	const value = price != null ? Number(price) * Number(position.shares) : 0
-	const pnl = price != null ? (Number(price) - Number(position.average_price)) * Number(position.shares) 
-	: 0  const pnlChange = toPercent(price, position.average_price)
+	const value = price != null ? Number(price) * Number(position.shares) : null
+	const pnl = price != null ? (Number(price) - Number(position.average_price)) * Number(position.shares) : null 
+	const pnlChange = toPercent(price, position.average_price)
   const pnlIsPositive = Boolean(pnlChange && pnlChange.startsWith('+'))
 
   return (
@@ -36,7 +36,7 @@ const PositionTable = ({ position, price }: Props) => {
                 }}
               />
               <div className="stock-text">
-                <p className="stock-symbol">${toCurrency(value)} </p>
+                <p className="stock-symbol">{value != null ? `$${toCurrency(value)}` : ''}</p>
                 <p key={position.shares} className="stock-shares">
                   {position.shares} shares
                 </p>
@@ -55,7 +55,7 @@ const PositionTable = ({ position, price }: Props) => {
           <td className="shares-cell">
             <div className="symbol-name">
               <div className="stock-text">
-                <p className="stock-name">${toCurrency(pnl)}</p>
+                <p className="stock-name">${pnl != null ? `$${toCurrency(pnl)}`:''}</p>
                 <p className={`stock-name ${pnlIsPositive ? 'positive' : 'negative'}`}>{toPercent(price, position.average_price)}</p>
               </div>
             </div>
