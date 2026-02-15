@@ -147,9 +147,10 @@ function Home() {
             </div>
 
             <div className={`positions-table ${portfolio ? 'loaded' : ''}`}>
-							<PositionsTable positions={portfolio?.positions} prices={prices} error={error} />}</div>
-          </div>
-        </div>
+							<PositionsTable positions={portfolio?.positions} prices={prices} error={error}/>
+						</div>
+					</div>
+			 	</div>
 
         <div className="home-right">
           <div className="balance-container">
