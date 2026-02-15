@@ -48,6 +48,7 @@ function Endpoint() {
     { key: 'controllerMethod', label: 'Controller Method', sortable: false, render: (trace) => `${trace.controller}#${trace.action}` },
     { key: 'status', label: 'Status', sortable: false, render: (trace) => trace.status },
   ]
+  
   const traceList = data?.traceList || []
   const statuses = [...new Set(traceList.map((trace) => trace.status))]
   const filteredTraces = statusFilter === 'all' ? traceList : traceList.filter((trace) => String(trace.status) === statusFilter)

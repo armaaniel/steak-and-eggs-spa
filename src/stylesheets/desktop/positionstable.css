@@ -3,18 +3,17 @@
 	border-radius:1rem;
 	padding:0rem 1rem;
 	background:white;
-    max-height: 375px;	
+    max-height: 375px;
     overflow-y: auto;
 }
 
 .portfolio {
 	width:100%;
 	font-family:avenir;
-	border-collapse:separate;	
+	border-collapse:separate;
 	background-color:white;
-	border-spacing: 0 16px;	
+	border-spacing: 0 16px;
 }
-
 
 .portfolio th {
 	border-bottom:1px solid rgb(228, 226, 225);
@@ -24,12 +23,10 @@
 
 .shares-cell {
 	border-radius:0px;
-	
 }
 
 .portfolio-row:hover {
 	background-color:#F5F5F5;
-		
 }
 
 .symbol-name {
@@ -40,7 +37,7 @@
    align-items: center;
    color:inherit;
    padding:8px;
-   cursor:pointer;  
+   cursor:pointer;
 }
 
 .stock-symbol {
@@ -69,7 +66,6 @@ font-family:avenir;
 color:rgb(97, 94, 92);
 font-family:avenir;
 animation: fadeIn 100ms ease-out;
-
 }
 
 .heading-row {
@@ -82,15 +78,8 @@ animation: fadeIn 100ms ease-out;
 .quantity-header:nth-child(2){width:29%;}
 .quantity-header:nth-child(3){width:29%;}
 
-
-
-
 .quantity-header-one:nth-child(1){width:47.5%;}
 .quantity-header-one:nth-child(2){width:15%;}
 .quantity-header-one:nth-child(3){width:12.5%;}
 .quantity-header-one:nth-child(4){width:12.5%;}
 .quantity-header-one:nth-child(5){width:12.5%;}
-
-
-
-

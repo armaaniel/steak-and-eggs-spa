@@ -10,7 +10,7 @@
 	column-gap:0.5rem;
 }
 
-.add-withdraw-button {	
+.add-withdraw-button {
 	font-family:Avenir;
 	font-weight:600;
 	padding:1.75rem;
@@ -22,16 +22,13 @@
 	background-color:white;
 	width:100%;
 	color:rgb(50, 48, 47);
-	
 }
-
 
 .add-withdraw-button:hover {
     box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px 0px, rgba(0, 0, 0, 0.1) 0px 3px 8px 0px;
 }
 
 .background-overlay {
-	
 	position:fixed;
 	top:0;
 	left:0;
@@ -39,7 +36,6 @@
 	bottom:0;
 	z-index:1000;
     background-color: rgba(0, 0, 0, 0.48);
-	
 }
 
 .modal-dialog {
@@ -53,13 +49,11 @@
 	background-color: white;
 	border-radius:1rem;
 	width:100%;
-	max-width:550px;	
+	max-width:550px;
 	min-height:50vh;
 	max-height:70vh;
-	
 	padding:2rem;
 	font-family:avenir;
-		
 }
 
 .modal-form {
@@ -79,7 +73,7 @@
 }
 
 .close-button:hover {
-  background-color: #e0e0e0; 
+  background-color: #e0e0e0;
 }
 
 .modal-amount-container {
@@ -88,7 +82,6 @@
 	flex:1;
 	position:relative;
 	justify-content:center;
-	
 }
 
 .modal-submit {
@@ -103,11 +96,6 @@
 	transform-origin:left top;
 	left:16px;
 	top:8px;
-	
-}
-
-.modal-currency {
-	padding:28px 16px 8px 4px;
 }
 
 .modal-amount-container-two {
@@ -123,14 +111,11 @@
 	align-items:center;
 	position:relative;
     font-family: BlinkMacSystemFont;
-	
 }
 
 .modal-dollar {
 	padding:28px 4px 8px 16px;
 }
-
-
 
 .modal-amount-input {
 	padding:28px 4px 8px 0px;
@@ -158,7 +143,6 @@
 	width:37.75%;
 	border:1px solid;
 	transition:0.2s all
-	
 }
 
 .aw-submit:hover {
@@ -172,6 +156,3 @@
 .insufficient {
 	animation:fadeIn 100ms ease-in;
 }
-
-
-

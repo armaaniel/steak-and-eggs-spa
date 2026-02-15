@@ -18,13 +18,4 @@
 	width:25%;
 	display:flex;
 	justify-content:center;
-	
-}
-
-.gh {
-	display:flex;
-	justify-content:end;
-	position:absolute;
-	bottom:2.5rem;
-	right:2.5rem;
 }

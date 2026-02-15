@@ -7,8 +7,7 @@
 	display:flex;
 	flex-direction:column;
 	width:400px;
-	row-gap:2rem;	
-		
+	row-gap:2rem;
 }
 
 .home-left {
@@ -18,13 +17,14 @@
 	row-gap:1.5rem;
     animation: fadeIn 80ms ease-in;
 }
+
 .chart {
 	height:36vh;
 }
 
 .portfolio-value {
 	font-family:Avenir;
-	color:rgb(50, 48, 47);	
+	color:rgb(50, 48, 47);
 	opacity:0;
 	transition:80ms opacity ease-in;
 }
@@ -44,12 +44,12 @@
 	opacity:1;
 }
 
-.port-value {	
+.port-value {
 	display:flex;
 }
 
 .holdings {
-	font-family:Avenir;	
+	font-family:Avenir;
 }
 
 .balance-container {
@@ -59,7 +59,7 @@
 	box-shadow:rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
 	border-radius:1rem;
 	background-color:white;
-	font-family:avenir;	
+	font-family:avenir;
 }
 
 .recharts-default-tooltip {
@@ -85,14 +85,13 @@
 		flex-direction:column;
 		row-gap:2rem;
 	}
-	
+
 	.nav-auth {
 		flex-direction:column;
 		row-gap:0.5rem;
 	}
-	
+
 	.home-right {
 		row-gap:1rem;
 	}
 }
-

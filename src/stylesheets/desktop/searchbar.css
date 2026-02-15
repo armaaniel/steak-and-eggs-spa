@@ -4,7 +4,6 @@
 	background-color:#fcfcfc;
 	border:1px solid rgb(228, 226, 225);
 	position:relative;
-
 }
 
 .nav-search-div:hover {
@@ -15,7 +14,6 @@
 	border-color:rgb(50, 48, 47);
 	outline:1px solid rgb(50, 48, 47);
 }
-
 
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
@@ -28,7 +26,6 @@ input[type="search"]::-webkit-search-cancel-button {
 	align-items:center;
 	padding:0px 8px 0px 12px;
 }
-
 
 .search-results-container {
 	display:flex;
@@ -46,7 +43,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .search-input-container {
-	flex:1;	
+	flex:1;
 	position:relative;
 	display:flex;
 	flex-direction:row;
@@ -55,7 +52,6 @@ input[type="search"]::-webkit-search-cancel-button {
 .search-input-container:focus-within label {
 	top:7px;
 	transform: scale3d(0.777778, 0.777778, 1);
-	
 }
 
 .search-input {
@@ -64,9 +60,8 @@ input[type="search"]::-webkit-search-cancel-button {
 	border:none;
 	outline:none;
 	flex:1;
-	border-radius:0.75rem;	
+	border-radius:0.75rem;
 }
-
 
 .search-label {
 	position:absolute;
@@ -89,18 +84,16 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .search-results {
     list-style-type: none;
-	
 }
 
 .search-result-item {
 	font-family:BlinkMacSystemFont;
 	font-weight:400;
-	
 }
+
 .search-result-item:hover {
 	background-color:#F5F5F5;
     cursor: pointer;
-	
 }
 
 .search-link-text {
@@ -115,9 +108,4 @@ input[type="search"]::-webkit-search-cancel-button {
 	font-weight:400;
 	padding:1rem;
 	color:rgb(64,68,82);
-	
 }
-	
-
-
-

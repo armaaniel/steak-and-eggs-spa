@@ -5,12 +5,13 @@
 	row-gap:1.5rem;
     animation: fadeIn 80ms ease-in;
 }
+
 .stocks-right {
 	display:flex;
 	flex-direction:column;
 	width:400px;
-	row-gap:2rem;	
-    animation: fadeIn 50ms ease-in;		
+	row-gap:2rem;
+    animation: fadeIn 50ms ease-in;
 }
 
 .image-container {
@@ -26,7 +27,7 @@
 	display:flex;
 	column-gap:0.5rem;
 	align-items:center;
-	padding:8px 8px 6px 8px;	
+	padding:8px 8px 6px 8px;
 }
 
 .stock-heading-price {
@@ -63,11 +64,6 @@ opacity:0;
 	color:#4A7812
 }
 
-
-.stock-percent.loaded {
-	opacity:1;
-}
-
 .stock-name-two.loaded {
 	opacity:1;
 }
@@ -75,7 +71,7 @@ opacity:0;
 .position {
 	display:flex;
 	flex-direction:column;
-	row-gap:1rem;		
+	row-gap:1rem;
 }
 
 .position-two {
@@ -83,7 +79,6 @@ opacity:0;
 	flex-direction:column;
 	row-gap:1rem;
     animation: fadeIn 100ms ease-in;
-	
 }
 
 .market-data {
@@ -107,7 +102,7 @@ opacity:0;
 }
 
 .data-name {
-	font-family:futura;	
+	font-family:futura;
 }
 
 .data-value {
@@ -135,4 +130,3 @@ opacity:0;
 	flex-direction:column;
 	row-gap:1.5rem;
 }
-

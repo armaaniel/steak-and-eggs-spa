@@ -57,7 +57,6 @@
 	display:flex;
 }
 
-
 .sidebar-button-container {
 	padding-left:0.5rem;
 	row-gap:0.5rem;
@@ -86,16 +85,10 @@
 	opacity:1;
 }
 
-.datacat-header {
-	font-family:BlinkMacSystemFont;
-	font-weight:700;
-	color:rgb(50,48,47);
-}
-
-.dc-cell {	
+.dc-cell {
 	padding:1rem 1rem;
 	border-bottom:1px solid rgb(233,236,239);
-	cursor:pointer;	
+	cursor:pointer;
 }
 
 .dc-table {
@@ -104,15 +97,17 @@
 	table-layout: fixed;
 }
 
-.dc-cell:nth-child(1) { 
-	width: 60%; 
-} 
-.dc-cell:nth-child(2) { 
-	width: 20%; 
-} 
-.dc-cell:nth-child(3) { 
-	width: 20%; 
-} 
+.dc-cell:nth-child(1) {
+	width: 60%;
+}
+
+.dc-cell:nth-child(2) {
+	width: 20%;
+}
+
+.dc-cell:nth-child(3) {
+	width: 20%;
+}
 
 .dc-pagination-container {
 	display:flex;
@@ -161,30 +156,29 @@
 	text-align:left;
 	font-family:BlinkMacSystemFont;
 	color:rgb(64,68,82);
-	font-weight:400;	
+	font-weight:400;
 }
 
 .dc-row:hover {
 	background-color:#EAECEF;
-	
 }
+
 .trace-details {
 	display:flex;
 	flex-direction:column;
 	row-gap:0.75rem;
 	font-family:BlinkMacSystemFont;
 	color:rgb(64,68,82);
-	font-weight:400;		
+	font-weight:400;
 }
 
 .trace-breakdown {
-	
 	font-family:BlinkMacSystemFont;
 	color:rgb(64,68,82);
 	font-weight:400;
 	display:flex;
 	flex-direction:column;
-	row-gap:10px;		
+	row-gap:10px;
 }
 
 .dc-back-button {
