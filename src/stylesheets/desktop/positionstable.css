@@ -6,12 +6,12 @@
     max-height: 375px;
     overflow-y: auto;
 		opacity:0;
-		transition: 100ms opacity ease-in;
+		transition: 150ms opacity ease-in;
 }
 
 .positions-table.loaded {
 	opacity: 1;
-	transition: 100ms opacity ease-in;
+	transition: 150ms opacity ease-in;
 }
 
 .portfolio {
