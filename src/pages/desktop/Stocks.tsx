@@ -104,6 +104,11 @@ function Stocks() {
         const response = await fetch(`${API}/stocks/${symbol}/chartdata`, {
           headers: { authToken: token } as HeadersInit,
         })
+	      if (response.status === 401) {
+	        localStorage.removeItem('authToken')
+	        resetConsumer()
+	        return
+	      }
         const data = await response.json()
         setChartData(data)
       } catch (error) {
@@ -124,6 +129,11 @@ function Stocks() {
         const response = await fetch(`${API}/stocks/${symbol}/companydata`, {
           headers: { authToken: token } as HeadersInit,
         })
+	      if (response.status === 401) {
+	        localStorage.removeItem('authToken')
+	        resetConsumer()
+	        return
+	      }
         const data = await response.json()
         setCompanyData(data)
       } catch (error) {
@@ -140,6 +150,11 @@ function Stocks() {
         const response = await fetch(`${API}/stocks/${symbol}/marketdata`, {
           headers: { authToken: token } as HeadersInit,
         })
+	      if (response.status === 401) {
+	        localStorage.removeItem('authToken')
+	        resetConsumer()
+	        return
+	      }
         const data = await response.json()
         setMarketData(data)
       } catch (error) {
@@ -155,6 +170,11 @@ function Stocks() {
         const response = await fetch(`${API}/stocks/${symbol}/stockprice`, {
           headers: { authToken: token } as HeadersInit,
         })
+	      if (response.status === 401) {
+	        localStorage.removeItem('authToken')
+	        resetConsumer()
+	        return
+	      }
         const data = await response.json()
         setPrice(data.price)
         setOpen(data.open)
