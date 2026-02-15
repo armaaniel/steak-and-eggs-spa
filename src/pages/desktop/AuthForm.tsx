@@ -3,26 +3,50 @@ import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import '../../stylesheets/desktop/loginsignup.css'
 
-function Login() {
-  const navigate = useNavigate()
+interface AuthFormProps {
+  mode: 'login' | 'signup'
+}
 
+function AuthForm({ mode }: AuthFormProps) {
+  const navigate = useNavigate()
   const API: string = import.meta.env.VITE_API
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<null | string>(null)
-	const [hasTyped, setHasTyped] = useState(false)
+  const [hasTyped, setHasTyped] = useState(false)
+
+  const isLogin = mode === 'login'
+
+  const validateUsername = (username: string) => {
+    if (username.length > 20) return 'Username must be 20 characters or less'
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) return 'Username can only contain letters, numbers, and underscores'
+    return null
+  }
+
+  const validatePassword = (password: string) => {
+    if (password.length === 0) return 'Password must contain at least 1 character'
+    return null
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setHasTyped(false)
+		
+    if (!isLogin) {
+      const usernameError = validateUsername(username)
+      const passwordError = validatePassword(password)
+      if (usernameError) { setError(usernameError); return }
+      if (passwordError) { setError(passwordError); return }
+    }
+
     try {
-			setHasTyped(false)
       setIsSubmitting(true)
-      const response = await fetch(`${API}/login`, {
+      const response = await fetch(`${API}/${mode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username, password: password }),
+        body: JSON.stringify({ username, password }),
       })
 
       if (response.ok) {
@@ -31,9 +55,9 @@ function Login() {
         navigate('/home')
       } else {
         const errorData = await response.json()
-				setError(errorData.error)
+        setError(errorData.error)
       }
-    } catch (error) {
+    } catch {
       setError('Something went wrong, please try again')
     } finally {
       setIsSubmitting(false)
@@ -42,7 +66,7 @@ function Login() {
 
   return (
     <div className="ls-desktop">
-      <div className="login-left">
+      <div className='ls-left'>
         <div className="ls-logo-desktop">
           <Link to="/">
             <svg viewBox="0 0 364 224" xmlns="http://www.w3.org/2000/svg" className="logo-desktop" aria-label="Steak & Eggs logo">
@@ -68,7 +92,7 @@ function Login() {
       <div className="ls-right">
         <div className="ls-container">
           <div className="ls-form-container">
-            <h2 className="ls-heading"> Welcome Back </h2>
+            <h2 className="ls-heading">{isLogin ? 'Welcome Back' : 'Sign Up'}</h2>
 
             {error && (
               <div className={`ls-error-container ${isSubmitting || hasTyped ? 'hidden' : 'visible'}`}>
@@ -85,14 +109,9 @@ function Login() {
                   name="username"
                   className="ls-input"
                   placeholder=" "
-                  onChange={(e) => {
-                    setUsername(e.target.value)
-                    setHasTyped(true)
-                  }}
+                  onChange={(e) => { setUsername(e.target.value); setHasTyped(true) }}
                 />
-                <label htmlFor="username" className="ls-label">
-                  Username
-                </label>
+                <label htmlFor="username" className="ls-label">Username</label>
               </div>
 
               <div className="ls-input-container">
@@ -101,26 +120,21 @@ function Login() {
                   name="password"
                   className="ls-input"
                   placeholder=" "
-                  onChange={(e) => {
-                    setPassword(e.target.value)
-                    setHasTyped(true)
-                  }}
+                  onChange={(e) => { setPassword(e.target.value); setHasTyped(true) }}
                 />
-                <label htmlFor="password" className="ls-label">
-                  Password
-                </label>
+                <label htmlFor="password" className="ls-label">Password</label>
               </div>
 
               <button type="submit" className="login-link signup login" disabled={isSubmitting}>
-                Log In
+                {isLogin ? 'Log In' : 'Sign Up'}
               </button>
             </form>
 
             <p className="ls-footer">
-              Don't have an account?{' '}
-              <Link to="/signup" className="ls-signup">
-                Sign Up{' '}
-              </Link>{' '}
+              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              <Link to={isLogin ? '/signup' : '/login'} className="ls-signup">
+                {isLogin ? 'Sign Up' : 'Login'}
+              </Link>
             </p>
           </div>
         </div>
@@ -129,4 +143,4 @@ function Login() {
   )
 }
 
-export default Login
+export default AuthForm

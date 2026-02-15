@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Welcome from './pages/desktop/Welcome'
 import Public from './layouts/desktop/Public'
 import Login from './pages/desktop/Login'
+import AuthForm from './pages/desktop/AuthForm'
 import Home from './pages/desktop/Home'
 import Signup from './pages/desktop/Signup'
 import Stocks from './pages/desktop/Stocks'
@@ -31,8 +32,8 @@ function App() {
 
         <Route path="/stocks/:symbol" element={<Stocks />} />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<AuthForm mode='login' key='login' />} />
+        <Route path="/signup" element={<AuthForm mode='signup' key='signup' />} />
 
         <Route element={<DCSummary />}>
           <Route path="/datacat" element={<AllRoutes />} />

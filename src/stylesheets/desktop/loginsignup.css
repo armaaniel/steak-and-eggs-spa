@@ -27,14 +27,7 @@
 	padding-right:20px;
 }
 
-.login-left {
-	width:50%;
-	height:100%;
-	display:flex;
-	background-color:#AFD8DF;
-}
-
-.signup-left {
+.ls-left {
 	width:50%;
 	height:100%;
 	display:flex;
