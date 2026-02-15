@@ -9,7 +9,16 @@
 	display:flex;
 	justify-content:center;
 	opacity:1;
-	transition: opacity 150ms;
+  transition: max-height 0.3s ease, opacity 150ms;
+	max-height:0;
+}
+
+.ls-error-container.hidden {
+	opacity:0;
+}
+
+.ls-error-container.visible {
+  max-height: 160px;
 }
 
 .ls-error {

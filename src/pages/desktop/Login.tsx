@@ -12,11 +12,12 @@ function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<null | string>(null)
+	const [hasTyped, setHasTyped] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError(null)
     try {
+			setHasTyped(false)
       setIsSubmitting(true)
       const response = await fetch(`${API}/login`, {
         method: 'POST',
@@ -71,8 +72,8 @@ function Login() {
           <div className="ls-form-container">
             <h2 className="ls-heading"> Welcome Back </h2>
 
-            {error && !isSubmitting && (
-              <div className="ls-error-container">
+            {error && (
+              <div className={`ls-error-container ${isSubmitting || hasTyped ? 'hidden' : 'visible'}`}>
                 <div className="ls-error">
                   <p className="ls-heading error">{error}</p>
                 </div>
@@ -88,7 +89,7 @@ function Login() {
                   placeholder=" "
                   onChange={(e) => {
                     setUsername(e.target.value)
-                    setError(null)
+                    setHasTyped(true)
                   }}
                 />
                 <label htmlFor="username" className="ls-label">
@@ -104,7 +105,7 @@ function Login() {
                   placeholder=" "
                   onChange={(e) => {
                     setPassword(e.target.value)
-                    setError(null)
+                    setHasTyped(true)
                   }}
                 />
                 <label htmlFor="password" className="ls-label">
