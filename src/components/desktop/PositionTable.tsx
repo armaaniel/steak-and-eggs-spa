@@ -8,9 +8,9 @@ interface Props {
 }
 
 const PositionTable = ({ position, price }: Props) => {
-  const value = parseFloat(price as any) * Number(position.shares)
-  const pnl = (parseFloat(price as any) - parseFloat(position.average_price)) * Number(position.shares)
-  const pnlChange = toPercent(price, position.average_price)
+	const value = price != null ? Number(price) * Number(position.shares) : 0
+	const pnl = price != null ? (Number(price) - Number(position.average_price)) * Number(position.shares) 
+	: 0  const pnlChange = toPercent(price, position.average_price)
   const pnlIsPositive = Boolean(pnlChange && pnlChange.startsWith('+'))
 
   return (
