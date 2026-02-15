@@ -29,6 +29,21 @@
 	background-color:#F5F5F5;
 }
 
+.portfolio-row-two {
+	opacity:0;
+	transition:opacity 150ms;
+}
+
+.portfolio-row-two.loaded {
+	opacity:1;
+	transition:opacity 150ms;
+}
+
+.portfolio-row-two:hover {
+	background-color:#F5F5F5;
+}
+
+
 .symbol-name {
 	display:flex;
   text-decoration: none;

@@ -151,11 +151,8 @@ function Stocks() {
           <div className="stock-heading-price">
             <div className="stock-heading-container">
               <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
-                <img
-                  src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`}
-                  height="40"
-                  width="40"
-                  onLoad={() => setImageLoaded(true)}
+                <img src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`}
+                  height="40" width="40" onLoad={() => setImageLoaded(true)}
                   onError={(e) => {
                     ;(e.target as HTMLImageElement).src = '/fallback-logo.svg'
                     setImageLoaded(true)

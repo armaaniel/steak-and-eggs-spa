@@ -51,7 +51,7 @@ const PositionsTable = ({ positions, prices, error }: Props) => {
           const pnlIsPositive = Boolean(pnlChange && pnlChange.startsWith('+'))
 
           return (
-            <tr key={position.symbol} className="portfolio-row">
+            <tr key={position.symbol} className="portfolio-row-two loaded">
               <td className="shares-cell">
                 <Link to={`/stocks/${position.symbol}`} className="symbol-name">
                   <img

@@ -24,19 +24,15 @@ const PositionTable = ({ position, price }: Props) => {
       </thead>
 
       <tbody>
-        <tr key={position.symbol} className="portfolio-row">
+        <tr key={position.symbol} className={`portfolio-row-two ${price != null ? 'loaded' : ''}`}>
           <td className="shares-cell">
             <div className="symbol-name">
               <img
                 src={`https://img.logo.dev/ticker/${position.symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`}
-                height="32"
-                width="32"
-                onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = '/fallback-logo.svg'
-                }}
-              />
+                height="32" width="32"
+                onError={(e) => {(e.target as HTMLImageElement).src = '/fallback-logo.svg'}}/>
               <div className="stock-text">
-                <p className="stock-symbol">{value != null ? `$${toCurrency(value)}` : ''}</p>
+                <p className="stock-symbol">{toCurrency(value)}</p>
                 <p key={position.shares} className="stock-shares">
                   {position.shares} shares
                 </p>
@@ -55,7 +51,7 @@ const PositionTable = ({ position, price }: Props) => {
           <td className="shares-cell">
             <div className="symbol-name">
               <div className="stock-text">
-                <p className="stock-name">${pnl != null ? `$${toCurrency(pnl)}`:''}</p>
+                <p className="stock-name">${toCurrency(pnl)}</p>
                 <p className={`stock-name ${pnlIsPositive ? 'positive' : 'negative'}`}>{toPercent(price, position.average_price)}</p>
               </div>
             </div>
