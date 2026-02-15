@@ -90,7 +90,7 @@ function Stock() {
           <Navbar />
         </header>
 
-        <main className="home">
+        <main className="home loaded">
           <NotFoundTwo />
         </main>
       </>
@@ -103,7 +103,7 @@ function Stock() {
         <Navbar />
       </header>
 
-      <main className="home">
+      <main className="home loaded">
         <Outlet context={{ getUserData, userData, tickerData }} />
       </main>
     </>

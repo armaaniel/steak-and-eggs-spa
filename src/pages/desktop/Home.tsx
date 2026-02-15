@@ -130,11 +130,11 @@ function Home() {
         <Navbar />
       </header>
 
-      <main className="home">
+      <main className={`home ${portfolio ? 'loaded' : ''}`}>
         <div className="home-left">
           <div className="port-value">
-            <h2 className="port-value-heading">Your Portfolio Value Is:&nbsp;</h2>
-            <h2 className={`portfolio-value ${portfolio ? 'loaded' : ''}`}>{toPortfolio(portfolio?.aum)}</h2>
+            <h2 className="portfolio-value">Your Portfolio Value Is:&nbsp;</h2>
+            <h2 className='portfolio-value'>{toPortfolio(portfolio?.aum)}</h2>
           </div>
 
           <div className="chart">
@@ -142,11 +142,11 @@ function Home() {
           </div>
 
           <div className="position">
-            <div className="holdings-div">
-              <h2 className="holdings"> Holdings </h2>
+            <div>
+              <h2 className="portfolio-value"> Holdings </h2>
             </div>
 
-            <div className={`positions-table ${portfolio ? 'loaded' : ''}`}>
+            <div className='positions-table'>
 							<PositionsTable positions={portfolio?.positions} prices={prices} error={error}/>
 						</div>
 					</div>
@@ -154,8 +154,8 @@ function Home() {
 
         <div className="home-right">
           <div className="balance-container">
-            <h2 className="balance-header">Cash:&nbsp;</h2>
-            <h2 className={`cash-balance ${portfolio ? 'loaded' : ''}`}>{toPortfolio(portfolio?.balance)}</h2>
+            <h2 className="portfolio-value">Cash:&nbsp;</h2>
+            <h2 className='portfolio-value'>{toPortfolio(portfolio?.balance)}</h2>
           </div>
 
           <div className="button-container">

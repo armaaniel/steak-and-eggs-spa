@@ -3,16 +3,9 @@
 	border-radius:1rem;
 	padding:0rem 1rem;
 	background:white;
-    max-height: 375px;
-    overflow-y: auto;
-		opacity:0;
-		transition: 100ms opacity ease-in;
-}
-
-.positions-table.loaded {
-	opacity: 1;
-	transition: 100ms opacity ease-in;
-}
+  max-height: 375px;
+  overflow-y: auto;
+	}
 
 .portfolio {
 	width:100%;
