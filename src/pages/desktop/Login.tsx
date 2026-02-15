@@ -31,9 +31,7 @@ function Login() {
         navigate('/home')
       } else {
         const errorData = await response.json()
-        setTimeout(() => {
-          setError(errorData.error)
-        }, 100)
+				setError(errorData.error)
       }
     } catch (error) {
       setError('Something went wrong, please try again')

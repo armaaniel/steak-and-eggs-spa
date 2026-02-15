@@ -12,10 +12,10 @@ function Signup() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<null | string>(null)
+	const [hasTyped, setHasTyped] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError(null)
     const usernameError = validateUsername(username)
     const passwordError = validatePassword(password)
 
@@ -30,6 +30,7 @@ function Signup() {
     }
 
     try {
+			setHasTyped(false)
       setIsSubmitting(true)
       const response = await fetch(`${API}/signup`, {
         method: 'POST',
@@ -43,9 +44,7 @@ function Signup() {
         navigate('/home')
       } else {
         const errorData = await response.json()
-        setTimeout(() => {
-          setError(errorData.error)
-        }, 100)
+				setError(errorData.error)
       }
     } catch (error) {
       setError('Something went wrong, please try again')
@@ -95,8 +94,8 @@ function Signup() {
           <div className="ls-form-container">
             <h2 className="ls-heading"> Sign Up </h2>
 
-            {error && !isSubmitting && (
-              <div className="ls-error-container">
+            {error && (
+              <div className={`ls-error-container ${isSubmitting || hasTyped ? 'hidden' : 'visible'}`}>
                 <div className="ls-error">
                   <p className="ls-heading error">{error}</p>
                 </div>
@@ -112,7 +111,7 @@ function Signup() {
                   placeholder=" "
                   onChange={(e) => {
                     setUsername(e.target.value)
-                    setError(null)
+                    setHasTyped(true)
                   }}
                 />
                 <label htmlFor="username" className="ls-label">
@@ -128,7 +127,7 @@ function Signup() {
                   placeholder=" "
                   onChange={(e) => {
                     setPassword(e.target.value)
-                    setError(null)
+                    setHasTyped(true)
                   }}
                 />
                 <label htmlFor="password" className="ls-label">
