@@ -95,9 +95,7 @@ function AuthForm({ mode }: AuthFormProps) {
             <h2 className="ls-heading">{isLogin ? 'Welcome Back' : 'Sign Up'}</h2>
 						
 						<div className={`ls-error-container ${error && !isSubmitting && !hasTyped ? 'visible' : 'hidden'}`}>
-							<div className="ls-error">
-								<p className="ls-heading error">{error}</p>
-              </div>
+							<p className="ls-heading error">{error}</p>
             </div>
 
             <form className="ls-form" onSubmit={handleSubmit}>

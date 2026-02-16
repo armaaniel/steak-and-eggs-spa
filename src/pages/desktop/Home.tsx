@@ -2,8 +2,7 @@ import '../../stylesheets/desktop/home.css'
 import '../../stylesheets/desktop/authenticated.css'
 import Chart from '../../components/desktop/Chart'
 import PositionsTable from '../../components/desktop/PositionsTable'
-import AddButton from '../../components/desktop/AddButton'
-import WithdrawButton from '../../components/desktop/WithdrawButton'
+import FundsButton from '../../components/desktop/FundsButton'
 import { useState, useEffect } from 'react'
 import { toPortfolio } from '../../utils.ts'
 import { getConsumer, resetConsumer } from '../../consumer.ts'
@@ -161,8 +160,8 @@ function Home() {
           </div>
 
           <div className="button-container">
-            <AddButton getPortfolioData={getPortfolioData} getChartData={getChartData} />
-            <WithdrawButton getPortfolioData={getPortfolioData} getChartData={getChartData} balance={portfolio?.balance} />
+            <FundsButton mode='deposit' getPortfolioData={getPortfolioData} getChartData={getChartData} />
+            <FundsButton mode='withdraw' getPortfolioData={getPortfolioData} getChartData={getChartData} balance={portfolio?.balance} />
           </div>
         </div>
       </main>

@@ -1,158 +1,128 @@
 .button-container {
-	display:flex;
-	justify-content:center;
-	gap:0.5rem;
+	display: flex;
+	justify-content: center;
+	gap: 0.5rem;
 }
 
-.modal-header {
-	display:flex;
-	align-items:baseline;
-	column-gap:0.5rem;
+.add-funds-container {
+	flex: 1;
+	min-width: 0;
 }
 
 .add-withdraw-button {
-	font-family:Avenir;
-	font-weight:600;
-	padding:1.75rem;
-    cursor: pointer;
-	border:1px solid rgb(228, 226, 225);
-    border-radius: 1rem;
-    font-size: 1rem;
-	box-shadow:rgba(0, 0, 0, 0.06) 0px 2px 6px 0px, rgba(0, 0, 0, 0.06) 0px 2px 6px 0px;
-	background-color:white;
-	width:100%;
-	color:rgb(50, 48, 47);
+	font-family: Avenir;
+	font-weight: 600;
+	padding: 1.75rem;
+	cursor: pointer;
+	border: 1px solid rgb(228, 226, 225);
+	border-radius: 1rem;
+	font-size: 1rem;
+	box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 6px 0px, rgba(0, 0, 0, 0.06) 0px 2px 6px 0px;
+	background-color: white;
+	width: 100%;
+	color: rgb(50, 48, 47);
+	transition: 0.15s all;
 }
 
 .add-withdraw-button:hover {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px 0px, rgba(0, 0, 0, 0.1) 0px 3px 8px 0px;
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px 0px, rgba(0, 0, 0, 0.1) 0px 3px 8px 0px;
 }
 
-.background-overlay {
-	position:fixed;
-	top:0;
-	left:0;
-	right:0;
-	bottom:0;
-	z-index:1000;
-    background-color: rgba(0, 0, 0, 0.48);
+.add-withdraw-button.active {
+	background-color: rgb(243, 241, 240);
+	box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.08);
+	border-color: rgb(200, 198, 197);
 }
 
-.modal-dialog {
-	display:flex;
-	flex-direction:column;
-	position:fixed;
-	top:50%;
-	left:50%;
-	transform:translate(-50%, -50%);
-	z-index: 1001;
-	background-color: white;
-	border-radius:1rem;
-	width:100%;
-	max-width:550px;
-	min-height:50vh;
-	max-height:70vh;
-	padding:2rem;
-	font-family:avenir;
+.add-funds-dropdown {
+	display: flex;
+	flex-direction: column;
+	row-gap: 0.6rem;
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
-.modal-form {
-	display:flex;
-	flex-direction:column;
-	flex:1;
+.add-funds-dropdown.open {
+	max-height: 200px;
+	padding-top: 0.75rem;
 }
 
-.close-button {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  padding:1rem;
-  border-radius:50%;
+.add-funds-input-row {
+	display: flex;
+	align-items: center;
+	border: 1px solid rgb(50, 47, 48);
+	border-radius: 0.5rem;
+	font-family: BlinkMacSystemFont;
 }
 
-.close-button:hover {
-  background-color: #e0e0e0;
+.add-funds-input-row .modal-dollar {
+	padding: 0.6rem 4px 0.6rem 12px;
 }
 
-.modal-amount-container {
-	display:flex;
-	flex-direction:column;
-	flex:1;
-	position:relative;
-	justify-content:center;
+.add-funds-input-row .modal-amount-input {
+	padding: 0.6rem 8px 0.6rem 0;
+	border: none;
+	flex: 1;
+	border-radius: 0.5rem;
+	outline: none;
+	font-size: 16px;
+	font-family: BlinkMacSystemFont;
+	font-weight: 500;
+	min-width: 0;
 }
 
-.modal-submit {
-	display:flex;
-	justify-content:center;
-	margin-bottom:0.5rem;
+.add-funds-input-row .modal-amount-input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
 }
 
-.modal-amount-label {
-	position:absolute;
-	transform:scale3d(0.777778, 0.777778, 1);
-	transform-origin:left top;
-	left:16px;
-	top:8px;
+.add-funds-dropdown .aw-submit {
+	font-size: 14px;
+	font-family: BlinkMacSystemFont;
+	font-weight: 500;
+	background: rgb(50, 48, 47);
+	border-radius: 4rem;
+	padding: 0.6rem 1rem;
+	color: white;
+	width: 100%;
+	border: 1px solid;
+	transition: 0.2s all;
+	cursor: pointer;
 }
 
-.modal-amount-container-two {
-	display:flex;
-	justify-content:center;
-}
-
-.modal-amount-container-three {
-	display:flex;
-	width:75%;
-	border:1px solid rgb(50,47,48);
-	border-radius:0.5rem;
-	align-items:center;
-	position:relative;
-    font-family: BlinkMacSystemFont;
-}
-
-.modal-dollar {
-	padding:28px 4px 8px 16px;
-}
-
-.modal-amount-input {
-	padding:28px 4px 8px 0px;
-	border:none;
-	flex:1;
-	border-radius:0.5rem;
-	outline:none;
-    font-size: 16px;
-    font-family: BlinkMacSystemFont;
-    font-weight: 500;
-}
-
-.modal-amount-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-}
-
-.aw-submit {
-	font-size:14px;
-	font-family:BlinkMacSystemFont;
-	font-weight:500;
-	background:rgb(50, 48, 47);
-	border-radius:4rem;
-	padding:1rem;
-	color:white;
-	width:37.75%;
-	border:1px solid;
-	transition:0.2s all
-}
-
-.aw-submit:hover {
-	background-color:#535050;
+.add-funds-dropdown .aw-submit:hover {
+	background-color: #535050;
 }
 
 .aw-submit:disabled {
-	cursor:wait;
+	background:white;
+  color:rgb(50, 48, 47);
+	cursor:not-allowed;
 }
 
-.insufficient {
-	animation:fadeIn 100ms ease-in;
+.aw-submit:disabled:hover {
+	background:white;
 }
+
+.aw-submit.submitting:disabled {
+  background: rgb(50, 48, 47);
+  color: white;
+  cursor: pointer;
+}
+
+.af-error-container {
+  font-family: Avenir;
+  font-size: 0.85rem;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.4s ease;
+}
+
+.af-error-container.visible {
+  max-height: 25px;
+  opacity: 1;
+}
+

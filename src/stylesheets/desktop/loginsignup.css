@@ -18,13 +18,7 @@
 }
 
 .ls-error-container.visible {
-  max-height: 500px;
-}
-
-.ls-error {
-	display:flex;
-	position:relative;
-	padding-right:20px;
+  max-height: 60px;
 }
 
 .ls-left {
@@ -66,10 +60,6 @@
 	text-align:center;
 	color:rgb(50, 48, 47);
 	font-family:avenir;
-}
-
-.ls-heading.error {
-	animation: fadeIn 100ms ease-in;
 }
 
 .ls-form {
