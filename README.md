@@ -6,37 +6,43 @@ Backend repo: [steak-and-eggs](https://github.com/armaaniel/steak-and-eggs)
 
 ## Architecture
 
-- React/TypeScript frontend subscribes to ActionCable channels via a single WebSocket connection for real-time price updates
-- Portfolio value recalculates live as prices stream in, throttled to prevent excessive re-renders
+- React/TypeScript frontend subscribes to real-time price updates via a single WebSocket connection
 - Graceful loading states across all data fetching and page transitions
-- All API calls return graceful fallbacks in the event of network failures
-- User inputs validate against available balance and share counts, disabling submission until valid
-- Debounced search with cached results from Redis on the backend
+- All API calls set meaningful fallback values in the event of network failures
+- User inputs are validated, disabling submission until inputs are valid
+- Derived values calculate live as prices stream in
+- Debounced search
 - Multi-step buy/sell order flow with confirmation and order receipt
 
 ---
 
 ## Deep Dive
 
-### Real-Time Price Updates
+### WebSocket Management
 
-Prices update in real-time across the positions table and stock pages via a single Websocket connection. The positions table calculates unrealized P&L in both dollar value and percentage as prices stream in, color-coded to reflect gains and losses.
-
-### Portfolio Recalculation
-
-As prices stream in, the users portfolio's value recalculates client-side by reducing the latest prices of all their positions alongside their cash balance. This is throttled to once every 5 seconds to avoid excessive re-renders while still feeling live.
+The client shares a single WebSocket connection for all real-time price updates across components. It subscribes to updates for the current symbol on the stock page, or for all held positions on the home page. Subscriptions are cleaned up on unmount.
 
 ### Loading States
 
-Loading states are managed across all data fetching and page transitions so the UI gracefully loads content in.
+Content visibility is gated behind data fetch resolution. Elements render at zero opacity and fade in once their data arrives.
 
 ### Error Handling
 
-Every fetch call catches failures and sets fallback state so the UI always renders something usable.
+The app degrades gracefully on network failures, setting meaningful fallback values on every failed fetch. 401 responses clear the stored auth token and redirect to login. Tables render inline error rows.
 
 ### Validations
 
-User inputs validate against available balance on buys and withdrawals, and available shares on sells, disabling submission until inputs are valid. Quantity and amount inputs are formatted and capped, and estimated cost updates live as the user types.
+User inputs are validated, disabling submission until inputs are valid. Inputs are formatted as currency as the user types, with max-length caps.
+
+### Reusable Components
+
+`TraceTable` is a generic table component that accepts a columns configuration — multiple views pass in their own columns and render functions. Sorting, pagination, empty states, and error states are handled internally.
+
+Login and signup share a single `AuthForm` component that adapts based on the current route.
+
+### Derived Values
+
+As prices stream in, the positions table calculates P&L and daily price change. The user's portfolio value recalculates client-side every 5 seconds. Estimated value on buy and sell orders update in real time as the user types.
 
 ## Tech Stack
 
