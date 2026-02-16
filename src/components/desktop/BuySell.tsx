@@ -40,7 +40,7 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
 
   const estimatedCost = calculateCost(quantity, price)
   const free = estimatedCost === 0 || isNaN(estimatedCost as any)
-  const hasInsufficientFunds = typeof estimatedCost === 'number' && estimatedCost > Number(balance)
+  const hasInsufficientFunds = typeof estimatedCost === 'number' && typeof balance === 'number' && estimatedCost > Number(balance)
   const hasInsufficientShares = Number(quantity) > (position?.shares || 0)
 
   const isQuantityInvalid = () => {
