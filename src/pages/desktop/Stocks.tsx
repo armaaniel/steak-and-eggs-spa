@@ -76,7 +76,6 @@ function Stocks() {
       if (!token) return
       setTickerNotFound(false)
       try {
-				throw new Error('test')
         const [tickerResponse] = await Promise.all([
           fetch(`${API}/stocks/${symbol}/tickerdata`, {
             headers: { authToken: token } as HeadersInit,
