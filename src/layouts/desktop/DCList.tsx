@@ -99,9 +99,10 @@ function DCList() {
                 </p>
 
                 {selectedTrace.breakdown && Object.keys(selectedTrace.breakdown).length > 0 && (
-                  <div className='call-breakdown'>Service call:
+                  <div className='call-breakdown'>
+										<p>Service call:</p>
                     {Object.entries(selectedTrace.breakdown).map(([serviceName, data]) => (
-                      <div key={serviceName}>
+                      <div key={serviceName}>{serviceName}
                         <p>duration: {`${data.duration.toFixed(2)}ms`}</p>
                         {data.used_redis !== undefined && <p>{`used_redis: ${data.used_redis}`}</p>}
                         {data.used_db !== undefined && <p>{`used_db: ${data.used_db}`}</p>}

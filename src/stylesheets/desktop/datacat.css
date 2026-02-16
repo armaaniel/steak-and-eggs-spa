@@ -175,7 +175,10 @@
 .call-breakdown {
 	display:flex;
 	flex-direction:column;
-	row-gap:1rem;
+}
+
+.call-breakdown div + div {
+  margin-top: 16px;
 }
 
 .trace-breakdown {
