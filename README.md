@@ -30,10 +30,6 @@ Content visibility is gated behind data fetch resolution. Elements render at zer
 
 The app degrades gracefully on network failures, setting meaningful fallback values on every failed fetch. 401 responses clear the stored auth token and redirect to login.
 
-### Validations
-
-User inputs are validated, disabling submission until inputs are valid. Inputs are formatted as currency with length caps where applicable.
-
 ### Reusable Components
 
 `TraceTable` is a generic table component that accepts a columns configuration — multiple views pass in their own columns and render functions. Sorting, pagination, empty states, and error states are handled internally.
@@ -43,6 +39,10 @@ Login and signup share a single `AuthForm` component that adapts based on the cu
 ### Derived Values
 
 As prices stream in, the positions table calculates P&L and daily price change. The user's portfolio value recalculates client-side every 5 seconds. Estimated value on buy and sell orders update in real time as the user types.
+
+### Validations
+
+User inputs are validated, disabling submission until inputs are valid. Inputs are formatted as currency with length caps where applicable.
 
 ## Tech Stack
 
