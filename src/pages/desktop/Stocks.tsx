@@ -40,7 +40,6 @@ function Stocks() {
   const [open, setOpen] = useState<Open>(null)
   const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000))
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
 
   const percentChange = toPercent(price, open)
   const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
@@ -77,6 +76,7 @@ function Stocks() {
       if (!token) return
       setTickerNotFound(false)
       try {
+				throw new Error('test')
         const [tickerResponse] = await Promise.all([
           fetch(`${API}/stocks/${symbol}/tickerdata`, {
             headers: { authToken: token } as HeadersInit,
@@ -94,7 +94,7 @@ function Stocks() {
           setTickerNotFound(true)
         }
       } catch (error) {
-        setError(error as Error)
+        setTickerData({exchange: 'N/A', name: 'N/A', ticker_type: 'N/A'})
       }
     }
     getData()
@@ -216,7 +216,7 @@ function Stocks() {
     return <Navigate to="/login" />
   }
 
-  if (tickerNotFound || error) {
+  if (tickerNotFound) {
     return (
       <>
         <header><Navbar /></header>
