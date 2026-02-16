@@ -28,7 +28,7 @@ Content visibility is gated behind data fetch resolution. Elements render at zer
 
 ### Error Handling
 
-The app degrades gracefully on network failures, setting meaningful fallback values on every failed fetch. 401 responses clear the stored auth token and redirect to login. Tables render inline error rows.
+The app degrades gracefully on network failures, setting meaningful fallback values on every failed fetch. 401 responses clear the stored auth token and redirect to login.
 
 ### Validations
 
