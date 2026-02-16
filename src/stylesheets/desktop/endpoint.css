@@ -25,6 +25,12 @@
 	cursor:pointer;
 }
 
+.call-breakdown {
+	display:flex;
+	flex-direction:row;
+	row-gap:1rem;
+}
+
 .page-button:disabled {
 	color:rgb(222,226,230);
 }
