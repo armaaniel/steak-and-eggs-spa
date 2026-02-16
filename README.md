@@ -32,7 +32,7 @@ The app degrades gracefully on network failures, setting meaningful fallback val
 
 ### Validations
 
-User inputs are validated, disabling submission until inputs are valid. Inputs are formatted as currency as the user types, with max-length caps.
+User inputs are validated, disabling submission until inputs are valid. Inputs are formatted as currency with max-length caps where applicable.
 
 ### Reusable Components
 
