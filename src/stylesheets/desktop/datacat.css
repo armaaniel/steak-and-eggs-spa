@@ -172,6 +172,12 @@
 	font-weight:400;
 }
 
+.call-breakdown {
+	display:flex;
+	flex-direction:column;
+	row-gap:1rem;
+}
+
 .trace-breakdown {
 	font-family:BlinkMacSystemFont;
 	color:rgb(64,68,82);
