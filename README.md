@@ -36,6 +36,8 @@ The app degrades gracefully on network failures, setting meaningful fallback val
 
 Login and signup share a single `AuthForm` component that adapts based on the current route.
 
+Add and Withdraw funds share a single `FundsButton` component that changes based on passed prop.
+
 ### Derived Values
 
 As prices stream in, the positions table calculates P&L and daily price change. The user's portfolio value recalculates client-side every 5 seconds. Estimated value on buy and sell orders update in real time as the user types.
