@@ -59,7 +59,7 @@
 .ls-heading {
 	text-align:center;
 	color:rgb(50, 48, 47);
-	font-family:avenir;
+	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .ls-form {
@@ -85,7 +85,7 @@
 
 .ls-footer {
 	color:rgb(97, 94, 92);
-	font-family:avenir;
+	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	text-align:center;
 	margin-top:1rem;
 }
@@ -103,7 +103,7 @@
 	left:1rem;
 	top: 50%;
 	transform: translateY(-50%);
-	font-family:avenir;
+	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	transform-origin: left top;
 	transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), top 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -119,7 +119,7 @@
 }
 
 .ls-signup {
-	font-family:futura;
+	font-family: Futura, "Trebuchet MS", Arial, sans-serif;
 	color:rgb(97, 94, 92);
 }
 

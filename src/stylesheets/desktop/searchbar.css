@@ -55,7 +55,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .search-input {
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	padding:24px 8px 8px 0px;
 	border:none;
 	outline:none;
@@ -66,7 +66,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .search-label {
 	position:absolute;
 	pointer-events:none;
-	font-family:Avenir-book;
+	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	transform-origin: left top;
 	transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), top 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 	top: 50%;
@@ -87,7 +87,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .search-result-item {
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	font-weight:400;
 }
 
@@ -104,7 +104,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .no-search-result {
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	font-weight:400;
 	padding:1rem;
 	color:rgb(64,68,82);

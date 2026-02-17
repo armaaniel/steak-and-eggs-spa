@@ -9,7 +9,7 @@
 .pagination-container {
 	display:flex;
 	justify-content:space-evenly;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color:rgb(64,68,82);
 }
 
@@ -59,7 +59,7 @@
 }
 
 .cache-text {
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color:rgb(64,68,82);
 	font-weight:400;
 	align-self:center;
@@ -102,14 +102,14 @@
 
 .portfolio-row {
 	text-align:left;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color:rgb(64,68,82);
 	font-weight:400;
 }
 
 .portfolio-row-selected {
 	text-align:left;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color:rgb(64,68,82);
 	font-weight:400;
 	background-color:#EAECEF;
@@ -117,7 +117,7 @@
 
 .portfolio-row-heading {
 	text-align:left;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color:rgb(64,68,82);
 	font-weight:400;
 	padding:0.25rem 0rem;
@@ -142,7 +142,7 @@
 
 .portfolio-row-heading-asc {
 	text-align:left;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color:rgb(64,68,82);
 	font-weight:400;
 	padding:0.25rem 0rem;
@@ -152,7 +152,7 @@
 
 .portfolio-row-heading-desc {
 	text-align:left;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color:rgb(64,68,82);
 	font-weight:400;
 	padding:0.25rem 0rem;
@@ -192,7 +192,7 @@
 	border:none;
 	border-radius:6px;
 	font-weight:600;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	opacity:1;
 	font-size:14px;
 	height:32px;
@@ -232,12 +232,12 @@
 	left:10px;
 	font-size:10px;
 	font-weight:500;
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	pointer-events:none;
 }
 
 .nav-button {
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	font-weight:400;
 	text-decoration:none;
 	font-size:18px;
@@ -246,7 +246,7 @@
 }
 
 .nav-button-active {
-	font-family:BlinkMacSystemFont;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	font-weight:400;
 	padding:5.25px 4px 5.25px 4px;
 	color:#A78BFA;
