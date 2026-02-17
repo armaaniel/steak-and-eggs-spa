@@ -168,6 +168,18 @@
 	white-space:nowrap;
 }
 
+.bs-error-container {
+  display: flex;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.bs-error-container.visible {
+  max-height: 25px;
+  opacity: 1;
+}
+
 @media (max-width:768px) {
 	.bs-parent-container {
 		position:static

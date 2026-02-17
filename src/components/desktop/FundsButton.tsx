@@ -83,7 +83,7 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
 			
       <div className={`add-funds-dropdown ${isOpen ? 'open' : ''}`}>
 				<div className={`af-error-container ${(error && !isSubmitting && !hasTyped) || insufficient ? 'visible' : ''}`}>
-					<p className="af-error">{insufficient ? 'Not enough funds to withdraw' : (error || '\u00A0')}</p>
+					<p>{insufficient ? 'Not enough funds to withdraw' : (error || '\u00A0')}</p>
 				</div>
 					
         <div className="add-funds-input-row">

@@ -42,6 +42,8 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
   const free = estimatedCost === 0 || isNaN(estimatedCost as any)
   const hasInsufficientFunds = isNaN(Number(balance)) || (typeof estimatedCost === 'number' && estimatedCost > Number(balance))
   const hasInsufficientShares = Number(quantity) > (position?.shares || 0)
+	const isBuy = currentState.action === 'buy'
+	const isSell = currentState.action === 'sell'
 
   const isQuantityInvalid = () => {
     if (quantity === '') return true
@@ -108,13 +110,13 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
           <div className="bs-button-container">
             <button onClick={buyState} className="buy-sell-button">
               <div className="bs-text-parent">
-                <p className={currentState.action === 'buy' ? 'buy-sell-text active' : 'buy-sell-text'}>Buy</p>
+                <p className={isBuy ? 'buy-sell-text active' : 'buy-sell-text'}>Buy</p>
               </div>
             </button>
 
             <button onClick={sellState} className="buy-sell-button">
               <div className="bs-text-parent">
-                <p className={currentState.action === 'sell' ? 'buy-sell-text active' : 'buy-sell-text'}>Sell</p>
+                <p className={isSell ? 'buy-sell-text active' : 'buy-sell-text'}>Sell</p>
               </div>
             </button>
           </div>
@@ -125,7 +127,7 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
                 <p>Order Type</p>
               </div>
 
-              <div>{currentState.action === 'buy' ? <p>Market Buy</p> : <p>Market Sell</p>}</div>
+              <div>{isBuy ? <p>Market Buy</p> : <p>Market Sell</p>}</div>
             </div>
 
             <div className="bs-containers">
@@ -147,28 +149,23 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
             </div>
 
             <div className="bs-next-parent">
-              {currentState.action === 'buy' ? (
-                <button className="next" onClick={nextStep} disabled={hasInsufficientFunds || quantityInvalid || free}>
-                  Next
-                </button>
-              ) : (
-                <button className="next" onClick={nextStep} disabled={hasInsufficientShares || quantityInvalid || free}>
-                  Next
-                </button>
-              )}
+							<button className="next" onClick={nextStep} 
+							disabled={(isBuy ? hasInsufficientFunds : hasInsufficientShares) || quantityInvalid || free}>
+							  Next
+							</button>
 
               <hr className="bs-line" />
 
               <div className="bs-containers">
-                <div className="bs-width-wrapper">{currentState.action === 'buy' ? <p>Available Cash</p> : <p>Available Shares</p>}</div>
+                <div className="bs-width-wrapper">{isBuy ? <p>Available Cash</p> : <p>Available Shares</p>}</div>
 
-                <div>{currentState.action === 'buy' ? <p className="est-cost"> ${toCurrency(balance)} USD </p> : <p>{position?.shares?.toLocaleString() || 0}</p>}</div>
+                <div>{isBuy ? <p className="est-cost"> ${toCurrency(balance)} USD </p> : <p>{position?.shares?.toLocaleString() || 0}</p>}</div>
               </div>
             </div>
-
-            {currentState.action === 'buy' && hasInsufficientFunds && <p>Insufficient funds for this purchase</p>}
-
-            {currentState.action === 'sell' && hasInsufficientShares && <p>Insufficient shares for this sale</p>}
+						
+						<div className={`bs-error-container ${(isBuy && hasInsufficientFunds) || (isSell && hasInsufficientShares) ? 'visible' : '' }`}>
+						  <p>{(isBuy && hasInsufficientFunds) ? 'Insufficient funds for this purchase' : (isSell && hasInsufficientShares) ? 'Insufficient shares for this sale' : '\u00A0'}</p>
+						</div>
           </div>
         </div>
       )}
@@ -188,7 +185,7 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
                 <p>Order</p>
               </div>
 
-              <div>{currentState.action === 'buy' ? <p>Market Buy {symbol}</p> : <p>Market Sell {symbol}</p>}</div>
+              <div>{isBuy ? <p>Market Buy {symbol}</p> : <p>Market Sell {symbol}</p>}</div>
             </div>
 
             <div className="bs-containers">
@@ -202,7 +199,7 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
             </div>
 
             <div className="bs-containers">
-              <div className="bs-width-wrapper">{currentState.action === 'buy' ? <p>Estimated Cost</p> : <p>Estimated Value</p>}</div>
+              <div className="bs-width-wrapper">{isBuy ? <p>Estimated Cost</p> : <p>Estimated Value</p>}</div>
 
               <div>
                 <p> ${toCurrency(estimatedCost)} USD </p>
@@ -211,14 +208,14 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
             <hr className="bs-line" />
 
             <form onSubmit={handleSubmit}>
-              <button type="submit" className={`next ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting || (currentState.action === 'buy' && hasInsufficientFunds) || (currentState.action === 'sell' && hasInsufficientShares)}>
+              <button type="submit" className={`next ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting || (isBuy && hasInsufficientFunds) || (isSell && hasInsufficientShares)}>
                 Submit
               </button>
             </form>
 
-            {currentState.action === 'buy' && hasInsufficientFunds && <p>Insufficient funds for this purchase</p>}
-
-            {currentState.action === 'sell' && hasInsufficientShares && <p>Insufficient shares for this sale</p>}
+						<div className={`bs-error-container ${(isBuy && hasInsufficientFunds) || (isSell && hasInsufficientShares) ? 'visible' : '' }`}>
+						  <p>{(isBuy && hasInsufficientFunds) ? 'Insufficient funds for this purchase' : (isSell && hasInsufficientShares) ? 'Insufficient shares for this sale' : '\u00A0'}</p>
+						</div>
           </div>
         </div>
       )}
@@ -235,11 +232,11 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
               <p>Order</p>
             </div>
 
-            <div>{currentState.action === 'buy' ? <p>Market Buy {orderData.symbol}</p> : <p>Market Sell {orderData.symbol}</p>}</div>
+            <div>{isBuy ? <p>Market Buy {orderData.symbol}</p> : <p>Market Sell {orderData.symbol}</p>}</div>
           </div>
 
           <div className="bs-containers">
-            <div className="bs-width-wrapper">{currentState.action === 'buy' ? <p>Cost</p> : <p>Value</p>}</div>
+            <div className="bs-width-wrapper">{isBuy ? <p>Cost</p> : <p>Value</p>}</div>
 
             <div>
               <p> ${toCurrency(orderData.value)} USD </p>
@@ -288,7 +285,7 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
               <p>Order</p>
             </div>
 
-            <div>{currentState.action === 'buy' ? <p>Market Buy {symbol}</p> : <p>Market Sell {symbol}</p>}</div>
+            <div>{isBuy ? <p>Market Buy {symbol}</p> : <p>Market Sell {symbol}</p>}</div>
           </div>
 
           <div className="bs-containers">
