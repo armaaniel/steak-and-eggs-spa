@@ -36,7 +36,7 @@ The app degrades gracefully on network failures, setting meaningful fallback val
 
 Login and signup share a single `AuthForm` component that adapts based on the current route.
 
-Add and Withdraw funds share a single `FundsButton` component that changes based on passed prop.
+Add and Withdraw funds share a single `FundsButton` component that changes based on a passed prop.
 
 ### Derived Values
 
