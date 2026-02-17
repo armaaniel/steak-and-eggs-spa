@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { toCurrency, toPercent } from '../../utils.ts'
+import { toCurrency, toPercent, toPnlCurrency } from '../../utils.ts'
 import '../../stylesheets/desktop/positionstable.css'
 import type { Positions, Prices, Error } from '../../types.ts'
 
@@ -100,7 +100,7 @@ const PositionsTable = ({ positions, prices, error }: Props) => {
               <td className="shares-cell">
                 <Link to={`/stocks/${position.symbol}`} className="symbol-name">
                   <div className="stock-text">
-                    <p className="stock-name">${toCurrency((price - parseFloat(position.average_price)) * position.shares)}</p>
+                    <p className="stock-name">${toPnlCurrency((price - parseFloat(position.average_price)) * position.shares)}</p>
                     <p className={`stock-name ${pnlIsPositive ? 'positive' : 'negative'}`}>{pnlChange}</p>
                   </div>
                 </Link>

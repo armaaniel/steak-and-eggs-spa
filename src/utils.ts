@@ -96,3 +96,17 @@ export const toPortfolio = (value: string | number | undefined) => {
 		return `$${number.toLocaleString('en-us', {minimumFractionDigits:2, maximumFractionDigits:2})} USD`
 	}
 }
+
+export const toPnlCurrency = (value: number | string | null | undefined) => {
+	if (value === null || value === undefined) {
+		return null
+	}
+	
+	const number = parseFloat(value as any)
+	
+	if (isNaN(number)) {
+		return 'N/A'
+	}
+	
+	return number.toLocaleString('en-us', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+}
