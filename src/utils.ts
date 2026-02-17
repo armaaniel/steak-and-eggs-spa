@@ -68,7 +68,7 @@ export const toPercent = (price:string | null | number, open:string | null | num
 	
 	const percentage = ((priceNum - openNum) / openNum) * 100;
 	
-	const decimals = Math.abs(percentage) < 0.01 ? 4 : 2;
+	const decimals = Math.abs(percentage) < 0.01 ? 3 : 2;
 	
 	if (percentage < 0) {
 		return `${percentage.toLocaleString('en-us', {minimumFractionDigits:decimals, maximumFractionDigits:decimals})}%`
