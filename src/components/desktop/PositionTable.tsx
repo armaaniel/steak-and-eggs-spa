@@ -1,4 +1,4 @@
-import { toCurrency, toPercent } from '../../utils.ts'
+import { toCurrency, toPercent, toPnlCurrency } from '../../utils.ts'
 import '../../stylesheets/desktop/positionstable.css'
 import type { Price, Position } from '../../types.ts'
 
@@ -51,7 +51,7 @@ const PositionTable = ({ position, price }: Props) => {
           <td className="shares-cell">
             <div className="symbol-name">
               <div className="stock-text">
-                <p className="stock-name">${toCurrency(pnl)}</p>
+                <p className="stock-name">${toPnlCurrency(pnl)}</p>
                 <p className={`stock-name ${pnlIsPositive ? 'positive' : 'negative'}`}>{toPercent(price, position.average_price)}</p>
               </div>
             </div>
