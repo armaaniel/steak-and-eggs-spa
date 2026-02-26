@@ -32,7 +32,7 @@ const PositionTable = ({ position, price }: Props) => {
                 height="32" width="32"
                 onError={(e) => {(e.target as HTMLImageElement).src = '/fallback-logo.svg'}}/>
               <div className="stock-text">
-                <p className="stock-symbol">{toCurrency(value)}</p>
+                <p className="stock-symbol">${toCurrency(value)}</p>
                 <p key={position.shares} className="stock-shares">
                   {position.shares} shares
                 </p>
