@@ -52,6 +52,7 @@ function AuthForm({ mode }: AuthFormProps) {
       if (response.ok) {
         const data = await response.json()
         localStorage.setItem('authToken', data.token)
+        localStorage.setItem('username', data.username)
         navigate('/home')
       } else {
         const errorData = await response.json()

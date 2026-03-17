@@ -4,6 +4,7 @@
 	background-color:#fcfcfc;
 	border:1px solid rgb(228, 226, 225);
 	position:relative;
+	transition: 0.1s;
 }
 
 .nav-search-div:hover {
