@@ -3,19 +3,30 @@ import { NavLink, Link, useNavigate } from 'react-router-dom'
 import Searchbar from '../../components/desktop/Searchbar'
 import { resetConsumer } from '../../consumer.ts'
 
-const USERNAME = localStorage.getItem('username')
 
 function Navbar() {
+  const API: string = import.meta.env.VITE_API
+	const USERNAME = localStorage.getItem('username')
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [showDeleteAccount, setShowDeleteAccount] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Change password state
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [cpError, setCpError] = useState<string | null>(null)
+  const [cpSuccess, setCpSuccess] = useState<string | null>(null)
+  const [cpSubmitting, setCpSubmitting] = useState(false)
+  const [cpHasTyped, setCpHasTyped] = useState(false)
+
+  // Delete account state
   const [deletePassword, setDeletePassword] = useState('')
+  const [daError, setDaError] = useState<string | null>(null)
+  const [daSubmitting, setDaSubmitting] = useState(false)
+  const [daHasTyped, setDaHasTyped] = useState(false)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -33,16 +44,70 @@ function Navbar() {
     navigate('/')
   }
 
-  const handleChangePasswordSubmit = (e: React.FormEvent) => {
+  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Call API to change password
-    closeChangePassword()
+    setCpHasTyped(false)
+    setCpSuccess(null)
+    setCpError(null)
+
+    if (newPassword !== confirmPassword) {
+      setCpError('New passwords do not match')
+      return
+    }
+    if (newPassword.length === 0) {
+      setCpError('New password must contain at least 1 character')
+      return
+    }
+
+    setCpSubmitting(true)
+    const token = localStorage.getItem('authToken')
+    try {
+      const response = await fetch(`${API}/change_password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword, confirm_password: confirmPassword }),
+      })
+      if (response.ok) {
+        setCpSuccess('Password updated successfully')
+      } else {
+        const data = await response.json()
+        setCpError(data.error || 'Something went wrong')
+      }
+    } catch {
+      setCpError('Something went wrong, please try again')
+    } finally {
+      setCpSubmitting(false)
+    }
   }
 
-  const handleDeleteAccountSubmit = (e: React.FormEvent) => {
+  const handleDeleteAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Call API to delete account
-    closeDeleteAccount()
+    setDaHasTyped(false)
+
+    if (deletePassword.length === 0) {
+      setDaError('Please enter your password')
+      return
+    }
+
+    setDaSubmitting(true)
+    const token = localStorage.getItem('authToken')
+    try {
+      const response = await fetch(`${API}/delete_account`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
+        body: JSON.stringify({ password: deletePassword }),
+      })
+      if (response.ok) {
+        handleLogout()
+      } else {
+        const data = await response.json()
+        setDaError(data.error || 'Something went wrong')
+      }
+    } catch {
+      setDaError('Something went wrong, please try again')
+    } finally {
+      setDaSubmitting(false)
+    }
   }
 
   const closeChangePassword = () => {
@@ -50,11 +115,18 @@ function Navbar() {
     setCurrentPassword('')
     setNewPassword('')
     setConfirmPassword('')
+    setCpError(null)
+    setCpSuccess(null)
+    setCpSubmitting(false)
+    setCpHasTyped(false)
   }
 
   const closeDeleteAccount = () => {
     setShowDeleteAccount(false)
     setDeletePassword('')
+    setDaError(null)
+    setDaSubmitting(false)
+    setDaHasTyped(false)
   }
 
   return (
@@ -138,7 +210,13 @@ function Navbar() {
       {showChangePassword && (
         <div className="modal-overlay" onClick={closeChangePassword}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2 className="modal-title">Change Password</h2>
+            <div className="modal-header">
+              <h2 className="modal-title">Change Password</h2>
+              <button className="modal-close" onClick={closeChangePassword} aria-label="Close">&#x2715;</button>
+            </div>
+            <div className={`ls-error-container ${(cpSuccess || cpError) && !cpHasTyped && !cpSubmitting ? 'visible' : 'hidden'}`}>
+              <p className={cpSuccess ? 'modal-success' : 'modal-error'}>{cpSuccess ?? cpError}</p>
+            </div>
             <form className="modal-form" onSubmit={handleChangePasswordSubmit}>
               <div className="ls-input-container">
                 <input
@@ -147,8 +225,7 @@ function Navbar() {
                   className="ls-input"
                   placeholder=" "
                   value={currentPassword}
-                  onChange={e => setCurrentPassword(e.target.value)}
-                  required
+                  onChange={e => { setCurrentPassword(e.target.value); setCpHasTyped(true) }}
                 />
                 <label htmlFor="current-password" className="ls-label">Current Password</label>
               </div>
@@ -159,8 +236,7 @@ function Navbar() {
                   className="ls-input"
                   placeholder=" "
                   value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                  required
+                  onChange={e => { setNewPassword(e.target.value); setCpHasTyped(true) }}
                 />
                 <label htmlFor="new-password" className="ls-label">New Password</label>
               </div>
@@ -171,8 +247,7 @@ function Navbar() {
                   className="ls-input"
                   placeholder=" "
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  required
+                  onChange={e => { setConfirmPassword(e.target.value); setCpHasTyped(true) }}
                 />
                 <label htmlFor="confirm-password" className="ls-label">Confirm New Password</label>
               </div>
@@ -180,7 +255,7 @@ function Navbar() {
                 <button type="button" className="login-link" onClick={closeChangePassword}>
                   Cancel
                 </button>
-                <button type="submit" className="login-link signup">
+                <button type="submit" className={`login-link signup ${cpSubmitting ? 'submitting' : ''}`} disabled={cpSubmitting}>
                   Update Password
                 </button>
               </div>
@@ -192,10 +267,16 @@ function Navbar() {
       {showDeleteAccount && (
         <div className="modal-overlay" onClick={closeDeleteAccount}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2 className="modal-title">Delete Account</h2>
+            <div className="modal-header">
+              <h2 className="modal-title">Delete Account</h2>
+              <button className="modal-close" onClick={closeDeleteAccount} aria-label="Close">&#x2715;</button>
+            </div>
             <p className="modal-danger-text">
               This action is permanent and cannot be undone. All your data, positions, and history will be deleted immediately.
             </p>
+            <div className={`ls-error-container ${daError && !daHasTyped && !daSubmitting ? 'visible' : 'hidden'}`}>
+              <p className="modal-error">{daError}</p>
+            </div>
             <form className="modal-form" onSubmit={handleDeleteAccountSubmit}>
               <div className="ls-input-container">
                 <input
@@ -204,8 +285,7 @@ function Navbar() {
                   className="ls-input"
                   placeholder=" "
                   value={deletePassword}
-                  onChange={e => setDeletePassword(e.target.value)}
-                  required
+                  onChange={e => { setDeletePassword(e.target.value); setDaHasTyped(true) }}
                 />
                 <label htmlFor="delete-password" className="ls-label">Enter your password to confirm</label>
               </div>
@@ -213,7 +293,7 @@ function Navbar() {
                 <button type="button" className="login-link" onClick={closeDeleteAccount}>
                   Cancel
                 </button>
-                <button type="submit" className="login-link signup modal-delete-btn">
+                <button type="submit" className={`login-link signup modal-delete-btn ${daSubmitting ? 'submitting' : ''}`} disabled={daSubmitting}>
                   Delete Account
                 </button>
               </div>
