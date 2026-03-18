@@ -15,7 +15,26 @@
 }
 
 .welcome-start-desktop {
+	position:relative;
 	width:25%;
 	display:flex;
 	justify-content:center;
+}
+
+.welcome-error {
+	position:absolute;
+	top:calc(100% + 48px);
+	left:50%;
+	transform:translateX(-50%);
+	white-space:nowrap;
+	opacity:1;
+	transition:opacity 150ms;
+}
+
+.welcome-error.hidden {
+	opacity:0;
+}
+
+.welcome-error.visible {
+	opacity:1;
 }
