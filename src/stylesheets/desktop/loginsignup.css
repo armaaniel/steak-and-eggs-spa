@@ -22,14 +22,58 @@
 }
 
 .ls-left {
+	position:relative;
 	width:50%;
 	height:100%;
 	display:flex;
+	flex-direction:column;
 	background-color:#AFD8DF;
 }
 
+.ls-try-demo-container {
+	flex:1;
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	justify-content:center;
+}
+
+.ls-try-demo {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-size:2.5rem;
+	color:rgb(50, 48, 47);
+	cursor:pointer;
+	text-decoration:none;
+	transition:opacity 0.2s, color 0.2s;
+}
+
+.ls-try-demo:hover {
+	opacity:0.6;
+}
+
+.ls-try-demo.submitting {
+	color:#AFD8DF;
+	cursor:default;
+}
+
+.ls-demo-error-container {
+	opacity:1;
+	max-height:0;
+	transition:max-height 0.3s ease, opacity 150ms;
+}
+
+.ls-demo-error-container.hidden {
+	opacity:0;
+}
+
+.ls-demo-error-container.visible {
+	max-height:60px;
+}
+
 .ls-logo-desktop {
-	margin:25px 0rem 0rem 9px;
+	position:absolute;
+	top:25px;
+	left:9px;
 }
 
 .ls-right {

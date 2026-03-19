@@ -17,7 +17,34 @@ function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<null | string>(null)
   const [hasTyped, setHasTyped] = useState(false)
 
+  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
+  const [demoError, setDemoError] = useState<null | string>(null)
+
   const isLogin = mode === 'login'
+
+  async function handleTryDemo() {
+    try {
+      setIsDemoSubmitting(true)
+      const response = await fetch(`${API}/demo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        localStorage.setItem('authToken', data.token)
+        localStorage.setItem('username', data.username)
+        navigate('/home')
+      } else {
+        const errorData = await response.json()
+        setDemoError(errorData.error)
+      }
+    } catch {
+      setDemoError('Something went wrong, please try again')
+    } finally {
+      setIsDemoSubmitting(false)
+    }
+  }
 
   const validateUsername = (username: string) => {
     if (username.length > 20) return 'Username must be 20 characters or less'
@@ -88,6 +115,16 @@ function AuthForm({ mode }: AuthFormProps) {
             </svg>
           </Link>
         </div>
+        {!isLogin && (
+          <div className="ls-try-demo-container">
+            <span className={`ls-try-demo ${isDemoSubmitting ? 'submitting' : ''}`} onClick={!isDemoSubmitting ? handleTryDemo : undefined}>
+              Try Demo
+            </span>
+            <div className={`ls-demo-error-container ${demoError && !isDemoSubmitting ? 'visible' : 'hidden'}`}>
+              <p className="ls-heading error">{demoError}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="ls-right">

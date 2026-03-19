@@ -6,6 +6,7 @@ import Home from './pages/desktop/Home'
 import Stocks from './pages/desktop/Stocks'
 import Activity from './pages/desktop/Activity'
 import HowItWorks from './pages/desktop/HowItWorks'
+import Privacy from './pages/desktop/Privacy'
 import AllRoutes from './pages/desktop/AllRoutes'
 import Endpoint from './pages/desktop/Endpoint'
 import Cache from './pages/desktop/Cache'
@@ -22,6 +23,7 @@ function App() {
         <Route element={<Public />}>
           <Route path="/" element={<Welcome />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Route>
 
         <Route path="/home" element={<Home />} />

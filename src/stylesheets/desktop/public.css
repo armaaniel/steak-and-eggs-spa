@@ -56,8 +56,9 @@
 }
 
 .login-link.signup.desktop:disabled {
-	background:white;
-	color:black;
+	background:#AFD8DF;
+	color:#AFD8DF;
+	border-color:#AFD8DF;
 	transition:0.2s;
 	cursor:default;
 }
