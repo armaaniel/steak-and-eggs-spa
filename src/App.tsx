@@ -7,6 +7,7 @@ import Stocks from './pages/desktop/Stocks'
 import Activity from './pages/desktop/Activity'
 import HowItWorks from './pages/desktop/HowItWorks'
 import Privacy from './pages/desktop/Privacy'
+import DeleteAccount from './pages/desktop/DeleteAccount'
 import AllRoutes from './pages/desktop/AllRoutes'
 import Endpoint from './pages/desktop/Endpoint'
 import Cache from './pages/desktop/Cache'
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Welcome />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/delete" element={<DeleteAccount />} />
         </Route>
 
         <Route path="/home" element={<Home />} />
