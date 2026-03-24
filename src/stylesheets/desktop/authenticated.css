@@ -219,8 +219,29 @@
 	border-color: transparent;
 }
 
-.modal-delete-btn:hover {
-	background-color: #a93226;
+.login-link.signup.modal-delete-btn:disabled {
+	background: white;
+	border-color: rgb(50, 48, 47);
+	color: rgb(50, 48, 47);
+	cursor: not-allowed;
+}
+
+.login-link.signup.modal-delete-btn:disabled:hover {
+	background: white;
+	cursor: not-allowed;
+}
+
+.login-link.signup.modal-delete-btn.submitting:disabled {
+	background: white;
+	color: white;
+	border-color: white;
+	cursor: default;
+	transition: 0.2s;
+}
+
+.login-link.signup.modal-delete-btn.submitting:disabled:hover {
+	background: white;
+	cursor: default;
 }
 
 @media (max-width:768px) {

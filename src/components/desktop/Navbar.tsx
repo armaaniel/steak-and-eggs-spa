@@ -14,7 +14,6 @@ function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Change password state
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [cpError, setCpError] = useState<string | null>(null)
@@ -23,7 +22,7 @@ function Navbar() {
   const [cpHasTyped, setCpHasTyped] = useState(false)
 
   // Delete account state
-  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [daError, setDaError] = useState<string | null>(null)
   const [daSubmitting, setDaSubmitting] = useState(false)
   const [daHasTyped, setDaHasTyped] = useState(false)
@@ -65,7 +64,7 @@ function Navbar() {
       const response = await fetch(`${API}/change_password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
-        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword, confirm_password: confirmPassword }),
+        body: JSON.stringify({ new_password: newPassword }),
       })
       if (response.ok) {
         setCpSuccess('Password updated successfully')
@@ -83,19 +82,17 @@ function Navbar() {
   const handleDeleteAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setDaHasTyped(false)
-
-    if (deletePassword.length === 0) {
-      setDaError('Please enter your password')
+    if (deleteConfirmation.toLowerCase() !== 'delete') {
+      setDaError('Please type "delete" to confirm')
       return
     }
-
+    setDaError(null)
     setDaSubmitting(true)
     const token = localStorage.getItem('authToken')
     try {
       const response = await fetch(`${API}/delete_account`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
-        body: JSON.stringify({ password: deletePassword }),
       })
       if (response.ok) {
         handleLogout()
@@ -112,7 +109,6 @@ function Navbar() {
 
   const closeChangePassword = () => {
     setShowChangePassword(false)
-    setCurrentPassword('')
     setNewPassword('')
     setConfirmPassword('')
     setCpError(null)
@@ -123,7 +119,7 @@ function Navbar() {
 
   const closeDeleteAccount = () => {
     setShowDeleteAccount(false)
-    setDeletePassword('')
+    setDeleteConfirmation('')
     setDaError(null)
     setDaSubmitting(false)
     setDaHasTyped(false)
@@ -220,17 +216,6 @@ function Navbar() {
             <form className="modal-form" onSubmit={handleChangePasswordSubmit}>
               <div className="ls-input-container">
                 <input
-                  id="current-password"
-                  type="password"
-                  className="ls-input"
-                  placeholder=" "
-                  value={currentPassword}
-                  onChange={e => { setCurrentPassword(e.target.value); setCpHasTyped(true) }}
-                />
-                <label htmlFor="current-password" className="ls-label">Current Password</label>
-              </div>
-              <div className="ls-input-container">
-                <input
                   id="new-password"
                   type="password"
                   className="ls-input"
@@ -280,20 +265,20 @@ function Navbar() {
             <form className="modal-form" onSubmit={handleDeleteAccountSubmit}>
               <div className="ls-input-container">
                 <input
-                  id="delete-password"
-                  type="password"
+                  id="delete-confirmation"
+                  type="text"
                   className="ls-input"
                   placeholder=" "
-                  value={deletePassword}
-                  onChange={e => { setDeletePassword(e.target.value); setDaHasTyped(true) }}
+                  value={deleteConfirmation}
+                  onChange={e => { setDeleteConfirmation(e.target.value); setDaHasTyped(true) }}
                 />
-                <label htmlFor="delete-password" className="ls-label">Enter your password to confirm</label>
+                <label htmlFor="delete-confirmation" className="ls-label">Type "delete" to confirm</label>
               </div>
               <div className="modal-actions">
                 <button type="button" className="login-link" onClick={closeDeleteAccount}>
                   Cancel
                 </button>
-                <button type="submit" className={`login-link signup modal-delete-btn ${daSubmitting ? 'submitting' : ''}`} disabled={daSubmitting}>
+                <button type="submit" className={`login-link signup modal-delete-btn ${daSubmitting ? 'submitting' : ''}`} disabled={daSubmitting || deleteConfirmation.toLowerCase() !== 'delete'}>
                   Delete Account
                 </button>
               </div>
