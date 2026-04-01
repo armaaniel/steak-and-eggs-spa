@@ -10,6 +10,7 @@ const TRACE_SUMMARY = gql`
       cleanRoute
       p99
       totalRequests
+			cacheHitRate
     }
   }
 `

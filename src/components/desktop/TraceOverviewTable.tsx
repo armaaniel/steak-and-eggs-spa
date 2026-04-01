@@ -21,10 +21,13 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
       if (sortField === 'totalRequests') {
         aValue = a.totalRequests
         bValue = b.totalRequests
-      } else {
+      } else if (sortField === 'p99') {
         aValue = a.p99
         bValue = b.p99
-      }
+      } else {
+				aValue = a.cacheHitRate
+				bValue = b.cacheHitRate
+			}
       if (direction === 'asc') {
         return aValue - bValue
       } else {
@@ -80,13 +83,16 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
             <th className={sorted && sortField === 'totalRequests' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('totalRequests')}>
               Total requests
             </th>
+						<th className={sorted && sortField === 'cacheHitRate' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('cacheHitRate')}>
+						  Cache hit rate
+						</th>
           </tr>
         </thead>
 
         {error ? (
           <tbody>
             <tr className="portfolio-row">
-              <td className="dc-cell" colSpan={5}>
+              <td className="dc-cell" colSpan={4}>
                 <p className="details-text">Unable to load data, please try again</p>
               </td>
             </tr>
@@ -106,6 +112,10 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
                 <td className="dc-cell">
                   <p className="details-text">{trace.totalRequests}</p>
                 </td>
+								
+								<td className="dc-cell">
+								  <p className="details-text">{trace.cacheHitRate != null ? `${trace.cacheHitRate}%` : '—'}</p>
+								</td>
               </tr>
             ))}
           </tbody>

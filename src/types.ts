@@ -87,6 +87,7 @@ export interface TraceSummary {
 	cleanRoute:string
 	p99:number
 	totalRequests:number
+	cacheHitRate:number | null
 }
 
 
