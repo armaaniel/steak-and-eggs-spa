@@ -25,8 +25,8 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
         aValue = a.p99
         bValue = b.p99
       } else {
-				aValue = a.cacheHitRate
-				bValue = b.cacheHitRate
+				aValue = a.cacheHitRate ?? -1
+				bValue = b.cacheHitRate ?? -1
 			}
       if (direction === 'asc') {
         return aValue - bValue
