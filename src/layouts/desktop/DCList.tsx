@@ -46,7 +46,7 @@ function DCList() {
   const { endpoint } = useEndpoint()
   const { data } = useQuery<StatsData>(GET_STATS, {
     variables: { endpoint },
-    skip: !(location.pathname.includes('/get') || location.pathname.includes('/post')),
+    skip: !(location.pathname.includes('/get') || location.pathname.includes('/post') || location.pathname.includes('/delete')),
   })
 
   const stats = data?.traceStats
