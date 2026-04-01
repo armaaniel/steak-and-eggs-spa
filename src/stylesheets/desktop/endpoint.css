@@ -274,6 +274,10 @@
     transform: translateY(1px) rotate(0deg);
 }
 
+.stats-container:not(.loaded) .p50{
+	cursor:default;
+}
+
 .p50{
 	cursor:pointer;
 	display:flex;
