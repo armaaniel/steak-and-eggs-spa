@@ -80,12 +80,12 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
             <th className={sorted && sortField === 'p99' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('p99')}>
               p99
             </th>
-            <th className={sorted && sortField === 'totalRequests' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('totalRequests')}>
-              Total requests
-            </th>
 						<th className={sorted && sortField === 'cacheHitRate' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('cacheHitRate')}>
 						  Cache hit rate
 						</th>
+            <th className={sorted && sortField === 'totalRequests' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('totalRequests')}>
+              Total requests
+            </th>
           </tr>
         </thead>
 
@@ -108,14 +108,14 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
                 <td className="dc-cell">
                   <p className="details-text">{trace.p99.toFixed(0)} ms</p>
                 </td>
+								
+								<td className="dc-cell">
+								  <p className="details-text">{trace.cacheHitRate ? `${trace.cacheHitRate}%` : '—'}</p>
+								</td>
 
                 <td className="dc-cell">
                   <p className="details-text">{trace.totalRequests}</p>
                 </td>
-								
-								<td className="dc-cell">
-								  <p className="details-text">{trace.cacheHitRate != null ? `${trace.cacheHitRate}%` : '—'}</p>
-								</td>
               </tr>
             ))}
           </tbody>

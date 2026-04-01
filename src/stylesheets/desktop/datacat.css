@@ -102,11 +102,15 @@
 }
 
 .dc-cell:nth-child(2) {
-	width: 20%;
+	width: 13.3%;
 }
 
 .dc-cell:nth-child(3) {
-	width: 20%;
+	width: 13.3%;
+}
+
+.dc-cell:nth-child(4) {
+	width: 13.3%;
 }
 
 .dc-pagination-container {
