@@ -6,6 +6,8 @@ Backend repo: [steak-and-eggs](https://github.com/armaaniel/steak-and-eggs)
 
 Mobile app: [steak-and-eggs-mobile](https://github.com/armaaniel/steak-and-eggs-mobile)
 
+Price ingestion: [steak-and-eggs-ingester](https://github.com/armaaniel/steak-and-eggs-ingester)
+
 ## Architecture
 
 - React/TypeScript frontend subscribes to real-time price updates via a single WebSocket connection
