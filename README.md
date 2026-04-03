@@ -4,6 +4,8 @@ Frontend for [steakneggs.app](https://steakneggs.app/) — a trading simulator w
 
 Backend repo: [steak-and-eggs](https://github.com/armaaniel/steak-and-eggs)
 
+Mobile app: [steak-and-eggs-mobile](https://github.com/armaaniel/steak-and-eggs-mobile)
+
 ## Architecture
 
 - React/TypeScript frontend subscribes to real-time price updates via a single WebSocket connection
