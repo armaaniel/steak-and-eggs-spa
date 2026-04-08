@@ -19,7 +19,7 @@ interface Activity {
 
 function Activity() {
   const API: String = import.meta.env.VITE_API
-  const token = localStorage.getItem('authToken')
+  const [token, setToken] = useState(localStorage.getItem('authToken'))
 
   const [isLoading, setIsLoading] = useState(true)
   const [activityData, setActivityData] = useState<Activity[] | null>(null)
@@ -54,6 +54,7 @@ function Activity() {
         } else if (response.status === 401) {
           localStorage.removeItem('authToken')
           resetConsumer()
+          setToken(null)
         } else {
           const data = await response.json()
           setActivityData(data)

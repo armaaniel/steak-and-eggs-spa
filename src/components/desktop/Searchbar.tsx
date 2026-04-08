@@ -48,7 +48,7 @@ const Searchbar = () => {
       async function searchStocks() {
         setError(null)
         try {
-          const response = await fetch(`${API}/search?q=${debouncedSearchTerm}`, {
+          const response = await fetch(`${API}/search?q=${encodeURIComponent(debouncedSearchTerm)}`, {
             headers: { authToken: token } as HeadersInit,
           })
 

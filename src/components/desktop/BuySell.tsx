@@ -136,7 +136,7 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
               </div>
 
               <div className="shares-input-form">
-                <NumericFormat value={quantity} onValueChange={handleChange} thousandSeparator={true} decimalScale={2} className="shares-input" allowNegative={false} placeholder="0.00" isAllowed={handleAllowed} />
+                <NumericFormat value={quantity} onValueChange={handleChange} thousandSeparator={true} decimalScale={0} className="shares-input" allowNegative={false} placeholder="0" isAllowed={handleAllowed} />
               </div>
             </div>
 
