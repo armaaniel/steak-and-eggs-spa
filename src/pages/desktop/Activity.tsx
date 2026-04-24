@@ -88,8 +88,8 @@ function Activity() {
                 <th className="activity-row-heading">Transaction Type</th>
                 <th className="activity-row-heading">Symbol</th>
                 <th className="activity-row-heading">Quantity</th>
-                <th className="activity-row-heading">Market Price</th>
                 <th className="activity-row-heading">Value</th>
+                <th className="activity-row-heading">Market Price</th>
                 <th className="activity-row-heading">Realized PnL</th>
                 <th className="activity-row-heading">Date & Time</th>
               </tr>
@@ -129,13 +129,13 @@ function Activity() {
                   <td className="activity-cell">
                     <p className="details-text">{transaction?.quantity?.toLocaleString()}</p>
                   </td>
-
+									
                   <td className="activity-cell">
-                    <p className="details-text">${toCurrency(transaction?.market_price)}</p>
+                    <p className="details-text">${toCurrency(transaction?.value)}</p>
                   </td>
 
                   <td className="activity-cell">
-                    <p className="details-text">${toCurrency(transaction?.value)}</p>
+                    <p className="details-text">${toCurrency(transaction?.market_price)}</p>
                   </td>
 
                   <td className="activity-cell">
