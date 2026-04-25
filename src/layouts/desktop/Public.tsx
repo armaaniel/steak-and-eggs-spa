@@ -39,9 +39,9 @@ function Public() {
           </div>
 
           <div className="nav-right">
-            <Link to="/how-it-works" className="nav-text">
-              <span>How It Works</span>
-            </Link>
+            <a href="https://www.notion.so/Steak-Eggs-3487e61da1f98087811cd2dd38b7f662?source=copy_link" className="nav-text" target="_blank" rel="noopener noreferrer">
+              <span>Architecture</span>
+            </a>
 
             <Link to={token ? '/home' : '/login'} className="login-link">
               Log In

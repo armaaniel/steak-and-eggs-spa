@@ -5,7 +5,6 @@ import AuthForm from './pages/desktop/AuthForm'
 import Home from './pages/desktop/Home'
 import Stocks from './pages/desktop/Stocks'
 import Activity from './pages/desktop/Activity'
-import HowItWorks from './pages/desktop/HowItWorks'
 import Privacy from './pages/desktop/Privacy'
 import DeleteAccount from './pages/desktop/DeleteAccount'
 import AllRoutes from './pages/desktop/AllRoutes'
@@ -23,7 +22,6 @@ function App() {
       <Routes>
         <Route element={<Public />}>
           <Route path="/" element={<Welcome />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/delete" element={<DeleteAccount />} />
         </Route>
