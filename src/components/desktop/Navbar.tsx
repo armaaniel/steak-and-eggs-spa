@@ -160,6 +160,11 @@ function Navbar() {
             <NavLink to="/datacat" className="nav-auth-text">
               <span>DataCat</span>
             </NavLink>
+						
+						<a href="https://www.notion.so/Steak-Eggs-3487e61da1f98087811cd2dd38b7f662?source=copy_link" className="nav-auth-text" target="_blank" rel="noopener noreferrer">
+	              <span>Architecture</span>
+						</a>
+							
           </div>
         </div>
 
