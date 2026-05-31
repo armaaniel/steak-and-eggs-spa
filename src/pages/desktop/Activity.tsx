@@ -134,7 +134,7 @@ function Activity() {
                   </td>
 									
                   <td className="activity-cell">
-                    <p className="details-text">${toPnl(transaction?.average_price)}</p>
+                    <p className="details-text">{toPnl(transaction?.average_price)}</p>
                   </td>
 
                   <td className="activity-cell">
