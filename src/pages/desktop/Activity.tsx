@@ -15,6 +15,7 @@ interface Activity {
   symbol: string
   transaction_type: 'Buy' | 'Sell' | 'Deposit' | 'Withdraw'
   value: string
+	average_price: string | null
 }
 
 function Activity() {
@@ -88,10 +89,12 @@ function Activity() {
                 <th className="activity-row-heading">Transaction Type</th>
                 <th className="activity-row-heading">Symbol</th>
                 <th className="activity-row-heading">Quantity</th>
-                <th className="activity-row-heading">Value</th>
+                <th className="activity-row-heading">Average Price</th>
                 <th className="activity-row-heading">Market Price</th>
                 <th className="activity-row-heading">Realized PnL</th>
                 <th className="activity-row-heading">Date & Time</th>
+                <th className="activity-row-heading">Value</th>
+								
               </tr>
             </thead>
 
@@ -131,7 +134,7 @@ function Activity() {
                   </td>
 									
                   <td className="activity-cell">
-                    <p className="details-text">${toCurrency(transaction?.value)}</p>
+                    <p className="details-text">${toCurrency(transaction?.average_price)}</p>
                   </td>
 
                   <td className="activity-cell">
@@ -145,6 +148,11 @@ function Activity() {
                   <td className="activity-cell">
                     <p className="details-text">{transaction?.date}</p>
                   </td>
+									
+                  <td className="activity-cell">
+                    <p className="details-text">${toCurrency(transaction?.value)}</p>
+                  </td>
+									
                 </tr>
               ))}
             </tbody>
