@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { toCurrency, toPercent, toPnlCurrency } from '../../utils.ts'
-import '../../stylesheets/desktop/positionstable.css'
-import type { Positions, Prices, Error } from '../../types.ts'
+import { toCurrency, toPercent, toPnlCurrency } from '../lib/utils.ts'
+import '../stylesheets/positionstable.css'
+import type { Positions, Prices, Error } from '../lib/types.ts'
 
 interface Props {
   positions?: Positions[]

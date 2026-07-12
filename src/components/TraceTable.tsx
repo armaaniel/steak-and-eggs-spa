@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Column } from '../../types.ts'
+import type { Column } from '../lib/types.ts'
 import { ApolloError } from '@apollo/client'
 
 interface TableProps<T> {

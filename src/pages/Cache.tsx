@@ -1,10 +1,10 @@
 import { useOutletContext, useLocation } from 'react-router-dom'
-import useEndpoint from '../../hooks/useEndpoint'
-import useTransition from '../../hooks/useTransition.ts'
-import EndpointNav from '../../components/desktop/EndpointNav'
+import useEndpoint from '../hooks/useEndpoint'
+import useTransition from '../hooks/useTransition.ts'
+import EndpointNav from '../components/EndpointNav'
 import { gql, useQuery } from '@apollo/client'
-import TraceTable from '../../components/desktop/TraceTable'
-import type { Trace, OutletContextType, Column } from '../../types.ts'
+import TraceTable from '../components/TraceTable'
+import type { Trace, OutletContextType, Column } from '../lib/types.ts'
 
 const TRACE_BREAKDOWN = gql`
   query getTraceBreakdown($endpoint: String!) {

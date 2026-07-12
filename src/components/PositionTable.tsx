@@ -1,6 +1,6 @@
-import { toCurrency, toPercent, toPnlCurrency } from '../../utils.ts'
-import '../../stylesheets/desktop/positionstable.css'
-import type { Price, Position } from '../../types.ts'
+import { toCurrency, toPercent, toPnlCurrency } from '../lib/utils.ts'
+import '../stylesheets/positionstable.css'
+import type { Price, Position } from '../lib/types.ts'
 
 interface Props {
   price: Price

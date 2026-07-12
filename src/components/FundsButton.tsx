@@ -1,9 +1,9 @@
-import '../../stylesheets/desktop/addwithdraw.css'
+import '../stylesheets/addwithdraw.css'
 import { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import type { NumberFormatValues } from 'react-number-format'
-import type { Error } from '../../types.ts'
-import apiFetch from '../../apiFetch'
+import type { Error } from '../lib/types.ts'
+import apiFetch from '../lib/apiFetch'
 
 interface Props {
   mode: 'deposit' | 'withdraw'
@@ -13,8 +13,6 @@ interface Props {
 }
 
 const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) => {
-  const token = localStorage.getItem('authToken')
-
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [amount, setAmount] = useState('')

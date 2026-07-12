@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
-import Searchbar from '../../components/desktop/Searchbar'
-import { resetConsumer } from '../../consumer.ts'
+import Searchbar from '../components/Searchbar'
+import { resetConsumer } from '../lib/consumer.ts'
 
 
 function Navbar() {

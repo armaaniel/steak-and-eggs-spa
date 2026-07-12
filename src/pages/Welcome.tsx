@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import '../../stylesheets/desktop/welcome.css'
+import '../stylesheets/welcome.css'
 
 function Welcome() {
   const navigate = useNavigate()

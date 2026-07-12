@@ -1,11 +1,11 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState, useEffect } from 'react'
-import '../../stylesheets/desktop/endpoint.css'
-import Sidebar from '../../components/desktop/Sidebar'
-import DCNavbar from '../../components/desktop/DCNavbar'
-import useEndpoint from '../../hooks/useEndpoint'
-import type { Trace, ConnectionWithID } from '../../types.ts'
+import '../stylesheets/endpoint.css'
+import Sidebar from '../components/Sidebar'
+import DCNavbar from '../components/DCNavbar'
+import useEndpoint from '../hooks/useEndpoint'
+import type { Trace, ConnectionWithID } from '../lib/types.ts'
 
 const GET_STATS = gql`
   query getStats($endpoint: String!) {

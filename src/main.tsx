@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { ApolloProvider } from '@apollo/client'
-import client from './apolloClient.ts'
+import client from './lib/apolloClient.ts'
 import App from './App.tsx'
 import './stylesheets/application.css'
 

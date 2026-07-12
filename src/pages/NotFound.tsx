@@ -1,4 +1,4 @@
-import '../../stylesheets/desktop/howitworks.css'
+import '../stylesheets/howitworks.css'
 import { Link } from 'react-router-dom'
 
 function NotFound() {

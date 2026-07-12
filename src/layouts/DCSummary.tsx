@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom'
-import Sidebar from '../../components/desktop/Sidebar'
-import DCNavbar from '../../components/desktop/DCNavbar'
-import '../../stylesheets/desktop/datacat.css'
+import Sidebar from '../components/Sidebar'
+import DCNavbar from '../components/DCNavbar'
+import '../stylesheets/datacat.css'
 
 function DCSummary() {
 	

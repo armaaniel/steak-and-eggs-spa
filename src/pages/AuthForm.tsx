@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import '../../stylesheets/desktop/loginsignup.css'
+import '../stylesheets/loginsignup.css'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'

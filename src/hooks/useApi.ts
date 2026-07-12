@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import apiFetch from '../apiFetch'
+import apiFetch from '../lib/apiFetch'
 
 function useApi<T>(path: string, fallback: T) {
 	const [data, setData] = useState<T | null>(null)

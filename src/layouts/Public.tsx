@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import '../../stylesheets/desktop/public.css'
+import '../stylesheets/public.css'
 
 function Public() {
   const token = localStorage.getItem('authToken')

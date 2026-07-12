@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { TraceSummary } from '../../types.ts'
+import type { TraceSummary } from '../lib/types.ts'
 import { ApolloError } from '@apollo/client'
 
 const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: TraceSummary[]; recordsPerPage: number; error: ApolloError | undefined }) => {

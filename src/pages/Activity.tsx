@@ -1,7 +1,7 @@
-import '../../stylesheets/desktop/activity.css'
+import '../stylesheets/activity.css'
 import { useState } from 'react'
-import { toCurrency, toPnl } from '../../utils.ts'
-import useApi from '../../hooks/useApi'
+import { toCurrency, toPnl } from '../lib/utils.ts'
+import useApi from '../hooks/useApi'
 
 interface Activity {
   date: string

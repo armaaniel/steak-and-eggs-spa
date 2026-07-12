@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useDebounce } from 'use-debounce'
 import { Link } from 'react-router-dom'
-import '../../stylesheets/desktop/searchbar.css'
-import type { Error } from '../../types.ts'
-import apiFetch from '../../apiFetch'
+import '../stylesheets/searchbar.css'
+import type { Error } from '../lib/types.ts'
+import apiFetch from '../lib/apiFetch'
 
 interface SearchResults {
   created_at: string

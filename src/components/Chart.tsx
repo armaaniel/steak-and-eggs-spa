@@ -1,7 +1,7 @@
 import React from 'react'
 import { LineChart, Line, Tooltip, ResponsiveContainer, YAxis } from 'recharts'
-import { toCurrency } from '../../utils.ts'
-import type { ChartData } from '../../types.ts'
+import { toCurrency } from '../lib/utils.ts'
+import type { ChartData } from '../lib/types.ts'
 
 interface Props {
   chartData: ChartData[]

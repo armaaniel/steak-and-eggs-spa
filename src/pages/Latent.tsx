@@ -1,9 +1,9 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useEffect } from 'react'
-import TraceTable from '../../components/desktop/TraceTable'
-import useTransition from '../../hooks/useTransition.ts'
-import type { Trace, OutletContextType, Column } from '../../types.ts'
+import TraceTable from '../components/TraceTable'
+import useTransition from '../hooks/useTransition.ts'
+import type { Trace, OutletContextType, Column } from '../lib/types.ts'
 
 const GET_LATENT_TRACES = gql`
   query getLatentTraces {

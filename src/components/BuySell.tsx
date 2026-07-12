@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { toCurrency } from '../../utils.ts'
-import type { Position } from '../../types.ts'
+import { toCurrency } from '../lib/utils.ts'
+import type { Position } from '../lib/types.ts'
 import { NumericFormat } from 'react-number-format'
-import '../../stylesheets/desktop/buysell.css'
+import '../stylesheets/buysell.css'
 import type { NumberFormatValues } from 'react-number-format'
-import type { Price, Error } from '../../types.ts'
-import apiFetch from '../../apiFetch'
+import type { Price, Error } from '../lib/types.ts'
+import apiFetch from '../lib/apiFetch'
 
 interface Props {
   getUserData: () => Promise<void>

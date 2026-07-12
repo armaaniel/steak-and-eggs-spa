@@ -1,4 +1,4 @@
-import '../../stylesheets/desktop/privacy.css'
+import '../stylesheets/privacy.css'
 
 function Privacy() {
   return (
