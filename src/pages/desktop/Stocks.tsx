@@ -24,7 +24,8 @@ interface CompanyData {
 }
 
 function Stocks() {
-  let { symbol } = useParams()
+  const { symbol: rawSymbol } = useParams()
+  const symbol = rawSymbol?.toUpperCase()
   const navigate = useNavigate()
 
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
@@ -40,12 +41,10 @@ function Stocks() {
   const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
 
   useEffect(() => {
-    if (symbol && symbol !== symbol.toUpperCase()) {
-      symbol = symbol.toUpperCase()
+    if (rawSymbol && rawSymbol !== symbol) {
       navigate(`/stocks/${symbol}`, { replace: true })
-      return
     }
-  }, [symbol])
+  }, [rawSymbol, symbol, navigate])
 	
 	const { data: userData, getData: getUserData } = useApi<UserData>(`/stocks/${symbol}/userdata`,
 	{balance:'N/A'})

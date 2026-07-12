@@ -97,7 +97,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         {error ? (
           <tbody>
             <tr className="portfolio-row">
-              <td className="shares-cell" colSpan={5}>
+              <td className="shares-cell" colSpan={columns.length}>
                 <p className="details-text">Unable to load data, please try again</p>
               </td>
             </tr>
@@ -105,7 +105,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         ) : currentPageTraces.length === 0 ? (
           <tbody>
             <tr className="portfolio-row">
-              <td className="shares-cell" colSpan={5}>
+              <td className="shares-cell" colSpan={columns.length}>
                 <p className="details-text">{emptyMessage || 'No traces found'}</p>
               </td>
             </tr>

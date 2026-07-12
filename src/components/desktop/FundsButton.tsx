@@ -13,7 +13,6 @@ interface Props {
 }
 
 const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) => {
-  const API: string = import.meta.env.VITE_API
   const token = localStorage.getItem('authToken')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -53,9 +52,9 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
     setHasTyped(false)
 		
     try {
-      const response = await apiFetch(`${API}/${mode}`, {
+      const response = await apiFetch(`/${mode}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
+        headers: { 'Content-Type': 'application/json' } as HeadersInit,
         body: JSON.stringify({ amount: amount }),
       })
 			if (!response) return

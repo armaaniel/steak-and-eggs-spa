@@ -15,6 +15,7 @@ const apiFetch = async (path: string, config?: RequestInit): Promise<Response | 
 	
 	if (response.status === 401) {
 		localStorage.removeItem('authToken')
+		localStorage.removeItem('username')
 		resetConsumer()
 		window.location.href = '/login'
 		return null
