@@ -1,31 +1,17 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
-import Searchbar from '../components/Searchbar'
+import Searchbar from './Searchbar'
+import ChangePasswordModal from './ChangePasswordModal'
+import DeleteAccountModal from './DeleteAccountModal'
 import { resetConsumer } from '../lib/consumer.ts'
 
 
 function Navbar() {
-  const API: string = import.meta.env.VITE_API
 	const USERNAME = localStorage.getItem('username')
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [showChangePassword, setShowChangePassword] = useState(false)
-  const [showDeleteAccount, setShowDeleteAccount] = useState(false)
+  const [openModal, setOpenModal] = useState<'password' | 'delete' | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  // Change password state
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [cpError, setCpError] = useState<string | null>(null)
-  const [cpSuccess, setCpSuccess] = useState<string | null>(null)
-  const [cpSubmitting, setCpSubmitting] = useState(false)
-  const [cpHasTyped, setCpHasTyped] = useState(false)
-
-  // Delete account state
-  const [deleteConfirmation, setDeleteConfirmation] = useState('')
-  const [daError, setDaError] = useState<string | null>(null)
-  const [daSubmitting, setDaSubmitting] = useState(false)
-  const [daHasTyped, setDaHasTyped] = useState(false)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -42,88 +28,6 @@ function Navbar() {
     localStorage.removeItem('username')
     resetConsumer()
     navigate('/')
-  }
-
-  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setCpHasTyped(false)
-    setCpSuccess(null)
-    setCpError(null)
-
-    if (newPassword !== confirmPassword) {
-      setCpError('New passwords do not match')
-      return
-    }
-    if (newPassword.length === 0) {
-      setCpError('New password must contain at least 1 character')
-      return
-    }
-
-    setCpSubmitting(true)
-    const token = localStorage.getItem('authToken')
-    try {
-      const response = await fetch(`${API}/change_password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
-        body: JSON.stringify({ new_password: newPassword }),
-      })
-      if (response.ok) {
-        setCpSuccess('Password updated successfully')
-      } else {
-        const data = await response.json()
-        setCpError(data.error || 'Something went wrong')
-      }
-    } catch {
-      setCpError('Something went wrong, please try again')
-    } finally {
-      setCpSubmitting(false)
-    }
-  }
-
-  const handleDeleteAccountSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setDaHasTyped(false)
-    if (deleteConfirmation.toLowerCase() !== 'delete') {
-      setDaError('Please type "delete" to confirm')
-      return
-    }
-    setDaError(null)
-    setDaSubmitting(true)
-    const token = localStorage.getItem('authToken')
-    try {
-      const response = await fetch(`${API}/delete_account`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
-      })
-      if (response.ok) {
-        handleLogout()
-      } else {
-        const data = await response.json()
-        setDaError(data.error || 'Something went wrong')
-      }
-    } catch {
-      setDaError('Something went wrong, please try again')
-    } finally {
-      setDaSubmitting(false)
-    }
-  }
-
-  const closeChangePassword = () => {
-    setShowChangePassword(false)
-    setNewPassword('')
-    setConfirmPassword('')
-    setCpError(null)
-    setCpSuccess(null)
-    setCpSubmitting(false)
-    setCpHasTyped(false)
-  }
-
-  const closeDeleteAccount = () => {
-    setShowDeleteAccount(false)
-    setDeleteConfirmation('')
-    setDaError(null)
-    setDaSubmitting(false)
-    setDaHasTyped(false)
   }
 
   return (
@@ -161,11 +65,11 @@ function Navbar() {
             <NavLink to="/datacat" className="nav-auth-text">
               <span>DataCat</span>
             </NavLink>
-						
+
 						<a href="https://www.notion.so/Steak-Eggs-3487e61da1f98087811cd2dd38b7f662?source=copy_link" className="nav-auth-text" target="_blank" rel="noopener noreferrer">
 	              <span>Architecture</span>
 						</a>
-							
+
           </div>
         </div>
 
@@ -189,13 +93,13 @@ function Navbar() {
                 <hr className="profile-dropdown-divider" />
                 <button
                   className="profile-dropdown-item"
-                  onClick={() => { setDropdownOpen(false); setShowChangePassword(true) }}
+                  onClick={() => { setDropdownOpen(false); setOpenModal('password') }}
                 >
                   Change Password
                 </button>
                 <button
                   className="profile-dropdown-item profile-dropdown-item--danger"
-                  onClick={() => { setDropdownOpen(false); setShowDeleteAccount(true) }}
+                  onClick={() => { setDropdownOpen(false); setOpenModal('delete') }}
                 >
                   Delete Account
                 </button>
@@ -209,89 +113,8 @@ function Navbar() {
         </div>
       </nav>
 
-      {showChangePassword && (
-        <div className="modal-overlay" onClick={closeChangePassword}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">Change Password</h2>
-              <button className="modal-close" onClick={closeChangePassword} aria-label="Close">&#x2715;</button>
-            </div>
-            <div className={`ls-error-container ${(cpSuccess || cpError) && !cpHasTyped && !cpSubmitting ? 'visible' : 'hidden'}`}>
-              <p className={cpSuccess ? 'modal-success' : 'modal-error'}>{cpSuccess ?? cpError}</p>
-            </div>
-            <form className="modal-form" onSubmit={handleChangePasswordSubmit}>
-              <div className="ls-input-container">
-                <input
-                  id="new-password"
-                  type="password"
-                  className="ls-input"
-                  placeholder=" "
-                  value={newPassword}
-                  onChange={e => { setNewPassword(e.target.value); setCpHasTyped(true) }}
-                />
-                <label htmlFor="new-password" className="ls-label">New Password</label>
-              </div>
-              <div className="ls-input-container">
-                <input
-                  id="confirm-password"
-                  type="password"
-                  className="ls-input"
-                  placeholder=" "
-                  value={confirmPassword}
-                  onChange={e => { setConfirmPassword(e.target.value); setCpHasTyped(true) }}
-                />
-                <label htmlFor="confirm-password" className="ls-label">Confirm New Password</label>
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="login-link" onClick={closeChangePassword}>
-                  Cancel
-                </button>
-                <button type="submit" className={`login-link signup ${cpSubmitting ? 'submitting' : ''}`} disabled={cpSubmitting}>
-                  Update Password
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showDeleteAccount && (
-        <div className="modal-overlay" onClick={closeDeleteAccount}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">Delete Account</h2>
-              <button className="modal-close" onClick={closeDeleteAccount} aria-label="Close">&#x2715;</button>
-            </div>
-            <p className="modal-danger-text">
-              This action is permanent and cannot be undone. All your data, positions, and history will be deleted immediately.
-            </p>
-            <div className={`ls-error-container ${daError && !daHasTyped && !daSubmitting ? 'visible' : 'hidden'}`}>
-              <p className="modal-error">{daError}</p>
-            </div>
-            <form className="modal-form" onSubmit={handleDeleteAccountSubmit}>
-              <div className="ls-input-container">
-                <input
-                  id="delete-confirmation"
-                  type="text"
-                  className="ls-input"
-                  placeholder=" "
-                  value={deleteConfirmation}
-                  onChange={e => { setDeleteConfirmation(e.target.value); setDaHasTyped(true) }}
-                />
-                <label htmlFor="delete-confirmation" className="ls-label">Type "delete" to confirm</label>
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="login-link" onClick={closeDeleteAccount}>
-                  Cancel
-                </button>
-                <button type="submit" className={`login-link signup modal-delete-btn ${daSubmitting ? 'submitting' : ''}`} disabled={daSubmitting || deleteConfirmation.toLowerCase() !== 'delete'}>
-                  Delete Account
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {openModal === 'password' && <ChangePasswordModal onClose={() => setOpenModal(null)} />}
+      {openModal === 'delete' && <DeleteAccountModal onClose={() => setOpenModal(null)} onDeleted={handleLogout} />}
     </>
   )
 }
