@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import '../stylesheets/loginsignup.css'
+import useTryDemo from '../hooks/useTryDemo'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
@@ -17,34 +18,9 @@ function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<null | string>(null)
   const [hasTyped, setHasTyped] = useState(false)
 
-  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
-  const [demoError, setDemoError] = useState<null | string>(null)
+  const { tryDemo: handleTryDemo, isSubmitting: isDemoSubmitting, error: demoError } = useTryDemo()
 
   const isLogin = mode === 'login'
-
-  async function handleTryDemo() {
-    try {
-      setIsDemoSubmitting(true)
-      const response = await fetch(`${API}/demo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem('authToken', data.token)
-        localStorage.setItem('username', data.username)
-        navigate('/home')
-      } else {
-        const errorData = await response.json()
-        setDemoError(errorData.error)
-      }
-    } catch {
-      setDemoError('Something went wrong, please try again')
-    } finally {
-      setIsDemoSubmitting(false)
-    }
-  }
 
   const validateUsername = (username: string) => {
     if (username.length > 20) return 'Username must be 20 characters or less'
