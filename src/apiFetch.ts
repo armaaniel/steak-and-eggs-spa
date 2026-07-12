@@ -9,7 +9,7 @@ const apiFetch = async (path: string, config?: RequestInit): Promise<Response | 
 		...config,
 		headers: {
 			...config?.headers,
-			authToken: token
+			authToken: token ?? ''
 		}
 	})
 	

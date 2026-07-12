@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format'
 import '../../stylesheets/desktop/buysell.css'
 import type { NumberFormatValues } from 'react-number-format'
 import type { Price, Error } from '../../types.ts'
+import apiFetch from '../../apiFetch'
 
 interface Props {
   getUserData: () => Promise<void>
@@ -13,7 +14,6 @@ interface Props {
   price: Price
   name: string | undefined
   symbol: string | undefined
-  token: string | null
 }
 
 interface OrderData {
@@ -23,8 +23,7 @@ interface OrderData {
   value: string
 }
 
-const BuySell = ({ getUserData, balance, position, price, name, symbol, token }: Props) => {
-  const API: String = import.meta.env.VITE_API
+const BuySell = ({ getUserData, balance, position, price, name, symbol }: Props) => {
 
   const [currentState, setCurrentState] = useState({ action: 'buy', step: 1 })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -77,11 +76,12 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol, token }:
     setError(null)
     const action = currentState.action
     try {
-      const response = await fetch(`${API}/stocks/${symbol}/${action}`, {
+      const response = await apiFetch(`/stocks/${symbol}/${action}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
+        headers: { 'Content-Type': 'application/json' } as HeadersInit,
         body: JSON.stringify({ name: name, quantity: quantity }),
       })
+			if (!response) return
       if (response.ok) {
         const data = await response.json()
         setOrderData(data)

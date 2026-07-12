@@ -1,14 +1,14 @@
 import '../../stylesheets/desktop/stocks.css'
 import Chart from '../../components/desktop/Chart'
-import { useParams, useNavigate, Navigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import PositionTable from '../../components/desktop/PositionTable'
 import BuySell from '../../components/desktop/BuySell'
-import Navbar from '../../components/desktop/Navbar'
 import NotFoundTwo from '../../components/desktop/NotFoundTwo'
-import { getConsumer, resetConsumer } from '../../consumer.ts'
+import { getConsumer } from '../../consumer.ts'
 import { toReadable, toCurrency, toPercent } from '../../utils.ts'
-import { toReadable, toCurrency, toPercent } from '../../hooks/useApi'
+import apiFetch from '../../apiFetch'
+import useApi from '../../hooks/useApi'
 import type { TickerData, UserData, ChartData, Price, Open } from '../../types.ts'
 
 interface MarketData {
@@ -27,13 +27,10 @@ function Stocks() {
   let { symbol } = useParams()
   const navigate = useNavigate()
 
-  const API: string = import.meta.env.VITE_API
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
 	
-	const [token, setToken] = useState(localStorage.getItem('authToken'))
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
-  const [userData, setUserData] = useState<UserData | null>(null)
   const [price, setPrice] = useState<Price>(null)
   const [open, setOpen] = useState<Open>(null)
   const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000))
@@ -42,25 +39,6 @@ function Stocks() {
   const percentChange = toPercent(price, open)
   const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
 
-  async function getUserData() {
-    if (!token) return
-    try {
-      const response = await fetch(`${API}/stocks/${symbol}/userdata`, {
-        headers: { authToken: token } as HeadersInit,
-      })
-      if (response.status === 401) {
-        localStorage.removeItem('authToken')
-        resetConsumer()
-				setToken(null)
-        return
-      }
-      const data = await response.json()
-      setUserData(data)
-    } catch (error) {
-      setUserData({ balance: 'N/A' })
-    }
-  }
-
   useEffect(() => {
     if (symbol && symbol !== symbol.toUpperCase()) {
       symbol = symbol.toUpperCase()
@@ -68,61 +46,45 @@ function Stocks() {
       return
     }
   }, [symbol])
-
-  useEffect(() => {
-    async function getData() {
-      if (!token) return
-      setTickerNotFound(false)
-      try {
-        const [tickerResponse] = await Promise.all([
-          fetch(`${API}/stocks/${symbol}/tickerdata`, {
-            headers: { authToken: token } as HeadersInit,
-          }),
-          getUserData(),
-        ])
-        if (tickerResponse.ok) {
-          const data = await tickerResponse.json()
-          setTickerData(data)
-        } else if (tickerResponse.status === 401) {
-          localStorage.removeItem('authToken')
-          resetConsumer()
-					setToken(null)
-        } else {
-          setTickerNotFound(true)
-        }
-      } catch (error) {
-        setTickerData({exchange: 'N/A', name: 'N/A', ticker_type: 'N/A'})
-      }
-    }
-    getData()
-  }, [symbol])
 	
-	const { data: chartData } = useAPI<ChartData[]>(`/stocks/${symbol}/chartdata`, [
+	const { data: userData, getData: getUserData } = useApi<UserData>(`/stocks/${symbol}/userdata`,
+	{balance:'N/A'})
+	
+	useEffect(() => {
+		async function getTickerData() {
+			setTickerNotFound(false)
+			try {
+				const response = await apiFetch(`/stocks/${symbol}/tickerdata`)
+				if (!response) return
+				if (response.ok) {
+					const data = await response.json()
+					setTickerData(data)
+				} else {
+					setTickerNotFound(true)
+				}
+			} catch {
+        setTickerData({exchange: 'N/A', name: 'N/A', ticker_type: 'N/A'})
+			}
+		}
+		getTickerData()
+	}, [symbol])
+	
+	const { data: chartData } = useApi<ChartData[]>(`/stocks/${symbol}/chartdata`, [
 	{ date: new Date().toLocaleDateString(), value: 0 },
 	{ date: new Date().toLocaleDateString(), value: 0 }
 	])
 	
 	const { data: companyData } = useApi<CompanyData>(`/stocks/${symbol}/companydata`,
-	{ market_cap: 'N/A', description: 'N/A'}
-	)
+	{ market_cap: 'N/A', description: 'N/A'})
 	
 	const { data: marketData } = useApi<MarketData>(`/stocks/${symbol}/marketdata`, 
-	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' }
-	)
-
+	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
 
   useEffect(() => {
     async function getStockPrice() {
       try {
-        const response = await fetch(`${API}/stocks/${symbol}/stockprice`, {
-          headers: { authToken: token } as HeadersInit,
-        })
-	      if (response.status === 401) {
-	        localStorage.removeItem('authToken')
-	        resetConsumer()
-					setToken(null)
-	        return
-	      }
+        const response = await apiFetch(`/stocks/${symbol}/stockprice`) 
+				if (!response) return
         const data = await response.json()
         setPrice(data.price)
         setOpen(data.open)
@@ -154,25 +116,17 @@ function Stocks() {
     return () => clearInterval(timeStamp)
   }, [])
 
-  if (!token) {
-    return <Navigate to="/login" />
-  }
-
   if (tickerNotFound) {
     return (
-      <>
-        <header><Navbar /></header>
-        <main className="home loaded">
-          <NotFoundTwo />
-        </main>
-      </>
+			<main className="home loaded">
+				<NotFoundTwo />
+      </main>
     )
   }
 
   return (
     <>
-      <header><Navbar /></header>
-      <main className={`home ${tickerData ? 'loaded' : ''}`}>
+      <main className={`home ${tickerData && userData ? 'loaded' : ''}`}>
         <div className='stocks-left'>
           <div className="stock-plus-chart">
             <div className="stock-heading-price">
@@ -203,7 +157,7 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              <Chart chartData={chartData} />
+              {chartData && <Chart chartData={chartData} />}
             </div>
           </div>
 
@@ -269,7 +223,7 @@ function Stocks() {
         </div>
 
         <div className='stocks-right'>
-          <BuySell getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} name={tickerData?.name} symbol={symbol} token={token} />
+          <BuySell getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} name={tickerData?.name} symbol={symbol} />
         </div>
       </main>
     </>

@@ -1,10 +1,7 @@
 import '../../stylesheets/desktop/activity.css'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { toCurrency, toPnl } from '../../utils.ts'
-import { resetConsumer } from '../../consumer.ts'
-import Navbar from '../../components/desktop/Navbar'
-import { Navigate } from 'react-router-dom'
-import type { Error } from '../../types.ts'
+import useApi from '../../hooks/useApi'
 
 interface Activity {
   date: string
@@ -19,12 +16,10 @@ interface Activity {
 }
 
 function Activity() {
-  const API: String = import.meta.env.VITE_API
-  const [token, setToken] = useState(localStorage.getItem('authToken'))
 
-  const [activityData, setActivityData] = useState<Activity[] | null>(null)
-  const [error, setError] = useState<Error>(null)
   const [currentPage, setCurrentPage] = useState(1)
+	
+	const { data: activityData, error } = useApi<Activity[]>(`/activitydata`, [])
 
   const recordsPerPage = 15
   const startRecord = (currentPage - 1) * recordsPerPage
@@ -39,45 +34,10 @@ function Activity() {
   const forward = () => {
     setCurrentPage(currentPage + 1)
   }
-
-  useEffect(() => {
-    async function getActivity() {
-      setError(null)
-      if (!token) return
-      try {
-        const response = await fetch(`${API}/activitydata`, {
-          headers: { authToken: token },
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setActivityData(data)
-        } else if (response.status === 401) {
-          localStorage.removeItem('authToken')
-          resetConsumer()
-          setToken(null)
-        } else {
-          const data = await response.json()
-          setActivityData(data)
-          setError('Unable to fetch transactions, please try again')
-        }
-      } catch (error) {
-        setError('Unable to fetch transactions, please try again')
-        setActivityData([])
-			}
-		}
-    getActivity()
-  }, [])
-
-  if (!token) {
-    return <Navigate to="/" />
-  }
+	
 
   return (
     <>
-      <header>
-        <Navbar />
-      </header>
-
       <main className="home-activity">
         <div className={`activity-container ${activityData ? 'loaded' : ''}`}>
           <table className="activity-stock-table">

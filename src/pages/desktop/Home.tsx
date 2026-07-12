@@ -5,11 +5,11 @@ import PositionsTable from '../../components/desktop/PositionsTable'
 import FundsButton from '../../components/desktop/FundsButton'
 import { useState, useEffect } from 'react'
 import { toPortfolio } from '../../utils.ts'
-import { getConsumer, resetConsumer } from '../../consumer.ts'
+import { getConsumer } from '../../consumer.ts'
 import { useThrottledCallback } from 'use-debounce'
-import Navbar from '../../components/desktop/Navbar'
-import { Navigate } from 'react-router-dom'
 import type { Positions, Prices, Error } from '../../types.ts'
+import useApi from '../../hooks/useApi'
+import apiFetch from '../../apiFetch'
 
 interface Portfolio {
   aum: string | number
@@ -23,67 +23,38 @@ interface ChartData {
 }
 
 function Home() {
-  const API: string = import.meta.env.VITE_API
 
-	const [token, setToken] = useState(localStorage.getItem('authToken'))
-  const [portfolio, setPortfolio] = useState<Portfolio | undefined>(undefined)
   const [prices, setPrices] = useState<Prices>({})
-  const [chartData, setChartData] = useState<ChartData[]>([])
+  const [portfolio, setPortfolio] = useState<Portfolio | undefined>(undefined)
   const [error, setError] = useState<Error>(null)
-
-  async function getPortfolioData() {
-    setError(null)
-    if (!token) return
-    try {
-      const response = await fetch(`${API}/portfoliodata`, {
-        headers: { authToken: token },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setPortfolio(data)
-      } else if (response.status === 401) {
-        localStorage.removeItem('authToken')
-        resetConsumer()
-				setToken(null)
-      } else {
-        const data = await response.json()
-        setPortfolio(data)
-        setError('Unable to fetch positions, please try again')
-      }
-    } catch (error) {
-      setPortfolio({ aum: 'N/A', balance: 'N/A' })
-      setError('Unable to fetch positions, please try again')
-    }
-  }
-
-  async function getChartData() {
-    if (!token) return
-    try {
-      const response = await fetch(`${API}/portfoliochart`, {
-        headers: { authToken: token },
-      })
-      if (response.status === 401) {
-        localStorage.removeItem('authToken')
-        resetConsumer()
-				setToken(null)
-				return
-      }
-      const data = await response.json()
-      setChartData(data)
-    } catch (error) {
-      const today = new Date()
-      setChartData([
-        { date: today.toLocaleDateString(), value: 0 },
-        { date: today.toLocaleDateString(), value: 0 },
-      ])
-    }
-  }
-
+	
+	async function getPortfolioData() {
+		setError(null)
+		try {
+			const response = await apiFetch(`/portfoliodata`)
+			if (!response) return
+			if (response.ok) {
+				const data = await response.json()
+				setPortfolio(data)
+			} else {
+				const data = await response.json()
+				setPortfolio(data)
+	      setError('Unable to fetch positions, please try again')
+			}
+		} catch (error) {
+			setPortfolio({ aum: 'N/A', balance: 'N/A' })
+	    setError('Unable to fetch positions, please try again')
+		}
+	}
+	
   useEffect(() => {
     getPortfolioData()
-    getChartData()
-  }, [])
+  }, [])		
+	
+	const { data: chartData, getData: getChartData } = useApi<ChartData[]>(`/portfoliochart`, [
+  { date: new Date().toLocaleDateString(), value: 0 },
+  { date: new Date().toLocaleDateString(), value: 0 }
+	])
 
   useEffect(() => {
     if (!portfolio?.positions) return
@@ -121,16 +92,8 @@ function Home() {
     updatePortfolio()
   }, [prices, portfolio?.positions, portfolio?.balance, updatePortfolio])
 
-  if (!token) {
-    return <Navigate to="/login" />
-  }
-
   return (
     <>
-      <header>
-        <Navbar />
-      </header>
-
       <main className={`home ${portfolio ? 'loaded' : ''}`}>
         <div className="home-left">
           <div className="port-value">
@@ -139,7 +102,7 @@ function Home() {
           </div>
 
           <div className="chart">
-            <Chart chartData={chartData} />
+          	{chartData && <Chart chartData={chartData} />}
           </div>
 
           <div className="position">

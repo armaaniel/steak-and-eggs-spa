@@ -3,6 +3,7 @@ import { useDebounce } from 'use-debounce'
 import { Link } from 'react-router-dom'
 import '../../stylesheets/desktop/searchbar.css'
 import type { Error } from '../../types.ts'
+import apiFetch from '../../apiFetch'
 
 interface SearchResults {
   created_at: string
@@ -16,13 +17,13 @@ interface SearchResults {
 }
 
 const Searchbar = () => {
-  const API: string = import.meta.env.VITE_API
-  const token = localStorage.getItem('authToken')
 
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm] = useDebounce(searchTerm, 150)
+	
   const [searchResults, setSearchResults] = useState<SearchResults[]>([])
   const [showResults, setShowResults] = useState(false)
+	
   const [error, setError] = useState<Error>(null)
   const searchRef = useRef<HTMLDivElement>(null)
 
@@ -48,22 +49,20 @@ const Searchbar = () => {
       async function searchStocks() {
         setError(null)
         try {
-          const response = await fetch(`${API}/search?q=${encodeURIComponent(debouncedSearchTerm)}`, {
-            headers: { authToken: token } as HeadersInit,
-          })
+          const response = await apiFetch(`/search?q=${encodeURIComponent(debouncedSearchTerm)}`)
 
-          if (!response.ok) {
-            if (response.status === 401) {
-              localStorage.removeItem('authToken')
-              window.location.href = '/login'
-              return null
-            }
-            throw new Error(`${response.status}`)
-          }
-
-          const data = await response.json()
-          setSearchResults(data)
-          setShowResults(true)
+          if (!response) return
+					
+					if (response.ok) {
+	          const data = await response.json()
+	          setSearchResults(data)
+	          setShowResults(true)			
+					} else {
+	          setError('Something went wrong, please try again later')
+						const data = await response.json()
+	          setSearchResults(data)
+	          setShowResults(true)			
+					}
         } catch (error) {
           setError('Something went wrong, please try again later')
           setSearchResults([])

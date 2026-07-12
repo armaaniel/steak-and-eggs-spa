@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Welcome from './pages/desktop/Welcome'
 import Public from './layouts/desktop/Public'
+import ProtectedRoute from './layouts/desktop/ProtectedRoute'
 import AuthForm from './pages/desktop/AuthForm'
 import Home from './pages/desktop/Home'
 import Stocks from './pages/desktop/Stocks'
@@ -25,15 +26,16 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/delete" element={<DeleteAccount />} />
         </Route>
-
-        <Route path="/home" element={<Home />} />
-
-        <Route path="/activity" element={<Activity />} />
-
-        <Route path="/stocks/:symbol" element={<Stocks />} />
-
+				
         <Route path="/login" element={<AuthForm mode='login' key='login' />} />
         <Route path="/signup" element={<AuthForm mode='signup' key='signup' />} />
+				
+				<Route element={<ProtectedRoute />}>
+					<Route path="/home" element={<Home />} />
+        	<Route path="/activity" element={<Activity />} />
+        	<Route path="/stocks/:symbol" element={<Stocks />} />
+				</Route>
+
 
         <Route element={<DCSummary />}>
           <Route path="/datacat" element={<AllRoutes />} />
