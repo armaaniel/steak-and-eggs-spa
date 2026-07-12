@@ -22,7 +22,6 @@ function Activity() {
   const API: String = import.meta.env.VITE_API
   const [token, setToken] = useState(localStorage.getItem('authToken'))
 
-  const [isLoading, setIsLoading] = useState(true)
   const [activityData, setActivityData] = useState<Activity[] | null>(null)
   const [error, setError] = useState<Error>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -64,10 +63,8 @@ function Activity() {
       } catch (error) {
         setError('Unable to fetch transactions, please try again')
         setActivityData([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
+			}
+		}
     getActivity()
   }, [])
 
@@ -82,7 +79,7 @@ function Activity() {
       </header>
 
       <main className="home-activity">
-        <div className={`activity-container ${isLoading ? '' : 'loaded'}`}>
+        <div className={`activity-container ${activityData ? 'loaded' : ''}`}>
           <table className="activity-stock-table">
             <thead>
               <tr className="activity-header-row">

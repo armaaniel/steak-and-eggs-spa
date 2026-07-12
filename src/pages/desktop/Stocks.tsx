@@ -8,6 +8,7 @@ import Navbar from '../../components/desktop/Navbar'
 import NotFoundTwo from '../../components/desktop/NotFoundTwo'
 import { getConsumer, resetConsumer } from '../../consumer.ts'
 import { toReadable, toCurrency, toPercent } from '../../utils.ts'
+import { toReadable, toCurrency, toPercent } from '../../hooks/useApi'
 import type { TickerData, UserData, ChartData, Price, Open } from '../../types.ts'
 
 interface MarketData {
@@ -33,9 +34,6 @@ function Stocks() {
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
   const [userData, setUserData] = useState<UserData | null>(null)
-  const [chartData, setChartData] = useState<ChartData[]>([])
-  const [marketData, setMarketData] = useState<null | MarketData>(null)
-  const [companyData, setCompanyData] = useState<null | CompanyData>(null)
   const [price, setPrice] = useState<Price>(null)
   const [open, setOpen] = useState<Open>(null)
   const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000))
@@ -98,75 +96,20 @@ function Stocks() {
     }
     getData()
   }, [symbol])
+	
+	const { data: chartData } = useAPI<ChartData[]>(`/stocks/${symbol}/chartdata`, [
+	{ date: new Date().toLocaleDateString(), value: 0 },
+	{ date: new Date().toLocaleDateString(), value: 0 }
+	])
+	
+	const { data: companyData } = useApi<CompanyData>(`/stocks/${symbol}/companydata`,
+	{ market_cap: 'N/A', description: 'N/A'}
+	)
+	
+	const { data: marketData } = useApi<MarketData>(`/stocks/${symbol}/marketdata`, 
+	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' }
+	)
 
-  useEffect(() => {
-    async function getChartData() {
-      try {
-        const response = await fetch(`${API}/stocks/${symbol}/chartdata`, {
-          headers: { authToken: token } as HeadersInit,
-        })
-	      if (response.status === 401) {
-	        localStorage.removeItem('authToken')
-	        resetConsumer()
-					setToken(null)
-	        return
-	      }
-        const data = await response.json()
-        setChartData(data)
-      } catch (error) {
-        const today = new Date()
-        setChartData([
-          { date: today.toLocaleDateString(), value: 0 },
-          { date: today.toLocaleDateString(), value: 0 },
-        ])
-      }
-    }
-    getChartData()
-  }, [symbol])
-
-  useEffect(() => {
-    async function getCompanyData() {
-      setCompanyData(null)
-      try {
-        const response = await fetch(`${API}/stocks/${symbol}/companydata`, {
-          headers: { authToken: token } as HeadersInit,
-        })
-	      if (response.status === 401) {
-	        localStorage.removeItem('authToken')
-	        resetConsumer()
-					setToken(null)
-	        return
-	      }
-        const data = await response.json()
-        setCompanyData(data)
-      } catch (error) {
-        setCompanyData({ market_cap: 'N/A', description: 'N/A' })
-      }
-    }
-    getCompanyData()
-  }, [symbol])
-
-  useEffect(() => {
-    async function getMarketData() {
-      setMarketData(null)
-      try {
-        const response = await fetch(`${API}/stocks/${symbol}/marketdata`, {
-          headers: { authToken: token } as HeadersInit,
-        })
-	      if (response.status === 401) {
-	        localStorage.removeItem('authToken')
-	        resetConsumer()
-					setToken(null)
-	        return
-	      }
-        const data = await response.json()
-        setMarketData(data)
-      } catch (error) {
-        setMarketData({ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
-      }
-    }
-    getMarketData()
-  }, [symbol])
 
   useEffect(() => {
     async function getStockPrice() {

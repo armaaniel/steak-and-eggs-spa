@@ -73,7 +73,7 @@ function AuthForm({ mode }: AuthFormProps) {
       const response = await fetch(`${API}/${mode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: username.trim(), password }),
       })
 
       if (response.ok) {
