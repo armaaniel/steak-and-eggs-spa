@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import type { NumberFormatValues } from 'react-number-format'
 import type { Error } from '../../types.ts'
+import apiFetch from '../../apiFetch'
 
 interface Props {
   mode: 'deposit' | 'withdraw'
@@ -52,12 +53,12 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
     setHasTyped(false)
 		
     try {
-      const response = await fetch(`${API}/${mode}`, {
+      const response = await apiFetch(`${API}/${mode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', authToken: token } as HeadersInit,
         body: JSON.stringify({ amount: amount }),
       })
-
+			if (!response) return
       if (response.ok) {
         setAmount('')
         getPortfolioData()
