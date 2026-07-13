@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { TraceSummary } from '../lib/types.ts'
+import type { TraceSummary } from '../../lib/types.ts'
 import { ApolloError } from '@apollo/client'
+import usePagination from '../../hooks/usePagination'
+import PaginationControls from '../PaginationControls'
 
 const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: TraceSummary[]; recordsPerPage: number; error: ApolloError | undefined }) => {
   const navigate = useNavigate()
@@ -9,10 +11,6 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
   const [sorted, setSorted] = useState(false)
   const [direction, setDirection] = useState('desc')
   const [sortField, setSortField] = useState('totalRequests')
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const startRecord = (currentPage - 1) * recordsPerPage
-  const endRecord = startRecord + recordsPerPage
 
   const sortTraces = () => {
     if (!sorted) return traceData
@@ -37,16 +35,7 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
   }
 
   const sortedTraces = sortTraces()
-  const totalPages = Math.ceil(sortedTraces.length / recordsPerPage)
-  const currentPageTraces = sortedTraces.slice(startRecord, endRecord)
-
-  const back = () => {
-    setCurrentPage(currentPage - 1)
-  }
-
-  const forward = () => {
-    setCurrentPage(currentPage + 1)
-  }
+  const { currentItems, currentPage, totalPages, next, prev, reset } = usePagination(sortedTraces, recordsPerPage)
 
   const handleSelect = (trace: TraceSummary) => {
     navigate(`/datacat/${trace.cleanRoute}`)
@@ -55,18 +44,12 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
   const handleSort = (field: keyof TraceSummary) => {
     setSorted(true)
     if (sortField === field) {
-      if (direction === 'asc') {
-        setDirection('desc')
-        setCurrentPage(1)
-      } else {
-        setDirection('asc')
-        setCurrentPage(1)
-      }
+      setDirection(direction === 'asc' ? 'desc' : 'asc')
     } else {
       setSortField(field)
       setDirection('desc')
-      setCurrentPage(1)
     }
+    reset()
   }
 
   return (
@@ -99,7 +82,7 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
           </tbody>
         ) : (
           <tbody>
-            {currentPageTraces.map((trace) => (
+            {currentItems.map((trace) => (
               <tr key={trace.route} className="dc-row" onClick={() => handleSelect(trace)}>
                 <td className="dc-cell">
                   <p className="details-text">{trace.route}</p>
@@ -108,7 +91,7 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
                 <td className="dc-cell">
                   <p className="details-text">{trace.p99.toFixed(0)} ms</p>
                 </td>
-								
+
 								<td className="dc-cell">
 								  <p className="details-text">{trace.cacheHitRate ? `${trace.cacheHitRate}%` : '—'}</p>
 								</td>
@@ -122,19 +105,7 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
         )}
       </table>
 
-      <div className="dc-pagination-container">
-        <button className="page-button" onClick={back} disabled={currentPage === 1}>
-          {' '}
-          Previous{' '}
-        </button>
-        <span className="page-span">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button className="page-button" onClick={forward} disabled={currentPage === totalPages}>
-          {' '}
-          Next{' '}
-        </button>
-      </div>
+      <PaginationControls currentPage={currentPage} totalPages={totalPages} onNext={next} onPrev={prev} className="dc-pagination-container" />
     </>
   )
 }

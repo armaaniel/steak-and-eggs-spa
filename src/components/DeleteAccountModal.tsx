@@ -6,7 +6,7 @@ interface Props {
   onDeleted: () => void
 }
 
-export default function DeleteAccountModal({ onClose, onDeleted }: Props) {
+const DeleteAccountModal = ({ onClose, onDeleted }: Props) => {
   const [confirmation, setConfirmation] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -78,3 +78,5 @@ export default function DeleteAccountModal({ onClose, onDeleted }: Props) {
     </div>
   )
 }
+
+export default DeleteAccountModal

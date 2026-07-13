@@ -2,7 +2,7 @@ interface Props {
   className?: string
 }
 
-export default function Logo({ className }: Props) {
+const Logo = ({ className }: Props) => {
   const classes = className ? `logo-desktop ${className}` : 'logo-desktop'
 
   return (
@@ -24,3 +24,5 @@ export default function Logo({ className }: Props) {
     </svg>
   )
 }
+
+export default Logo

@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
-import type { Column } from '../lib/types.ts'
+import { useState } from 'react'
+import type { Column } from '../../lib/types.ts'
 import { ApolloError } from '@apollo/client'
+import usePagination from '../../hooks/usePagination'
+import PaginationControls from '../PaginationControls'
 
 interface TableProps<T> {
   traceData: T[]
@@ -20,10 +22,6 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
   const [sorted, setSorted] = useState(false)
   const [direction, setDirection] = useState('desc')
   const [sortField, setSortField] = useState('createdAt')
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const startRecord = (currentPage - 1) * recordsPerPage
-  const endRecord = startRecord + recordsPerPage
 
   const sortTraces = () => {
     if (!sorted) return traceData
@@ -45,16 +43,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
   }
 
   const sortedTraces = sortTraces()
-  const totalPages = Math.ceil(sortedTraces.length / recordsPerPage)
-  const currentPageTraces = sortedTraces.slice(startRecord, endRecord)
-
-  const back = () => {
-    setCurrentPage(currentPage - 1)
-  }
-
-  const forward = () => {
-    setCurrentPage(currentPage + 1)
-  }
+  const { currentItems, currentPage, totalPages, next, prev, reset } = usePagination(sortedTraces, recordsPerPage)
 
   const handleSelect = (trace: T) => {
     setSelectedTrace(trace)
@@ -63,23 +52,13 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
   const handleSort = (field: string) => {
     setSorted(true)
     if (sortField === field) {
-      if (direction === 'asc') {
-        setDirection('desc')
-        setCurrentPage(1)
-      } else {
-        setDirection('asc')
-        setCurrentPage(1)
-      }
+      setDirection(direction === 'asc' ? 'desc' : 'asc')
     } else {
       setSortField(field)
       setDirection('desc')
-      setCurrentPage(1)
     }
+    reset()
   }
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [traceData])
 
   return (
     <>
@@ -102,7 +81,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
               </td>
             </tr>
           </tbody>
-        ) : currentPageTraces.length === 0 ? (
+        ) : currentItems.length === 0 ? (
           <tbody>
             <tr className="portfolio-row">
               <td className="shares-cell" colSpan={columns.length}>
@@ -112,7 +91,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
           </tbody>
         ) : (
           <tbody>
-            {currentPageTraces.map((trace) => (
+            {currentItems.map((trace) => (
               <tr key={trace.id} className={selectedTrace?.id === trace.id ? 'portfolio-row-selected' : 'portfolio-row'} onClick={() => handleSelect(trace)}>
                 {columns.map((column) => (
                   <td key={column.key} className="shares-cell">
@@ -125,19 +104,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         )}
       </table>
 
-      <div className="pagination-container">
-        <button className="page-button" onClick={back} disabled={currentPage === 1}>
-          {' '}
-          Previous{' '}
-        </button>
-        <span className="page-span">
-          Page {currentPage} of {totalPages > 0 ? totalPages : 1}
-        </span>
-        <button className="page-button" onClick={forward} disabled={currentPage === totalPages}>
-          {' '}
-          Next{' '}
-        </button>
-      </div>
+      <PaginationControls currentPage={currentPage} totalPages={totalPages} onNext={next} onPrev={prev} />
     </>
   )
 }

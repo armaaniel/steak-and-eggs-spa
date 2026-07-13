@@ -1,11 +1,12 @@
 import { useOutletContext, useLocation } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState, useEffect } from 'react'
-import TraceTable from '../components/TraceTable'
-import EndpointNav from '../components/EndpointNav'
-import useEndpoint from '../hooks/useEndpoint'
-import useTransition from '../hooks/useTransition.ts'
-import type { Trace, OutletContextType, Column } from '../lib/types.ts'
+import TraceTable from '../../components/datacat/TraceTable'
+import EndpointNav from '../../components/datacat/EndpointNav'
+import useEndpoint from '../../hooks/useEndpoint'
+import useTransition from '../../hooks/useTransition.ts'
+import { traceColumns } from '../../lib/traceColumns'
+import type { Trace, OutletContextType } from '../../lib/types.ts'
 
 const GET_TRACES = gql`
   query getTraces($endpoint: String!) {
@@ -41,14 +42,7 @@ function Endpoint() {
 
   const recordsPerPage = 18
   const isLoaded = useTransition(loading, data || error)
-  const columns: Column<Trace>[] = [
-    { key: 'createdAt', label: 'Created At', sortable: true, render: (trace) => new Date(trace.createdAt).toLocaleString() },
-    { key: 'endpoint', label: 'Endpoint', sortable: false, render: (trace) => trace.endpoint },
-    { key: 'duration', label: 'Duration', sortable: true, render: (trace) => `${trace.duration?.toFixed(0)} ms` },
-    { key: 'controllerMethod', label: 'Controller Method', sortable: false, render: (trace) => `${trace.controller}#${trace.action}` },
-    { key: 'status', label: 'Status', sortable: false, render: (trace) => trace.status },
-  ]
-  
+
   const traceList = data?.traceList || []
   const statuses = [...new Set(traceList.map((trace) => trace.status))]
   const filteredTraces = statusFilter === 'all' ? traceList : traceList.filter((trace) => String(trace.status) === statusFilter)
@@ -89,7 +83,7 @@ function Endpoint() {
       </div>
 
       <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-        <TraceTable traceData={filteredTraces} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
+        <TraceTable traceData={filteredTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
       </div>
     </>
   )

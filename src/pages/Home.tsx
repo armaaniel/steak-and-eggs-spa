@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { toPortfolio } from '../lib/utils.ts'
 import { getConsumer } from '../lib/consumer.ts'
 import { useThrottledCallback } from 'use-debounce'
-import type { Positions, Prices, Error } from '../lib/types.ts'
+import type { Positions, Prices, Error, ChartData } from '../lib/types.ts'
 import useApi from '../hooks/useApi'
 import apiFetch from '../lib/apiFetch'
 
@@ -15,11 +15,6 @@ interface Portfolio {
   aum: string | number
   balance: string
   positions?: Positions[]
-}
-
-interface ChartData {
-  date: string
-  value: number
 }
 
 function Home() {

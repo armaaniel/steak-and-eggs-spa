@@ -5,7 +5,7 @@ interface Props {
   onClose: () => void
 }
 
-export default function ChangePasswordModal({ onClose }: Props) {
+const ChangePasswordModal = ({ onClose }: Props) => {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -95,3 +95,5 @@ export default function ChangePasswordModal({ onClose }: Props) {
     </div>
   )
 }
+
+export default ChangePasswordModal

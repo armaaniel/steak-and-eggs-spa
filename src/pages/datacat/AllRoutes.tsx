@@ -1,7 +1,7 @@
 import { gql, useQuery } from '@apollo/client'
-import TraceOverviewTable from '../components/TraceOverviewTable'
-import useTransition from '../hooks/useTransition.ts'
-import type { TraceSummary } from '../lib/types.ts'
+import TraceOverviewTable from '../../components/datacat/TraceOverviewTable'
+import useTransition from '../../hooks/useTransition.ts'
+import type { TraceSummary } from '../../lib/types.ts'
 
 const TRACE_SUMMARY = gql`
   query fetchTraceSummary {

@@ -1,7 +1,8 @@
 import '../stylesheets/activity.css'
-import { useState } from 'react'
 import { toCurrency, toPnl } from '../lib/utils.ts'
 import useApi from '../hooks/useApi'
+import usePagination from '../hooks/usePagination'
+import PaginationControls from '../components/PaginationControls'
 
 interface Activity {
   date: string
@@ -16,25 +17,8 @@ interface Activity {
 }
 
 function Activity() {
-
-  const [currentPage, setCurrentPage] = useState(1)
-	
 	const { data: activityData, error } = useApi<Activity[]>(`/activitydata`, [])
-
-  const recordsPerPage = 15
-  const startRecord = (currentPage - 1) * recordsPerPage
-  const endRecord = startRecord + recordsPerPage
-  const totalPages = Math.ceil((activityData?.length || 1) / recordsPerPage)
-  const currentPageTraces = activityData?.slice(startRecord, endRecord)
-
-  const back = () => {
-    setCurrentPage(currentPage - 1)
-  }
-
-  const forward = () => {
-    setCurrentPage(currentPage + 1)
-  }
-	
+	const { currentItems, currentPage, totalPages, next, prev } = usePagination(activityData ?? [], 15)
 
   return (
     <>
@@ -51,7 +35,6 @@ function Activity() {
                 <th className="activity-row-heading">Realized PnL</th>
                 <th className="activity-row-heading">Date & Time</th>
                 <th className="activity-row-heading">Value</th>
-								
               </tr>
             </thead>
 
@@ -76,7 +59,7 @@ function Activity() {
             )}
 
             <tbody>
-              {currentPageTraces?.map((transaction) => (
+              {currentItems.map((transaction) => (
                 <tr key={transaction?.id} className="activity-row">
                   <td className="activity-cell">
                     <p className="details-text">{transaction?.transaction_type}</p>
@@ -89,7 +72,7 @@ function Activity() {
                   <td className="activity-cell">
                     <p className="details-text">{transaction?.quantity?.toLocaleString()}</p>
                   </td>
-									
+
                   <td className="activity-cell">
                     <p className="details-text">{toPnl(transaction?.average_price)}</p>
                   </td>
@@ -105,30 +88,17 @@ function Activity() {
                   <td className="activity-cell">
                     <p className="details-text">{transaction?.date}</p>
                   </td>
-									
+
                   <td className="activity-cell">
                     <p className="details-text">${toCurrency(transaction?.value)}</p>
                   </td>
-									
                 </tr>
               ))}
             </tbody>
           </table>
 
           {activityData && (
-            <div className="pagination-container">
-              <button className="page-button" onClick={back} disabled={currentPage === 1}>
-                {' '}
-                Previous{' '}
-              </button>
-              <span className="page-span">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button className="page-button" onClick={forward} disabled={currentPage === totalPages}>
-                {' '}
-                Next{' '}
-              </button>
-            </div>
+            <PaginationControls currentPage={currentPage} totalPages={totalPages} onNext={next} onPrev={prev} />
           )}
         </div>
       </main>

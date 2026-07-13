@@ -1,8 +1,8 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import TraceTable from '../components/TraceTable'
-import useTransition from '../hooks/useTransition.ts'
-import type { OutletContextType, Column, Connection, ConnectionWithID } from '../lib/types.ts'
+import TraceTable from '../../components/datacat/TraceTable'
+import useTransition from '../../hooks/useTransition.ts'
+import type { OutletContextType, Column, Connection, ConnectionWithID } from '../../lib/types.ts'
 
 const GET_CONNECTIONS = gql`
   query getConnections {
