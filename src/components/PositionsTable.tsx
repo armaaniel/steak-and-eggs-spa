@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { toCurrency, toPercent, toPnlCurrency } from '../lib/utils.ts'
 import '../stylesheets/positionstable.css'
 import type { Positions, Prices, Error } from '../lib/types.ts'
+import TickerLogo from './TickerLogo'
 
 interface Props {
   positions?: Positions[]
@@ -54,14 +55,7 @@ const PositionsTable = ({ positions, prices, error }: Props) => {
             <tr key={position.symbol} className="portfolio-row-two loaded">
               <td className="shares-cell">
                 <Link to={`/stocks/${position.symbol}`} className="symbol-name">
-                  <img
-                    src={`https://img.logo.dev/ticker/${position.symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`}
-                    height="32"
-                    width="32"
-                    onError={(e) => {
-                      ;(e.target as HTMLImageElement).src = '/fallback-logo.svg'
-                    }}
-                  />
+                  <TickerLogo symbol={position.symbol} />
                   <div className="stock-text">
                     <p className="stock-symbol">{position.symbol}</p>
                     <p className="stock-name">{position.name}</p>

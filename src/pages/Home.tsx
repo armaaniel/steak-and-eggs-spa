@@ -3,13 +3,12 @@ import '../stylesheets/authenticated.css'
 import Chart from '../components/Chart'
 import PositionsTable from '../components/PositionsTable'
 import FundsButton from '../components/FundsButton'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { toPortfolio } from '../lib/utils.ts'
-import { getConsumer } from '../lib/consumer.ts'
 import { useThrottledCallback } from 'use-debounce'
-import type { Positions, Prices, Error, ChartData } from '../lib/types.ts'
+import type { Positions, ChartData } from '../lib/types.ts'
 import useApi from '../hooks/useApi'
-import apiFetch from '../lib/apiFetch'
+import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
 
 interface Portfolio {
   aum: string | number
@@ -19,54 +18,16 @@ interface Portfolio {
 
 function Home() {
 
-  const [prices, setPrices] = useState<Prices>({})
-  const [portfolio, setPortfolio] = useState<Portfolio | undefined>(undefined)
-  const [error, setError] = useState<Error>(null)
-	
-	async function getPortfolioData() {
-		setError(null)
-		try {
-			const response = await apiFetch(`/portfoliodata`)
-			if (!response) return
-			if (response.ok) {
-				const data = await response.json()
-				setPortfolio(data)
-			} else {
-				const data = await response.json()
-				setPortfolio(data)
-	      setError('Unable to fetch positions, please try again')
-			}
-		} catch (error) {
-			setPortfolio({ aum: 'N/A', balance: 'N/A' })
-	    setError('Unable to fetch positions, please try again')
-		}
-	}
-	
-  useEffect(() => {
-    getPortfolioData()
-  }, [])		
-	
+	const { data: portfolio, error, setData: setPortfolio, getData: getPortfolioData } = useApi<Portfolio>(`/portfoliodata`,
+		{ aum: 'N/A', balance: 'N/A' })
+
+	const symbols = portfolio?.positions?.map((p) => p.symbol) ?? []
+	const prices = usePriceSubscriptions(symbols)
+		
 	const { data: chartData, getData: getChartData } = useApi<ChartData[]>(`/portfoliochart`, [
   { date: new Date().toLocaleDateString(), value: 0 },
   { date: new Date().toLocaleDateString(), value: 0 }
 	])
-
-  useEffect(() => {
-    if (!portfolio?.positions) return
-
-    const consumer = getConsumer()
-    const subscriptions = portfolio.positions.map((position) => {
-      return consumer.subscriptions.create(
-        { channel: 'PriceChannel', symbol: position.symbol },
-        {
-          received(data: number) {
-            setPrices((prev) => ({ ...prev, [position.symbol]: data }))
-          },
-        },
-      )
-    })
-    return () => subscriptions.forEach((subscription) => subscription.unsubscribe())
-  }, [portfolio?.positions])
 
   const updatePortfolio = useThrottledCallback(
     () => {

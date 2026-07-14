@@ -26,7 +26,7 @@ function useApi<T>(path: string, fallback: T) {
 	
 	useEffect(() => { getData() }, [path])
 	
-	return {data, error, getData }
+	return {data, error, getData, setData }
 	
 }
 

@@ -37,7 +37,7 @@ function AuthForm({ mode }: AuthFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setHasTyped(false)
-		
+
     if (!isLogin) {
       const usernameError = validateUsername(username)
       const passwordError = validatePassword(password)
@@ -93,7 +93,7 @@ function AuthForm({ mode }: AuthFormProps) {
         <div className="ls-container">
           <div className="ls-form-container">
             <h2 className="ls-heading">{isLogin ? 'Welcome Back' : 'Sign Up'}</h2>
-						
+
 						<div className={`ls-error-container ${error && !isSubmitting && !hasTyped ? 'visible' : 'hidden'}`}>
 							<p className="ls-heading error">{error}</p>
             </div>

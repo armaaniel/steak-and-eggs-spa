@@ -5,10 +5,11 @@ import { useState, useEffect } from 'react'
 import PositionTable from '../components/PositionTable'
 import BuySell from '../components/BuySell'
 import NotFoundTwo from '../components/NotFoundTwo'
-import { getConsumer } from '../lib/consumer.ts'
 import { toReadable, toCurrency, toPercent } from '../lib/utils.ts'
 import apiFetch from '../lib/apiFetch'
 import useApi from '../hooks/useApi'
+import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
+import TickerLogo from '../components/TickerLogo'
 import type { TickerData, UserData, ChartData, Price, Open } from '../lib/types.ts'
 
 interface MarketData {
@@ -23,6 +24,11 @@ interface CompanyData {
   market_cap: number | string | null
 }
 
+interface Quote {
+  price: Price
+  open: Open
+}
+
 function Stocks() {
   const { symbol: rawSymbol } = useParams()
   const symbol = rawSymbol?.toUpperCase()
@@ -32,10 +38,16 @@ function Stocks() {
 	
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
-  const [price, setPrice] = useState<Price>(null)
-  const [open, setOpen] = useState<Open>(null)
   const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000))
   const [imageLoaded, setImageLoaded] = useState(false)
+
+  const { data: quote } = useApi<Quote>(
+    `/stocks/${symbol}/stockprice`,
+    { price: 'N/A', open: 'N/A' }
+  )
+  const prices = usePriceSubscriptions(symbol ? [symbol] : [])
+  const price = prices[symbol ?? ''] ?? quote?.price ?? null
+  const open = quote?.open ?? null
 
   const percentChange = toPercent(price, open)
   const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
@@ -80,35 +92,6 @@ function Stocks() {
 	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
 
   useEffect(() => {
-    async function getStockPrice() {
-      try {
-        const response = await apiFetch(`/stocks/${symbol}/stockprice`) 
-				if (!response) return
-        const data = await response.json()
-        setPrice(data.price)
-        setOpen(data.open)
-      } catch (error) {
-        setPrice('N/A')
-        setOpen('N/A')
-      }
-    }
-    getStockPrice()
-  }, [symbol])
-
-  useEffect(() => {
-    const consumer = getConsumer()
-    const subscription = consumer.subscriptions.create(
-      { channel: 'PriceChannel', symbol: symbol },
-      {
-        received(data: number) {
-          setPrice(data)
-        },
-      },
-    )
-    return () => subscription.unsubscribe()
-  }, [symbol])
-
-  useEffect(() => {
     const timeStamp = setInterval(() => {
       setAsOf(new Date(Date.now() - 15 * 60 * 1000))
     }, 15000)
@@ -131,14 +114,11 @@ function Stocks() {
             <div className="stock-heading-price">
               <div className="stock-heading-container">
                 <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
-                  <img
-                    src={`https://img.logo.dev/ticker/${symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`}
-                    height="40" width="40"
+                  <TickerLogo
+                    symbol={symbol!}
+                    size={40}
                     onLoad={() => setImageLoaded(true)}
-                    onError={(e) => {
-                      ;(e.target as HTMLImageElement).src = '/fallback-logo.svg'
-                      setImageLoaded(true)
-                    }}
+                    onError={() => setImageLoaded(true)}
                   />
                 </div>
                 <div className="stock-text">

@@ -1,6 +1,7 @@
 import { toCurrency, toPercent, toPnlCurrency } from '../lib/utils.ts'
 import '../stylesheets/positionstable.css'
 import type { Price, Position } from '../lib/types.ts'
+import TickerLogo from './TickerLogo'
 
 interface Props {
   price: Price
@@ -27,10 +28,7 @@ const PositionTable = ({ position, price }: Props) => {
         <tr key={position.symbol} className={`portfolio-row-two ${price != null ? 'loaded' : ''}`}>
           <td className="shares-cell">
             <div className="symbol-name">
-              <img
-                src={`https://img.logo.dev/ticker/${position.symbol}?token=pk_ZBCJebqoQXKBWVLhwcIBfg&retina=true&format=png`}
-                height="32" width="32"
-                onError={(e) => {(e.target as HTMLImageElement).src = '/fallback-logo.svg'}}/>
+              <TickerLogo symbol={position.symbol} />
               <div className="stock-text">
                 <p className="stock-symbol">${toCurrency(value)}</p>
                 <p key={position.shares} className="stock-shares">

@@ -45,10 +45,10 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
 			setHasTyped(false)
 			return
 		}
-		
+
     setIsSubmitting(true)
     setHasTyped(false)
-		
+
     try {
       const response = await apiFetch(`/${mode}`, {
         method: 'POST',
@@ -74,16 +74,16 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
 
   return (
     <div className="add-funds-container">
-			
+
       <button className={`add-withdraw-button ${isOpen ? 'active' : ''}`} onClick={toggleDropdown}>
         {mode === 'deposit' ? 'Add Funds' : 'Withdraw Funds'}
       </button>
-			
+
       <div className={`add-funds-dropdown ${isOpen ? 'open' : ''}`}>
 				<div className={`af-error-container ${(error && !isSubmitting && !hasTyped) || insufficient ? 'visible' : ''}`}>
-					<p>{insufficient ? 'Not enough funds to withdraw' : (error || '\u00A0')}</p>
+					<p>{insufficient ? 'Not enough funds to withdraw' : (error || ' ')}</p>
 				</div>
-					
+
         <div className="add-funds-input-row">
           <span className="modal-dollar">$</span>
           <NumericFormat value={amount} onValueChange={handleChange} thousandSeparator={true} decimalScale={2}

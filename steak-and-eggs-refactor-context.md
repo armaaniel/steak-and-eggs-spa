@@ -226,8 +226,8 @@ function Stocks() {
 - [x] BuySell refactor to use apiFetch for POST
 - [x] FundsButton refactor to use apiFetch for POST
 - [x] BuySell decomposition (OrderForm, OrderConfirm, OrderResult components)
-- [ ] Pagination extraction (shared between Activity and DataCat views)
-- [ ] Decide on usePrice after seeing final Stocks.tsx shape
+- [x] Pagination extraction (shared between Activity and DataCat views)
+- [x] Decide on usePrice after seeing final Stocks.tsx shape
 - [ ] Port patterns to React Native mobile app (same hooks, quick job once SPA is done)
 
 ### Collaborative Experience (Track 2)
