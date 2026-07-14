@@ -202,7 +202,7 @@ function Stocks() {
         </div>
 
         <div className='stocks-right'>
-          <BuySell getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} name={tickerData?.name} symbol={symbol} />
+          <BuySell getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} symbol={symbol} />
         </div>
       </main>
     </>

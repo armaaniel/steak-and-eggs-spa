@@ -12,7 +12,6 @@ interface Props {
   balance: string | undefined
   position: Position | undefined
   price: Price
-  name: string | undefined
   symbol: string | undefined
 }
 
@@ -23,7 +22,7 @@ interface OrderData {
   value: string
 }
 
-const BuySell = ({ getUserData, balance, position, price, name, symbol }: Props) => {
+const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
 
   const [currentState, setCurrentState] = useState({ action: 'buy', step: 1 })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -79,7 +78,7 @@ const BuySell = ({ getUserData, balance, position, price, name, symbol }: Props)
       const response = await apiFetch(`/stocks/${symbol}/${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' } as HeadersInit,
-        body: JSON.stringify({ name: name, quantity: quantity }),
+        body: JSON.stringify({ quantity: quantity }),
       })
 			if (!response) return
       if (response.ok) {
