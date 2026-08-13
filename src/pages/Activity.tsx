@@ -41,7 +41,7 @@ function Activity() {
             {!error && activityData?.length === 0 && (
               <tbody>
                 <tr className="activity-row">
-                  <td className="activity-cell" colSpan={7}>
+                  <td className="activity-cell" colSpan={8}>
                     <p className="details-text">No Activities Yet</p>
                   </td>
                 </tr>
@@ -51,7 +51,7 @@ function Activity() {
             {error && (
               <tbody>
                 <tr className="activity-row">
-                  <td className="activity-cell" colSpan={7}>
+                  <td className="activity-cell" colSpan={8}>
                     <p className="details-text">{error}</p>
                   </td>
                 </tr>

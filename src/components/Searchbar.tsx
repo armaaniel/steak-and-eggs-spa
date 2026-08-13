@@ -87,7 +87,7 @@ const Searchbar = () => {
         </div>
 
         <div className="search-input-container">
-          <input type="search" className="search-input" placeholder=" " value={searchTerm} onChange={handleChange} />
+          <input type="search" id="search" className="search-input" placeholder=" " value={searchTerm} onChange={handleChange} />
           <label htmlFor="search" className="search-label">
             Search name or symbol
           </label>

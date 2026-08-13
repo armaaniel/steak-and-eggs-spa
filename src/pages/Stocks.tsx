@@ -39,7 +39,6 @@ function Stocks() {
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
   const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000))
-  const [imageLoaded, setImageLoaded] = useState(false)
 
   const { data: quote } = useApi<Quote>(
     `/stocks/${symbol}/stockprice`,
@@ -113,14 +112,7 @@ function Stocks() {
           <div className="stock-plus-chart">
             <div className="stock-heading-price">
               <div className="stock-heading-container">
-                <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
-                  <TickerLogo
-                    symbol={symbol!}
-                    size={40}
-                    onLoad={() => setImageLoaded(true)}
-                    onError={() => setImageLoaded(true)}
-                  />
-                </div>
+                <TickerLogo symbol={symbol!} size={40} />
                 <div className="stock-text">
                   <p className="stock-symbol">{symbol}</p>
                   <p className={`stock-name-two ${tickerData ? 'loaded' : ''}`}>{tickerData?.name}</p>

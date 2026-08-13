@@ -15,3 +15,13 @@ body {
   background-color: #fcfcfc;
   height:100%;
 }
+
+/* Shared ticker logo: fades itself in once the image loads */
+.ticker-logo {
+  opacity: 0;
+  transition: opacity 50ms;
+}
+
+.ticker-logo.loaded {
+  opacity: 1;
+}

@@ -12,15 +12,6 @@
 	row-gap:2rem;
 }
 
-.image-container {
-  transition: opacity 50ms;
-  opacity: 0;
-}
-
-.image-container.loaded {
-  opacity: 1;
-}
-
 .stock-heading-container {
 	display:flex;
 	column-gap:0.5rem;

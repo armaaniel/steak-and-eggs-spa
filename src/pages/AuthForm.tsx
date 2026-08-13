@@ -103,6 +103,7 @@ function AuthForm({ mode }: AuthFormProps) {
                 <input
                   type="text"
                   name="username"
+                  id="username"
                   className="ls-input"
                   placeholder=" "
                   onChange={(e) => { setUsername(e.target.value); setHasTyped(true) }}
@@ -114,6 +115,7 @@ function AuthForm({ mode }: AuthFormProps) {
                 <input
                   type="password"
                   name="password"
+                  id="password"
                   className="ls-input"
                   placeholder=" "
                   onChange={(e) => { setPassword(e.target.value); setHasTyped(true) }}

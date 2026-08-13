@@ -1,22 +1,26 @@
+import { useState } from 'react'
+
 interface Props {
   symbol: string
   size?: number
-  onLoad?: () => void
-  onError?: () => void
 }
 
 const LOGO_DEV_TOKEN = 'pk_ZBCJebqoQXKBWVLhwcIBfg'
 
-const TickerLogo = ({ symbol, size = 32, onLoad, onError }: Props) => {
+const TickerLogo = ({ symbol, size = 32 }: Props) => {
+  const [loaded, setLoaded] = useState(false)
+
   return (
     <img
       src={`https://img.logo.dev/ticker/${symbol}?token=${LOGO_DEV_TOKEN}&retina=true&format=png`}
+      className={`ticker-logo ${loaded ? 'loaded' : ''}`}
       height={size}
       width={size}
-      onLoad={onLoad}
+      alt={`${symbol} logo`}
+      onLoad={() => setLoaded(true)}
       onError={(e) => {
         e.currentTarget.src = '/fallback-logo.svg'
-        onError?.()
+        setLoaded(true)
       }}
     />
   )

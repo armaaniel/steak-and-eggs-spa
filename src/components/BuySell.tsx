@@ -126,7 +126,9 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
                 <p>Order Type</p>
               </div>
 
-              <div>{isBuy ? <p>Market Buy</p> : <p>Market Sell</p>}</div>
+              <div>
+                <p>Market {isBuy ? 'Buy' : 'Sell'}</p>
+              </div>
             </div>
 
             <div className="bs-containers">
@@ -140,7 +142,9 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
             </div>
 
             <div className="bs-containers">
-              <div className="bs-width-wrapper">{currentState.action === 'buy' ? <p>Estimated Cost</p> : <p>Estimated Value</p>}</div>
+              <div className="bs-width-wrapper">
+                <p>Estimated {isBuy ? 'Cost' : 'Value'}</p>
+              </div>
 
               <div>
                 <p>{price === null ? '$0.00 USD' : `$${toCurrency(estimatedCost)} USD`}</p>
@@ -156,7 +160,9 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
               <hr className="bs-line" />
 
               <div className="bs-containers">
-                <div className="bs-width-wrapper">{isBuy ? <p>Available Cash</p> : <p>Available Shares</p>}</div>
+                <div className="bs-width-wrapper">
+                  <p>Available {isBuy ? 'Cash' : 'Shares'}</p>
+                </div>
 
                 <div>{isBuy ? <p className="est-cost"> ${toCurrency(balance)} USD </p> : <p>{position?.shares?.toLocaleString() || 0}</p>}</div>
               </div>
@@ -184,7 +190,9 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
                 <p>Order</p>
               </div>
 
-              <div>{isBuy ? <p>Market Buy {symbol}</p> : <p>Market Sell {symbol}</p>}</div>
+              <div>
+                <p>Market {isBuy ? 'Buy' : 'Sell'} {symbol}</p>
+              </div>
             </div>
 
             <div className="bs-containers">
@@ -198,7 +206,9 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
             </div>
 
             <div className="bs-containers">
-              <div className="bs-width-wrapper">{isBuy ? <p>Estimated Cost</p> : <p>Estimated Value</p>}</div>
+              <div className="bs-width-wrapper">
+                <p>Estimated {isBuy ? 'Cost' : 'Value'}</p>
+              </div>
 
               <div>
                 <p> ${toCurrency(estimatedCost)} USD </p>
@@ -231,11 +241,15 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
               <p>Order</p>
             </div>
 
-            <div>{isBuy ? <p>Market Buy {orderData.symbol}</p> : <p>Market Sell {orderData.symbol}</p>}</div>
+            <div>
+              <p>Market {isBuy ? 'Buy' : 'Sell'} {orderData.symbol}</p>
+            </div>
           </div>
 
           <div className="bs-containers">
-            <div className="bs-width-wrapper">{isBuy ? <p>Cost</p> : <p>Value</p>}</div>
+            <div className="bs-width-wrapper">
+              <p>{isBuy ? 'Cost' : 'Value'}</p>
+            </div>
 
             <div>
               <p> ${toCurrency(orderData.value)} USD </p>
@@ -284,7 +298,9 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
               <p>Order</p>
             </div>
 
-            <div>{isBuy ? <p>Market Buy {symbol}</p> : <p>Market Sell {symbol}</p>}</div>
+            <div>
+              <p>Market {isBuy ? 'Buy' : 'Sell'} {symbol}</p>
+            </div>
           </div>
 
           <div className="bs-containers">
