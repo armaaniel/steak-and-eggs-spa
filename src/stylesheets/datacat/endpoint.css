@@ -24,7 +24,7 @@
 	flex-direction:column;
 	row-gap:1rem;
 	padding:1rem;
-	box-shadow:rgba(0,0,0,0.06)0px 0px 2px 1px;
+	box-shadow:var(--dc-shadow-card);
 	border:1px solid var(--dc-border);
 	width:50%;
 	transition:opacity 150ms;
@@ -44,7 +44,7 @@
 	flex-direction:column;
 	row-gap:1rem;
 	padding:1rem;
-	box-shadow:rgba(0,0,0,0.06)0px 0px 2px 1px;
+	box-shadow:var(--dc-shadow-card);
 	border:1px solid var(--dc-border);
 	opacity:0;
     transition: opacity 150ms;
@@ -110,11 +110,11 @@
 }
 
 .portfolio-row-heading.asc {
-	box-shadow: rgba(0,0,0,0.6) 0px -3px 0px 0px inset;
+	box-shadow: var(--dc-sort-indicator) 0px -3px 0px 0px inset;
 }
 
 .portfolio-row-heading.desc {
-	box-shadow: rgba(0,0,0,0.6) 0px 3px 0px 0px inset;
+	box-shadow: var(--dc-sort-indicator) 0px 3px 0px 0px inset;
 }
 
 .cache-hidden {
@@ -158,7 +158,7 @@
 	display:flex;
 	position:relative;
 	width:90px;
-	border: 0.8px solid rgb(50,48,47);
+	border: 0.8px solid var(--dc-border-strong);
 	border-radius:6px;
 	opacity:0;
 	transition:opacity 150ms;
@@ -170,7 +170,7 @@
 }
 
 .status-div:focus-within {
-	outline: 1px solid black;
+	outline: 1px solid var(--dc-border-strong);
 }
 
 .status-label {

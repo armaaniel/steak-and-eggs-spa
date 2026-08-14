@@ -1,11 +1,10 @@
-/* DataCat is pinned light until its own dark pass: its own page background,
-   and light-scheme native controls regardless of the app theme */
+/* DataCat's page surface. Its palette is themed separately from the main app (--dc-* tokens),
+   but it follows the same light/dark switch. */
 .dc-root {
 	display:flex;
 	flex-direction:column;
 	flex:1;
 	background-color:var(--dc-page-bg);
-	color-scheme:light;
 }
 
 .dc-home-parent {
@@ -80,7 +79,7 @@
 	border-radius:0.5rem;
 	flex-direction:column;
 	row-gap:1rem;
-	box-shadow:rgba(0,0,0,0.06) 0px 0px 2px 1px;
+	box-shadow:var(--dc-shadow-card);
 	border:1px solid var(--dc-border);
 	opacity:0;
 	transition:opacity 150ms;
@@ -119,7 +118,7 @@
 }
 
 /* Extends PaginationControls' base .pagination-container class.
-   The shared component uses themable tokens, so pin its DataCat instance to the light palette */
+   The shared component uses main-app tokens, so restate it in DataCat's palette */
 .dc-pagination-container {
 	padding-bottom:1rem;
 	color:var(--dc-text);
@@ -128,10 +127,11 @@
 .dc-pagination-container .page-button {
 	background-color:var(--dc-surface);
 	border-color:var(--dc-border);
+	color:var(--dc-text);
 }
 
 .dc-pagination-container .page-button:disabled {
-	color:rgb(222, 226, 230);
+	color:var(--dc-text-disabled);
 }
 
 .dc-row-heading {
@@ -148,12 +148,12 @@
 }
 
 .dc-row-heading.asc {
-	box-shadow: rgba(0,0,0,0.6) 0px -3px 0px 0px inset;
+	box-shadow: var(--dc-sort-indicator) 0px -3px 0px 0px inset;
 	user-select: none;
 }
 
 .dc-row-heading.desc {
-	box-shadow: rgba(0,0,0,0.6) 0px 3px 0px 0px inset;
+	box-shadow: var(--dc-sort-indicator) 0px 3px 0px 0px inset;
 	user-select: none;
 }
 

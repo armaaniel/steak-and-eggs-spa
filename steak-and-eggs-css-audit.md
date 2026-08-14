@@ -31,8 +31,12 @@ illustration keeps its fixed colors — it's artwork, not UI.
 **Decisions:**
 - **Theme control:** manual toggle (profile dropdown) persisted in localStorage, with the OS
   `prefers-color-scheme` as the first-visit default. `data-theme` attribute on `<html>`.
-- **DataCat:** tokenized in the same pass, but dark values designed later — it stays light
-  until its own phase (acceptable "flashlight effect" when entering it from dark mode).
+- **DataCat:** tokenized in the same pass, dark values designed in its own later phase.
+  *Resolved 2026-08-13* — DataCat now themes too, so the planned "flashlight effect" never
+  shipped. Its dark palette stays cool-tinted (`#0e1013`/`#16191d` slate) where the main app
+  is pure neutral, preserving the same identity split the light palettes have. The pinning
+  (`color-scheme:light` on `.dc-root`, the pagination override) is gone; the override remains
+  only to restate the shared component in DataCat's palette.
 - **Drift:** unify the near-duplicate values aggressively (differences ≤3/255 per channel) —
   every extra role must be designed twice once dark exists.
 
@@ -355,7 +359,7 @@ modifiers straying from their base file.
 | 20 | Prettier formatting pass | 🟢 | all files | todo |
 | 21 | Dark palette (main app) + `[data-theme="dark"]` values | 🌓 feature | `application.css` | ✅ done |
 | 22 | Theme toggle: profile dropdown UI, localStorage, system default, no-flash init | 🌓 feature | `Navbar` + `index.html` | ✅ done |
-| 23 | DataCat dark palette (later phase) | 🌓 feature | `datacat/endpoint.css` | todo |
+| 23 | DataCat dark palette (later phase) | 🌓 feature | `datacat/endpoint.css` | ✅ done |
 | 24 | Move DataCat styles into `stylesheets/datacat/` (mirrors the JSX layout; give TraceTable its own cell class so #7 doesn't cross the boundary) | 🟡 org | `datacat.css` / `endpoint.css` + 2 imports | ✅ done |
 | 25 | Move `authenticated.css` import from Home.tsx to ProtectedRoute.tsx (it styles the layout's Navbar/modals, not Home; mirrors Public.tsx) | 🟡 org | `Home.tsx:2` → `ProtectedRoute.tsx` | ✅ done |
 
