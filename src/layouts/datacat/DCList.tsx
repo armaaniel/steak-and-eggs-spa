@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState, useEffect } from 'react'
-import '../../stylesheets/endpoint.css'
+import '../../stylesheets/datacat/endpoint.css'
 import Sidebar from '../../components/datacat/Sidebar'
 import DCNavbar from '../../components/datacat/DCNavbar'
 import TraceDetailsPanel from '../../components/datacat/TraceDetailsPanel'
