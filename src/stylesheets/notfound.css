@@ -1,26 +1,18 @@
-.howto-header {
+.not-found-header {
 	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	font-weight:600;
 	font-size:1.5rem;
-	margin-top:65px;
-}
-
-.howto-header.four {
 	margin-top:30px;
 }
 
-.howto-parent {
+.not-found-parent {
 	display:flex;
 	flex-direction:column;
 	margin-left:75px;
-	row-gap:32.5px;
-}
-
-.howto-parent.four {
 	row-gap:30px;
 }
 
-.four-main {
+.not-found-main {
 	display:flex;
 	flex-direction:column;
 	flex:1;

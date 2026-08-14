@@ -1,4 +1,4 @@
-import '../stylesheets/howitworks.css'
+import '../stylesheets/notfound.css'
 import { Link } from 'react-router-dom'
 import Logo from '../components/Logo'
 
@@ -16,9 +16,9 @@ function NotFound() {
       </header>
 
       <main className="home two">
-        <div className="four-main">
-          <div className="howto-parent four">
-            <div className="howto-header four">
+        <div className="not-found-main">
+          <div className="not-found-parent">
+            <div className="not-found-header">
               <h1>
                 Page cannot be found <br />
                 Click our logo <br /> To go back to the app{' '}
@@ -27,7 +27,7 @@ function NotFound() {
 
             <div>
               <Link to={token ? '/home' : '/'}>
-                <Logo className="four" />
+                <Logo className="large" />
               </Link>
             </div>
           </div>
