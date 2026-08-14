@@ -123,7 +123,7 @@ function AuthForm({ mode }: AuthFormProps) {
                 <label htmlFor="password" className="ls-label">Password</label>
               </div>
 
-              <button type="submit" className="login-link signup login" disabled={isSubmitting}>
+              <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
                 {isLogin ? 'Log In' : 'Sign Up'}
               </button>
             </form>

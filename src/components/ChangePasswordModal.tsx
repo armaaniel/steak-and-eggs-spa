@@ -83,10 +83,10 @@ const ChangePasswordModal = ({ onClose }: Props) => {
             <label htmlFor="confirm-password" className="ls-label">Confirm New Password</label>
           </div>
           <div className="modal-actions">
-            <button type="button" className="login-link" onClick={onClose}>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className={`login-link signup ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting}>
+            <button type="submit" className={`btn btn-primary modal-save ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting}>
               Update Password
             </button>
           </div>

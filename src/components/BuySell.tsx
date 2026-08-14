@@ -152,7 +152,7 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
             </div>
 
             <div className="bs-next-parent">
-							<button className="next" onClick={nextStep} 
+							<button className="btn btn-primary next" onClick={nextStep}
 							disabled={(isBuy ? hasInsufficientFunds : hasInsufficientShares) || quantityInvalid || free}>
 							  Next
 							</button>
@@ -217,7 +217,7 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
             <hr className="bs-line" />
 
             <form onSubmit={handleSubmit}>
-              <button type="submit" className={`next ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting || (isBuy && hasInsufficientFunds) || (isSell && hasInsufficientShares)}>
+              <button type="submit" className={`btn btn-primary next ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting || (isBuy && hasInsufficientFunds) || (isSell && hasInsufficientShares)}>
                 Submit
               </button>
             </form>
@@ -279,7 +279,7 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
           <hr className="bs-line" />
 
           <div>
-            <button className="next" onClick={resetState}>
+            <button className="btn btn-primary next" onClick={resetState}>
               Done
             </button>
           </div>
@@ -324,7 +324,7 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
           </div>
 
           <div>
-            <button className="next" onClick={resetState}>
+            <button className="btn btn-primary next" onClick={resetState}>
               Done
             </button>
           </div>

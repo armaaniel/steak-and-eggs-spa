@@ -76,38 +76,22 @@
 	-webkit-appearance: none;
 }
 
-.add-funds-dropdown .aw-submit {
+.btn.aw-submit {
 	font-size: 14px;
-	font-family: var(--font-ui);
-	font-weight: 500;
-	background:var(--btn-bg);
-	border-radius: 4rem;
 	padding: 0.6rem 1rem;
-	color:var(--btn-text);
 	width: 100%;
-	border: 1px solid;
-	transition: 0.2s all;
-	cursor: pointer;
 }
 
-.add-funds-dropdown .aw-submit:hover {
-	background-color: var(--btn-hover);
-}
-
-.aw-submit:disabled {
+.btn.aw-submit:disabled {
 	background:var(--surface);
-  color:var(--text);
+	color:var(--text);
 	cursor:not-allowed;
 }
 
-.aw-submit:disabled:hover {
-	background:var(--surface);
-}
-
-.aw-submit.submitting:disabled {
-  background:var(--btn-bg);
-  color:var(--btn-text);
-  cursor: pointer;
+.btn.aw-submit.submitting:disabled {
+	background:var(--btn-bg);
+	color:var(--btn-text);
+	cursor: pointer;
 }
 
 .af-error-container {

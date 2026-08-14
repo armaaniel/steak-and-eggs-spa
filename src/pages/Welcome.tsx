@@ -10,7 +10,7 @@ function Welcome() {
         <h1 className="welcome-heading-desktop"> The best place to paper trade </h1>
 
         <div className="welcome-start-desktop">
-          <button className="login-link signup desktop" disabled={isSubmitting} onClick={tryDemo}>
+          <button className="btn btn-primary welcome-cta" disabled={isSubmitting} onClick={tryDemo}>
             Try Demo
           </button>
           <div className={`welcome-error ${error && !isSubmitting ? 'visible' : 'hidden'}`}>

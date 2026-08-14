@@ -29,11 +29,11 @@ function Public() {
               <span>Architecture</span>
             </a>
 
-            <Link to={token ? '/home' : '/login'} className="login-link">
+            <Link to={token ? '/home' : '/login'} className="btn btn-secondary">
               Log In
             </Link>
 
-            <Link to={token ? '/home' : '/signup'} className="login-link signup">
+            <Link to={token ? '/home' : '/signup'} className="btn btn-primary">
               Sign Up
             </Link>
           </div>

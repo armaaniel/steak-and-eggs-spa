@@ -3,6 +3,7 @@ import { ApolloProvider } from '@apollo/client'
 import client from './lib/apolloClient.ts'
 import App from './App.tsx'
 import './stylesheets/application.css'
+import './stylesheets/buttons.css'
 
 const root = createRoot(document.body)
 root.render(

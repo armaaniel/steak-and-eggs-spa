@@ -98,35 +98,23 @@
 	outline:1px solid var(--border-strong);
 }
 
-.next {
-	font-family: var(--font-ui);
-	font-weight:500;
+.btn.next {
 	font-size:14px;
-	background:var(--btn-bg);
-	border:1px solid;
-	border-radius:4rem;
 	min-height:2rem;
 	width:100%;
 	padding:1rem;
-	color:var(--btn-text);
-	transition:0.2s
-}
-
-.next:hover {
-	background-color:var(--btn-hover);
-	cursor:pointer;
 }
 
 /* text matches the button background on purpose: blanks the label while the request is in flight */
-.next.submitting:disabled {
+.btn.next.submitting:disabled {
 	background:var(--btn-bg);
 	color:var(--btn-bg);
 	cursor:default;
 }
 
-.next:disabled {
+.btn.next:disabled {
 	background:var(--surface);
-  	color:var(--text);
+	color:var(--text);
 	cursor:not-allowed;
 }
 

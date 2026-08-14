@@ -21,6 +21,20 @@
 	justify-content:center;
 }
 
+.btn.welcome-cta {
+	width:50%;
+	padding:0.9rem 1rem;
+	font-size:20px;
+	border-color:var(--text-strong);
+}
+
+.btn.welcome-cta:disabled {
+	background:var(--brand);
+	color:var(--brand);
+	border-color:var(--brand);
+	cursor:default;
+}
+
 .welcome-error {
 	position:absolute;
 	top:calc(100% + 48px);

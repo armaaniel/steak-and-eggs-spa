@@ -89,7 +89,7 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
           <NumericFormat value={amount} onValueChange={handleChange} thousandSeparator={true} decimalScale={2}
             className="modal-amount-input" allowNegative={false} placeholder="0.00" suffix=" USD" isAllowed={handleAllowed}/>
         </div>
-        <button type="button" className={`aw-submit ${isSubmitting ? 'submitting' : ''}`} onClick={handleSubmit} disabled={isSubmitting || insufficient}>
+        <button type="button" className={`btn btn-primary aw-submit ${isSubmitting ? 'submitting' : ''}`} onClick={handleSubmit} disabled={isSubmitting || insufficient}>
           Submit
         </button>
       </div>

@@ -167,12 +167,25 @@
 	color:var(--text-muted);
 }
 
+.btn.auth-submit {
+	width:38%;
+	align-self:center;
+	font-size:1rem;
+	margin-top:1rem;
+}
+
+.btn.auth-submit:disabled {
+	background:var(--surface);
+	color:var(--text-strong);
+	cursor:default;
+}
+
 @media (max-width:768px) {
 	.ls-form-container {
 		width:80%;
 	}
 
-	.login-link.signup.login {
+	.btn.auth-submit {
 		width:100%;
 	}
 }

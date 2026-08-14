@@ -47,15 +47,14 @@
 	position: relative;
 }
 
-.profile-trigger {
+.btn.profile-trigger {
 	white-space: nowrap;
 	font-size: 1rem;
-	cursor: pointer;
-	border: 1px solid var(--border);
+	border-color: var(--border);
 	transition: 0.1s;
 }
 
-.profile-trigger:hover {
+.btn.profile-trigger:hover {
 	border-color:var(--border-strong);
 	background-color:var(--surface);
 }
@@ -166,11 +165,10 @@
 	color:var(--text);
 }
 
-.login-link.signup.submitting:disabled {
+.btn.modal-save.submitting:disabled {
 	background:var(--surface);
 	color:var(--text);
 	cursor: not-allowed;
-	transition: 0.2s;
 }
 
 .modal-error {
@@ -214,34 +212,18 @@
 	justify-content: flex-end;
 }
 
-.modal-delete-btn {
-	background-color: var(--danger);
-	border-color: transparent;
-}
-
-.login-link.signup.modal-delete-btn:disabled {
+.btn.modal-delete-btn:disabled {
 	background:var(--surface);
 	border-color:var(--border-strong);
 	color:var(--text);
 	cursor: not-allowed;
 }
 
-.login-link.signup.modal-delete-btn:disabled:hover {
-	background:var(--surface);
-	cursor: not-allowed;
-}
-
 /* everything matches the modal surface on purpose: hides the button while the request is in flight */
-.login-link.signup.modal-delete-btn.submitting:disabled {
+.btn.modal-delete-btn.submitting:disabled {
 	background:var(--surface);
 	color:var(--surface);
 	border-color:var(--surface);
-	cursor: default;
-	transition: 0.2s;
-}
-
-.login-link.signup.modal-delete-btn.submitting:disabled:hover {
-	background:var(--surface);
 	cursor: default;
 }
 

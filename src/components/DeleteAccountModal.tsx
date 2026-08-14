@@ -66,10 +66,10 @@ const DeleteAccountModal = ({ onClose, onDeleted }: Props) => {
             <label htmlFor="delete-confirmation" className="ls-label">Type "delete" to confirm</label>
           </div>
           <div className="modal-actions">
-            <button type="button" className="login-link" onClick={onClose}>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className={`login-link signup modal-delete-btn ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting || confirmation.toLowerCase() !== 'delete'}>
+            <button type="submit" className={`btn btn-danger modal-delete-btn ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting || confirmation.toLowerCase() !== 'delete'}>
               Delete Account
             </button>
           </div>
