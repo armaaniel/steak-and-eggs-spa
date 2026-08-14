@@ -1,3 +1,5 @@
+import '../stylesheets/pagination.css'
+
 interface Props {
   currentPage: number
   totalPages: number
@@ -6,9 +8,11 @@ interface Props {
   className?: string
 }
 
-const PaginationControls = ({ currentPage, totalPages, onNext, onPrev, className = 'pagination-container' }: Props) => {
+const PaginationControls = ({ currentPage, totalPages, onNext, onPrev, className }: Props) => {
+  const classes = className ? `pagination-container ${className}` : 'pagination-container'
+
   return (
-    <div className={className}>
+    <div className={classes}>
       <button className="page-button" onClick={onPrev} disabled={currentPage === 1}>Previous</button>
       <span className="page-span">Page {currentPage} of {totalPages}</span>
       <button className="page-button" onClick={onNext} disabled={currentPage === totalPages}>Next</button>

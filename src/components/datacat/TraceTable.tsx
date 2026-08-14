@@ -76,7 +76,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         {error ? (
           <tbody>
             <tr className="portfolio-row">
-              <td className="shares-cell" colSpan={columns.length}>
+              <td className="dc-shares-cell" colSpan={columns.length}>
                 <p className="details-text">Unable to load data, please try again</p>
               </td>
             </tr>
@@ -84,7 +84,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         ) : currentItems.length === 0 ? (
           <tbody>
             <tr className="portfolio-row">
-              <td className="shares-cell" colSpan={columns.length}>
+              <td className="dc-shares-cell" colSpan={columns.length}>
                 <p className="details-text">{emptyMessage || 'No traces found'}</p>
               </td>
             </tr>
@@ -94,7 +94,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
             {currentItems.map((trace) => (
               <tr key={trace.id} className={selectedTrace?.id === trace.id ? 'portfolio-row-selected' : 'portfolio-row'} onClick={() => handleSelect(trace)}>
                 {columns.map((column) => (
-                  <td key={column.key} className="shares-cell">
+                  <td key={column.key} className="dc-shares-cell">
                     <p className="details-text">{column.render(trace)}</p>
                   </td>
                 ))}

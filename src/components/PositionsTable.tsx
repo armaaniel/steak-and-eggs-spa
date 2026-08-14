@@ -67,7 +67,7 @@ const PositionsTable = ({ positions, prices, error }: Props) => {
                 <Link to={`/stocks/${position.symbol}`} className="symbol-name">
                   <div className="stock-text">
                     <p className="stock-symbol">${toCurrency(price * position.shares)} </p>
-                    <p key={position.shares} className="stock-shares">
+                    <p className="stock-shares">
                       {position.shares} shares
                     </p>
                   </div>

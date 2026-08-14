@@ -38,3 +38,9 @@
 .welcome-error.visible {
 	opacity:1;
 }
+
+@media (max-width:768px) {
+	.welcome-start-desktop {
+		width:100%;
+	}
+}

@@ -1,5 +1,4 @@
 import '../stylesheets/home.css'
-import '../stylesheets/authenticated.css'
 import Chart from '../components/Chart'
 import PositionsTable from '../components/PositionsTable'
 import FundsButton from '../components/FundsButton'

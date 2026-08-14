@@ -78,12 +78,6 @@
 	cursor:default;
 }
 
-.login-link.signup.howto {
-	width:25%;
-	padding:1.1rem 1.25rem;
-	font-size:20px;
-}
-
 .nav-right {
 	display:flex;
 	align-items:center;
@@ -99,4 +93,26 @@
 .login-link:hover {
 	background-color:#D4D3D2;
 	cursor:pointer;
+}
+
+@media (max-width:768px) {
+	.logo-desktop {
+		width:150px;
+	}
+
+	.nav {
+		align-items:center;
+		column-gap:0.25rem;
+		padding:25px 6px 10px 9px;
+		min-height:0px;
+	}
+
+	.nav-right {
+		column-gap:0.25rem;
+		text-align:center
+	}
+
+	.login-link {
+		padding:0.5rem 1.25rem;
+	}
 }

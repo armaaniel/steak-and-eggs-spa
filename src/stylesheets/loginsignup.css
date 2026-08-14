@@ -168,16 +168,6 @@
 }
 
 @media (max-width:768px) {
-	.login-left {
-		width:0%;
-		position:absolute;
-	}
-
-	.signup-left {
-		width:0%;
-		position:absolute;
-	}
-
 	.ls-form-container {
 		width:80%;
 	}

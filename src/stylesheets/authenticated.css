@@ -245,31 +245,8 @@
 }
 
 @media (max-width:768px) {
-	.logo-desktop {
-		width:150px;
-	}
-
-	.nav {
-		align-items:center;
-		column-gap:0.25rem;
-		padding:25px 6px 10px 9px;
-		min-height:0px;
-	}
-
-	.nav-right {
-		column-gap:0.25rem;
-		text-align:center
-	}
-
-	.login-link {
-		padding:0.5rem 1.25rem;
-	}
-
-	.welcome-start-desktop {
-		width:100%;
-	}
-
-	.login-link.signup.howto {
-		width:50%;
+	.nav-auth {
+		flex-direction:column;
+		row-gap:0.5rem;
 	}
 }

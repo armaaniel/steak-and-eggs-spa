@@ -1,3 +1,4 @@
+import '../stylesheets/authenticated.css'
 import { Navigate, Outlet } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 
