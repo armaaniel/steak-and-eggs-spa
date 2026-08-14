@@ -60,13 +60,13 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
             <th className="dc-row-heading" onClick={() => setSorted(false)}>
               Route
             </th>
-            <th className={sorted && sortField === 'p99' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('p99')}>
+            <th className={`dc-row-heading ${sorted && sortField === 'p99' ? direction : ''}`} onClick={() => handleSort('p99')}>
               p99
             </th>
-						<th className={sorted && sortField === 'cacheHitRate' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('cacheHitRate')}>
+						<th className={`dc-row-heading ${sorted && sortField === 'cacheHitRate' ? direction : ''}`} onClick={() => handleSort('cacheHitRate')}>
 						  Cache hit rate
 						</th>
-            <th className={sorted && sortField === 'totalRequests' ? (direction === 'asc' ? 'dc-row-heading-asc' : 'dc-row-heading-desc') : 'dc-row-heading'} onClick={() => handleSort('totalRequests')}>
+            <th className={`dc-row-heading ${sorted && sortField === 'totalRequests' ? direction : ''}`} onClick={() => handleSort('totalRequests')}>
               Total requests
             </th>
           </tr>

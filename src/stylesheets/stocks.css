@@ -57,12 +57,7 @@ opacity:0;
 	opacity:1;
 }
 
-.position {
-	display:flex;
-	flex-direction:column;
-	row-gap:1rem;
-}
-
+.position,
 .position-two {
 	display:flex;
 	flex-direction:column;
@@ -75,7 +70,8 @@ opacity:0;
 	row-gap:0.5rem;
 }
 
-.market-data-container {
+.market-data-container,
+.company-data-container {
 	display:flex;
 }
 
@@ -83,10 +79,6 @@ opacity:0;
 	display:flex;
 	flex-direction:column;
 	row-gap:1.5rem;
-}
-
-.company-data-container {
-	display:flex;
 }
 
 .data-name {
@@ -105,10 +97,7 @@ opacity:0;
 	opacity:1;
 }
 
-.market-data-container > div {
-	flex:1;
-}
-
+.market-data-container > div,
 .company-data-container > div {
 	flex:1;
 }

@@ -79,14 +79,6 @@
 	font-weight:400;
 }
 
-.portfolio-row-selected {
-	text-align:left;
-	font-family: var(--font-ui);
-	color:var(--dc-text);
-	font-weight:400;
-	background-color:var(--dc-surface-2);
-}
-
 .portfolio-row-heading {
 	text-align:left;
 	font-family: var(--font-ui);
@@ -98,6 +90,11 @@
 
 .portfolio-row:hover {
 	background-color:var(--dc-hover);
+}
+
+/* must come after :hover (equal specificity) so a selected row keeps its background while hovered */
+.portfolio-row.selected {
+	background-color:var(--dc-surface-2);
 }
 
 .overview-stock-table {
@@ -112,32 +109,12 @@
 	background-color:var(--dc-surface-2);
 }
 
-.portfolio-row-heading-asc {
-	text-align:left;
-	font-family: var(--font-ui);
-	color:var(--dc-text);
-	font-weight:400;
-	padding:0.25rem 0rem;
-    box-shadow: rgba(0,0,0,0.6) 0px -3px 0px 0px inset;
-	user-select: none;
+.portfolio-row-heading.asc {
+	box-shadow: rgba(0,0,0,0.6) 0px -3px 0px 0px inset;
 }
 
-.portfolio-row-heading-desc {
-	text-align:left;
-	font-family: var(--font-ui);
-	color:var(--dc-text);
-	font-weight:400;
-	padding:0.25rem 0rem;
-    box-shadow: rgba(0,0,0,0.6) 0px 3px 0px 0px inset;
-	user-select: none;
-}
-
-.portfolio-row-heading-asc:hover {
-	background-color:var(--dc-surface-2);
-}
-
-.portfolio-row-heading-desc:hover {
-	background-color:var(--dc-surface-2);
+.portfolio-row-heading.desc {
+	box-shadow: rgba(0,0,0,0.6) 0px 3px 0px 0px inset;
 }
 
 .cache-hidden {
@@ -217,13 +194,8 @@
 	color:var(--dc-link);
 }
 
-.nav-button-active {
-	font-family: var(--font-ui);
-	font-weight:400;
-	padding:5.25px 4px 5.25px 4px;
+.nav-button.active {
 	color:var(--dc-active);
-	text-decoration:none;
-	font-size:18px;
 }
 
 .select-svg-div {

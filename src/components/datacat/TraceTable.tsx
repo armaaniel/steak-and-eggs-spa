@@ -66,7 +66,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         <thead>
           <tr>
             {columns.map((column) => (
-              <th key={column.key} className={column.sortable && sorted && sortField === `${column.key}` ? (direction === 'asc' ? 'portfolio-row-heading-asc' : 'portfolio-row-heading-desc') : 'portfolio-row-heading'} onClick={column.sortable ? () => handleSort(column.key) : undefined}>
+              <th key={column.key} className={`portfolio-row-heading ${column.sortable && sorted && sortField === column.key ? direction : ''}`} onClick={column.sortable ? () => handleSort(column.key) : undefined}>
                 {column.label}
               </th>
             ))}
@@ -92,7 +92,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         ) : (
           <tbody>
             {currentItems.map((trace) => (
-              <tr key={trace.id} className={selectedTrace?.id === trace.id ? 'portfolio-row-selected' : 'portfolio-row'} onClick={() => handleSelect(trace)}>
+              <tr key={trace.id} className={`portfolio-row ${selectedTrace?.id === trace.id ? 'selected' : ''}`} onClick={() => handleSelect(trace)}>
                 {columns.map((column) => (
                   <td key={column.key} className="dc-shares-cell">
                     <p className="details-text">{column.render(trace)}</p>
