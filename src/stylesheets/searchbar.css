@@ -1,19 +1,19 @@
 .nav-search-div {
 	flex:1;
 	border-radius:0.75rem;
-	background-color:#fcfcfc;
-	border:1px solid rgb(228, 226, 225);
+	background-color:var(--page-bg);
+	border:1px solid var(--border);
 	position:relative;
 	transition: 0.1s;
 }
 
 .nav-search-div:hover {
-	border-color:rgb(50, 48, 47);
+	border-color:var(--border-strong);
 }
 
 .nav-search-div:focus-within {
-	border-color:rgb(50, 48, 47);
-	outline:1px solid rgb(50, 48, 47);
+	border-color:var(--border-strong);
+	outline:1px solid var(--border-strong);
 }
 
 input[type="search"]::-webkit-search-cancel-button {
@@ -26,6 +26,7 @@ input[type="search"]::-webkit-search-cancel-button {
 	display:flex;
 	align-items:center;
 	padding:0px 8px 0px 12px;
+	color:var(--text); /* magnifier svg uses stroke="currentColor" */
 }
 
 .search-results-container {
@@ -34,10 +35,10 @@ input[type="search"]::-webkit-search-cancel-button {
 	position:absolute;
 	width:100%;
 	z-index:100;
-	background-color:white;
+	background-color:var(--surface);
 	border-radius:0.5rem;
-	box-shadow:rgba(0,0,0,0.06)0px 0px 2px 1px;
-	border:1px solid #ECEDEE;
+	box-shadow:var(--shadow-card);
+	border:1px solid var(--border-cool);
 	max-height:400px;
 	overflow:hidden auto;
 	margin-top:2px;
@@ -56,7 +57,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .search-input {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: var(--font-ui);
 	padding:24px 8px 8px 0px;
 	border:none;
 	outline:none;
@@ -67,7 +68,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .search-label {
 	position:absolute;
 	pointer-events:none;
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	transform-origin: left top;
 	transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), top 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 	top: 50%;
@@ -88,12 +89,12 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .search-result-item {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: var(--font-ui);
 	font-weight:400;
 }
 
 .search-result-item:hover {
-	background-color:#F5F5F5;
+	background-color:var(--hover);
     cursor: pointer;
 }
 
@@ -101,12 +102,12 @@ input[type="search"]::-webkit-search-cancel-button {
 	display:block;
 	padding:1rem;
     text-decoration: none;
-	color:rgb(64,68,82);
+	color:var(--text-cool);
 }
 
 .no-search-result {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: var(--font-ui);
 	font-weight:400;
 	padding:1rem;
-	color:rgb(64,68,82);
+	color:var(--text-cool);
 }

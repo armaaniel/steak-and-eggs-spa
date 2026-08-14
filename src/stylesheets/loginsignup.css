@@ -27,7 +27,7 @@
 	height:100%;
 	display:flex;
 	flex-direction:column;
-	background-color:#AFD8DF;
+	background-color:var(--brand);
 }
 
 .ls-try-demo-container {
@@ -39,9 +39,9 @@
 }
 
 .ls-try-demo {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: var(--font-ui);
 	font-size:2.5rem;
-	color:rgb(50, 48, 47);
+	color:var(--text);
 	cursor:pointer;
 	text-decoration:none;
 	transition:opacity 0.2s, color 0.2s;
@@ -52,7 +52,7 @@
 }
 
 .ls-try-demo.submitting {
-	color:#AFD8DF;
+	color:var(--brand);
 	cursor:default;
 }
 
@@ -92,8 +92,8 @@
 .ls-form-container {
 	display:flex;
 	flex-direction:column;
-	border:1.5px solid rgb(228, 226, 225);
-	background-color:white;
+	border:1.5px solid var(--border);
+	background-color:var(--surface);
 	width:65%;
 	gap:1rem;
 	border-radius:1rem;
@@ -102,8 +102,8 @@
 
 .ls-heading {
 	text-align:center;
-	color:rgb(50, 48, 47);
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	color:var(--text);
+	font-family: var(--font-body);
 }
 
 .ls-form {
@@ -115,21 +115,21 @@
 .ls-input {
 	border-radius:0.5rem;
 	padding:28px 8px 8px 16px;
-	border:1px solid rgb(228, 226, 225);
+	border:1px solid var(--border);
 }
 
 .ls-input:hover {
-	border-color:rgb(50, 48, 47);
+	border-color:var(--border-strong);
 }
 
 .ls-input:focus {
-	border-color:rgb(50, 48, 47);
-	outline:1px solid rgb(50, 48, 47);
+	border-color:var(--border-strong);
+	outline:1px solid var(--border-strong);
 }
 
 .ls-footer {
-	color:rgb(97, 94, 92);
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	color:var(--text-muted);
+	font-family: var(--font-body);
 	text-align:center;
 	margin-top:1rem;
 }
@@ -147,7 +147,7 @@
 	left:1rem;
 	top: 50%;
 	transform: translateY(-50%);
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	transform-origin: left top;
 	transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), top 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -163,8 +163,8 @@
 }
 
 .ls-signup {
-	font-family: Futura, "Trebuchet MS", Arial, sans-serif;
-	color:rgb(97, 94, 92);
+	font-family: var(--font-display);
+	color:var(--text-muted);
 }
 
 @media (max-width:768px) {

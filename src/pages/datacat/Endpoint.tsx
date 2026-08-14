@@ -76,7 +76,7 @@ function Endpoint() {
 
           <div className="select-svg-div">
             <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 3.5L5 6.5L8 3.5" stroke="rgb(104,102,100)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </div>
         </div>

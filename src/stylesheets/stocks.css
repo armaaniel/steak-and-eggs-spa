@@ -28,7 +28,7 @@
 .stock-price-container {
 	display:flex;
 	align-items:center;
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	margin-left:8px;
 	column-gap:4px;
 	opacity:0;
@@ -40,17 +40,17 @@
 }
 
 .stock-name-two {
-color:rgb(97, 94, 92);
-font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+color:var(--text-muted);
+font-family: var(--font-body);
 opacity:0;
 }
 
 .stock-price-currency.negative {
-	color:#D8726F
+	color:var(--negative)
 }
 
 .stock-price-currency.positive {
-	color:#4A7812
+	color:var(--positive)
 }
 
 .stock-name-two.loaded {
@@ -90,11 +90,11 @@ opacity:0;
 }
 
 .data-name {
-	font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+	font-family: var(--font-display);
 }
 
 .data-value {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-weight:200;
 	opacity:0;
 	transition:opacity 100ms ease-in;

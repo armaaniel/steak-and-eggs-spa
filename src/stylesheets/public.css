@@ -15,9 +15,9 @@
 }
 
 .nav-text {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: var(--font-ui);
 	font-weight:500;
-	color:#32302f;
+	color:var(--text);
 	text-decoration:none;
 	margin-top:0.25rem;
 }
@@ -29,13 +29,13 @@
 }
 
 .login-link {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: var(--font-ui);
 	font-weight:500;
-	background:white;
+	background:var(--surface);
 	border-radius:4rem;
 	border:1px solid;
 	padding:0.75rem 1.5rem;
-	color:black;
+	color:var(--text-strong);
 	text-decoration:none;
 	transition:0.4s;
 	display:flex;
@@ -43,22 +43,22 @@
 }
 
 .login-link.signup {
-	color:white;
-	background:rgb(50, 48, 47);
+	color:var(--btn-text);
+	background:var(--btn-bg);
 }
 
 .login-link.signup.desktop {
 	width:50%;
 	padding:0.9rem 1rem;
 	font-size:20px;
-	border:1px solid black;
+	border:1px solid var(--text-strong);
 	transition:0.2s;
 }
 
 .login-link.signup.desktop:disabled {
-	background:#AFD8DF;
-	color:#AFD8DF;
-	border-color:#AFD8DF;
+	background:var(--brand);
+	color:var(--brand);
+	border-color:var(--brand);
 	transition:0.2s;
 	cursor:default;
 }
@@ -72,8 +72,8 @@
 }
 
 .login-link.signup.login:disabled {
-	background:white;
-	color:black;
+	background:var(--surface);
+	color:var(--text-strong);
 	transition:0.2s;
 	cursor:default;
 }
@@ -86,7 +86,7 @@
 }
 
 .login-link.signup:hover {
-	background-color:#535050;
+	background-color:var(--btn-hover);
 	cursor:pointer;
 }
 

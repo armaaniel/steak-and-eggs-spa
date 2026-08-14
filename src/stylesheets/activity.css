@@ -23,22 +23,22 @@
 
 .activity-row {
 	text-align:left;
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	color:rgb(64,68,82);
-	border-bottom:1px solid rgb(233,236,239)
+	font-family: var(--font-body);
+	color:var(--text-cool);
+	border-bottom:1px solid var(--border-cool)
 }
 
 .activity-header-row {
 	text-align:left;
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	color:rgb(64,68,82);
-	border-bottom:1px solid rgb(233,236,239)
+	font-family: var(--font-body);
+	color:var(--text-cool);
+	border-bottom:1px solid var(--border-cool)
 }
 
 .activity-row-heading {
 	text-align:left;
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	color:rgb(64,68,82);
+	font-family: var(--font-body);
+	color:var(--text-cool);
 	font-weight:500;
 	padding:0.25rem 0rem;
 }
@@ -50,14 +50,14 @@
 .activity-row-heading:nth-child(5) { width: 14%; }
 
 .activity-row:hover {
-	background-color:#F5F5F5;
+	background-color:var(--hover);
 }
 
 .activity-stock-table {
 	width:100%;
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	border-collapse:collapse;
-	background-color:white;
+	background-color:var(--surface);
 }
 
 .activity-cell {

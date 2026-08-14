@@ -21,9 +21,9 @@
 }
 
 .nav-auth-text {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-weight: 500;
-	color:rgb(97, 94, 92);
+	color:var(--text-muted);
 	text-decoration:none;
 	margin-top:0.25rem;
 	padding:1.25rem;
@@ -35,11 +35,11 @@
 }
 
 .nav-auth-text.active {
-	color:black;
+	color:var(--text-strong);
 }
 
 .nav-auth-text:hover {
-	background-color:#F2F2F2
+	background-color:var(--hover)
 }
 
 /* Profile dropdown */
@@ -51,21 +51,21 @@
 	white-space: nowrap;
 	font-size: 1rem;
 	cursor: pointer;
-	border: 1px solid rgb(228, 226, 225);
+	border: 1px solid var(--border);
 	transition: 0.1s;
 }
 
 .profile-trigger:hover {
-	border-color: rgb(50, 48, 47);
-	background-color: white;
+	border-color:var(--border-strong);
+	background-color:var(--surface);
 }
 
 .profile-dropdown {
 	position: absolute;
 	top: calc(100% + 8px);
 	right: 0;
-	background: white;
-	border: 1.5px solid rgb(228, 226, 225);
+	background:var(--surface);
+	border: 1.5px solid var(--border);
 	border-radius: 0.75rem;
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 	min-width: 180px;
@@ -74,16 +74,16 @@
 }
 
 .profile-dropdown-username {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-weight: 600;
 	font-size: 0.875rem;
-	color: rgb(50, 48, 47);
+	color:var(--text);
 	padding: 0.5rem 1rem 0.3rem;
 }
 
 .profile-dropdown-divider {
 	border: none;
-	border-top: 1px solid rgb(228, 226, 225);
+	border-top: 1px solid var(--border);
 	margin: 0.3rem 0;
 }
 
@@ -94,24 +94,24 @@
 	background: none;
 	border: none;
 	padding: 0.6rem 1rem;
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-size: 0.9rem;
 	font-weight: 500;
-	color: rgb(50, 48, 47);
+	color:var(--text);
 	cursor: pointer;
 	transition: background-color 0.15s;
 }
 
 .profile-dropdown-item:hover {
-	background-color: #F2F2F2;
+	background-color: var(--hover);
 }
 
 .profile-dropdown-item--danger {
-	color: #c0392b;
+	color: var(--danger);
 }
 
 .profile-dropdown-item--danger:hover {
-	background-color: #fdf2f2;
+	background-color: var(--danger-bg);
 }
 
 /* Modals */
@@ -126,9 +126,9 @@
 }
 
 .modal {
-	background: white;
+	background:var(--surface);
 	border-radius: 1rem;
-	border: 1.5px solid rgb(228, 226, 225);
+	border: 1.5px solid var(--border);
 	padding: 2rem 2rem 1.75rem;
 	width: 420px;
 	max-width: 90vw;
@@ -149,41 +149,41 @@
 	border: none;
 	cursor: pointer;
 	font-size: 1rem;
-	color: rgb(97, 94, 92);
+	color:var(--text-muted);
 	padding: 0.25rem;
 	line-height: 1;
 	transition: color 0.1s;
 }
 
 .modal-close:hover {
-	color: rgb(50, 48, 47);
+	color:var(--text);
 }
 
 .modal-title {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-weight: 700;
 	font-size: 1.25rem;
-	color: rgb(50, 48, 47);
+	color:var(--text);
 }
 
 .login-link.signup.submitting:disabled {
-	background: white;
-	color: rgb(50, 48, 47);
+	background:var(--surface);
+	color:var(--text);
 	cursor: not-allowed;
 	transition: 0.2s;
 }
 
 .modal-error {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-size: 0.875rem;
-	color: rgb(97, 94, 92);
+	color:var(--text-muted);
 	text-align: center;
 }
 
 .modal-success {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-size: 0.875rem;
-	color: rgb(76, 153, 0);
+	color: var(--success);
 	text-align: center;
 }
 
@@ -192,12 +192,12 @@
 }
 
 .modal-danger-text {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-size: 0.9rem;
-	color: #c0392b;
+	color: var(--danger);
 	line-height: 1.5;
-	background-color: #fdf2f2;
-	border: 1px solid #f5c6c4;
+	background-color: var(--danger-bg);
+	border: 1px solid var(--danger-border);
 	border-radius: 0.5rem;
 	padding: 0.75rem 1rem;
 }
@@ -215,32 +215,33 @@
 }
 
 .modal-delete-btn {
-	background-color: #c0392b;
+	background-color: var(--danger);
 	border-color: transparent;
 }
 
 .login-link.signup.modal-delete-btn:disabled {
-	background: white;
-	border-color: rgb(50, 48, 47);
-	color: rgb(50, 48, 47);
+	background:var(--surface);
+	border-color:var(--border-strong);
+	color:var(--text);
 	cursor: not-allowed;
 }
 
 .login-link.signup.modal-delete-btn:disabled:hover {
-	background: white;
+	background:var(--surface);
 	cursor: not-allowed;
 }
 
+/* everything matches the modal surface on purpose: hides the button while the request is in flight */
 .login-link.signup.modal-delete-btn.submitting:disabled {
-	background: white;
-	color: white;
-	border-color: white;
+	background:var(--surface);
+	color:var(--surface);
+	border-color:var(--surface);
 	cursor: default;
 	transition: 0.2s;
 }
 
 .login-link.signup.modal-delete-btn.submitting:disabled:hover {
-	background: white;
+	background:var(--surface);
 	cursor: default;
 }
 

@@ -1,3 +1,47 @@
+/* Design tokens — light values. Dark mode will redefine the main set under [data-theme="dark"]. */
+:root {
+	/* fonts */
+	--font-display: Futura, "Trebuchet MS", Arial, sans-serif;
+	--font-body: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	--font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+	/* main app palette (themable) */
+	--page-bg: #fcfcfc;
+	--surface: white;
+	--text: rgb(50, 48, 47);
+	--text-strong: black;
+	--text-muted: rgb(97, 94, 92);
+	--text-cool: rgb(64, 68, 82);
+	--text-disabled: rgb(222, 226, 230);
+	--border: rgb(228, 226, 225);
+	--border-cool: rgb(233, 236, 239);
+	--border-strong: rgb(50, 48, 47);
+	--hover: #F5F5F5;
+	--btn-bg: rgb(50, 48, 47);
+	--btn-text: white;
+	--btn-hover: #535050;
+	--brand: #AFD8DF;
+	--positive: #4A7812;
+	--negative: #D8726F;
+	--success: rgb(76, 153, 0);
+	--danger: #c0392b;
+	--danger-bg: #fdf2f2;
+	--danger-border: #f5c6c4;
+	--shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
+	--chart-line: #8884d8;
+
+	/* DataCat palette — pinned light until its own dark pass.
+	   Values matching the main palette today is coincidence; diverging is the point. */
+	--dc-surface: white;
+	--dc-surface-2: #EAECEF;
+	--dc-text: rgb(64, 68, 82);
+	--dc-text-muted: rgb(97, 94, 92);
+	--dc-border: rgb(233, 236, 239);
+	--dc-hover: #F5F5F5;
+	--dc-link: #424770;
+	--dc-active: #A78BFA;
+}
+
 *{
 	box-sizing:border-box;
 	margin:0;
@@ -12,7 +56,7 @@ html {
 body {
   display:flex;
   flex-direction:column;
-  background-color: #fcfcfc;
+  background-color: var(--page-bg);
   height:100%;
 }
 
