@@ -4,7 +4,7 @@
 	background-color:var(--page-bg);
 	border:1px solid var(--border);
 	position:relative;
-	transition: 0.1s;
+	transition: border-color 0.1s;
 }
 
 .nav-search-div:hover {
