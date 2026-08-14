@@ -30,12 +30,12 @@
 }
 
 .btn-secondary:hover {
-	background-color:#D4D3D2;
+	background-color:var(--btn-secondary-hover);
 }
 
 .btn-danger {
 	background:var(--danger);
-	color:var(--btn-text);
+	color:var(--on-danger);
 	border-color:transparent;
 }
 

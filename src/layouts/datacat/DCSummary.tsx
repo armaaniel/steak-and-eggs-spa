@@ -6,7 +6,7 @@ import '../../stylesheets/datacat/datacat.css'
 function DCSummary() {
 	
   return (
-    <>
+    <div className="dc-root">
       <DCNavbar />
 
       <div className="dc-home-parent">
@@ -18,7 +18,7 @@ function DCSummary() {
           <Outlet />
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

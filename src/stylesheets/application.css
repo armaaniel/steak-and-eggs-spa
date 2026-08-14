@@ -1,5 +1,8 @@
-/* Design tokens — light values. Dark mode will redefine the main set under [data-theme="dark"]. */
+/* Design tokens — light values. The main set is redefined under [data-theme="dark"];
+   the --dc-* set is deliberately not (DataCat stays light until its own dark pass). */
 :root {
+	color-scheme: light;
+
 	/* fonts */
 	--font-display: Futura, "Trebuchet MS", Arial, sans-serif;
 	--font-body: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -20,6 +23,9 @@
 	--btn-bg: rgb(50, 48, 47);
 	--btn-text: white;
 	--btn-hover: #535050;
+	--btn-secondary-hover: #D4D3D2;
+	--pressed-bg: rgb(243, 241, 240);
+	--pressed-border: rgb(200, 198, 197);
 	--brand: #AFD8DF;
 	--positive: #4A7812;
 	--negative: #D8726F;
@@ -27,11 +33,13 @@
 	--danger: #c0392b;
 	--danger-bg: #fdf2f2;
 	--danger-border: #f5c6c4;
+	--on-danger: white;
 	--shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
 	--chart-line: #8884d8;
 
 	/* DataCat palette — pinned light until its own dark pass.
 	   Values matching the main palette today is coincidence; diverging is the point. */
+	--dc-page-bg: #fcfcfc;
 	--dc-surface: white;
 	--dc-surface-2: #EAECEF;
 	--dc-text: rgb(64, 68, 82);
@@ -40,6 +48,39 @@
 	--dc-hover: #F5F5F5;
 	--dc-link: #424770;
 	--dc-active: #A78BFA;
+}
+
+/* Dark theme: same roles, warm-dark values. Set by the inline script in index.html
+   (localStorage 'theme', falling back to the OS preference) and the Navbar toggle. */
+[data-theme="dark"] {
+	color-scheme: dark;
+
+	--page-bg: #171514;
+	--surface: #211f1e;
+	--text: #e8e6e3;
+	--text-strong: white;
+	--text-muted: #a5a09b;
+	--text-cool: #aab1bf;
+	--text-disabled: #4b4f56;
+	--border: #383533;
+	--border-cool: #363a41;
+	--border-strong: #9b9691;
+	--hover: #2b2928;
+	--btn-bg: #e8e6e3;
+	--btn-text: #171514;
+	--btn-hover: #cfccc7;
+	--btn-secondary-hover: #383533;
+	--pressed-bg: #2b2827;
+	--pressed-border: #4a4542;
+	--brand: #22434a;
+	--positive: #85b954;
+	--negative: #e28b88;
+	--success: #6cc24a;
+	--danger: #e0604f;
+	--danger-bg: #372220;
+	--danger-border: #5e3833;
+	--shadow-card: rgba(0, 0, 0, 0.5) 0px 0px 2px 1px;
+	--chart-line: #a29ded;
 }
 
 *{
@@ -57,6 +98,7 @@ body {
   display:flex;
   flex-direction:column;
   background-color: var(--page-bg);
+  color: var(--text);
   height:100%;
 }
 
@@ -68,4 +110,16 @@ body {
 
 .ticker-logo.loaded {
   opacity: 1;
+}
+
+/* Ticker logos with dark glyphs vanish on dark cards — keep their chip light in dark mode */
+[data-theme="dark"] .ticker-logo {
+  background-color: white;
+  border-radius: 6px;
+}
+
+/* The wordmark in the Logo SVG is artwork with a hardcoded fill; retint it to the ink token
+   (light value is within 3/255 of the original #333333) so it stays legible on dark */
+.logo-desktop text {
+  fill: var(--text);
 }

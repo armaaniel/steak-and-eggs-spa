@@ -70,7 +70,7 @@ function DCList() {
   }, [location.pathname])
 
   return (
-    <>
+    <div className="dc-root">
       <DCNavbar />
       <div className="dc-home-parent">
         <div className="home-left-two">
@@ -123,7 +123,7 @@ function DCList() {
           <Outlet context={{ selectedTrace, setSelectedTrace, loaded, setLoaded, selectedConnection, setSelectedConnection }} />
         </div>
       </div>
-    </>
+    </div>
   )
 }
 export default DCList

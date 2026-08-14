@@ -29,9 +29,9 @@
 }
 
 .add-withdraw-button.active {
-	background-color: rgb(243, 241, 240);
+	background-color: var(--pressed-bg);
 	box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.08);
-	border-color: rgb(200, 198, 197);
+	border-color: var(--pressed-border);
 }
 
 .add-funds-dropdown {
@@ -62,6 +62,7 @@
 
 .add-funds-input-row .modal-amount-input {
 	padding: 0.6rem 8px 0.6rem 0;
+	background: transparent;
 	border: none;
 	flex: 1;
 	border-radius: 0.5rem;

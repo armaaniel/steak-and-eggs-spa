@@ -59,6 +59,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .search-input {
 	font-family: var(--font-ui);
 	padding:24px 8px 8px 0px;
+	background:transparent;
 	border:none;
 	outline:none;
 	flex:1;
