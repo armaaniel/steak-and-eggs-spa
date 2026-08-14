@@ -147,7 +147,7 @@ already defined at the top of the component. Pick one (`isBuy`).
 | 10 | Market Details → render from array | 🟡 dup | `Stocks.tsx:146-193` | todo |
 | 11 | `bs-containers` row → local component | 🟡 dup | `BuySell.tsx` | todo |
 | 12 | Three-`<tbody>` state pattern → helper | 🟡 dup | `Activity.tsx`, `PositionsTable.tsx` | todo |
-| 13 | `key={position.shares}` comment/rethink | 🟢 | `PositionTable.tsx:34`, `PositionsTable.tsx:70` | todo |
+| 13 | `key={position.shares}` — delete: its target animation never existed (see CSS audit #2) | 🟢 | `PositionTable.tsx:34`, `PositionsTable.tsx:70` | ✅ done |
 | 14 | Drop single-child fragments | 🟢 | `Stocks`, `Activity`, `Home` | todo |
 | 15 | Redundant `<li>` onClick | 🟢 | `Searchbar.tsx:101` | todo |
 
