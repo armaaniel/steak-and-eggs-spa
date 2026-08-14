@@ -25,7 +25,7 @@ const PositionsTable = ({ positions, prices, error }: Props) => {
 
       {!positions && !error && (
         <tbody>
-          <tr className="portfolio-row">
+          <tr className="positions-state-row">
             <td className="shares-cell" colSpan={5}>
               <p>No positions yet</p>
             </td>
@@ -35,7 +35,7 @@ const PositionsTable = ({ positions, prices, error }: Props) => {
 
       {!positions && error && (
         <tbody>
-          <tr className="portfolio-row">
+          <tr className="positions-state-row">
             <td className="shares-cell" colSpan={5}>
               <p>{error}</p>
             </td>
