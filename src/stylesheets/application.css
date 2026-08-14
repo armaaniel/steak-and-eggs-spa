@@ -36,6 +36,7 @@
 	--on-danger: white;
 	--shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
 	--chart-line: #8884d8;
+	--logo-wordmark: var(--chart-line); /* follows the accent purple: #8884d8 light, #a29ded dark */
 
 	/* DataCat palette — pinned light until its own dark pass.
 	   Values matching the main palette today is coincidence; diverging is the point. */
@@ -55,23 +56,23 @@
 [data-theme="dark"] {
 	color-scheme: dark;
 
-	--page-bg: #171514;
-	--surface: #211f1e;
-	--text: #e8e6e3;
+	--page-bg: rgb(13, 13, 13);
+	--surface: rgb(28, 28, 28);
+	--text: rgb(252, 252, 252);
 	--text-strong: white;
-	--text-muted: #a5a09b;
+	--text-muted: rgb(163, 163, 163);
 	--text-cool: #aab1bf;
 	--text-disabled: #4b4f56;
-	--border: #383533;
+	--border: rgb(45, 45, 45);
 	--border-cool: #363a41;
-	--border-strong: #9b9691;
-	--hover: #2b2928;
-	--btn-bg: #e8e6e3;
-	--btn-text: #171514;
-	--btn-hover: #cfccc7;
-	--btn-secondary-hover: #383533;
-	--pressed-bg: #2b2827;
-	--pressed-border: #4a4542;
+	--border-strong: rgb(150, 150, 150);
+	--hover: rgb(38, 38, 38);
+	--btn-bg: rgb(252, 252, 252);
+	--btn-text: rgb(13, 13, 13);
+	--btn-hover: rgb(214, 214, 214);
+	--btn-secondary-hover: rgb(51, 51, 51);
+	--pressed-bg: rgb(40, 40, 40);
+	--pressed-border: rgb(64, 64, 64);
 	--brand: #22434a;
 	--positive: #85b954;
 	--negative: #e28b88;
@@ -118,8 +119,7 @@ body {
   border-radius: 6px;
 }
 
-/* The wordmark in the Logo SVG is artwork with a hardcoded fill; retint it to the ink token
-   (light value is within 3/255 of the original #333333) so it stays legible on dark */
+/* The Logo SVG wordmark (overrides the artwork's hardcoded #333333 fill) */
 .logo-desktop text {
-  fill: var(--text);
+  fill: var(--logo-wordmark);
 }

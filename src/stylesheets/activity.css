@@ -43,11 +43,11 @@
 	background-color:var(--hover);
 }
 
+/* no background: the table sits directly on the page rather than reading as a raised card */
 .activity-stock-table {
 	width:100%;
 	font-family: var(--font-body);
 	border-collapse:collapse;
-	background-color:var(--surface);
 }
 
 .activity-cell {
