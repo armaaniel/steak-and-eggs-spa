@@ -5,6 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Steak and Eggs</title>
+    <script>
+      // Set the theme before anything renders so there's no flash of the wrong one.
+      // Stored choice wins; first visit follows the OS preference.
+      document.documentElement.dataset.theme =
+        localStorage.getItem('theme') ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    </script>
   </head>
   <body>
     <script type="module" src="/src/main.tsx"></script>

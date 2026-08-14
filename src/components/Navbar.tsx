@@ -12,6 +12,7 @@ function Navbar() {
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [openModal, setOpenModal] = useState<'password' | 'delete' | null>(null)
+  const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'))
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -23,6 +24,13 @@ function Navbar() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    document.documentElement.dataset.theme = next
+    localStorage.setItem('theme', next)
+    setTheme(next)
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('authToken')
@@ -82,6 +90,9 @@ function Navbar() {
                   onClick={() => { setDropdownOpen(false); setOpenModal('password') }}
                 >
                   Change Password
+                </button>
+                <button className="profile-dropdown-item" onClick={toggleTheme}>
+                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </button>
                 <button
                   className="profile-dropdown-item profile-dropdown-item--danger"
