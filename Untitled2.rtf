@@ -1,0 +1,219 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier;
+\f3\fmodern\fcharset0 Courier-Bold;\f4\froman\fcharset0 Times-Italic;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The mechanism, first\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 A trace row is a set of facts about one request. Every column is a dimension you can 
+\f2\fs26 GROUP BY
+\f1\fs24  or filter on. 
+\f0\b A field you didn't capture isn't a slow question \'97 it's an unanswerable one, permanently and retroactively.
+\f1\b0  You cannot go back and add 
+\f2\fs26 user_id
+\f1\fs24  to yesterday's traces.\
+That asymmetry is the whole argument. Capturing a field costs a few bytes and you can stop anytime. Not capturing it costs you every past incident you might have explained with it. You don't know which dimension will explain the next problem, so width is a hedge against your own inability to predict.\
+Right now your ten columns can answer: how slow, what status, which controller, how much time in the DB. That's it. Everything below is a question you currently cannot ask at any price.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Field by field\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f3\fs26 \cf0 route_template
+\f1\b0\fs24  \'97 
+\f2\fs26 "GET /stocks/:symbol/chartdata"
+\f1\fs24 \
+Your 
+\f2\fs26 endpoint
+\f1\fs24  bakes the symbol into the grouping key, so "p99 by endpoint" fragments across every ticker anyone ever looked at. This gives you a low-cardinality key that groups correctly. It also deletes 
+\f2\fs26 normalize_endpoint
+\f1\fs24 's ten-case ladder 
+\f4\i and
+\f1\i0  its duplicate 
+\f2\fs26 CASE
+\f1\fs24  inside the 
+\f2\fs26 trace_summary
+\f1\fs24  SQL \'97 the same mapping maintained twice in two languages.\
+Free: 
+\f2\fs26 payload[:controller]
+\f1\fs24  and 
+\f2\fs26 payload[:action]
+\f1\fs24  already give it to you.\
+
+\f3\b\fs26 symbol
+\f1\b0\fs24  \'97 
+\f2\fs26 "AAPL"
+\f1\fs24 \
+The dimension you currently destroy by concatenating. Unlocks: 
+\f4\i is one ticker slow, or all of them?
+\f1\i0  Your 
+\f2\fs26 MarketService
+\f1\fs24  calls Polygon per-symbol, so a single illiquid ticker returning slowly looks like generalized 
+\f2\fs26 /chartdata
+\f1\fs24  latency today. With this column it's one 
+\f2\fs26 GROUP BY
+\f1\fs24 .\
+
+\f3\b\fs26 user_id
+\f1\b0\fs24 \
+Unlocks the single most important triage question: 
+\f4\i is this everyone, or one person?
+\f1\i0  Systemic versus individual is the first fork in every investigation, and you currently can't take it.\
+Concrete: someone with 200 positions makes 
+\f2\fs26 get_aum
+\f1\fs24  slow. Today your latency distribution just looks bimodal and unexplainable. With 
+\f2\fs26 user_id
+\f1\fs24  you find the one account and the cause in a minute.\
+
+\f3\b\fs26 db_query_count
+\f1\b0\fs24  (and 
+\f2\fs26 redis_call_count
+\f1\fs24 )\
+You have 
+\f2\fs26 db_runtime
+\f1\fs24  \'97 total time \'97 but not 
+\f4\i how many queries
+\f1\i0 . Those are completely different problems: 50ms in one query means a slow query; 50ms across 50 queries means an N+1. You literally cannot tell them apart right now.\
+This is the single highest-value field for finding real performance bugs, and 
+\f2\fs26 sql.active_record
+\f1\fs24  hands you the count for free.\
+
+\f3\b\fs26 deploy_sha
+\f1\b0\fs24 \
+Unlocks 
+\f4\i did this start with a deploy?
+\f1\i0  \'97 which is the answer to most latency regressions. Without it you're squinting at timestamps against your CI history. With it, 
+\f2\fs26 GROUP BY deploy_sha
+\f1\fs24  attributes the regression instantly.\
+Prerequisite: your CI only tags 
+\f2\fs26 :latest
+\f1\fs24 , so there's no SHA to record. That's the same ten-minute tagging fix that also makes rollback possible.\
+
+\f3\b\fs26 error_kind
+\f1\b0\fs24 \
+You have 
+\f2\fs26 status
+\f1\fs24 . A 503 in your app could be 
+\f2\fs26 ApiError
+\f1\fs24 , a bare 
+\f2\fs26 StandardError
+\f1\fs24  from a missing price, or a 
+\f2\fs26 NoMethodError
+\f1\fs24  from a real bug \'97 and they're indistinguishable. This makes "which failure type is spiking" a query.\
+Prerequisite: your typed-error work, since 
+\f2\fs26 error_kind
+\f1\fs24  on two bare 
+\f2\fs26 StandardError
+\f1\fs24 s tells you nothing.\
+
+\f3\b\fs26 result_size
+\f1\b0\fs24  \'97 position count, ticker results returned, transactions listed\
+Unlocks 
+\f4\i is this slow because of code or because of data volume?
+\f1\i0  Most tail latency is workload size, not code paths. Correlating 
+\f2\fs26 duration
+\f1\fs24  against 
+\f2\fs26 result_size
+\f1\fs24  separates "this endpoint is slow" from "this endpoint is fine but some users have a lot of data."\
+
+\f3\b\fs26 cache_hit
+\f1\b0\fs24  (as columns, not JSONB)\
+You already collect 
+\f2\fs26 used_redis
+\f1\fs24  / 
+\f2\fs26 used_db
+\f1\fs24  / 
+\f2\fs26 used_api
+\f1\fs24  \'97 buried inside 
+\f2\fs26 breakdown
+\f1\fs24 , which is why 
+\f2\fs26 trace_breakdown
+\f1\fs24  resorts to 
+\f2\fs26 breakdown::text LIKE '%"used_redis":true%'
+\f1\fs24 . Promoting them to real columns unlocks two things you can't do today: p99 on cache miss versus cache hit as separate numbers, and your actual hit rate over time.\
+
+\f3\b\fs26 queue_time
+\f1\b0\fs24 \
+Time between the ALB receiving the request and Rails starting to process it, from the 
+\f2\fs26 X-Request-Start
+\f1\fs24  header. This is the field almost nobody has and it distinguishes 
+\f4\i slow
+\f1\i0  from 
+\f4\i saturated
+\f1\i0 .\
+When you're overloaded, per-request duration stays flat while requests pile up waiting for a Puma thread. Your p99 looks fine and users are timing out. This is the only field that shows that, and it'll matter the moment you load test.\
+
+\f3\b\fs26 client_type
+\f1\b0\fs24  \'97 web vs mobile\
+You have a React SPA 
+\f4\i and
+\f1\i0  a React Native app hitting the same endpoints, and no way to tell them apart. Unlocks "is mobile slower?" \'97 which it probably is, and you'd never know.\
+
+\f3\b\fs26 request_id
+\f1\b0\fs24 \
+Rails already generates one. Storing it lets you jump from a trace row to the Rails log lines and the Sentry event for that same request. Pure correlation, nearly free.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 The point you'd miss looking at these one at a time\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Individually each field answers one question. The value is combinatorial: 
+\f4\i p99 for mobile clients, on cache miss, with more than 50 positions, since the last deploy.
+\f1\i0  That's one query against a wide table, and it's the shape of an actual root cause. Six fields don't give you six questions \'97 they give you every combination, including ones you'd never have thought to instrument for.\
+That's the difference between a dashboard and observability.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 What it costs, and the discipline\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Bytes are irrelevant \'97 maybe 200 more per row. The real constraints:\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 PII.
+\f1\b0  
+\f2\fs26 user_id
+\f1\fs24  is an identifier, 
+\f2\fs26 symbol
+\f1\fs24  is harmless, but never capture params or request bodies wholesale \'97 that's how account numbers end up in your traces. Decide per-field, deliberately.\
+
+\f0\b Bounded values only.
+\f1\b0  Every field should have a knowable range. 
+\f2\fs26 symbol
+\f1\fs24  is bounded by listed tickers. A free-text search query is not \'97 don't store 
+\f2\fs26 params[:term]
+\f1\fs24  raw.\
+
+\f0\b Two schema fixes while you're in there:
+\f1\b0  your 
+\f2\fs26 breakdown
+\f1\fs24  is 
+\f2\fs26 t.json
+\f1\fs24 , not 
+\f2\fs26 jsonb
+\f1\fs24  \'97 the text form, which can't use containment operators or GIN indexes. That's part of why you ended up string-matching. And add an index on 
+\f2\fs26 created_at
+\f1\fs24  at minimum, since every one of your queries filters or sorts on time.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Where to start\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\b0\fs26 \cf0 route_template
+\f1\fs24 , 
+\f2\fs26 symbol
+\f1\fs24 , 
+\f2\fs26 user_id
+\f1\fs24 , 
+\f2\fs26 db_query_count
+\f1\fs24 . One migration, and they cover who, what, where, and the most common cause. Add 
+\f2\fs26 deploy_sha
+\f1\fs24  and 
+\f2\fs26 error_kind
+\f1\fs24  once their prerequisites land.\
+}
