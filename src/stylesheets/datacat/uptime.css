@@ -1,0 +1,212 @@
+/* Uptime's bar chart. Every bar is a meter: the track is one bucket of the probe
+   schedule, the fill is how many of that bucket's expected runs actually started.
+   Color comes from the reserved status set (--dc-status-*), never a series color,
+   and the legend names each state so it never rides on hue alone. */
+
+.uptime-header {
+	display:flex;
+	justify-content:end;
+}
+
+.uptime-chart-body {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.5rem;
+}
+
+.uptime-chart {
+	display:flex;
+	justify-content:space-between;
+	align-items:end;
+	column-gap:2px; /* the surface gap — what separates neighbouring bars */
+	height:140px;
+}
+
+.uptime-bar {
+	position:relative;
+	display:flex;
+	align-items:end;
+	flex:1;
+	max-width:24px;
+	height:100%;
+	padding:0;
+	border:none;
+	border-radius:4px 4px 0 0; /* rounded data-end, square at the baseline */
+	background-color:var(--dc-surface-2);
+	cursor:pointer;
+}
+
+.uptime-bar.selected {
+	outline:2px solid var(--dc-border-strong);
+	outline-offset:1px;
+}
+
+.uptime-bar-fill {
+	width:100%;
+	min-height:3px; /* one run out of a 288-run bucket still has to be visible */
+	border-radius:4px 4px 0 0;
+}
+
+.uptime-tooltip {
+	position:absolute;
+	top:4px;
+	left:50%;
+	transform:translateX(-50%);
+	display:flex;
+	flex-direction:column;
+	row-gap:2px;
+	padding:0.5rem;
+	border-radius:6px;
+	border:1px solid var(--dc-border);
+	background-color:var(--dc-surface);
+	box-shadow:var(--dc-shadow-card);
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text);
+	text-align:left;
+	white-space:nowrap;
+	opacity:0;
+	pointer-events:none;
+	transition:opacity 150ms;
+	z-index:1;
+}
+
+.uptime-bar:hover .uptime-tooltip,
+.uptime-bar:focus-visible .uptime-tooltip {
+	opacity:1;
+}
+
+/* a centred tooltip on the end bars would hang off the card — anchor those to the edge.
+   Three deep on each side covers the 30-bar ranges, where the slots are narrowest. */
+.uptime-bar:nth-child(-n+3) .uptime-tooltip {
+	left:0;
+	transform:none;
+}
+
+.uptime-bar:nth-last-child(-n+3) .uptime-tooltip {
+	left:auto;
+	right:0;
+	transform:none;
+}
+
+.uptime-tooltip-time {
+	color:var(--dc-text-muted);
+}
+
+.uptime-axis {
+	display:flex;
+	justify-content:space-between;
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text-muted);
+}
+
+.uptime-legend {
+	display:flex;
+	column-gap:1rem;
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text-muted);
+}
+
+.uptime-legend-item {
+	display:flex;
+	align-items:center;
+	column-gap:6px;
+}
+
+.uptime-swatch {
+	width:10px;
+	height:10px;
+	flex-shrink:0;
+	border-radius:2px;
+	background-color:var(--dc-surface-2);
+}
+
+.uptime-bar-fill.good,
+.uptime-swatch.good {
+	background-color:var(--dc-status-good);
+}
+
+.uptime-bar-fill.warn,
+.uptime-swatch.warn {
+	background-color:var(--dc-status-warn);
+}
+
+.uptime-bar-fill.critical,
+.uptime-swatch.critical {
+	background-color:var(--dc-status-critical);
+}
+
+.uptime-runs-title {
+	font-family: var(--font-ui);
+	font-weight:500;
+	color:var(--dc-text);
+}
+
+.uptime-message {
+	font-family: var(--font-ui);
+	font-weight:400;
+	color:var(--dc-text);
+}
+
+.uptime-runs {
+	display:flex;
+	flex-direction:column;
+}
+
+.uptime-run + .uptime-run {
+	border-top:1px solid var(--dc-border);
+}
+
+.uptime-run-trigger {
+	display:flex;
+	align-items:center;
+	column-gap:0.75rem;
+	width:100%;
+	padding:0.5rem 0.25rem;
+	border:none;
+	background:none;
+	cursor:pointer;
+	font-family: var(--font-ui);
+	font-size:14px;
+	font-weight:400;
+	color:var(--dc-text);
+	text-align:left;
+}
+
+.uptime-run-trigger:hover {
+	background-color:var(--dc-hover);
+}
+
+.uptime-run-status {
+	flex:0 0 90px;
+}
+
+.uptime-run-time {
+	color:var(--dc-text-muted);
+}
+
+.uptime-run-chevron {
+	margin-left:auto;
+}
+
+.uptime-run-details {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.5rem;
+	max-height:0;
+	overflow:hidden;
+	padding-left:calc(10px + 0.75rem); /* lines the detail up with the status label, past the swatch */
+	font-family: var(--font-ui);
+	font-size:14px;
+	color:var(--dc-text);
+	opacity:0;
+	transition:opacity 150ms, max-height 150ms, padding-bottom 150ms;
+}
+
+.uptime-run-details.open {
+	max-height:200px;
+	padding-bottom:0.5rem;
+	opacity:1;
+}

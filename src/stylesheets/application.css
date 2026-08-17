@@ -53,6 +53,13 @@
 	--dc-active: #A78BFA;
 	--dc-shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
 	--dc-sort-indicator: rgba(0, 0, 0, 0.6);
+
+	/* Reserved status set — state, never a series color. Deliberately not themed: the same
+	   three steps clear 3:1 on the dark surface, and warn is faint on the light one by design,
+	   where the label beside the swatch is what carries the meaning. */
+	--dc-status-good: #0ca30c;
+	--dc-status-warn: #fab219;
+	--dc-status-critical: #d03b3b;
 }
 
 /* Dark theme: same roles, warm-dark values. Set by the inline script in index.html
@@ -100,7 +107,8 @@
 	--dc-link: #9aa3d6;
 	--dc-shadow-card: rgba(0, 0, 0, 0.5) 0px 0px 2px 1px;
 	--dc-sort-indicator: rgba(255, 255, 255, 0.7);
-	/* --dc-active (#A78BFA, violet-400) is unchanged: already designed for dark backgrounds */
+	/* --dc-active (#A78BFA, violet-400) is unchanged: already designed for dark backgrounds,
+	   as is the --dc-status-* set, which is fixed across both themes */
 }
 
 *{

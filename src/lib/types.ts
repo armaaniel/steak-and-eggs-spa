@@ -90,6 +90,22 @@ export interface TraceSummary {
 	cacheHitRate:number | null
 }
 
+export interface SyntheticBucket {
+	bucket:string
+	started:number
+	completed:number
+	failures:number
+	expected:number
+}
+
+export interface SyntheticRun {
+	userId:string
+	startedAt:string
+	requestCount:number
+	failures:number
+	completed:boolean
+}
+
 
 
 

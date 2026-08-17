@@ -97,6 +97,10 @@ export const toPortfolio = (value: string | number | undefined) => {
 	}
 }
 
+export const toBucketLabel = (bucket:string) => {
+	return new Date(bucket).toLocaleString('en-us', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})
+}
+
 export const toPnlCurrency = (value: number | string | null | undefined) => {
 	if (value === null || value === undefined) {
 		return null

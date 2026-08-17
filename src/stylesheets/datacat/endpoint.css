@@ -136,7 +136,8 @@
 	justify-content:space-between;
 }
 
-#status-select {
+#status-select,
+#range-select {
 	padding:12px 30px 4px 10px;
 	border:none;
 	border-radius:6px;
@@ -150,7 +151,8 @@
 	background-color:var(--dc-surface);
 }
 
-#status-select:focus {
+#status-select:focus,
+#range-select:focus {
 	outline:none;
 }
 
