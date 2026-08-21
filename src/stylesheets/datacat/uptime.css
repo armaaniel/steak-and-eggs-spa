@@ -206,7 +206,46 @@
 }
 
 .uptime-run-details.open {
-	max-height:200px;
+	max-height:900px; /* clears the detail lines plus every request the probe script makes */
 	padding-bottom:0.5rem;
 	opacity:1;
+}
+
+.uptime-requests {
+	display:flex;
+	flex-direction:column;
+}
+
+.uptime-request {
+	display:flex;
+	align-items:center;
+	column-gap:0.75rem;
+	width:100%;
+	padding:0.25rem;
+	border:none;
+	border-radius:4px;
+	background:none;
+	cursor:pointer;
+	font-family: var(--font-ui);
+	font-size:14px;
+	font-weight:400;
+	color:var(--dc-text);
+	text-align:left;
+}
+
+.uptime-request:hover {
+	background-color:var(--dc-hover);
+}
+
+/* must come after :hover (equal specificity) so the row in the details panel stays marked while hovered */
+.uptime-request.selected {
+	background-color:var(--dc-surface-2);
+}
+
+.uptime-request-status {
+	flex:0 0 32px;
+}
+
+.uptime-request-endpoint {
+	flex:1;
 }
