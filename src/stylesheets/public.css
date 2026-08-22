@@ -1,5 +1,5 @@
 .logo-desktop {
-	width:182px;
+	width:77px;
 }
 
 .logo-desktop.large {
@@ -37,7 +37,7 @@
 
 @media (max-width:768px) {
 	.logo-desktop {
-		width:150px;
+		width:63px;
 	}
 
 	.nav {

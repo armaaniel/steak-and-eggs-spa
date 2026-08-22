@@ -18,7 +18,7 @@ interface Activity {
 
 function Activity() {
 	const { data: activityData, error } = useApi<Activity[]>(`/activitydata`, [])
-	const { currentItems, currentPage, totalPages, next, prev } = usePagination(activityData ?? [], 15)
+	const { currentItems, currentPage, totalPages, next, prev } = usePagination(activityData ?? [], 18)
 
   return (
     <>

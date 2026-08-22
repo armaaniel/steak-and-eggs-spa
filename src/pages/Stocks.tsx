@@ -36,9 +36,9 @@ function Stocks() {
 
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
 	
+  const [hoveredPoint, setHoveredPoint] = useState<ChartData | null>(null)
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
-  const [asOf, setAsOf] = useState(new Date(Date.now() - 15 * 60 * 1000))
 
   const { data: quote } = useApi<Quote>(
     `/stocks/${symbol}/stockprice`,
@@ -90,13 +90,6 @@ function Stocks() {
 	const { data: marketData } = useApi<MarketData>(`/stocks/${symbol}/marketdata`, 
 	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
 
-  useEffect(() => {
-    const timeStamp = setInterval(() => {
-      setAsOf(new Date(Date.now() - 15 * 60 * 1000))
-    }, 15000)
-    return () => clearInterval(timeStamp)
-  }, [])
-
   if (tickerNotFound) {
     return (
 			<main className="home loaded">
@@ -120,15 +113,14 @@ function Stocks() {
               </div>
 
               <div className={`stock-price-container ${price ? 'loaded' : ''}`}>
-                <h2 className="stock-price-header">${toCurrency(price)}</h2>
-                <span className="stock-price-currency">USD</span>
-                <div><span className="stock-price-currency">{asOf.toLocaleTimeString()}</span></div>
+                <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price)}</h2>
                 <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{percentChange}</span></div>
+                <span className="stock-price-date">{hoveredPoint?.date}</span>
               </div>
             </div>
 
             <div className="chart">
-              {chartData && <Chart chartData={chartData} />}
+              {chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
             </div>
           </div>
 

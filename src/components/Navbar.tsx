@@ -43,15 +43,14 @@ function Navbar() {
     <>
       <nav className="nav-auth">
         <div className="nav-left-auth">
-          <Link to="/home">
-            <Logo />
-          </Link>
+          <div className="nav-brand">
+            <Link to="/home" className="nav-brand-logo">
+              <Logo />
+            </Link>
+            <Link to="/home" className="nav-brand-text">Home</Link>
+          </div>
 
           <div className="nav-auth-text-container">
-            <NavLink to="/home" className={({ isActive }) => `nav-auth-text ${isActive ? 'active' : ''}`}>
-              <span>Home</span>
-            </NavLink>
-
             <NavLink to="/activity" className="nav-auth-text">
               <span>Activity</span>
             </NavLink>

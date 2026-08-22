@@ -2,7 +2,7 @@ import '../stylesheets/home.css'
 import Chart from '../components/Chart'
 import PositionsTable from '../components/PositionsTable'
 import FundsButton from '../components/FundsButton'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { toPortfolio } from '../lib/utils.ts'
 import { useThrottledCallback } from 'use-debounce'
 import type { Positions, ChartData } from '../lib/types.ts'
@@ -19,6 +19,8 @@ function Home() {
 
 	const { data: portfolio, error, setData: setPortfolio, getData: getPortfolioData } = useApi<Portfolio>(`/portfoliodata`,
 		{ aum: 'N/A', balance: 'N/A' })
+
+	const [hoveredPoint, setHoveredPoint] = useState<ChartData | null>(null)
 
 	const symbols = portfolio?.positions?.map((p) => p.symbol) ?? []
 	const prices = usePriceSubscriptions(symbols)
@@ -52,12 +54,13 @@ function Home() {
       <main className={`home ${portfolio ? 'loaded' : ''}`}>
         <div className="home-left">
           <div className="port-value">
-            <h2 className="portfolio-value">Your Portfolio Value Is:&nbsp;</h2>
-            <h2 className='portfolio-value'>{toPortfolio(portfolio?.aum)}</h2>
+            <h2 className="portfolio-value">Portfolio Value:&nbsp;</h2>
+            <h2 className='portfolio-value'>{toPortfolio(hoveredPoint?.value ?? portfolio?.aum)}</h2>
+            <span className="port-value-date">{hoveredPoint?.date}</span>
           </div>
 
           <div className="chart">
-          	{chartData && <Chart chartData={chartData} />}
+          	{chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
           </div>
 
           <div className="position">

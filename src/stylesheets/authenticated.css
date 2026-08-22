@@ -1,23 +1,52 @@
 .nav-auth {
 	display:flex;
 	flex-direction:row;
-	padding:1.5rem 2.5rem 8px 9px;
-	min-height:150px;
+	padding:1rem;
+}
+
+.nav-brand {
+	display:flex;
+	align-items:center;
+}
+
+.nav-brand-logo {
+	display:flex;
+}
+
+.nav-brand-text {
+	font-family:var(--font-body);
+	font-weight:500;
+	color:var(--text-muted);
+	text-decoration:none;
+	white-space:nowrap;
+	padding:1.25rem;
+	/* The steak sits low in the cropped viewBox (the eggs take the top), so its centre
+	   lands ~9px under the flex centreline at the current 77px logo. Drop the text to
+	   meet it rather than lifting the logo into the navbar's top padding. */
+	transform:translateY(9px);
+}
+
+.nav-brand-logo:hover + .nav-brand-text,
+.nav-brand-text:hover {
+	color:var(--accent-bright);
 }
 
 .nav-left-auth {
 	display:flex;
 	flex:1;
 	align-items:center;
-	column-gap:0.5rem;
 }
 
 .nav-right-auth {
 	display:flex;
 	align-items:center;
 	column-gap:1rem;
-	margin-top:0.25rem;
 	width:400px;
+	/* Same drop as the nav text, so the searchbar sits on its centreline.
+	   Uses position/top rather than a transform: a transform would create a
+	   stacking context and trap the profile dropdown's z-index inside the navbar. */
+	position:relative;
+	top:9px;
 }
 
 .nav-auth-text {
@@ -25,21 +54,18 @@
 	font-weight: 500;
 	color:var(--text-muted);
 	text-decoration:none;
-	margin-top:0.25rem;
 	padding:1.25rem;
-	border-radius:0.5rem;
 }
 
 .nav-auth-text-container {
-	margin-top:0.25rem
-}
-
-.nav-auth-text.active {
-	color:var(--text-strong);
+	display:flex;
+	align-items:center;
+	/* Match the brand text's drop onto the steak's centreline. */
+	transform:translateY(9px);
 }
 
 .nav-auth-text:hover {
-	background-color:var(--hover)
+	color:var(--accent-bright);
 }
 
 /* Profile dropdown */

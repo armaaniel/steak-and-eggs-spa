@@ -1,7 +1,7 @@
 .home-activity {
 	display:flex;
 	flex-direction:row;
-	padding:1rem 2.5rem 2rem 1rem;
+	padding:0 17px 2rem 1rem;
 	column-gap:1.5rem;
 	height:100%;
 }

@@ -16,7 +16,7 @@
 	display:flex;
 	column-gap:0.5rem;
 	align-items:center;
-	padding:8px 8px 6px 8px;
+	padding:0 8px 4px 8px;
 }
 
 .stock-heading-price {
@@ -37,6 +37,11 @@
 
 .stock-price-container.loaded {
 	opacity:1;
+}
+
+.stock-price-date {
+	color:var(--text-muted);
+	margin-left:0.5rem;
 }
 
 .stock-name-two {

@@ -36,7 +36,7 @@
 	--on-danger: white;
 	--shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
 	--chart-line: #8884d8;
-	--logo-wordmark: var(--chart-line); /* follows the accent purple: #8884d8 light, #a29ded dark */
+	--accent-bright: #9b96e8;
 
 	/* DataCat palette — its own cool/slate identity, themed separately from the main app.
 	   Values matching the main palette is coincidence; diverging is the point. */
@@ -97,6 +97,7 @@
 	--danger-border: #5e3833;
 	--shadow-card: rgba(0, 0, 0, 0.5) 0px 0px 2px 1px;
 	--chart-line: #a29ded;
+	--accent-bright: #b5b0f5;
 
 	/* DataCat stays cool-tinted where the main app is pure neutral — same separation as light mode */
 	--dc-page-bg: #0e1013;
@@ -151,9 +152,4 @@ body {
 [data-theme="dark"] .ticker-logo {
   background-color: white;
   border-radius: 6px;
-}
-
-/* The Logo SVG wordmark (overrides the artwork's hardcoded #333333 fill) */
-.logo-desktop text {
-  fill: var(--logo-wordmark);
 }

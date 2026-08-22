@@ -1,7 +1,7 @@
 .home {
 	display:flex;
 	flex-direction:row;
-	padding:1rem 2.5rem 2rem 1rem;
+	padding:4px 17px 2rem 1rem;
 	column-gap:1.5rem;
 	opacity:0;
 	transition:80ms ease-in;
@@ -48,6 +48,13 @@
 
 .port-value {
 	display:flex;
+	align-items:baseline;
+}
+
+.port-value-date {
+	font-family:var(--font-body);
+	color:var(--text-muted);
+	margin-left:0.75rem;
 }
 
 .balance-container {
