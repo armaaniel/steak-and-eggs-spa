@@ -20,9 +20,10 @@
 	--border-cool: rgb(233, 236, 239);
 	--border-strong: rgb(50, 48, 47);
 	--hover: #F5F5F5;
-	--btn-bg: rgb(50, 48, 47);
+	--btn-bg: #5147D1;
 	--btn-text: white;
-	--btn-hover: #535050;
+	--btn-hover: #685FDD;
+	--btn-danger-hover: #535050;
 	--btn-secondary-hover: #D4D3D2;
 	--pressed-bg: rgb(243, 241, 240);
 	--pressed-border: rgb(200, 198, 197);
@@ -35,8 +36,11 @@
 	--danger-border: #f5c6c4;
 	--on-danger: white;
 	--shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
-	--chart-line: #8884d8;
-	--accent-bright: #9b96e8;
+	/* Light mode darkens and saturates the accent rather than tinting it. Emphasis
+	   moves away from the background, so on white it goes deeper than the base;
+	   in dark mode the same token goes lighter. Hence "emphasis", not "bright". */
+	--chart-line: #5147D1;
+	--accent-emphasis: #3F35B8;
 
 	/* DataCat palette — its own cool/slate identity, themed separately from the main app.
 	   Values matching the main palette is coincidence; diverging is the point. */
@@ -82,9 +86,10 @@
 	--border-cool: #363a41;
 	--border-strong: rgb(150, 150, 150);
 	--hover: rgb(38, 38, 38);
-	--btn-bg: rgb(252, 252, 252);
+	--btn-bg: #a29ded;
 	--btn-text: rgb(13, 13, 13);
-	--btn-hover: rgb(214, 214, 214);
+	--btn-hover: #b5b0f5;
+	--btn-danger-hover: rgb(214, 214, 214);
 	--btn-secondary-hover: rgb(51, 51, 51);
 	--pressed-bg: rgb(40, 40, 40);
 	--pressed-border: rgb(64, 64, 64);
@@ -97,7 +102,7 @@
 	--danger-border: #5e3833;
 	--shadow-card: rgba(0, 0, 0, 0.5) 0px 0px 2px 1px;
 	--chart-line: #a29ded;
-	--accent-bright: #b5b0f5;
+	--accent-emphasis: #b5b0f5;
 
 	/* DataCat stays cool-tinted where the main app is pure neutral — same separation as light mode */
 	--dc-page-bg: #0e1013;

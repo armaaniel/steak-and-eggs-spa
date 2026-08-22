@@ -8,12 +8,12 @@
 }
 
 .nav-search-div:hover {
-	border-color:var(--border-strong);
+	border-color:var(--accent-emphasis);
 }
 
 .nav-search-div:focus-within {
-	border-color:var(--border-strong);
-	outline:1px solid var(--border-strong);
+	border-color:var(--accent-emphasis);
+	outline:1px solid var(--accent-emphasis);
 }
 
 input[type="search"]::-webkit-search-cancel-button {

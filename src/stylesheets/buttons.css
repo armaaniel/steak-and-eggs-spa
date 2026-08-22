@@ -40,9 +40,10 @@
 }
 
 /* inherited from the old .login-link.signup:hover — the delete button has always hovered gray;
-   a darker red is a future design decision, not this refactor's */
+   a darker red is a future design decision, not this refactor's. Its own token now, so
+   the accent --btn-hover in dark mode doesn't turn the delete button purple. */
 .btn-danger:hover {
-	background-color:var(--btn-hover);
+	background-color:var(--btn-danger-hover);
 }
 
 @media (max-width:768px) {

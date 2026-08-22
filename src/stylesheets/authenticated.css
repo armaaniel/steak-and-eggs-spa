@@ -26,9 +26,8 @@
 	transform:translateY(9px);
 }
 
-.nav-brand-logo:hover + .nav-brand-text,
-.nav-brand-text:hover {
-	color:var(--accent-bright);
+.nav-brand:hover .nav-brand-text {
+	color:var(--accent-emphasis);
 }
 
 .nav-left-auth {
@@ -65,7 +64,7 @@
 }
 
 .nav-auth-text:hover {
-	color:var(--accent-bright);
+	color:var(--accent-emphasis);
 }
 
 /* Profile dropdown */
