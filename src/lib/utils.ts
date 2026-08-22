@@ -97,6 +97,32 @@ export const toPortfolio = (value: string | number | undefined) => {
 	}
 }
 
+export const toDuration = (seconds:number | null | undefined) => {
+	if (seconds === null || seconds === undefined) {
+		return '-'
+	}
+	
+	const total = Math.round(seconds)
+	
+	if (total < 60) {
+		return `${total}s`
+	}
+	
+	const minutes = Math.floor(total / 60)
+	
+	if (minutes < 60) {
+		return `${minutes}m ${total % 60}s`
+	}
+	
+	const hours = Math.floor(minutes / 60)
+	
+	if (hours < 24) {
+		return `${hours}h ${minutes % 60}m`
+	}
+	
+	return `${Math.floor(hours / 24)}d ${hours % 24}h`
+}
+
 export const toBucketLabel = (bucket:string) => {
 	return new Date(bucket).toLocaleString('en-us', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})
 }

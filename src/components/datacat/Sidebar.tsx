@@ -18,6 +18,10 @@ const Sidebar = () => {
       <NavLink to="/datacat/uptime" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
         Uptime
       </NavLink>
+
+      <NavLink to="/datacat/ingester" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
+        Ingester
+      </NavLink>
     </div>
   )
 }

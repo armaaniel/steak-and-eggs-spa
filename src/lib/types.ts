@@ -115,4 +115,55 @@ export type Price = null | string | number
 export type Open = null | string
 export type Error = null | string
 
+export interface IngesterUptime {
+	pct:number
+	streamingSeconds:number
+	idleSeconds:number
+	downSeconds:number
+	unaccountedSeconds:number
+	windowSeconds:number
+}
 
+export interface IngesterSpan {
+	at:string
+	bootId:string
+	connectionId:string | null
+	state:string
+	seconds:number
+}
+
+export interface IngesterRatePoint {
+	at:string
+	eventsPerSec:number | null
+	framesPerSec:number | null
+	maxLagMs:number | null
+	symbols:number | null
+}
+
+export interface IngesterBoot {
+	bootId:string
+	startedAt:string
+	lastSeenAt:string
+	durationSeconds:number
+	connections:number
+	reconnects:number
+	cleanExit:boolean | null
+	events:string | null
+	peakLagMs:number | null
+}
+
+export interface IngesterConnection {
+	connectionId:string
+	bootId:string
+	spawnedAt:string
+	firstMessageAt:string | null
+	lastSeenAt:string
+	endedBy:string | null
+	connectSeconds:number | null
+	durationSeconds:number | null
+}
+
+export interface IngesterCause {
+	cause:string
+	count:number
+}

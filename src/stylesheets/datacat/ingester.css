@@ -1,0 +1,129 @@
+/* The ingester page. Feed state uses the reserved status set (--dc-status-*); the two
+   throughput series use the categorical slots (--dc-series-*). The two never mix — a
+   status colour here always means feed health, never "the other line". */
+
+.ing-header {
+	display:flex;
+	justify-content:end;
+}
+
+.ing-uptime {
+	display:flex;
+	align-items:baseline;
+	column-gap:0.5rem;
+}
+
+.ing-pct {
+	font-family: var(--font-ui);
+	font-size:40px;
+	font-weight:600;
+	color:var(--dc-text);
+}
+
+.ing-pct-label {
+	font-family: var(--font-ui);
+	font-size:13px;
+	color:var(--dc-text-muted);
+}
+
+.ing-timeline {
+	display:flex;
+	border-radius:4px;
+	overflow:hidden; /* the end spans inherit the strip's rounded corners */
+	background-color:var(--dc-surface-2);
+}
+
+.ing-span.streaming {
+	fill:var(--dc-status-good);
+}
+
+.ing-span.idle {
+	fill:var(--dc-surface-2);
+}
+
+.ing-span.down {
+	fill:var(--dc-status-critical);
+}
+
+.ing-legend {
+	display:flex;
+	flex-wrap:wrap;
+	column-gap:1rem;
+	row-gap:0.25rem;
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text-muted);
+}
+
+.ing-legend-item {
+	display:flex;
+	align-items:center;
+	column-gap:6px;
+}
+
+.ing-swatch {
+	width:10px;
+	height:10px;
+	flex-shrink:0;
+	border-radius:2px;
+}
+
+.ing-swatch.streaming {
+	background-color:var(--dc-status-good);
+}
+
+.ing-swatch.idle,
+.ing-swatch.unaccounted {
+	background-color:var(--dc-surface-2);
+}
+
+.ing-swatch.down {
+	background-color:var(--dc-status-critical);
+}
+
+.ing-chart {
+	height:220px;
+}
+
+.ing-tooltip {
+	display:flex;
+	flex-direction:column;
+	row-gap:2px;
+	padding:0.5rem;
+	border-radius:6px;
+	border:1px solid var(--dc-border);
+	background-color:var(--dc-surface);
+	box-shadow:var(--dc-shadow-card);
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text);
+}
+
+.ing-tooltip-time {
+	color:var(--dc-text-muted);
+}
+
+.ing-card-header {
+	display:flex;
+	align-items:baseline;
+	justify-content:space-between;
+	column-gap:1rem;
+}
+
+.ing-card-title {
+	font-family: var(--font-ui);
+	font-weight:500;
+	color:var(--dc-text);
+}
+
+.ing-causes {
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text-muted);
+}
+
+.ing-message {
+	font-family: var(--font-ui);
+	font-weight:400;
+	color:var(--dc-text);
+}

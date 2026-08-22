@@ -60,6 +60,10 @@
 	--dc-status-good: #0ca30c;
 	--dc-status-warn: #fab219;
 	--dc-status-critical: #d03b3b;
+
+	/* categorical series slots, for charts plotting two measures of the same unit */
+	--dc-series-1: #2a78d6;
+	--dc-series-2: #eb6834;
 }
 
 /* Dark theme: same roles, warm-dark values. Set by the inline script in index.html
@@ -107,6 +111,9 @@
 	--dc-link: #9aa3d6;
 	--dc-shadow-card: rgba(0, 0, 0, 0.5) 0px 0px 2px 1px;
 	--dc-sort-indicator: rgba(255, 255, 255, 0.7);
+	/* the same two hues, stepped for the dark surface rather than flipped */
+	--dc-series-1: #3987e5;
+	--dc-series-2: #d95926;
 	/* --dc-active (#A78BFA, violet-400) is unchanged: already designed for dark backgrounds,
 	   as is the --dc-status-* set, which is fixed across both themes */
 }
