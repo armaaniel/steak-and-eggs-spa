@@ -53,7 +53,8 @@
 	color:var(--dc-link);
 }
 
-.side-button.active {
+.side-button.active,
+.side-button:hover {
 	color:var(--dc-active);
 }
 
