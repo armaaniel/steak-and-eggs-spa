@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import DCThemeToggle from './DCThemeToggle'
 
 const Sidebar = () => {
   return (
@@ -22,6 +23,8 @@ const Sidebar = () => {
       <NavLink to="/datacat/ingester" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
         Ingester
       </NavLink>
+
+      <DCThemeToggle />
     </div>
   )
 }

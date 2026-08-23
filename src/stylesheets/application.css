@@ -20,7 +20,7 @@
 	--border-cool: rgb(233, 236, 239);
 	--border-strong: rgb(50, 48, 47);
 	--hover: #F5F5F5;
-	--btn-bg: #5147D1;
+	--btn-bg: var(--chart-line);
 	--btn-text: white;
 	--btn-hover: #685FDD;
 	--btn-danger-hover: #535050;
@@ -40,7 +40,7 @@
 	   moves away from the background, so on white it goes deeper than the base;
 	   in dark mode the same token goes lighter. Hence "emphasis", not "bright". */
 	--chart-line: #5147D1;
-	--accent-emphasis: #3F35B8;
+	--accent-emphasis: #2C1ED0;
 
 	/* DataCat palette — its own cool/slate identity, themed separately from the main app.
 	   Values matching the main palette is coincidence; diverging is the point. */
@@ -86,7 +86,7 @@
 	--border-cool: #363a41;
 	--border-strong: rgb(150, 150, 150);
 	--hover: rgb(38, 38, 38);
-	--btn-bg: #a29ded;
+	--btn-bg: var(--chart-line);
 	--btn-text: rgb(13, 13, 13);
 	--btn-hover: #b5b0f5;
 	--btn-danger-hover: rgb(214, 214, 214);

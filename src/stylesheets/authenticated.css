@@ -80,7 +80,7 @@
 }
 
 .btn.profile-trigger:hover {
-	border-color:var(--border-strong);
+	border-color:var(--accent-emphasis);
 	background-color:var(--surface);
 }
 

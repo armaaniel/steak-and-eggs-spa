@@ -17,7 +17,7 @@
 }
 
 .buy-sell-text.active {
-	color:var(--chart-line);
+	color:var(--accent-emphasis);
 }
 
 .buy-sell-text.active::after {
