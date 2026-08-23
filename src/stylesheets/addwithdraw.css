@@ -28,12 +28,10 @@
 	box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px 0px, rgba(0, 0, 0, 0.1) 0px 3px 8px 0px;
 }
 
-/* The shadow lift above is pure black, so it reads on a light page but disappears
-   against a dark surface. A surface lift has no room either: --hover (38) sits 2 points
-   off the --pressed-bg (40) this button already uses when open. Brightened border it is,
-   the same cue .nav-search-div:hover uses. */
+/* The shadow lift above reads on a light page but disappears against a dark surface,
+   so dark mode gets the accent border instead — same cue as .nav-search-div:hover. */
 [data-theme="dark"] .add-withdraw-button:hover {
-	border-color:var(--border-strong);
+	border-color:var(--accent-emphasis);
 }
 
 .add-withdraw-button.active {

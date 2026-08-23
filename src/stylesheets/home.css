@@ -68,11 +68,6 @@
 }
 
 /* Third-party overrides: these style Recharts internals, not our own markup */
-.recharts-default-tooltip {
-	align-items:center;
-	font-family: var(--font-body);
-}
-
 .chart svg {
   outline: none
 }

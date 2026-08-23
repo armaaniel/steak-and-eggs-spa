@@ -47,15 +47,15 @@ function Navbar() {
             <Link to="/home" className="nav-brand-logo">
               <Logo />
             </Link>
-            <Link to="/home" className="nav-brand-text">Home</Link>
+            <NavLink to="/home" end className={({ isActive }) => `nav-brand-text ${isActive ? 'active' : ''}`}>Home</NavLink>
           </div>
 
           <div className="nav-auth-text-container">
-            <NavLink to="/activity" className="nav-auth-text">
+            <NavLink to="/activity" className={({ isActive }) => `nav-auth-text ${isActive ? 'active' : ''}`}>
               <span>Activity</span>
             </NavLink>
 
-            <NavLink to="/datacat" className="nav-auth-text">
+            <NavLink to="/datacat" className={({ isActive }) => `nav-auth-text ${isActive ? 'active' : ''}`}>
               <span>DataCat</span>
             </NavLink>
 

@@ -26,6 +26,10 @@
 	transform:translateY(9px);
 }
 
+.nav-brand-text.active {
+	color:var(--accent-emphasis);
+}
+
 .nav-brand:hover .nav-brand-text {
 	color:var(--accent-emphasis);
 }
@@ -61,6 +65,10 @@
 	align-items:center;
 	/* Match the brand text's drop onto the steak's centreline. */
 	transform:translateY(9px);
+}
+
+.nav-auth-text.active {
+	color:var(--accent-emphasis);
 }
 
 .nav-auth-text:hover {
