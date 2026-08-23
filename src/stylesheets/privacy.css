@@ -1,8 +1,9 @@
+/* These pages sit inside the Public layout, whose chrome is already themed. The body
+   paints --page-bg / --text, so this sheet only needs to not fight it. */
 .privacy-main {
 	display:flex;
 	flex-direction:column;
 	flex:1;
-	background-color:#f0eee6;
 }
 
 .privacy-parent {
@@ -13,21 +14,21 @@
 }
 
 .privacy-header {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-weight:600;
 	font-size:2rem;
 	margin-bottom:8px;
 }
 
 .privacy-updated {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	color:#6B6961;
+	font-family: var(--font-ui);
+	color:var(--text-muted);
 	margin-bottom:40px;
 	font-size:0.95rem;
 }
 
 .privacy-section-title {
-	font-family: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-body);
 	font-weight:600;
 	font-size:1.25rem;
 	margin-top:36px;
@@ -35,20 +36,20 @@
 }
 
 .privacy-parent p {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-ui);
 	font-size:1rem;
 	line-height:1.7;
 	margin-bottom:16px;
-	color:#1A1915;
+	color:var(--text);
 }
 
 .privacy-parent ul {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: var(--font-ui);
 	font-size:1rem;
 	line-height:1.7;
 	margin-bottom:16px;
 	padding-left:24px;
-	color:#1A1915;
+	color:var(--text);
 }
 
 .privacy-parent li {
@@ -56,7 +57,7 @@
 }
 
 .privacy-parent a {
-	color:#C15F3C;
+	color:var(--chart-line);
 	text-decoration:none;
 }
 
@@ -67,8 +68,8 @@
 .privacy-footer {
 	margin-top:60px;
 	padding-top:20px;
-	border-top:1px solid #E5E3DB;
-	color:#6B6961;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	border-top:1px solid var(--border);
+	color:var(--text-muted);
+	font-family: var(--font-ui);
 	font-size:0.9rem;
 }
