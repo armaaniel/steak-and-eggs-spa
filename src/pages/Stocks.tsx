@@ -31,7 +31,7 @@ interface Quote {
   open: Open
 }
 
-const DEFAULT_SYMBOL = 'AAPL'
+const DEFAULT_SYMBOL = 'SPY'
 
 function Stocks() {
   const { symbol: rawSymbol } = useParams()
