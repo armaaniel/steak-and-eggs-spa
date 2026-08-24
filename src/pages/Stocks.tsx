@@ -1,6 +1,6 @@
 import '../stylesheets/stocks.css'
 import Chart from '../components/Chart'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import PositionTable from '../components/PositionTable'
 import BuySell from '../components/BuySell'
@@ -9,6 +9,7 @@ import { toReadable, toCurrency, toPercent } from '../lib/utils.ts'
 import apiFetch from '../lib/apiFetch'
 import useApi from '../hooks/useApi'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
+import { useAuth } from '../lib/auth'
 import TickerLogo from '../components/TickerLogo'
 import type { TickerData, UserData, ChartData, Price, Open } from '../lib/types.ts'
 
@@ -29,10 +30,14 @@ interface Quote {
   open: Open
 }
 
+const DEFAULT_SYMBOL = 'AAPL'
+
 function Stocks() {
   const { symbol: rawSymbol } = useParams()
-  const symbol = rawSymbol?.toUpperCase()
+  const symbol = (rawSymbol ?? DEFAULT_SYMBOL).toUpperCase()
   const navigate = useNavigate()
+  const { token } = useAuth()
+  const isAuthenticated = token !== null
 
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
 	
@@ -44,8 +49,8 @@ function Stocks() {
     `/stocks/${symbol}/stockprice`,
     { price: 'N/A', open: 'N/A' }
   )
-  const prices = usePriceSubscriptions(symbol ? [symbol] : [])
-  const price = prices[symbol ?? ''] ?? quote?.price ?? null
+  const prices = usePriceSubscriptions([symbol])
+  const price = prices[symbol] ?? quote?.price ?? null
   const open = quote?.open ?? null
 
   const percentChange = toPercent(price, open)
@@ -57,7 +62,7 @@ function Stocks() {
     }
   }, [rawSymbol, symbol, navigate])
 	
-	const { data: userData, getData: getUserData } = useApi<UserData>(`/stocks/${symbol}/userdata`,
+	const { data: userData, getData: getUserData } = useApi<UserData>(isAuthenticated ? `/stocks/${symbol}/userdata` : null,
 	{balance:'N/A'})
 	
 	useEffect(() => {
@@ -89,6 +94,10 @@ function Stocks() {
 	
 	const { data: marketData } = useApi<MarketData>(`/stocks/${symbol}/marketdata`, 
 	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
+	
+	const isReady = isAuthenticated
+		? Boolean(tickerData && userData)
+		: Boolean(tickerData)
 
   if (tickerNotFound) {
     return (
@@ -100,12 +109,12 @@ function Stocks() {
 
   return (
     <>
-      <main className={`home ${tickerData && userData ? 'loaded' : ''}`}>
+      <main className={`home ${isReady ? 'loaded' : ''}`}>
         <div className='stocks-left'>
           <div className="stock-plus-chart">
             <div className="stock-heading-price">
               <div className="stock-heading-container">
-                <TickerLogo symbol={symbol!} size={40} />
+                <TickerLogo symbol={symbol} size={40} />
                 <div className="stock-text">
                   <p className="stock-symbol">{symbol}</p>
                   <p className={`stock-name-two ${tickerData ? 'loaded' : ''}`}>{tickerData?.name}</p>
@@ -123,6 +132,27 @@ function Stocks() {
               {chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
             </div>
           </div>
+
+          {!isAuthenticated && (
+            <div className="stock-pitch">
+              <h3 className="stock-pitch-heading">Practice trading {symbol} on Steak &amp; Eggs.</h3>
+
+              <p className="stock-pitch-body">
+                Steak &amp; Eggs gives you the tools to learn the market without risking a dollar.
+                Live prices, real charts, and a portfolio that moves the way a real one would, all for free.
+              </p>
+
+              <div className="stock-pitch-actions">
+                <Link to="/login" className="btn btn-secondary">
+                  Log In
+                </Link>
+
+                <Link to="/signup" className="btn btn-primary">
+                  Sign Up
+                </Link>
+              </div>
+            </div>
+          )}
 
           {userData?.position && (
             <div className="position-two">
@@ -186,7 +216,7 @@ function Stocks() {
         </div>
 
         <div className='stocks-right'>
-          <BuySell getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} symbol={symbol} />
+          <BuySell isAuthenticated={isAuthenticated} getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} symbol={symbol} />
         </div>
       </main>
     </>

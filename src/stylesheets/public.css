@@ -6,49 +6,9 @@
 	width:320px;
 }
 
-.nav {
-	display:flex;
-	flex-direction:row;
-	padding:25px 2.5rem 10px 9px;
-	justify-content:space-between;
-	min-height:150px;
-}
-
-.nav-text {
-	font-family: var(--font-ui);
-	font-weight:500;
-	color:var(--text);
-	text-decoration:none;
-	margin-top:0.25rem;
-}
-
-.nav-left {
-	display:flex;
-	align-items:center;
-	column-gap:1rem;
-}
-
-.nav-right {
-	display:flex;
-	align-items:center;
-	column-gap:1rem;
-	margin-top:0.25rem;
-}
-
 @media (max-width:768px) {
 	.logo-desktop {
 		width:63px;
 	}
 
-	.nav {
-		align-items:center;
-		column-gap:0.25rem;
-		padding:25px 6px 10px 9px;
-		min-height:0px;
-	}
-
-	.nav-right {
-		column-gap:0.25rem;
-		text-align:center
-	}
 }

@@ -6,8 +6,10 @@ import '../stylesheets/buysell.css'
 import type { NumberFormatValues } from 'react-number-format'
 import type { Price, Error } from '../lib/types.ts'
 import apiFetch from '../lib/apiFetch'
+import useTryDemo from '../hooks/useTryDemo'
 
 interface Props {
+  isAuthenticated: boolean
   getUserData: () => Promise<void>
   balance: string | undefined
   position: Position | undefined
@@ -22,7 +24,9 @@ interface OrderData {
   value: string
 }
 
-const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
+const BuySell = ({ isAuthenticated, getUserData, balance, position, price, symbol }: Props) => {
+
+  const { tryDemo, isSubmitting: isDemoSubmitting, error: demoError } = useTryDemo(`/stocks/${symbol}`)
 
   const [currentState, setCurrentState] = useState({ action: 'buy', step: 1 })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -42,6 +46,10 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
   const hasInsufficientShares = Number(quantity) > (position?.shares || 0)
 	const isBuy = currentState.action === 'buy'
 	const isSell = currentState.action === 'sell'
+	const hasInsufficient = isAuthenticated && (isBuy ? hasInsufficientFunds : hasInsufficientShares)
+	const panelError = hasInsufficient
+		? (isBuy ? 'Insufficient funds for this purchase' : 'Insufficient shares for this sale')
+		: demoError
 
   const isQuantityInvalid = () => {
     if (quantity === '') return true
@@ -152,10 +160,16 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
             </div>
 
             <div className="bs-next-parent">
-							<button className="btn btn-primary next" onClick={nextStep}
-							disabled={(isBuy ? hasInsufficientFunds : hasInsufficientShares) || quantityInvalid || free}>
-							  Next
-							</button>
+							{isAuthenticated ? (
+								<button className="btn btn-primary next" onClick={nextStep}
+								disabled={(isBuy ? hasInsufficientFunds : hasInsufficientShares) || quantityInvalid || free}>
+								  Next
+								</button>
+							) : (
+								<button className="btn btn-primary next" onClick={tryDemo} disabled={isDemoSubmitting}>
+								  Try Demo
+								</button>
+							)}
 
               <hr className="bs-line" />
 
@@ -168,8 +182,8 @@ const BuySell = ({ getUserData, balance, position, price, symbol }: Props) => {
               </div>
             </div>
 						
-						<div className={`bs-error-container ${(isBuy && hasInsufficientFunds) || (isSell && hasInsufficientShares) ? 'visible' : '' }`}>
-						  <p>{(isBuy && hasInsufficientFunds) ? 'Insufficient funds for this purchase' : (isSell && hasInsufficientShares) ? 'Insufficient shares for this sale' : '\u00A0'}</p>
+						<div className={`bs-error-container ${panelError ? 'visible' : '' }`}>
+						  <p>{panelError ?? '\u00A0'}</p>
 						</div>
           </div>
         </div>

@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import '../stylesheets/loginsignup.css'
-import useTryDemo from '../hooks/useTryDemo'
-import Logo from '../components/Logo'
+import { useAuth } from '../lib/auth'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
@@ -11,6 +10,7 @@ interface AuthFormProps {
 
 function AuthForm({ mode }: AuthFormProps) {
   const navigate = useNavigate()
+  const { token, setToken } = useAuth()
   const API: string = import.meta.env.VITE_API
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,7 +19,7 @@ function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<null | string>(null)
   const [hasTyped, setHasTyped] = useState(false)
 
-  const { tryDemo: handleTryDemo, isSubmitting: isDemoSubmitting, error: demoError } = useTryDemo()
+  if (token) return <Navigate to="/home" replace />
 
   const isLogin = mode === 'login'
 
@@ -57,6 +57,7 @@ function AuthForm({ mode }: AuthFormProps) {
         const data = await response.json()
         localStorage.setItem('authToken', data.token)
         localStorage.setItem('username', data.username)
+        setToken(data.token)
         navigate('/home')
       } else {
         const errorData = await response.json()
@@ -71,71 +72,56 @@ function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <div className="ls-desktop">
-      <div className='ls-left'>
-        <div className="ls-logo-desktop">
-          <Link to="/">
-            <Logo />
+      <Link to="/" className="ls-back" aria-label="Back to home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="m12 19-7-7 7-7" />
+          <path d="M22 12H5" />
+        </svg>
+      </Link>
+
+      <div className="ls-form-container">
+        <h2 className="ls-heading">{isLogin ? 'Login' : 'Sign Up'}</h2>
+
+        <div className={`ls-error-container ${error && !isSubmitting && !hasTyped ? 'visible' : 'hidden'}`}>
+          <p className="ls-heading error">{error}</p>
+        </div>
+
+        <form className="ls-form" onSubmit={handleSubmit}>
+          <div className="ls-input-container">
+            <input
+              type="text"
+              name="username"
+              id="username"
+              className="ls-input"
+              placeholder=" "
+              onChange={(e) => { setUsername(e.target.value); setHasTyped(true) }}
+            />
+            <label htmlFor="username" className="ls-label">Username</label>
+          </div>
+
+          <div className="ls-input-container">
+            <input
+              type="password"
+              name="password"
+              id="password"
+              className="ls-input"
+              placeholder=" "
+              onChange={(e) => { setPassword(e.target.value); setHasTyped(true) }}
+            />
+            <label htmlFor="password" className="ls-label">Password</label>
+          </div>
+
+          <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
+            {isLogin ? 'Log In' : 'Sign Up'}
+          </button>
+        </form>
+
+        <p className="ls-footer">
+          {isLogin ? "Don't have an account? " : 'Already have an account? '}
+          <Link to={isLogin ? '/signup' : '/login'} className="ls-signup">
+            {isLogin ? 'Sign Up' : 'Login'}
           </Link>
-        </div>
-        {!isLogin && (
-          <div className="ls-try-demo-container">
-            <span className={`ls-try-demo ${isDemoSubmitting ? 'submitting' : ''}`} onClick={!isDemoSubmitting ? handleTryDemo : undefined}>
-              Try Demo
-            </span>
-            <div className={`ls-demo-error-container ${demoError && !isDemoSubmitting ? 'visible' : 'hidden'}`}>
-              <p className="ls-heading error">{demoError}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="ls-right">
-        <div className="ls-container">
-          <div className="ls-form-container">
-            <h2 className="ls-heading">{isLogin ? 'Welcome Back' : 'Sign Up'}</h2>
-
-						<div className={`ls-error-container ${error && !isSubmitting && !hasTyped ? 'visible' : 'hidden'}`}>
-							<p className="ls-heading error">{error}</p>
-            </div>
-
-            <form className="ls-form" onSubmit={handleSubmit}>
-              <div className="ls-input-container">
-                <input
-                  type="text"
-                  name="username"
-                  id="username"
-                  className="ls-input"
-                  placeholder=" "
-                  onChange={(e) => { setUsername(e.target.value); setHasTyped(true) }}
-                />
-                <label htmlFor="username" className="ls-label">Username</label>
-              </div>
-
-              <div className="ls-input-container">
-                <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  className="ls-input"
-                  placeholder=" "
-                  onChange={(e) => { setPassword(e.target.value); setHasTyped(true) }}
-                />
-                <label htmlFor="password" className="ls-label">Password</label>
-              </div>
-
-              <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
-                {isLogin ? 'Log In' : 'Sign Up'}
-              </button>
-            </form>
-
-            <p className="ls-footer">
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <Link to={isLogin ? '/signup' : '/login'} className="ls-signup">
-                {isLogin ? 'Sign Up' : 'Login'}
-              </Link>
-            </p>
-          </div>
-        </div>
+        </p>
       </div>
     </div>
   )

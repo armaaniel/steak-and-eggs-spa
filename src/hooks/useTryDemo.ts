@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../lib/auth'
 
-export default function useTryDemo() {
+export default function useTryDemo(destination = '/home') {
 	const navigate = useNavigate()
+	const { setToken } = useAuth()
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
@@ -18,7 +20,8 @@ export default function useTryDemo() {
 				const data = await response.json()
 				localStorage.setItem('authToken', data.token)
 				localStorage.setItem('username', data.username)
-				navigate('/home')
+				setToken(data.token)
+				navigate(destination)
 			} else {
 				const errorData = await response.json()
 				setError(errorData.error)

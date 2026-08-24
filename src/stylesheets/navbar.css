@@ -1,0 +1,85 @@
+/* Shared navbar chrome. Both PublicNav and the authenticated Navbar use these
+   classes; anything only one of them needs lives with that component's own rules. */
+.nav {
+	display:flex;
+	flex-direction:row;
+	padding:1rem;
+}
+
+.nav-left {
+	display:flex;
+	flex:1;
+	align-items:center;
+}
+
+.nav-right {
+	display:flex;
+	align-items:center;
+	column-gap:1rem;
+	/* Same 9px drop as the nav text. position/top rather than a transform: a transform
+	   creates a stacking context and traps the profile dropdown's z-index inside. */
+	position:relative;
+	top:9px;
+}
+
+/* The Logo SVG is inline, so a plain <a> around it picks up baseline descender space
+   and renders taller than the artwork — which inflates .nav-left and drags the
+   vertically-centred links down with it. */
+.nav-logo {
+	display:flex;
+}
+
+.nav-text {
+	font-family: var(--font-body);
+	font-weight:500;
+	color:var(--text-muted);
+	text-decoration:none;
+	padding:1.25rem;
+}
+
+.nav-text.active,
+.nav-text:hover {
+	color:var(--accent-emphasis);
+}
+
+/* The steak sits low in the logo's cropped viewBox (the eggs take the top), so its
+   centre lands ~9px under the flex centreline at the current 77px logo. Drop the
+   links to meet it rather than lifting the logo into the navbar's top padding.
+   Left only — .nav-right already carries the same drop for its own children. */
+.nav-left .nav-text {
+	position:relative;
+	top:9px;
+}
+
+/* Sits in .nav-right, which already carries the 9px drop for its own children. */
+.nav-theme-toggle {
+	display:inline-flex;
+	align-items:center;
+	background:none;
+	border:none;
+	padding:0.5rem;
+	color:var(--text-muted);
+	cursor:pointer;
+	transition:color 0.15s ease;
+}
+
+.nav-theme-toggle:hover {
+	color:var(--accent-emphasis);
+}
+
+/* The searchbar is flex:1, so its container needs a width to size against. */
+.nav-right.with-search {
+	width:400px;
+}
+
+@media (max-width:768px) {
+	.nav {
+		flex-direction:column;
+		row-gap:0.5rem;
+	}
+
+	.nav-right {
+		column-gap:0.25rem;
+		text-align:center;
+	}
+}

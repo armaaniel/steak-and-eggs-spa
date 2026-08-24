@@ -6,7 +6,11 @@ function useApi<T>(path: string | null, fallback: T) {
 	const [error, setError] = useState<string | null>(null)
 	
 	const getData = async () => {
-		if (!path) return
+		if (!path) {
+			setData(null)
+			setError(null)
+			return
+		}
 		setError(null)
 		
 		try {

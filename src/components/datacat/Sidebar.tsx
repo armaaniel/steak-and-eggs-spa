@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import DCThemeToggle from './DCThemeToggle'
+import ThemeToggle from '../ThemeToggle'
 
 const Sidebar = () => {
   return (
@@ -24,7 +24,7 @@ const Sidebar = () => {
         Ingester
       </NavLink>
 
-      <DCThemeToggle />
+      <ThemeToggle className="dc-theme-toggle" />
     </div>
   )
 }
