@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
-export default function useTryDemo(destination = '/home') {
+export default function useTryDemo() {
 	const navigate = useNavigate()
 	const { setToken } = useAuth()
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
-	async function tryDemo() {
+	async function tryDemo(destination = '/home') {
 		setIsSubmitting(true)
 		setError(null)
 		try {

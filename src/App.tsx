@@ -3,6 +3,7 @@ import { AuthProvider } from './lib/auth'
 import Public from './layouts/Public'
 import ProtectedRoute from './layouts/ProtectedRoute'
 import AuthForm from './pages/AuthForm'
+import About from './pages/About'
 import Home from './pages/Home'
 import Stocks from './pages/Stocks'
 import Activity from './pages/Activity'
@@ -27,6 +28,7 @@ function App() {
           <Route element={<Public />}>
             <Route path="/" element={<Stocks />} />
             <Route path="/stocks/:symbol" element={<Stocks />} />
+            <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/delete" element={<DeleteAccount />} />
           </Route>

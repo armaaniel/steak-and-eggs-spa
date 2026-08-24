@@ -33,15 +33,37 @@
 	background-color:var(--btn-secondary-hover);
 }
 
+/* Reads as .btn-secondary in light. In dark, --surface floats as a raised chip against
+   the near-black page, so the fill drops to --page-bg and the border carries the shape.
+   The :hover rule ties the dark rule on specificity (0,2,0), so it has to stay below it. */
+.btn-ghost {
+	background:var(--surface);
+	color:var(--text-strong);
+}
+
+[data-theme="dark"] .btn-ghost {
+	background:var(--page-bg);
+}
+
+.btn-ghost:hover {
+	background-color:var(--btn-secondary-hover);
+}
+
+/* Mirrors .btn.next:disabled in buysell.css, so the demo button reads the same in flight
+   wherever it appears. Sits after :hover, which it ties on specificity — source order is
+   what stops a disabled button still lighting up under the cursor. */
+.btn-ghost:disabled {
+	background:var(--surface);
+	color:var(--text);
+	cursor:not-allowed;
+}
+
 .btn-danger {
 	background:var(--danger);
 	color:var(--on-danger);
 	border-color:transparent;
 }
 
-/* inherited from the old .login-link.signup:hover — the delete button has always hovered gray;
-   a darker red is a future design decision, not this refactor's. Its own token now, so
-   the accent --btn-hover in dark mode doesn't turn the delete button purple. */
 .btn-danger:hover {
 	background-color:var(--btn-danger-hover);
 }

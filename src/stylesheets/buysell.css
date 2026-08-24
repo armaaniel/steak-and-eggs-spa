@@ -161,6 +161,15 @@
 	white-space:nowrap;
 }
 
+.bs-available {
+	opacity:1;
+  transition:opacity 110ms ease-in;
+}
+
+.home.loaded .bs-available:not(.loaded) {
+      opacity:0;
+}
+
 .bs-error-container {
   display: flex;
   max-height: 0;

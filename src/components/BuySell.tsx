@@ -6,9 +6,10 @@ import '../stylesheets/buysell.css'
 import type { NumberFormatValues } from 'react-number-format'
 import type { Price, Error } from '../lib/types.ts'
 import apiFetch from '../lib/apiFetch'
-import useTryDemo from '../hooks/useTryDemo'
+import type { DemoContext } from '../layouts/Public'
 
 interface Props {
+  demo: DemoContext
   isAuthenticated: boolean
   getUserData: () => Promise<void>
   balance: string | undefined
@@ -24,9 +25,9 @@ interface OrderData {
   value: string
 }
 
-const BuySell = ({ isAuthenticated, getUserData, balance, position, price, symbol }: Props) => {
+const BuySell = ({ demo, isAuthenticated, getUserData, balance, position, price, symbol }: Props) => {
 
-  const { tryDemo, isSubmitting: isDemoSubmitting, error: demoError } = useTryDemo(`/stocks/${symbol}`)
+  const { tryDemo, isSubmitting: isDemoSubmitting, error: demoError } = demo
 
   const [currentState, setCurrentState] = useState({ action: 'buy', step: 1 })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,9 +45,12 @@ const BuySell = ({ isAuthenticated, getUserData, balance, position, price, symbo
   const free = estimatedCost === 0 || isNaN(estimatedCost as any)
   const hasInsufficientFunds = isNaN(Number(balance)) || (typeof estimatedCost === 'number' && estimatedCost > Number(balance))
   const hasInsufficientShares = Number(quantity) > (position?.shares || 0)
+
+	const isUserDataLoaded = balance !== undefined
 	const isBuy = currentState.action === 'buy'
 	const isSell = currentState.action === 'sell'
-	const hasInsufficient = isAuthenticated && (isBuy ? hasInsufficientFunds : hasInsufficientShares)
+	/* dont want error flag when balance inflight  */
+	const hasInsufficient = isAuthenticated && isUserDataLoaded && (isBuy ? hasInsufficientFunds : hasInsufficientShares)
 	const panelError = hasInsufficient
 		? (isBuy ? 'Insufficient funds for this purchase' : 'Insufficient shares for this sale')
 		: demoError
@@ -166,7 +170,7 @@ const BuySell = ({ isAuthenticated, getUserData, balance, position, price, symbo
 								  Next
 								</button>
 							) : (
-								<button className="btn btn-primary next" onClick={tryDemo} disabled={isDemoSubmitting}>
+								<button className="btn btn-primary next" onClick={() => tryDemo(`/stocks/${symbol}`)} disabled={isDemoSubmitting}>
 								  Try Demo
 								</button>
 							)}
@@ -174,11 +178,17 @@ const BuySell = ({ isAuthenticated, getUserData, balance, position, price, symbo
               <hr className="bs-line" />
 
               <div className="bs-containers">
-                <div className="bs-width-wrapper">
-                  <p>Available {isBuy ? 'Cash' : 'Shares'}</p>
-                </div>
+                {isAuthenticated ? (
+                  <>
+                    <div className="bs-width-wrapper">
+                      <p>Available {isBuy ? 'Cash' : 'Shares'}</p>
+                    </div>
 
-                <div>{isBuy ? <p className="est-cost"> ${toCurrency(balance)} USD </p> : <p>{position?.shares?.toLocaleString() || 0}</p>}</div>
+                    <div className={`bs-available ${isUserDataLoaded ? 'loaded' : ''}`}>{isBuy ? <p className="est-cost"> ${toCurrency(balance)} USD </p> : <p>{position?.shares?.toLocaleString() || 0}</p>}</div>
+                  </>
+                ) : (
+                  <p>Login or sign up to get started</p>
+                )}
               </div>
             </div>
 						

@@ -1,0 +1,111 @@
+/* Sits inside the Public layout, whose chrome is already themed. The body paints
+   --page-bg / --text, so this sheet only needs to not fight it. Deliberately parallel
+   to privacy.css — if a third prose page turns up, the two should merge. */
+.about-main {
+	display:flex;
+	flex-direction:column;
+	flex:1;
+}
+
+.about-parent {
+	display:flex;
+	flex-direction:column;
+	margin:36px 75px 80px;
+	max-width:720px;
+}
+
+.about-section-title {
+	font-family: var(--font-body);
+	font-weight:600;
+	font-size:1.25rem;
+	margin-top:36px;
+	margin-bottom:12px;
+}
+
+/* First heading sits against the container's own top margin. */
+.about-section-title:first-child {
+	margin-top:0;
+}
+
+.about-parent p,
+.about-parent ul {
+	font-family: var(--font-ui);
+	font-size:1rem;
+	line-height:1.7;
+	margin-bottom:16px;
+	color:var(--text);
+}
+
+.about-parent ul {
+	padding-left:24px;
+}
+
+.about-parent li {
+	margin-bottom:6px;
+}
+
+/* .btn carries no margin, so the row's spacing lives here — same 1rem the
+   root page's pitch actions use. */
+.about-actions {
+	display:flex;
+	align-items:center;
+	flex-wrap:wrap;
+	gap:1rem;
+	margin-top:40px;
+}
+
+/* Mirrors .af-error-container in addwithdraw.css: always in the tree so the reveal has
+   something to run on, and .visible does the work. Sits in the actions row rather than
+   under it, so it grows to the right of Try Demo. */
+.about-error-container {
+	overflow:hidden;
+	display:flex;
+	align-items:center;
+	max-height:0;
+	opacity:0;
+	transition: max-height 0.3s ease, opacity 0.4s ease;
+}
+
+.about-error-container.visible {
+	max-height:2rem;
+	opacity:1;
+}
+
+/* Type comes from .about-parent p like the rest of the page; only the bottom margin
+   is dropped, since in a centred row it would push the text off the buttons' baseline. */
+.about-error-container p {
+	margin-bottom:0;
+}
+
+.about-footer {
+	margin-top:60px;
+	padding-top:20px;
+	border-top:1px solid var(--border);
+}
+
+/* Beats the .about-parent p sizing, which would otherwise pull the footer
+   back up to body size. */
+.about-footer p {
+	color:var(--text-muted);
+	font-size:0.9rem;
+	margin-bottom:6px;
+}
+
+.about-footer p:last-child {
+	margin-bottom:0;
+}
+
+.about-footer a {
+	color:var(--chart-line);
+	text-decoration:none;
+}
+
+.about-footer a:hover {
+	text-decoration:underline;
+}
+
+@media (max-width:768px) {
+	.about-parent {
+		margin:24px 24px 60px;
+	}
+}

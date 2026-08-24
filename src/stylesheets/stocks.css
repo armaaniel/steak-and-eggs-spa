@@ -143,3 +143,23 @@ opacity:0;
 	column-gap:1rem;
 	margin-top:0.25rem;
 }
+
+/* error container */
+.stock-pitch-error {
+	display:flex;
+	align-items:center;
+	overflow:hidden;
+	max-height:0;
+	opacity:0;
+	transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.stock-pitch-error.visible {
+	max-height:2rem;
+	opacity:1;
+}
+
+.stock-pitch-error p {
+	font-family: var(--font-body);
+	color:var(--text-muted);
+}

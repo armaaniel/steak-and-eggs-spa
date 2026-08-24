@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Link, Navigate } from 'react-router-dom'
 import '../stylesheets/loginsignup.css'
 import { useAuth } from '../lib/auth'
+import { useDemo } from '../layouts/Public'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
@@ -18,10 +19,13 @@ function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<null | string>(null)
   const [hasTyped, setHasTyped] = useState(false)
+  const { tryDemo, isSubmitting: isDemoSubmitting, error: demoError } = useDemo()
 
   if (token) return <Navigate to="/home" replace />
 
   const isLogin = mode === 'login'
+  const shownError = error || demoError
+  const isBusy = isSubmitting || isDemoSubmitting
 
   const validateUsername = (username: string) => {
     if (username.length > 20) return 'Username must be 20 characters or less'
@@ -82,8 +86,8 @@ function AuthForm({ mode }: AuthFormProps) {
       <div className="ls-form-container">
         <h2 className="ls-heading">{isLogin ? 'Login' : 'Sign Up'}</h2>
 
-        <div className={`ls-error-container ${error && !isSubmitting && !hasTyped ? 'visible' : 'hidden'}`}>
-          <p className="ls-heading error">{error}</p>
+        <div className={`ls-error-container ${shownError && !isBusy && !hasTyped ? 'visible' : 'hidden'}`}>
+          <p className="ls-heading error">{shownError}</p>
         </div>
 
         <form className="ls-form" onSubmit={handleSubmit}>
@@ -122,6 +126,16 @@ function AuthForm({ mode }: AuthFormProps) {
             {isLogin ? 'Sign Up' : 'Login'}
           </Link>
         </p>
+
+        {!isLogin && (
+          <>
+            <div className="ls-or">or</div>
+
+            <button type="button" className="btn btn-ghost ls-demo" onClick={() => tryDemo()} disabled={isDemoSubmitting}>
+              Try Demo
+            </button>
+          </>
+        )}
       </div>
     </div>
   )

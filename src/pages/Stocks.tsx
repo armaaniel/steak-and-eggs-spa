@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import PositionTable from '../components/PositionTable'
 import BuySell from '../components/BuySell'
 import NotFoundTwo from '../components/NotFoundTwo'
+import { useDemo } from '../layouts/Public'
 import { toReadable, toCurrency, toPercent } from '../lib/utils.ts'
 import apiFetch from '../lib/apiFetch'
 import useApi from '../hooks/useApi'
@@ -38,6 +39,8 @@ function Stocks() {
   const navigate = useNavigate()
   const { token } = useAuth()
   const isAuthenticated = token !== null
+  const demo = useDemo()
+  const { tryDemo, isSubmitting: isDemoSubmitting, error: demoError } = demo
 
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
 	
@@ -95,9 +98,13 @@ function Stocks() {
 	const { data: marketData } = useApi<MarketData>(`/stocks/${symbol}/marketdata`, 
 	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
 	
-	const isReady = isAuthenticated
-		? Boolean(tickerData && userData)
-		: Boolean(tickerData)
+	/* one-way: nothing sets it false, so a load starting after the first reveal can't hide a page that's already up */
+	const [isReady, setIsReady] = useState(false)
+
+	useEffect(() => {
+		const ready = isAuthenticated ? tickerData && userData : tickerData
+		if (ready) setIsReady(true)
+	}, [isAuthenticated, tickerData, userData])
 
   if (tickerNotFound) {
     return (
@@ -135,21 +142,29 @@ function Stocks() {
 
           {!isAuthenticated && (
             <div className="stock-pitch">
-              <h3 className="stock-pitch-heading">Practice trading {symbol} on Steak &amp; Eggs.</h3>
+              <h3 className="stock-pitch-heading">Practice trading {symbol} on Steak &amp; Eggs</h3>
 
               <p className="stock-pitch-body">
-                Steak &amp; Eggs gives you the tools to learn the market without risking a dollar.
-                Live prices, real charts, and a portfolio that moves the way a real one would, all for free.
+                Steak &amp; Eggs gives you a platform to learn the market without risking a dollar.
+                Streaming prices, performance tracking, and live profit and loss, all for free.
               </p>
 
               <div className="stock-pitch-actions">
-                <Link to="/login" className="btn btn-secondary">
+                <Link to="/login" className="btn btn-ghost">
                   Log In
                 </Link>
 
                 <Link to="/signup" className="btn btn-primary">
                   Sign Up
                 </Link>
+
+                <button className="btn btn-ghost" onClick={() => tryDemo(`/stocks/${symbol}`)} disabled={isDemoSubmitting}>
+                  Try Demo
+                </button>
+
+                <div className={`stock-pitch-error ${demoError ? 'visible' : ''}`}>
+                  <p>{demoError ?? '\u00A0'}</p>
+                </div>
               </div>
             </div>
           )}
@@ -216,7 +231,7 @@ function Stocks() {
         </div>
 
         <div className='stocks-right'>
-          <BuySell isAuthenticated={isAuthenticated} getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} symbol={symbol} />
+          <BuySell demo={demo} isAuthenticated={isAuthenticated} getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} symbol={symbol} />
         </div>
       </main>
     </>

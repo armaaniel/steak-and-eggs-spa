@@ -142,6 +142,31 @@
 	cursor:default;
 }
 
+
+.ls-or {
+	display:flex;
+	align-items:center;
+	column-gap:0.75rem;
+	color:var(--text-muted);
+	font-family: var(--font-body);
+}
+
+/* Rules drawn as pseudo-elements either side of the label, so the "or" keeps the
+   container's own background instead of needing one painted behind it. */
+
+.ls-or::before,
+.ls-or::after {
+	content:'';
+	flex:1;
+	height:1px;
+	background:var(--border);
+}
+
+.btn.ls-demo {
+	width:100%;
+	font-size:1rem;
+}
+
 @media (max-width:768px) {
 	.ls-form-container {
 		width:80%;
