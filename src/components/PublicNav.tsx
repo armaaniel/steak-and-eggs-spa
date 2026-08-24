@@ -24,7 +24,7 @@ const PublicNav = ({ showSearch = true }: Props) => {
         </NavLink>
 
         <NavLink to="/datacat" className='nav-text' state={{ authBoolean: false }}>
-          <span>DataCat (APM)</span>
+          <span>DataCat</span>
         </NavLink>
 
         <a href="https://github.com/armaaniel" className="nav-text" target="_blank" rel="noopener noreferrer">
