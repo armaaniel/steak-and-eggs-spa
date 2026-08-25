@@ -158,6 +158,7 @@ export interface IngesterConnection {
 	spawnedAt:string
 	firstMessageAt:string | null
 	lastSeenAt:string
+	endedAt:string | null
 	endedBy:string | null
 	connectSeconds:number | null
 	durationSeconds:number | null

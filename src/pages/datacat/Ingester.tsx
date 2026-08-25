@@ -57,6 +57,7 @@ const GET_INGESTER = gql`
       spawnedAt
       firstMessageAt
       lastSeenAt
+      endedAt
       endedBy
       connectSeconds
       durationSeconds
@@ -104,7 +105,8 @@ const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'spawnedAt', label: 'Spawned', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
   { key: 'connectSeconds', label: 'Time To First Message', sortable: false, render: (connection) => toDuration(connection.connectSeconds) },
   { key: 'durationSeconds', label: 'Held', sortable: false, render: (connection) => toDuration(connection.durationSeconds) },
-  { key: 'endedBy', label: 'Ended By', sortable: false, render: (connection) => connection.endedBy ?? 'open' },
+  // endedAt and endedBy come from the same filter, so a cause always has a time with it
+  { key: 'endedBy', label: 'Ended', sortable: false, render: (connection) => (connection.endedBy && connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : 'open') },
 ]
 
 function Ingester() {
