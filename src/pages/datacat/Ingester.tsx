@@ -112,7 +112,7 @@ const bootColumns: Column<BootRow>[] = [
 ]
 
 const connectionColumns: Column<ConnectionRow>[] = [
-  { key: 'spawnedAt', label: 'Spawned', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
+  { key: 'spawnedAt', label: 'Started', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
   // the timestamp rather than the delta from spawn: a connection opened outside market hours
   // waits on the first trade, not on the socket, and a duration there reads as latency it isn't
   { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? new Date(connection.firstMessageAt).toLocaleString() : 'none') },
