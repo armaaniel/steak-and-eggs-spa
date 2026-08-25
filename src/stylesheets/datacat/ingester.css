@@ -126,3 +126,72 @@
 	font-weight:400;
 	color:var(--dc-text);
 }
+
+.ing-transitions {
+	display:flex;
+	flex-direction:column;
+}
+
+.ing-transition + .ing-transition {
+	border-top:1px solid var(--dc-border);
+}
+
+.ing-transition-trigger {
+	display:flex;
+	align-items:center;
+	column-gap:0.75rem;
+	width:100%;
+	padding:0.5rem 0.25rem;
+	border:none;
+	background:none;
+	cursor:pointer;
+	font-family: var(--font-ui);
+	font-size:14px;
+	font-weight:400;
+	color:var(--dc-text);
+	text-align:left;
+}
+
+.ing-transition-trigger:hover:not(:disabled) {
+	background-color:var(--dc-hover);
+}
+
+/* a transition with no detail payload has nothing to open */
+.ing-transition-trigger:disabled {
+	cursor:default;
+}
+
+.ing-transition-time {
+	flex:0 0 190px;
+	color:var(--dc-text-muted);
+}
+
+.ing-transition-cause {
+	flex:0 0 150px;
+	font-weight:500;
+}
+
+.ing-transition-chevron {
+	margin-left:auto;
+}
+
+.ing-transition-detail {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.5rem;
+	max-height:0;
+	overflow:hidden;
+	padding-left:0.25rem;
+	font-family: var(--font-ui);
+	font-size:14px;
+	color:var(--dc-text);
+	word-break:break-word; /* stack traces and connection strings arrive unwrapped */
+	opacity:0;
+	transition:opacity 150ms, max-height 150ms, padding-bottom 150ms;
+}
+
+.ing-transition-detail.open {
+	max-height:400px;
+	padding-bottom:0.5rem;
+	opacity:1;
+}

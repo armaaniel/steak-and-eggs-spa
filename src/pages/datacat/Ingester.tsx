@@ -4,10 +4,11 @@ import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import IngesterRateChart from '../../components/datacat/IngesterRateChart'
 import IngesterLagChart from '../../components/datacat/IngesterLagChart'
+import IngesterTransitionRow from '../../components/datacat/IngesterTransitionRow'
 import useTransition from '../../hooks/useTransition.ts'
 import { toDuration } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
-import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterBoot, IngesterConnection, IngesterCause } from '../../lib/types.ts'
+import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, IngesterCause } from '../../lib/types.ts'
 
 const GET_INGESTER = gql`
   query getIngester($hours: Int!) {
@@ -31,6 +32,15 @@ const GET_INGESTER = gql`
       framesPerSec
       maxLagMs
       symbols
+    }
+    ingesterTransitions(hours: $hours) {
+      id
+      at
+      bootId
+      connectionId
+      state
+      cause
+      detail
     }
     ingesterLag(hours: $hours) {
       at
@@ -72,6 +82,7 @@ interface IngesterData {
   ingesterUptime: IngesterUptime
   ingesterSpans: IngesterSpan[]
   ingesterRate: IngesterRatePoint[]
+  ingesterTransitions: IngesterTransition[]
   ingesterLag: IngesterLagPoint[]
   ingesterBoots: IngesterBoot[]
   ingesterConnections: IngesterConnection[]
@@ -125,6 +136,7 @@ function Ingester() {
   const spans = data?.ingesterSpans || []
   const rate = data?.ingesterRate || []
   const lag = data?.ingesterLag || []
+  const transitions = data?.ingesterTransitions || []
   const causes = data?.ingesterCauses || []
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
@@ -184,6 +196,20 @@ function Ingester() {
                 Down {toDuration(uptime?.downSeconds)}
               </span>
             </div>
+          </div>
+
+          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+            <p className="ing-card-title">Transitions</p>
+
+            {transitions.length === 0 ? (
+              <p className="ing-message">No transitions in this window</p>
+            ) : (
+              <div className="ing-transitions">
+                {transitions.map((transition) => (
+                  <IngesterTransitionRow key={transition.id} transition={transition} />
+                ))}
+              </div>
+            )}
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>

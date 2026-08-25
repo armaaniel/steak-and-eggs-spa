@@ -175,3 +175,13 @@ export interface IngesterLagPoint {
 	sampledEvents:number | null
 	symbols:number | null
 }
+
+export interface IngesterTransition {
+	id:string
+	at:string
+	bootId:string
+	connectionId:string | null
+	state:string
+	cause:string | null
+	detail:Record<string, unknown> | null
+}
