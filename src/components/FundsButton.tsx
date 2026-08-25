@@ -52,7 +52,7 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
     try {
       const response = await apiFetch(`/${mode}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' } as HeadersInit,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: amount }),
       })
 			if (!response) return

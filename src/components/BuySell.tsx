@@ -89,7 +89,7 @@ const BuySell = ({ demo, isAuthenticated, getUserData, balance, position, price,
     try {
       const response = await apiFetch(`/stocks/${symbol}/${action}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' } as HeadersInit,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: quantity }),
       })
 			if (!response) return
