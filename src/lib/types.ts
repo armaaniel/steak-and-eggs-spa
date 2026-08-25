@@ -167,3 +167,11 @@ export interface IngesterCause {
 	cause:string
 	count:number
 }
+
+export interface IngesterLagPoint {
+	at:string
+	maxExcessMs:number | null
+	meanExcessMs:number | null
+	sampledEvents:number | null
+	symbols:number | null
+}

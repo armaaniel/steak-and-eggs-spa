@@ -3,10 +3,11 @@ import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import IngesterRateChart from '../../components/datacat/IngesterRateChart'
+import IngesterLagChart from '../../components/datacat/IngesterLagChart'
 import useTransition from '../../hooks/useTransition.ts'
 import { toDuration } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
-import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterBoot, IngesterConnection, IngesterCause } from '../../lib/types.ts'
+import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterBoot, IngesterConnection, IngesterCause } from '../../lib/types.ts'
 
 const GET_INGESTER = gql`
   query getIngester($hours: Int!) {
@@ -30,6 +31,13 @@ const GET_INGESTER = gql`
       eventsPerSec
       framesPerSec
       maxLagMs
+      symbols
+    }
+    ingesterLag(hours: $hours) {
+      at
+      maxExcessMs
+      meanExcessMs
+      sampledEvents
       symbols
     }
     ingesterBoots(hours: $hours) {
@@ -64,6 +72,7 @@ interface IngesterData {
   ingesterUptime: IngesterUptime
   ingesterSpans: IngesterSpan[]
   ingesterRate: IngesterRatePoint[]
+  ingesterLag: IngesterLagPoint[]
   ingesterBoots: IngesterBoot[]
   ingesterConnections: IngesterConnection[]
   ingesterCauses: IngesterCause[]
@@ -114,6 +123,7 @@ function Ingester() {
   const uptime = data?.ingesterUptime
   const spans = data?.ingesterSpans || []
   const rate = data?.ingesterRate || []
+  const lag = data?.ingesterLag || []
   const causes = data?.ingesterCauses || []
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
@@ -184,6 +194,15 @@ function Ingester() {
             <p className="ing-card-title">Throughput</p>
 
             {rate.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterRateChart points={rate} />}
+          </div>
+
+          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+            <div className="ing-card-header">
+              <p className="ing-card-title">Lag above baseline</p>
+              <p className="ing-causes">excess over the feed's baseline delay</p>
+            </div>
+
+            {lag.length === 0 ? <p className="ing-message">No samples ran late in this window</p> : <IngesterLagChart points={lag} hours={hours} />}
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
