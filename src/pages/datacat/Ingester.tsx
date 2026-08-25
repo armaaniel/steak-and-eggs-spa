@@ -1,14 +1,14 @@
+import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import IngesterRateChart from '../../components/datacat/IngesterRateChart'
 import IngesterLagChart from '../../components/datacat/IngesterLagChart'
-import IngesterTransitionRow from '../../components/datacat/IngesterTransitionRow'
 import useTransition from '../../hooks/useTransition.ts'
 import { toDuration } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
-import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, IngesterCause } from '../../lib/types.ts'
+import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, IngesterCause, OutletContextType } from '../../lib/types.ts'
 
 const GET_INGESTER = gql`
   query getIngester($hours: Int!) {
@@ -116,11 +116,14 @@ const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'spawnedAt', label: 'Spawned', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
   { key: 'connectSeconds', label: 'Time To First Message', sortable: false, render: (connection) => toDuration(connection.connectSeconds) },
   { key: 'durationSeconds', label: 'Held', sortable: false, render: (connection) => toDuration(connection.durationSeconds) },
-  // endedAt and endedBy come from the same filter, so a cause always has a time with it
-  { key: 'endedBy', label: 'Ended', sortable: false, render: (connection) => (connection.endedBy && connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : 'open') },
+  // endedBy is now always present ('open' / 'no record' / the cause); only a real terminal
+  // cause carries a timestamp with it
+  { key: 'endedBy', label: 'Ended', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },
 ]
 
 function Ingester() {
+  const { selectedTransition, setSelectedTransition } = useOutletContext<OutletContextType>()
+
   const [hours, setHours] = useState(24)
   const [selectedBoot, setSelectedBoot] = useState<BootRow | null>(null)
   const [selectedConnection, setSelectedConnection] = useState<ConnectionRow | null>(null)
@@ -242,7 +245,11 @@ function Ingester() {
             ) : (
               <div className="ing-transitions">
                 {transitions.map((transition) => (
-                  <IngesterTransitionRow key={transition.id} transition={transition} />
+                  <button key={transition.id} type="button" className={`ing-transition-row ${selectedTransition?.id === transition.id ? 'selected' : ''}`} onClick={() => setSelectedTransition(transition)}>
+                    <span className="ing-transition-time">{new Date(transition.at).toLocaleString()}</span>
+                    <span className="ing-transition-cause">{transition.cause ?? '-'}</span>
+                    <span>{transition.state}</span>
+                  </button>
                 ))}
               </div>
             )}

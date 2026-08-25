@@ -70,6 +70,8 @@ export interface OutletContextType {
 	setSelectedTrace: React.Dispatch<React.SetStateAction<Trace | null>>
 	selectedConnection: ConnectionWithID | null
 	setSelectedConnection: React.Dispatch<React.SetStateAction<ConnectionWithID | null>>
+	selectedTransition: IngesterTransition | null
+	setSelectedTransition: React.Dispatch<React.SetStateAction<IngesterTransition | null>>
 	loaded: boolean
     setLoaded: React.Dispatch<React.SetStateAction<boolean>>
 	
@@ -158,7 +160,7 @@ export interface IngesterConnection {
 	firstMessageAt:string | null
 	lastSeenAt:string
 	endedAt:string | null
-	endedBy:string | null
+	endedBy:string
 	connectSeconds:number | null
 	durationSeconds:number | null
 }
