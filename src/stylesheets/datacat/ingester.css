@@ -82,6 +82,9 @@
 
 .ing-chart {
 	height:220px;
+	/* recharts renders its legend as plain HTML and its ticks as SVG text, neither of which
+	   picks up a font on its own — the container hands both the same one the cards use */
+	font-family: var(--font-ui);
 }
 
 .ing-tooltip {
