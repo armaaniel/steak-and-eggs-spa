@@ -68,7 +68,6 @@ const GET_INGESTER = gql`
       lastSeenAt
       endedAt
       endedBy
-      connectSeconds
       durationSeconds
     }
     ingesterCauses(hours: $hours) {
@@ -114,7 +113,9 @@ const bootColumns: Column<BootRow>[] = [
 
 const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'spawnedAt', label: 'Spawned', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
-  { key: 'connectSeconds', label: 'Time To First Message', sortable: false, render: (connection) => toDuration(connection.connectSeconds) },
+  // the timestamp rather than the delta from spawn: a connection opened outside market hours
+  // waits on the first trade, not on the socket, and a duration there reads as latency it isn't
+  { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? new Date(connection.firstMessageAt).toLocaleString() : 'none') },
   { key: 'durationSeconds', label: 'Held', sortable: false, render: (connection) => toDuration(connection.durationSeconds) },
   // endedBy is now always present ('open' / 'no record' / the cause); only a real terminal
   // cause carries a timestamp with it

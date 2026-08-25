@@ -161,7 +161,6 @@ export interface IngesterConnection {
 	lastSeenAt:string
 	endedAt:string | null
 	endedBy:string
-	connectSeconds:number | null
 	durationSeconds:number | null
 }
 
