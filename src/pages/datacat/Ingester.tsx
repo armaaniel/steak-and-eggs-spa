@@ -56,7 +56,7 @@ const GET_INGESTER = gql`
       durationSeconds
       connections
       reconnects
-      cleanExit
+      exitState
       events
       peakLagMs
     }
@@ -108,7 +108,8 @@ const bootColumns: Column<BootRow>[] = [
   { key: 'reconnects', label: 'Reconnects', sortable: false, render: (boot) => boot.reconnects },
   { key: 'events', label: 'Events', sortable: false, render: (boot) => Number(boot.events ?? 0).toLocaleString() },
   { key: 'peakLagMs', label: 'Peak Lag', sortable: false, render: (boot) => (boot.peakLagMs === null ? '-' : `${boot.peakLagMs} ms`) },
-  { key: 'cleanExit', label: 'Exit', sortable: false, render: (boot) => (boot.cleanExit === null ? 'running' : boot.cleanExit ? 'clean' : 'unclean') },
+  // the server decides the state; 'none' is the only value that reads better spelled out
+  { key: 'exitState', label: 'Exit', sortable: false, render: (boot) => (boot.exitState === 'none' ? 'no sigterm' : boot.exitState) },
 ]
 
 const connectionColumns: Column<ConnectionRow>[] = [
@@ -199,20 +200,6 @@ function Ingester() {
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-            <p className="ing-card-title">Transitions</p>
-
-            {transitions.length === 0 ? (
-              <p className="ing-message">No transitions in this window</p>
-            ) : (
-              <div className="ing-transitions">
-                {transitions.map((transition) => (
-                  <IngesterTransitionRow key={transition.id} transition={transition} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
             <p className="ing-card-title">Throughput</p>
 
             {rate.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterRateChart points={rate} />}
@@ -245,6 +232,20 @@ function Ingester() {
             </div>
 
             <TraceTable traceData={connections} columns={connectionColumns} selectedTrace={selectedConnection} setSelectedTrace={setSelectedConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage="No connections in this window" />
+          </div>
+
+          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+            <p className="ing-card-title">Transitions</p>
+
+            {transitions.length === 0 ? (
+              <p className="ing-message">No transitions in this window</p>
+            ) : (
+              <div className="ing-transitions">
+                {transitions.map((transition) => (
+                  <IngesterTransitionRow key={transition.id} transition={transition} />
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}

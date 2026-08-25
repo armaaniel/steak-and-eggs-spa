@@ -146,7 +146,7 @@ export interface IngesterBoot {
 	durationSeconds:number
 	connections:number
 	reconnects:number
-	cleanExit:boolean | null
+	exitState:string
 	events:string | null
 	peakLagMs:number | null
 }
