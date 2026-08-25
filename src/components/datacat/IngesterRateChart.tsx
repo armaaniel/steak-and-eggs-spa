@@ -22,7 +22,7 @@ const RateTooltip = ({ active, payload }: TooltipProps) => {
       <p className="ing-tooltip-time">{new Date(point.at).toLocaleString()}</p>
       <p>{point.eventsPerSec?.toFixed(1) ?? '-'} events/sec</p>
       <p>{point.framesPerSec?.toFixed(1) ?? '-'} frames/sec</p>
-      <p>{point.maxLagMs ?? '-'} ms peak lag</p>
+      <p>{point.maxExcessMs?.toLocaleString() ?? '-'} ms peak lag</p>
       <p>{point.symbols ?? '-'} symbols</p>
     </div>
   )

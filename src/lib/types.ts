@@ -137,7 +137,7 @@ export interface IngesterRatePoint {
 	at:string
 	eventsPerSec:number | null
 	framesPerSec:number | null
-	maxLagMs:number | null
+	maxExcessMs:number | null
 	symbols:number | null
 }
 

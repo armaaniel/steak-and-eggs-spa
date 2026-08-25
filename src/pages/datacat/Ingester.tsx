@@ -30,7 +30,7 @@ const GET_INGESTER = gql`
       at
       eventsPerSec
       framesPerSec
-      maxLagMs
+      maxExcessMs
       symbols
     }
     ingesterTransitions(hours: $hours) {
