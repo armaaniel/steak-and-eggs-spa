@@ -123,11 +123,14 @@ const connectionColumns: Column<ConnectionRow>[] = [
 ]
 
 function Ingester() {
-  const { selectedTransition, setSelectedTransition } = useOutletContext<OutletContextType>()
+  const { selectedIngesterDetail, setSelectedIngesterDetail } = useOutletContext<OutletContextType>()
 
   const [hours, setHours] = useState(24)
-  const [selectedBoot, setSelectedBoot] = useState<BootRow | null>(null)
-  const [selectedConnection, setSelectedConnection] = useState<ConnectionRow | null>(null)
+
+  const changeHours = (value: number) => {
+    setSelectedIngesterDetail(null) // the selected row may not exist in the new window
+    setHours(value)
+  }
 
   const recordsPerPage = 10
 
@@ -147,6 +150,26 @@ function Ingester() {
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
   const connections: ConnectionRow[] = (data?.ingesterConnections || []).map((connection) => ({ ...connection, id: connection.connectionId }))
 
+  // the page already holds every transition and connection, and both carry bootId — so the
+  // drill-down is a filter over data in hand rather than another round trip
+  const selectBoot = (boot: BootRow) =>
+    setSelectedIngesterDetail({
+      kind: 'boot',
+      boot,
+      transitions: transitions.filter((transition) => transition.bootId === boot.bootId),
+      connections: connections.filter((connection) => connection.bootId === boot.bootId),
+    })
+
+  const selectConnection = (connection: ConnectionRow) =>
+    setSelectedIngesterDetail({
+      kind: 'connection',
+      connection,
+      transitions: transitions.filter((transition) => transition.connectionId === connection.connectionId),
+    })
+
+  const selectedBoot = selectedIngesterDetail?.kind === 'boot' ? boots.find((boot) => boot.bootId === selectedIngesterDetail.boot.bootId) || null : null
+  const selectedConnection = selectedIngesterDetail?.kind === 'connection' ? connections.find((row) => row.connectionId === selectedIngesterDetail.connection.connectionId) || null : null
+
   return (
     <>
       <div className="ing-header">
@@ -155,7 +178,7 @@ function Ingester() {
             Window
           </label>
 
-          <select id="hours-select" value={hours} onChange={(e) => setHours(Number(e.target.value))}>
+          <select id="hours-select" value={hours} onChange={(e) => changeHours(Number(e.target.value))}>
             {windows.map((option) => (
               <option key={option.hours} value={option.hours}>
                 {option.label}
@@ -221,7 +244,7 @@ function Ingester() {
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
             <p className="ing-card-title">Boots</p>
 
-            <TraceTable traceData={boots} columns={bootColumns} selectedTrace={selectedBoot} setSelectedTrace={setSelectedBoot} recordsPerPage={recordsPerPage} error={error} emptyMessage="No boots in this window" />
+            <TraceTable traceData={boots} columns={bootColumns} selectedTrace={selectedBoot} setSelectedTrace={selectBoot} recordsPerPage={recordsPerPage} error={error} emptyMessage="No boots in this window" />
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
@@ -235,7 +258,7 @@ function Ingester() {
               )}
             </div>
 
-            <TraceTable traceData={connections} columns={connectionColumns} selectedTrace={selectedConnection} setSelectedTrace={setSelectedConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage="No connections in this window" />
+            <TraceTable traceData={connections} columns={connectionColumns} selectedTrace={selectedConnection} setSelectedTrace={selectConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage="No connections in this window" />
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
@@ -246,7 +269,7 @@ function Ingester() {
             ) : (
               <div className="ing-transitions">
                 {transitions.map((transition) => (
-                  <button key={transition.id} type="button" className={`ing-transition-row ${selectedTransition?.id === transition.id ? 'selected' : ''}`} onClick={() => setSelectedTransition(transition)}>
+                  <button key={transition.id} type="button" className={`ing-transition-row ${selectedIngesterDetail?.kind === 'transition' && selectedIngesterDetail.transition.id === transition.id ? 'selected' : ''}`} onClick={() => setSelectedIngesterDetail({ kind: 'transition', transition })}>
                     <span className="ing-transition-time">{new Date(transition.at).toLocaleString()}</span>
                     <span className="ing-transition-cause">{transition.cause ?? '-'}</span>
                     <span>{transition.state}</span>

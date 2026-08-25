@@ -8,7 +8,7 @@ interface TableProps<T> {
   traceData: T[]
   columns: Column<T>[]
   selectedTrace: T | null
-  setSelectedTrace: React.Dispatch<React.SetStateAction<T | null>>
+  setSelectedTrace: (trace: T) => void
   recordsPerPage: number
   error: ApolloError | undefined
   emptyMessage?: string | undefined

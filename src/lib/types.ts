@@ -70,8 +70,8 @@ export interface OutletContextType {
 	setSelectedTrace: React.Dispatch<React.SetStateAction<Trace | null>>
 	selectedConnection: ConnectionWithID | null
 	setSelectedConnection: React.Dispatch<React.SetStateAction<ConnectionWithID | null>>
-	selectedTransition: IngesterTransition | null
-	setSelectedTransition: React.Dispatch<React.SetStateAction<IngesterTransition | null>>
+	selectedIngesterDetail: IngesterDetail | null
+	setSelectedIngesterDetail: React.Dispatch<React.SetStateAction<IngesterDetail | null>>
 	loaded: boolean
     setLoaded: React.Dispatch<React.SetStateAction<boolean>>
 	
@@ -186,3 +186,10 @@ export interface IngesterTransition {
 	cause:string | null
 	detail:Record<string, unknown> | null
 }
+
+// One selection for the whole ingester page rather than three parallel ones. The page owns
+// the filtering, so each payload arrives self-contained and the panel just renders it.
+export type IngesterDetail =
+	| {kind:'boot'; boot:IngesterBoot; transitions:IngesterTransition[]; connections:IngesterConnection[]}
+	| {kind:'connection'; connection:IngesterConnection; transitions:IngesterTransition[]}
+	| {kind:'transition'; transition:IngesterTransition}

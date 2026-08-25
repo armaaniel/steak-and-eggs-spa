@@ -4,7 +4,7 @@ interface Props {
   connection: ConnectionWithID
 }
 
-const ConnectionDetailsPanel = ({ connection }: Props) => {
+const CableConnectionDetailsPanel = ({ connection }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
@@ -29,4 +29,4 @@ const ConnectionDetailsPanel = ({ connection }: Props) => {
   )
 }
 
-export default ConnectionDetailsPanel
+export default CableConnectionDetailsPanel

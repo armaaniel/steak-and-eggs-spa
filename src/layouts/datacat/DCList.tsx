@@ -5,11 +5,11 @@ import '../../stylesheets/datacat/endpoint.css'
 import Sidebar from '../../components/datacat/Sidebar'
 import DCNavbar from '../../components/datacat/DCNavbar'
 import TraceDetailsPanel from '../../components/datacat/TraceDetailsPanel'
-import ConnectionDetailsPanel from '../../components/datacat/ConnectionDetailsPanel'
-import TransitionDetailsPanel from '../../components/datacat/TransitionDetailsPanel'
+import CableConnectionDetailsPanel from '../../components/datacat/CableConnectionDetailsPanel'
+import IngesterDetailsPanel from '../../components/datacat/IngesterDetailsPanel'
 import StatsPanel from '../../components/datacat/StatsPanel'
 import useEndpoint from '../../hooks/useEndpoint'
-import type { Trace, ConnectionWithID, IngesterTransition } from '../../lib/types.ts'
+import type { Trace, ConnectionWithID, IngesterDetail } from '../../lib/types.ts'
 
 const GET_STATS = gql`
   query getStats($endpoint: String!) {
@@ -41,7 +41,7 @@ function DCList() {
   const [loaded, setLoaded] = useState(false)
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
   const [selectedConnection, setSelectedConnection] = useState<ConnectionWithID | null>(null)
-  const [selectedTransition, setSelectedTransition] = useState<IngesterTransition | null>(null)
+  const [selectedIngesterDetail, setSelectedIngesterDetail] = useState<IngesterDetail | null>(null)
 
   const [statsOpen, setStatsOpen] = useState(() => {
     const saved = localStorage.getItem('statsOpen')
@@ -65,7 +65,7 @@ function DCList() {
   const closeDetails = () => {
     setSelectedTrace(null)
     setSelectedConnection(null)
-    setSelectedTransition(null)
+    setSelectedIngesterDetail(null)
   }
 
   useEffect(() => {
@@ -77,7 +77,7 @@ function DCList() {
       <DCNavbar />
       <div className="dc-home-parent">
         <div className="home-left-two">
-          {(selectedTrace || selectedConnection || selectedTransition) && (
+          {(selectedTrace || selectedConnection || selectedIngesterDetail) && (
             <div className="dc-side-header-container">
               <h3 className="catlas-text">Details</h3>
               <div className="dc-back-button-container">
@@ -92,9 +92,9 @@ function DCList() {
           {selectedTrace ? (
             <TraceDetailsPanel trace={selectedTrace} />
           ) : selectedConnection ? (
-            <ConnectionDetailsPanel connection={selectedConnection} />
-          ) : selectedTransition ? (
-            <TransitionDetailsPanel transition={selectedTransition} />
+            <CableConnectionDetailsPanel connection={selectedConnection} />
+          ) : selectedIngesterDetail ? (
+            <IngesterDetailsPanel detail={selectedIngesterDetail} />
           ) : (
             <>
               <Sidebar />
@@ -125,7 +125,7 @@ function DCList() {
         </div>
 
         <div className="dc-home-right">
-          <Outlet context={{ selectedTrace, setSelectedTrace, loaded, setLoaded, selectedConnection, setSelectedConnection, selectedTransition, setSelectedTransition }} />
+          <Outlet context={{ selectedTrace, setSelectedTrace, loaded, setLoaded, selectedConnection, setSelectedConnection, selectedIngesterDetail, setSelectedIngesterDetail }} />
         </div>
       </div>
     </div>
