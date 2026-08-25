@@ -16,7 +16,6 @@ const GET_INGESTER = gql`
       streamingSeconds
       idleSeconds
       downSeconds
-      unaccountedSeconds
       windowSeconds
     }
     ingesterSpans(hours: $hours) {
@@ -183,11 +182,6 @@ function Ingester() {
               <span className="ing-legend-item">
                 <span className="ing-swatch down" />
                 Down {toDuration(uptime?.downSeconds)}
-              </span>
-
-              <span className="ing-legend-item">
-                <span className="ing-swatch unaccounted" />
-                Unaccounted {toDuration(uptime?.unaccountedSeconds)}
               </span>
             </div>
           </div>

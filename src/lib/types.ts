@@ -120,7 +120,6 @@ export interface IngesterUptime {
 	streamingSeconds:number
 	idleSeconds:number
 	downSeconds:number
-	unaccountedSeconds:number
 	windowSeconds:number
 }
 

@@ -72,8 +72,7 @@
 	background-color:var(--dc-status-good);
 }
 
-.ing-swatch.idle,
-.ing-swatch.unaccounted {
+.ing-swatch.idle {
 	background-color:var(--dc-surface-2);
 }
 
