@@ -113,13 +113,13 @@ const bootColumns: Column<BootRow>[] = [
 
 const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'spawnedAt', label: 'Started', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
+  { key: 'durationSeconds', label: 'Lifetime', sortable: false, render: (connection) => toDuration(connection.durationSeconds) },
   // the timestamp rather than the delta from spawn: a connection opened outside market hours
   // waits on the first trade, not on the socket, and a duration there reads as latency it isn't
   { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? new Date(connection.firstMessageAt).toLocaleString() : 'none') },
-  { key: 'durationSeconds', label: 'Held', sortable: false, render: (connection) => toDuration(connection.durationSeconds) },
   // endedBy is now always present ('open' / 'no record' / the cause); only a real terminal
   // cause carries a timestamp with it
-  { key: 'endedBy', label: 'Ended', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },
+  { key: 'endedBy', label: 'Exit', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },
 ]
 
 function Ingester() {

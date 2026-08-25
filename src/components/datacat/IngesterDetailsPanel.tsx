@@ -51,7 +51,7 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
                 {[...detail.connections].sort((a, b) => byTime({ at: a.spawnedAt }, { at: b.spawnedAt })).map((connection) => (
                   <div key={connection.connectionId}>
                     {new Date(connection.spawnedAt).toLocaleString()}
-                    <p>held {toDuration(connection.durationSeconds)}, ended {connection.endedBy}</p>
+                    <p>lifetime {toDuration(connection.durationSeconds)}, exit {connection.endedBy}</p>
                   </div>
                 ))}
               </div>
@@ -68,8 +68,8 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
             <p>Started: {new Date(detail.connection.spawnedAt).toLocaleString()}</p>
             <p>First message: {detail.connection.firstMessageAt ? new Date(detail.connection.firstMessageAt).toLocaleString() : 'none'}</p>
             <p>Last seen: {new Date(detail.connection.lastSeenAt).toLocaleString()}</p>
-            <p>Held: {toDuration(detail.connection.durationSeconds)}</p>
-            <p>Ended: {detail.connection.endedBy}</p>
+            <p>Lifetime: {toDuration(detail.connection.durationSeconds)}</p>
+            <p>Exit: {detail.connection.endedBy}</p>
 
             {detail.transitions.length > 0 && <TransitionLines transitions={detail.transitions} />}
           </>
