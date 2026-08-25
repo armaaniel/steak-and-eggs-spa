@@ -261,23 +261,6 @@ function Ingester() {
             <TraceTable traceData={connections} columns={connectionColumns} selectedTrace={selectedConnection} setSelectedTrace={selectConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage="No connections in this window" />
           </div>
 
-          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-            <p className="ing-card-title">Transitions</p>
-
-            {transitions.length === 0 ? (
-              <p className="ing-message">No transitions in this window</p>
-            ) : (
-              <div className="ing-transitions">
-                {transitions.map((transition) => (
-                  <button key={transition.id} type="button" className={`ing-transition-row ${selectedIngesterDetail?.kind === 'transition' && selectedIngesterDetail.transition.id === transition.id ? 'selected' : ''}`} onClick={() => setSelectedIngesterDetail({ kind: 'transition', transition })}>
-                    <span className="ing-transition-time">{new Date(transition.at).toLocaleString()}</span>
-                    <span className="ing-transition-cause">{transition.cause ?? '-'}</span>
-                    <span>{transition.state}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </>
       )}
     </>

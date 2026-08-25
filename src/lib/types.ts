@@ -192,4 +192,3 @@ export interface IngesterTransition {
 export type IngesterDetail =
 	| {kind:'boot'; boot:IngesterBoot; transitions:IngesterTransition[]; connections:IngesterConnection[]}
 	| {kind:'connection'; connection:IngesterConnection; transitions:IngesterTransition[]}
-	| {kind:'transition'; transition:IngesterTransition}

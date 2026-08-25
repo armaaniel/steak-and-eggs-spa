@@ -9,10 +9,14 @@ interface Props {
 // keys are present get printed rather than special-casing each one
 const toValue = (value: unknown) => (value !== null && typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value))
 
+// the query returns newest-first for scanning; inside a panel these are a narrative, so
+// they read forward. Copied rather than sorted in place — the array belongs to the page.
+const byTime = (a: { at: string }, b: { at: string }) => new Date(a.at).getTime() - new Date(b.at).getTime()
+
 const TransitionLines = ({ transitions }: { transitions: IngesterTransition[] }) => (
   <div className="call-breakdown">
     <p>Transitions:</p>
-    {transitions.map((transition) => (
+    {[...transitions].sort(byTime).map((transition) => (
       <div key={transition.id}>
         {transition.cause ?? '-'}
         <p>{new Date(transition.at).toLocaleString()}</p>
@@ -44,7 +48,7 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
             {detail.connections.length > 0 && (
               <div className="call-breakdown">
                 <p>Connections:</p>
-                {detail.connections.map((connection) => (
+                {[...detail.connections].sort((a, b) => byTime({ at: a.spawnedAt }, { at: b.spawnedAt })).map((connection) => (
                   <div key={connection.connectionId}>
                     {new Date(connection.spawnedAt).toLocaleString()}
                     <p>held {toDuration(connection.durationSeconds)}, ended {connection.endedBy}</p>
@@ -68,28 +72,6 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
             <p>Ended: {detail.connection.endedBy}</p>
 
             {detail.transitions.length > 0 && <TransitionLines transitions={detail.transitions} />}
-          </>
-        )}
-
-        {detail.kind === 'transition' && (
-          <>
-            <p>Cause: {detail.transition.cause ?? '-'}</p>
-            <p>State: {detail.transition.state}</p>
-            <p>At: {new Date(detail.transition.at).toLocaleString()}</p>
-            <p>Boot: {detail.transition.bootId}</p>
-            <p>Connection: {detail.transition.connectionId ?? '-'}</p>
-
-            {Object.entries(detail.transition.detail || {}).length > 0 && (
-              <div className="call-breakdown">
-                <p>Detail:</p>
-                {Object.entries(detail.transition.detail || {}).map(([key, value]) => (
-                  <div key={key}>
-                    {key}
-                    <p className="ing-detail-value">{toValue(value)}</p>
-                  </div>
-                ))}
-              </div>
-            )}
           </>
         )}
       </div>
