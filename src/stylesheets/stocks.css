@@ -172,7 +172,7 @@ opacity:0;
 .chart-ranges {
 	display:flex;
 	column-gap:0.25rem;
-	padding:0.5rem 8px 0 8px;
+	padding:0px 8px;
 }
 
 .chart-range {
@@ -190,7 +190,7 @@ opacity:0;
 
 .chart-range:hover {
 	background-color:var(--hover);
-	color:var(--text-strong);
+	color:var(--accent-emphasis);
 }
 
 .chart-range.selected {
