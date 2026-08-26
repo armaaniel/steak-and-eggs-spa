@@ -76,15 +76,16 @@ function Home() {
 	}, [chartData, chartRange])
 
 	const baseline = visibleChart?.[0]?.value ?? null
+	const decimals = baseline !== null && Math.abs(baseline) < 1 ? 4 : 2
 	const current = hoveredPoint?.value ?? portfolio?.aum ?? null
 
-	const percentChange = toPercent(current, baseline)
+	const percentChange = toPercent(current, baseline, decimals)
 	const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
 
 	const change = baseline !== null && current !== null ? Number(current) - baseline : null
 	const changeLabel = change === null || isNaN(change) || percentChange === null
 		? null
-		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change))} (${percentChange})`
+		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change), decimals)} (${percentChange})`
 
   const updatePortfolio = useThrottledCallback(
     () => {
@@ -111,7 +112,7 @@ function Home() {
         <div className="home-left">
           <div className="port-value">
             <h2 className="portfolio-value">Portfolio Value:&nbsp;</h2>
-            <h2 className='portfolio-value'>{toPortfolio(hoveredPoint?.value ?? portfolio?.aum)}</h2>
+            <h2 className='portfolio-value'>{toPortfolio(hoveredPoint?.value ?? portfolio?.aum, decimals)}</h2>
           </div>
 
           <div className="port-change">

@@ -35,7 +35,7 @@ export const toPnl = (value: string | null) => {
 	}
 }		
 	
-export const toCurrency = (value: number | string | null | undefined) => {
+export const toCurrency = (value: number | string | null | undefined, decimals?: number) => {
 	
 	if (value === null || value === undefined) {
 		return null
@@ -45,6 +45,10 @@ export const toCurrency = (value: number | string | null | undefined) => {
 	
 	if (isNaN(number)) {
 		return 'N/A'
+	}
+	
+	if (decimals !== undefined) {
+		return number.toLocaleString('en-us', {minimumFractionDigits:decimals, maximumFractionDigits:decimals})
 	}
 	
 	if (number < 1 && number !== 0 && number >=-1) {
@@ -56,7 +60,7 @@ export const toCurrency = (value: number | string | null | undefined) => {
 
 
 
-export const toPercent = (price:string | null | number, open:string | null | number) => {
+export const toPercent = (price:string | null | number, open:string | null | number, fixed?: number) => {
 	if (!price || !open) return null;
 	
 	const priceNum = Number(price)
@@ -68,7 +72,7 @@ export const toPercent = (price:string | null | number, open:string | null | num
 	
 	const percentage = ((priceNum - openNum) / openNum) * 100;
 	
-	const decimals = Math.abs(percentage) < 0.01 ? 3 : 2;
+	const decimals = fixed ?? (Math.abs(percentage) < 0.01 ? 3 : 2);
 	
 	if (percentage < 0) {
 		return `${percentage.toLocaleString('en-us', {minimumFractionDigits:decimals, maximumFractionDigits:decimals})}%`
@@ -78,7 +82,7 @@ export const toPercent = (price:string | null | number, open:string | null | num
 }
 	
 
-export const toPortfolio = (value: string | number | undefined) => {
+export const toPortfolio = (value: string | number | undefined, decimals?: number) => {
 	
 	if (value === null || value === undefined) {
 		return null
@@ -88,6 +92,10 @@ export const toPortfolio = (value: string | number | undefined) => {
 	
 	if (isNaN(number)) {
 		return 'N/A'
+	}
+	
+	if (decimals !== undefined) {
+		return `$${number.toLocaleString('en-us', {minimumFractionDigits:decimals, maximumFractionDigits:decimals})} USD`
 	}
 	
 	if (number < 1 && number !== 0) {

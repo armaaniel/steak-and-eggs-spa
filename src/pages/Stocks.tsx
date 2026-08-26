@@ -111,15 +111,16 @@ function Stocks() {
 	}
 
 	const baseline = chartData?.[0]?.value ?? null
+	const decimals = baseline !== null && Math.abs(baseline) < 1 ? 4 : 2
 	const current = hoveredPoint?.value ?? price
 
-	const percentChange = toPercent(current, baseline)
+	const percentChange = toPercent(current, baseline, decimals)
 	const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
 
 	const change = baseline !== null && current !== null ? Number(current) - baseline : null
 	const changeLabel = change === null || isNaN(change) || percentChange === null
 		? null
-		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change))} (${percentChange})`
+		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change), decimals)} (${percentChange})`
 	
 	const { data: companyData } = useApi<CompanyData>(`/stocks/${symbol}/companydata`,
 	{ market_cap: 'N/A', description: 'N/A'})
@@ -158,7 +159,7 @@ function Stocks() {
               </div>
 
               <div className={`stock-price-container ${price ? 'loaded' : ''}`}>
-                <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price)}</h2>
+                <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price, decimals)}</h2>
                 <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span></div>
                 {changeLabel && <span className="stock-price-phrase">{RANGE_PHRASES[chartRange]}</span>}
               </div>

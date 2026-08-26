@@ -43,6 +43,7 @@
 
 .portfolio-value {
 	font-family: var(--font-body);
+	font-variant-numeric: tabular-nums;
 	color:var(--text);
 }
 
@@ -56,6 +57,7 @@
 	align-items:baseline;
 	column-gap:0.25rem;
 	font-family: var(--font-body);
+	font-variant-numeric: tabular-nums;
 	min-height:1.5rem;
 }
 
