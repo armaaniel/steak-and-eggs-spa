@@ -51,10 +51,24 @@
 	align-items:baseline;
 }
 
-.port-value-date {
-	font-family:var(--font-body);
+.port-change {
+	display:flex;
+	align-items:baseline;
+	column-gap:0.25rem;
+	font-family: var(--font-body);
+	min-height:1.5rem;
+}
+
+.port-change-value.positive {
+	color:var(--positive);
+}
+
+.port-change-value.negative {
+	color:var(--negative);
+}
+
+.port-change-phrase {
 	color:var(--text-muted);
-	margin-left:0.75rem;
 }
 
 .balance-container {

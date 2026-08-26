@@ -1,5 +1,7 @@
 import '../stylesheets/stocks.css'
 import Chart from '../components/Chart'
+import ChartRanges from '../components/ChartRanges'
+import useStoredRange from '../hooks/useStoredRange'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import PositionTable from '../components/PositionTable'
@@ -59,7 +61,7 @@ function Stocks() {
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
 	
   const [hoveredPoint, setHoveredPoint] = useState<ChartData | null>(null)
-  const [chartRange, setChartRange] = useState<ChartRange>(DEFAULT_RANGE)
+  const [chartRange, setChartRange] = useStoredRange('stocks.range', CHART_RANGES, DEFAULT_RANGE)
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
 
@@ -159,7 +161,6 @@ function Stocks() {
                 <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price)}</h2>
                 <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span></div>
                 {changeLabel && <span className="stock-price-phrase">{RANGE_PHRASES[chartRange]}</span>}
-                <span className="stock-price-date">{hoveredPoint?.date}</span>
               </div>
             </div>
 
@@ -167,17 +168,7 @@ function Stocks() {
               {chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
             </div>
 
-            <div className="chart-ranges">
-              {CHART_RANGES.map((range) => (
-                <button
-                  key={range}
-                  className={`chart-range ${range === chartRange ? 'selected' : ''}`}
-                  onClick={() => selectRange(range)}
-                >
-                  {range}
-                </button>
-              ))}
-            </div>
+            <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
           </div>
 
           {!isAuthenticated && (

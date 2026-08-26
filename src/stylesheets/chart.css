@@ -1,0 +1,15 @@
+.chart-label {
+	white-space:nowrap;
+	font-family: var(--font-body);
+	font-size:1rem;
+	color:var(--text-muted);
+}
+
+.recharts-active-dot .recharts-dot {
+	fill: var(--chart-line);
+	stroke: var(--chart-line);
+}
+
+.recharts-tooltip-cursor {
+	stroke: var(--border-strong);
+}

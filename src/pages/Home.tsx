@@ -1,13 +1,42 @@
 import '../stylesheets/home.css'
 import Chart from '../components/Chart'
+import ChartRanges from '../components/ChartRanges'
+import useStoredRange from '../hooks/useStoredRange'
 import PositionsTable from '../components/PositionsTable'
 import FundsButton from '../components/FundsButton'
-import { useEffect, useState } from 'react'
-import { toPortfolio } from '../lib/utils.ts'
+import { useEffect, useMemo, useState } from 'react'
+import { toPortfolio, toCurrency, toPercent } from '../lib/utils.ts'
 import { useThrottledCallback } from 'use-debounce'
 import type { Positions, ChartData } from '../lib/types.ts'
 import useApi from '../hooks/useApi'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
+
+const CHART_RANGES = ['1W', '1M', '3M', 'YTD', '1Y', 'Max'] as const
+type ChartRange = (typeof CHART_RANGES)[number]
+const DEFAULT_RANGE: ChartRange = 'Max'
+
+const RANGE_PHRASES: Record<ChartRange, string> = {
+  '1W': 'Past week',
+  '1M': 'Past month',
+  '3M': 'Past 3 months',
+  'YTD': 'Year to date',
+  '1Y': 'Past year',
+  'Max': 'All time'
+}
+
+const rangeStart = (range: ChartRange, last: Date) => {
+  const start = new Date(last)
+
+  switch (range) {
+    case '1W': start.setDate(start.getDate() - 7); break
+    case '1M': start.setMonth(start.getMonth() - 1); break
+    case '3M': start.setMonth(start.getMonth() - 3); break
+    case '1Y': start.setFullYear(start.getFullYear() - 1); break
+    case 'YTD': return new Date(last.getFullYear(), 0, 1)
+  }
+
+  return start
+}
 
 interface Portfolio {
   aum: string | number
@@ -21,6 +50,12 @@ function Home() {
 		{ aum: 'N/A', balance: 'N/A' })
 
 	const [hoveredPoint, setHoveredPoint] = useState<ChartData | null>(null)
+	const [chartRange, setChartRange] = useStoredRange('portfolio.range', CHART_RANGES, DEFAULT_RANGE)
+
+	const selectRange = (range: ChartRange) => {
+		setChartRange(range)
+		setHoveredPoint(null)
+	}
 
 	const symbols = portfolio?.positions?.map((p) => p.symbol) ?? []
 	const prices = usePriceSubscriptions(symbols)
@@ -29,6 +64,27 @@ function Home() {
   { date: new Date().toLocaleDateString(), value: 0 },
   { date: new Date().toLocaleDateString(), value: 0 }
 	])
+
+	const visibleChart = useMemo(() => {
+		if (!chartData || chartData.length === 0 || chartRange === 'Max') return chartData
+
+		const last = new Date(chartData[chartData.length - 1].date)
+		const start = rangeStart(chartRange, last)
+		const sliced = chartData.filter((point) => new Date(point.date).getTime() >= start.getTime())
+
+		return sliced.length < 2 ? chartData.slice(-2) : sliced
+	}, [chartData, chartRange])
+
+	const baseline = visibleChart?.[0]?.value ?? null
+	const current = hoveredPoint?.value ?? portfolio?.aum ?? null
+
+	const percentChange = toPercent(current, baseline)
+	const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
+
+	const change = baseline !== null && current !== null ? Number(current) - baseline : null
+	const changeLabel = change === null || isNaN(change) || percentChange === null
+		? null
+		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change))} (${percentChange})`
 
   const updatePortfolio = useThrottledCallback(
     () => {
@@ -56,12 +112,18 @@ function Home() {
           <div className="port-value">
             <h2 className="portfolio-value">Portfolio Value:&nbsp;</h2>
             <h2 className='portfolio-value'>{toPortfolio(hoveredPoint?.value ?? portfolio?.aum)}</h2>
-            <span className="port-value-date">{hoveredPoint?.date}</span>
+          </div>
+
+          <div className="port-change">
+            <span className={`port-change-value ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span>
+            {changeLabel && <span className="port-change-phrase">{RANGE_PHRASES[chartRange]}</span>}
           </div>
 
           <div className="chart">
-          	{chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
+          	{visibleChart && <Chart chartData={visibleChart} onHover={setHoveredPoint} />}
           </div>
+
+          <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
 
           <div className="position">
             <div>
