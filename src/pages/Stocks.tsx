@@ -33,6 +33,20 @@ interface Quote {
 
 const DEFAULT_SYMBOL = 'AAPL'
 
+const CHART_RANGES = ['1D', '1W', '1M', '3M', 'YTD', '1Y', '5Y'] as const
+type ChartRange = (typeof CHART_RANGES)[number]
+const DEFAULT_RANGE: ChartRange = '1D'
+
+const RANGE_PHRASES: Record<ChartRange, string> = {
+  '1D': 'Today',
+  '1W': 'Past week',
+  '1M': 'Past month',
+  '3M': 'Past 3 months',
+  'YTD': 'Year to date',
+  '1Y': 'Past year',
+  '5Y': 'Past 5 years'
+}
+
 function Stocks() {
   const { symbol: rawSymbol } = useParams()
   const symbol = (rawSymbol ?? DEFAULT_SYMBOL).toUpperCase()
@@ -45,6 +59,7 @@ function Stocks() {
   const exchangeNames: { [key: string]: string } = { XNAS: 'NASDAQ', BATS: 'BATS', XASE: 'NYSE American', XNYS: 'NYSE', ARCX: 'NYSE Arca' }
 	
   const [hoveredPoint, setHoveredPoint] = useState<ChartData | null>(null)
+  const [chartRange, setChartRange] = useState<ChartRange>(DEFAULT_RANGE)
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
 
@@ -54,10 +69,6 @@ function Stocks() {
   )
   const prices = usePriceSubscriptions([symbol])
   const price = prices[symbol] ?? quote?.price ?? null
-  const open = quote?.open ?? null
-
-  const percentChange = toPercent(price, open)
-  const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
 
   useEffect(() => {
     if (rawSymbol && rawSymbol !== symbol) {
@@ -87,10 +98,26 @@ function Stocks() {
 		getTickerData()
 	}, [symbol])
 	
-	const { data: chartData } = useApi<ChartData[]>(`/stocks/${symbol}/chartdata`, [
+	const { data: chartData } = useApi<ChartData[]>(`/stocks/${symbol}/chartdata?range=${chartRange}`, [
 	{ date: new Date().toLocaleDateString(), value: 0 },
 	{ date: new Date().toLocaleDateString(), value: 0 }
 	])
+
+	const selectRange = (range: ChartRange) => {
+		setChartRange(range)
+		setHoveredPoint(null)
+	}
+
+	const baseline = chartData?.[0]?.value ?? null
+	const current = hoveredPoint?.value ?? price
+
+	const percentChange = toPercent(current, baseline)
+	const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
+
+	const change = baseline !== null && current !== null ? Number(current) - baseline : null
+	const changeLabel = change === null || isNaN(change) || percentChange === null
+		? null
+		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change))} (${percentChange})`
 	
 	const { data: companyData } = useApi<CompanyData>(`/stocks/${symbol}/companydata`,
 	{ market_cap: 'N/A', description: 'N/A'})
@@ -130,13 +157,26 @@ function Stocks() {
 
               <div className={`stock-price-container ${price ? 'loaded' : ''}`}>
                 <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price)}</h2>
-                <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{percentChange}</span></div>
+                <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span></div>
+                {changeLabel && <span className="stock-price-phrase">{RANGE_PHRASES[chartRange]}</span>}
                 <span className="stock-price-date">{hoveredPoint?.date}</span>
               </div>
             </div>
 
             <div className="chart">
               {chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
+            </div>
+
+            <div className="chart-ranges">
+              {CHART_RANGES.map((range) => (
+                <button
+                  key={range}
+                  className={`chart-range ${range === chartRange ? 'selected' : ''}`}
+                  onClick={() => selectRange(range)}
+                >
+                  {range}
+                </button>
+              ))}
             </div>
           </div>
 
