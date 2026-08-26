@@ -8,7 +8,7 @@ import IngesterLagChart from '../../components/datacat/IngesterLagChart'
 import useTransition from '../../hooks/useTransition.ts'
 import { toDuration } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
-import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, IngesterCause, OutletContextType } from '../../lib/types.ts'
+import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType } from '../../lib/types.ts'
 
 const GET_INGESTER = gql`
   query getIngester($hours: Int!) {
@@ -70,10 +70,6 @@ const GET_INGESTER = gql`
       events
       p99MeanExcessMs
     }
-    ingesterCauses(hours: $hours) {
-      cause
-      count
-    }
   }
 `
 
@@ -85,7 +81,6 @@ interface IngesterData {
   ingesterLag: IngesterLagPoint[]
   ingesterBoots: IngesterBoot[]
   ingesterConnections: IngesterConnection[]
-  ingesterCauses: IngesterCause[]
 }
 
 type BootRow = IngesterBoot & { id: string }
@@ -145,7 +140,6 @@ function Ingester() {
   const rate = data?.ingesterRate || []
   const lag = data?.ingesterLag || []
   const transitions = data?.ingesterTransitions || []
-  const causes = data?.ingesterCauses || []
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
   const connections: ConnectionRow[] = (data?.ingesterConnections || []).map((connection) => ({ ...connection, id: connection.connectionId }))
@@ -233,10 +227,7 @@ function Ingester() {
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-            <div className="ing-card-header">
-              <p className="ing-card-title">Lag above baseline</p>
-              <p className="ing-causes">excess over the feed's baseline delay</p>
-            </div>
+            <p className="ing-card-title">Lag above baseline</p>
 
             {lag.length === 0 ? <p className="ing-message">No samples ran late in this window</p> : <IngesterLagChart points={lag} hours={hours} />}
           </div>
@@ -248,15 +239,7 @@ function Ingester() {
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-            <div className="ing-card-header">
-              <p className="ing-card-title">Connections</p>
-
-              {causes.length > 0 && (
-                <p className="ing-causes">
-                  {causes.map((cause) => `${cause.cause} ${cause.count}`).join(' · ')}
-                </p>
-              )}
-            </div>
+            <p className="ing-card-title">Connections</p>
 
             <TraceTable traceData={connections} columns={connectionColumns} selectedTrace={selectedConnection} setSelectedTrace={selectConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage="No connections in this window" />
           </div>

@@ -105,23 +105,10 @@
 	color:var(--dc-text-muted);
 }
 
-.ing-card-header {
-	display:flex;
-	align-items:baseline;
-	justify-content:space-between;
-	column-gap:1rem;
-}
-
 .ing-card-title {
 	font-family: var(--font-ui);
 	font-weight:500;
 	color:var(--dc-text);
-}
-
-.ing-causes {
-	font-family: var(--font-ui);
-	font-size:12px;
-	color:var(--dc-text-muted);
 }
 
 .ing-message {
