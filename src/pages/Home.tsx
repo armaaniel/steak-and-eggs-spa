@@ -11,17 +11,17 @@ import type { Positions, ChartData } from '../lib/types.ts'
 import useApi from '../hooks/useApi'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
 
-const CHART_RANGES = ['1W', '1M', '3M', 'YTD', '1Y', 'Max'] as const
+const CHART_RANGES = ['Max', '1W', '1M', '3M', 'YTD', '1Y'] as const
 type ChartRange = (typeof CHART_RANGES)[number]
 const DEFAULT_RANGE: ChartRange = 'Max'
 
 const RANGE_PHRASES: Record<ChartRange, string> = {
+  'Max': 'All time',
   '1W': 'Past week',
   '1M': 'Past month',
   '3M': 'Past 3 months',
   'YTD': 'Year to date',
-  '1Y': 'Past year',
-  'Max': 'All time'
+  '1Y': 'Past year'
 }
 
 const rangeStart = (range: ChartRange, last: Date) => {
