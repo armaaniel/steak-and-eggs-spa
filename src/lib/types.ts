@@ -164,11 +164,6 @@ export interface IngesterConnection {
 	p99MeanExcessMs:number | null
 }
 
-export interface IngesterCause {
-	cause:string
-	count:number
-}
-
 export interface IngesterLagPoint {
 	at:string
 	maxExcessMs:number | null
