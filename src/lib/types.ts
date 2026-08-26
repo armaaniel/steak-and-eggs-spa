@@ -149,8 +149,6 @@ export interface IngesterBoot {
 	connections:number
 	reconnects:number
 	exitState:string
-	events:string | null
-	peakLagMs:number | null
 }
 
 export interface IngesterConnection {
@@ -162,6 +160,8 @@ export interface IngesterConnection {
 	endedAt:string | null
 	endedBy:string
 	durationSeconds:number | null
+	events:string | null
+	p99MeanExcessMs:number | null
 }
 
 export interface IngesterCause {

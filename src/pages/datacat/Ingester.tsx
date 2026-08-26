@@ -57,8 +57,6 @@ const GET_INGESTER = gql`
       connections
       reconnects
       exitState
-      events
-      peakLagMs
     }
     ingesterConnections(hours: $hours) {
       connectionId
@@ -69,6 +67,8 @@ const GET_INGESTER = gql`
       endedAt
       endedBy
       durationSeconds
+      events
+      p99MeanExcessMs
     }
     ingesterCauses(hours: $hours) {
       cause
@@ -105,8 +105,6 @@ const bootColumns: Column<BootRow>[] = [
   { key: 'durationSeconds', label: 'Lifetime', sortable: false, render: (boot) => toDuration(boot.durationSeconds) },
   { key: 'connections', label: 'Connections', sortable: false, render: (boot) => boot.connections },
   { key: 'reconnects', label: 'Reconnects', sortable: false, render: (boot) => boot.reconnects },
-  { key: 'events', label: 'Events', sortable: false, render: (boot) => Number(boot.events ?? 0).toLocaleString() },
-  { key: 'peakLagMs', label: 'Peak Lag', sortable: false, render: (boot) => (boot.peakLagMs === null ? '-' : `${boot.peakLagMs} ms`) },
   // the server decides the state; 'none' is the only value that reads better spelled out
   { key: 'exitState', label: 'Exit', sortable: false, render: (boot) => (boot.exitState === 'none' ? 'no sigterm' : boot.exitState) },
 ]
@@ -117,6 +115,8 @@ const connectionColumns: Column<ConnectionRow>[] = [
   // the timestamp rather than the delta from spawn: a connection opened outside market hours
   // waits on the first trade, not on the socket, and a duration there reads as latency it isn't
   { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? new Date(connection.firstMessageAt).toLocaleString() : 'none') },
+  { key: 'events', label: 'Events', sortable: false, render: (connection) => Number(connection.events ?? 0).toLocaleString() },
+  { key: 'p99MeanExcessMs', label: 'p99 Mean Lag', sortable: false, render: (connection) => (connection.p99MeanExcessMs === null ? '-' : `${connection.p99MeanExcessMs.toLocaleString()} ms`) },
   // endedBy is now always present ('open' / 'no record' / the cause); only a real terminal
   // cause carries a timestamp with it
   { key: 'endedBy', label: 'Exit', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },

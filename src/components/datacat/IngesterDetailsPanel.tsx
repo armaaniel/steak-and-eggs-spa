@@ -41,8 +41,6 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
             <p>Last seen: {new Date(detail.boot.lastSeenAt).toLocaleString()}</p>
             <p>Lifetime: {toDuration(detail.boot.durationSeconds)}</p>
             <p>Reconnects: {detail.boot.reconnects}</p>
-            <p>Events: {Number(detail.boot.events ?? 0).toLocaleString()}</p>
-            <p>Peak lag: {detail.boot.peakLagMs === null ? '-' : `${detail.boot.peakLagMs} ms`}</p>
             <p>Exit: {detail.boot.exitState === 'none' ? 'no sigterm' : detail.boot.exitState}</p>
 
             {detail.connections.length > 0 && (
@@ -69,6 +67,8 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
             <p>First message: {detail.connection.firstMessageAt ? new Date(detail.connection.firstMessageAt).toLocaleString() : 'none'}</p>
             <p>Last seen: {new Date(detail.connection.lastSeenAt).toLocaleString()}</p>
             <p>Lifetime: {toDuration(detail.connection.durationSeconds)}</p>
+            <p>Events: {Number(detail.connection.events ?? 0).toLocaleString()}</p>
+            <p>p99 mean lag: {detail.connection.p99MeanExcessMs === null ? '-' : `${detail.connection.p99MeanExcessMs.toLocaleString()} ms`}</p>
             <p>Exit: {detail.connection.endedBy}</p>
 
             {detail.transitions.length > 0 && <TransitionLines transitions={detail.transitions} />}
