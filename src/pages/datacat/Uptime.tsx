@@ -27,7 +27,7 @@ const GET_RUNS = gql`
       startedAt
       requestCount
       failures
-      completed
+      result
     }
   }
 `
