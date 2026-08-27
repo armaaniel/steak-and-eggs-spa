@@ -23,7 +23,7 @@ const GET_BUCKETS = gql`
 const GET_RUNS = gql`
   query getSyntheticRuns($range: String!, $bucket: ISO8601DateTime!) {
     syntheticRuns(range: $range, bucket: $bucket) {
-      userId
+      runId
       startedAt
       requestCount
       failures
@@ -111,7 +111,7 @@ function Uptime() {
           ) : (
             <div className="uptime-runs">
               {runs.map((run) => (
-                <SyntheticRunRow key={run.userId} run={run} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} />
+                <SyntheticRunRow key={run.runId} run={run} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} />
               ))}
             </div>
           )}

@@ -3,8 +3,8 @@ import { useState } from 'react'
 import type { SyntheticRun, Trace } from '../../lib/types.ts'
 
 const GET_RUN_TRACES = gql`
-  query getSyntheticRunTraces($userId: ID!) {
-    syntheticRunTraces(userId: $userId) {
+  query getSyntheticRunTraces($runId: ID!) {
+    syntheticRunTraces(runId: $runId) {
       id
       createdAt
       endpoint
@@ -32,13 +32,12 @@ interface Props {
 const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
 
-  // a run still inside the filling bucket reads as incomplete until its teardown lands
-  const status = run.failures > 0 ? 'critical' : !run.completed ? 'warn' : 'good'
-  const label = run.failures > 0 ? 'Failed' : !run.completed ? 'Incomplete' : 'Passed'
+	const status = run.result === 'pass' ? 'good' : run.result === 'fail' ? 'critical' : 'warn'
+	const label  = run.result === 'pass' ? 'Passed' : run.result === 'fail' ? 'Failed' : 'No verdict'
 
   // only an expanded run pays for its traces — a 30d bucket holds 288 of them
   const { error, data } = useQuery<TracesData>(GET_RUN_TRACES, {
-    variables: { userId: run.userId },
+    variables: { runId: run.runId },
     skip: !isOpen,
   })
 
@@ -59,7 +58,7 @@ const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
       </button>
 
       <div className={`uptime-run-details ${isOpen ? 'open' : ''}`}>
-        <p>User: {run.userId}</p>
+        <p>Run: {run.runId}</p>
         <p>Started: {new Date(run.startedAt).toLocaleString()}</p>
         <p>Reached teardown: {run.completed ? 'yes' : 'no'}</p>
 

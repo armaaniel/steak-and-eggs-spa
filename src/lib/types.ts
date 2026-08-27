@@ -101,15 +101,12 @@ export interface SyntheticBucket {
 }
 
 export interface SyntheticRun {
-	userId:string
-	startedAt:string
-	requestCount:number
-	failures:number
-	completed:boolean
+  runId: string
+  startedAt: string
+  requestCount: number
+  failures: number
+  result: 'pass' | 'fail' | null
 }
-
-
-
 
 export type Prices = {[symbol:string]:number}
 
