@@ -60,7 +60,6 @@ const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
       <div className={`uptime-run-details ${isOpen ? 'open' : ''}`}>
         <p>Run: {run.runId}</p>
         <p>Started: {new Date(run.startedAt).toLocaleString()}</p>
-        <p>Reached teardown: {run.completed ? 'yes' : 'no'}</p>
 
         <div className="uptime-requests">
           {error ? (
