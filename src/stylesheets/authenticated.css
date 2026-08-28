@@ -85,6 +85,7 @@
 	font-size: 0.9rem;
 	font-weight: 500;
 	color:var(--text);
+	text-decoration: none;
 	cursor: pointer;
 	transition: background-color 0.15s;
 }
