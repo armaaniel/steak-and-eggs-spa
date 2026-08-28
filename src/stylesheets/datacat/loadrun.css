@@ -1,0 +1,159 @@
+.lr-panels {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.25rem;
+	font-family: var(--font-ui);
+}
+
+.lr-head {
+	display:flex;
+	align-items:flex-start;
+	justify-content:space-between;
+	column-gap:1rem;
+	margin-bottom:0.5rem;
+}
+
+.lr-title {
+	font-weight:500;
+	color:var(--dc-text);
+}
+
+.lr-subtitle {
+	font-size:12px;
+	color:var(--dc-text-muted);
+}
+
+.lr-toggle {
+	flex-shrink:0;
+	padding:0.25rem 0.6rem;
+	border:1px solid var(--dc-border);
+	border-radius:6px;
+	background-color:var(--dc-surface);
+	color:var(--dc-text);
+	font-family: var(--font-ui);
+	font-size:12px;
+	cursor:pointer;
+}
+
+.lr-toggle:hover {
+	background-color:var(--dc-hover);
+}
+
+/* the panel's own name, so each small multiple says what its y-axis measures —
+   three units stacked here, and none of them may share an axis */
+.lr-panel-label {
+	font-size:12px;
+	color:var(--dc-text-muted);
+	margin-top:0.5rem;
+}
+
+.lr-chart {
+	height:170px;
+}
+
+/* the bottom panel is the only one that draws x-axis ticks; it gets the extra
+   height so the labels sit inside the container instead of scrolling it */
+.lr-chart-axis {
+	height:206px;
+}
+
+.lr-mark-label {
+	fill:var(--dc-text-muted);
+	font-family: var(--font-ui);
+	font-size:11px;
+}
+
+.lr-tooltip {
+	display:flex;
+	flex-direction:column;
+	row-gap:2px;
+	padding:0.5rem;
+	border-radius:6px;
+	border:1px solid var(--dc-border);
+	background-color:var(--dc-surface);
+	box-shadow:var(--dc-shadow-card);
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text);
+}
+
+.lr-tooltip-time {
+	color:var(--dc-text-muted);
+}
+
+.lr-dim {
+	color:var(--dc-text-muted);
+}
+
+/* a short stroke of the series color, not a filled box: at tooltip density a swatch
+   is data-weight ink doing a label's job */
+.lr-key {
+	display:inline-block;
+	width:10px;
+	height:2px;
+	margin-right:6px;
+	vertical-align:middle;
+	border-radius:1px;
+}
+
+.lr-key-client {
+	background-color:var(--dc-series-2);
+}
+
+.lr-key-server {
+	background-color:var(--dc-series-1);
+}
+
+.lr-table-scroll {
+	overflow-x:auto;
+}
+
+.lr-table {
+	width:100%;
+	border-collapse:collapse;
+	font-size:12px;
+	color:var(--dc-text);
+	font-variant-numeric: tabular-nums;
+}
+
+.lr-table th {
+	text-align:right;
+	font-weight:500;
+	color:var(--dc-text-muted);
+	padding:0.35rem 0.5rem;
+	border-bottom:1px solid var(--dc-border);
+	white-space:nowrap;
+}
+
+.lr-table th:first-child,
+.lr-table td:first-child {
+	text-align:left;
+}
+
+.lr-table td {
+	text-align:right;
+	padding:0.35rem 0.5rem;
+	border-bottom:1px solid var(--dc-border);
+	white-space:nowrap;
+}
+
+.lr-table tbody tr:hover {
+	background-color:var(--dc-hover);
+}
+
+.lr-message {
+	font-family: var(--font-ui);
+	font-size:13px;
+	color:var(--dc-text-muted);
+}
+
+.lr-legend-text {
+	color:var(--dc-text);
+}
+
+.lr-header {
+	display:flex;
+	align-items:center;
+	column-gap:0.75rem;
+	flex-wrap:wrap;
+}

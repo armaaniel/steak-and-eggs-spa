@@ -161,6 +161,28 @@ export interface IngesterConnection {
 	p99MeanExcessMs:number | null
 }
 
+export interface LoadRunSummary {
+	runId:string
+	route:string
+	startedAt:string
+	endedAt:string
+	samples:number
+}
+
+export interface LoadCompareRow {
+	bucket:string
+	rps:number
+	sent:number
+	traced:number
+	gap:number
+	errors:number
+	clientP50:number
+	clientP99:number
+	serverP50:number
+	serverP99:number
+	queueP99:number
+}
+
 export interface IngesterLagPoint {
 	at:string
 	maxExcessMs:number | null

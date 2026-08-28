@@ -24,6 +24,10 @@ const Sidebar = () => {
         Ingester
       </NavLink>
 
+      <NavLink to="/datacat/load" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
+        Load Runs
+      </NavLink>
+
       <ThemeToggle className="dc-theme-toggle" />
     </div>
   )

@@ -16,6 +16,7 @@ import Latent from './pages/datacat/Latent'
 import Connections from './pages/datacat/Connections'
 import Uptime from './pages/datacat/Uptime'
 import Ingester from './pages/datacat/Ingester'
+import LoadRun from './pages/datacat/LoadRun'
 import DCSummary from './layouts/datacat/DCSummary'
 import DCList from './layouts/datacat/DCList'
 import NotFound from './pages/NotFound'
@@ -55,6 +56,7 @@ function App() {
             <Route path="/datacat/connections/" element={<Connections />} />
             <Route path="/datacat/uptime/" element={<Uptime />} />
             <Route path="/datacat/ingester/" element={<Ingester />} />
+            <Route path="/datacat/load/" element={<LoadRun />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
