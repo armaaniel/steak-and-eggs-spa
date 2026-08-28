@@ -155,5 +155,20 @@
 	display:flex;
 	align-items:center;
 	column-gap:0.75rem;
+	row-gap:0.5rem;
 	flex-wrap:wrap;
+	margin-bottom:0.75rem;
+}
+
+/* the shared .status-div is a fixed 90px, sized for "24h" — a run is named by its
+   start time and route, so this pair sizes to its options instead */
+.lr-header .status-div {
+	width:auto;
+	min-width:90px;
+	max-width:100%;
+}
+
+.lr-header #run-select {
+	max-width:400px;
+	text-overflow:ellipsis;
 }

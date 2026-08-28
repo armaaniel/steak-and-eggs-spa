@@ -71,8 +71,10 @@ const LoadRun = () => {
   const isLoaded = useTransition(loading, data || error)
   const rows = data?.loadCompare || []
 
+  // a run is identified by when it started, so the date leads — but the full locale string
+  // spends its width on seconds and a four-digit year and pushes the count out of the box
   const label = (run: LoadRunSummary) =>
-    `${new Date(run.startedAt).toLocaleString()} · ${run.route} · ${run.samples.toLocaleString()} samples`
+    `${new Date(run.startedAt).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${run.route} · ${run.samples.toLocaleString()}`
 
   if (runsError) {
     return (

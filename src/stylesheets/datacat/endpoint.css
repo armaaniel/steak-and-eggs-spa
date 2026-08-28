@@ -138,7 +138,9 @@
 
 #status-select,
 #range-select,
-#hours-select {
+#hours-select,
+#run-select,
+#step-select {
 	padding:12px 30px 4px 10px;
 	border:none;
 	border-radius:6px;
@@ -154,7 +156,9 @@
 
 #status-select:focus,
 #range-select:focus,
-#hours-select:focus {
+#hours-select:focus,
+#run-select:focus,
+#step-select:focus {
 	outline:none;
 }
 
