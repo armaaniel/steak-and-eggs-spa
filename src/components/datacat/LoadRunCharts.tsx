@@ -115,7 +115,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
       }
     }
 
-    const point = cpuByTime.get(t)
+    const point = cpuByTime.get(Math.floor(t / 60000) * 60000)
 
     series.push({
       t,
