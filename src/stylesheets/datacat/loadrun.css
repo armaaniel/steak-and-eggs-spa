@@ -172,3 +172,30 @@
 	max-width:400px;
 	text-overflow:ellipsis;
 }
+
+.lr-stats {
+	display:flex;
+	column-gap:2rem;
+	row-gap:0.5rem;
+	flex-wrap:wrap;
+	margin-bottom:0.75rem;
+}
+
+.lr-stat-label {
+	font-size:11px;
+	color:var(--dc-text-muted);
+}
+
+.lr-stat-value {
+	font-size:18px;
+	font-weight:600;
+	color:var(--dc-text);
+}
+
+.lr-stat-value.warn {
+	color:var(--dc-status-warn);
+}
+
+.lr-stat-value.critical {
+	color:var(--dc-status-critical);
+}

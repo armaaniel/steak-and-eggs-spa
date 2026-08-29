@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AreaChart, BarChart, ComposedChart, Area, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { AreaChart, ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
@@ -79,13 +79,7 @@ const endLabel = (last: number, show: boolean) => ({ x, y, index, value }: Label
   return <text x={Number(x) - 8} y={Number(y) - 10} textAnchor="end" className="lr-mark-label">{ms(Number(value))}</text>
 }
 
-const peakLabel = (peak: number) => ({ x, y, index, value }: LabelProps) => {
-  if (index !== peak || !value || x === undefined || y === undefined) return <g />
-
-  return <text x={Number(x)} y={Number(y) - 6} textAnchor="middle" className="lr-mark-label">{Number(value).toLocaleString()}</text>
-}
-
-type Panel = 'rps' | 'latency' | 'cpu' | 'failures'
+type Panel = 'rps' | 'latency' | 'cpu'
 
 const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
   const [showTable, setShowTable] = useState(false)
@@ -140,14 +134,23 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
   // other too. Leave them off and let the legend and tooltip carry it.
   const labelEnds = !!tail.row && Math.abs(tail.row.clientP99 - tail.row.serverP99) > spread * 0.08
 
-  const peak = rows.reduce((worst, row, index) => (row.gap > rows[worst].gap ? index : worst), 0)
-  const peakOffset = series.findIndex((mark) => mark.row === rows[peak])
+  const totals = rows.reduce(
+    (sum, row) => ({
+      sent: sum.sent + row.sent,
+      traced: sum.traced + row.traced,
+      gap: sum.gap + row.gap,
+      errors: sum.errors + row.errors
+    }),
+    { sent: 0, traced: 0, gap: 0, errors: 0 }
+  )
 
   const axis = {
     type: 'number' as const,
     dataKey: 't',
     domain: ['dataMin', 'dataMax'] as [string, string]
   }
+
+  const ticked = { minTickGap: 48, tickLine: false, tick: { fontSize: 11 }, tickFormatter: clock }
 
   // recharts paints legend text in the series color by default; identity belongs to the
   // mark beside the label, so the text goes back to the ordinary ink token
@@ -175,6 +178,25 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
         <button type="button" className="lr-toggle" onClick={() => setShowTable(!showTable)}>
           {showTable ? 'Show charts' : 'Show table'}
         </button>
+      </div>
+
+      <div className="lr-stats">
+        <div className="lr-stat">
+          <p className="lr-stat-label">Sent</p>
+          <p className="lr-stat-value">{totals.sent.toLocaleString()}</p>
+        </div>
+        <div className="lr-stat">
+          <p className="lr-stat-label">Traced</p>
+          <p className="lr-stat-value">{totals.traced.toLocaleString()}</p>
+        </div>
+        <div className="lr-stat">
+          <p className="lr-stat-label">Untraced</p>
+          <p className={`lr-stat-value ${totals.gap > 0 ? 'warn' : ''}`}>{totals.gap.toLocaleString()}</p>
+        </div>
+        <div className="lr-stat">
+          <p className="lr-stat-label">Errors</p>
+          <p className={`lr-stat-value ${totals.errors > 0 ? 'critical' : ''}`}>{totals.errors.toLocaleString()}</p>
+        </div>
       </div>
 
       {showTable ? (
@@ -222,11 +244,11 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
           </div>
 
           <p className="lr-panel-label">p99 latency (ms)</p>
-          <div className="lr-chart" {...watch('latency')}>
+          <div className={`lr-chart ${hasCpu ? '' : 'lr-chart-axis'}`} {...watch('latency')}>
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={series} syncId="load-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
                 <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                <XAxis {...axis} hide />
+                <XAxis {...axis} {...(hasCpu ? { hide: true } : ticked)} />
                 <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
                 <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
@@ -237,16 +259,14 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
             </ResponsiveContainer>
           </div>
 
-          {/* Grouped, not stacked: a request that times out client-side is counted in both
-              errors and untraced, so stacking them would double-count the same failure. */}
           {hasCpu && (
             <>
               <p className="lr-panel-label">CPU (%) · band is min to max</p>
-              <div className="lr-chart" {...watch('cpu')}>
+              <div className="lr-chart lr-chart-axis" {...watch('cpu')}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={series} syncId="load-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
                     <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                    <XAxis {...axis} hide />
+                    <XAxis {...axis} {...ticked} />
                     <YAxis width={56} domain={[0, (max: number) => Math.max(100, Math.ceil(max))]} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
                     <Tooltip content={readout('cpu')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
                     <Area type="monotone" dataKey="cpuBand" stroke="none" fill="var(--dc-series-1)" fillOpacity={0.1} connectNulls activeDot={false} isAnimationActive={false} />
@@ -257,20 +277,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
             </>
           )}
 
-          <p className="lr-panel-label">Failed requests</p>
-          <div className="lr-chart lr-chart-axis" {...watch('failures')}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={series} syncId="load-run" barGap={2} margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-                <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                <XAxis {...axis} minTickGap={48} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={clock} />
-                <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} allowDecimals={false} />
-                <Tooltip content={readout('failures')} cursor={{ fill: 'var(--dc-hover)' }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-                <Bar dataKey="gap" name="untraced" fill="var(--dc-status-warn)" maxBarSize={24} radius={[4, 4, 0, 0]} isAnimationActive={false} label={peakLabel(peakOffset)} />
-                <Bar dataKey="errors" name="errors" fill="var(--dc-status-critical)" maxBarSize={24} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
         </>
       )}
     </div>
