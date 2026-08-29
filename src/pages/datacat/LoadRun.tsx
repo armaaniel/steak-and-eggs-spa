@@ -71,7 +71,7 @@ const keyOf = (run: LoadRunSummary) => `${run.runId}|${run.route}`
 const LoadRun = () => {
   const [selected, setSelected] = useState<string | null>(null)
   const [step, setStep] = useState(15)
-  const [statsOpen, setStatsOpen] = useState(true)
+  const [statsOpen, setStatsOpen] = useState(false)
 
   const { error: runsError, data: runsData } = useQuery<RunsData>(GET_LOAD_RUNS)
 

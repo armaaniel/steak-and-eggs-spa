@@ -178,14 +178,16 @@
 	column-gap:2rem;
 	row-gap:0.5rem;
 	flex-wrap:wrap;
-	margin-top:1rem;
 	opacity:0;
+	max-height:0;
 	overflow:hidden;
-	transition: opacity 150ms;
+	transition: opacity 150ms, max-height 150ms, padding-top 150ms;
 }
 
 .lr-stats.open {
 	opacity:1;
+	max-height:6rem;
+	padding-top:0.75rem;
 }
 
 .lr-stat-label {
