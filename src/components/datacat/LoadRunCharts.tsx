@@ -155,6 +155,8 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
 
   const readout = (panel: Panel) => (hovered === panel ? <RunTooltip /> : () => null)
 
+  const dot = (panel: Panel) => (hovered === panel ? { r: 4, strokeWidth: 0 } : false)
+
   // native pointer events on the wrapper: recharts 3 doesn't forward onMouseMove from the
   // chart, and pointermove (rather than pointerenter) still fires if the panel re-renders
   // under a pointer that is already sitting inside it
@@ -214,7 +216,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
                 <XAxis {...axis} hide />
                 <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
                 <Tooltip content={readout('rps')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-                <Area type="monotone" dataKey="rps" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="var(--dc-series-1)" fillOpacity={0.1} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
+                <Area type="monotone" dataKey="rps" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="var(--dc-series-1)" fillOpacity={0.1} dot={false} activeDot={dot('rps')} isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -229,8 +231,8 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
                 <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
                 <Area type="monotone" dataKey="band" stroke="none" fill="var(--dc-series-2)" fillOpacity={0.1} legendType="none" tooltipType="none" activeDot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="clientP99" name="client p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} label={endLabel(last, labelEnds)} />
-                <Line type="monotone" dataKey="serverP99" name="server p99" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} label={endLabel(last, labelEnds)} />
+                <Line type="monotone" dataKey="clientP99" name="client p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
+                <Line type="monotone" dataKey="serverP99" name="server p99" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -248,7 +250,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
                     <YAxis width={56} domain={[0, (max: number) => Math.max(100, Math.ceil(max))]} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
                     <Tooltip content={readout('cpu')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
                     <Area type="monotone" dataKey="cpuBand" stroke="none" fill="var(--dc-series-1)" fillOpacity={0.1} connectNulls activeDot={false} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="cpuAvg" name="cpu" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} connectNulls activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--dc-surface)' }} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="cpuAvg" name="cpu" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} connectNulls activeDot={dot('cpu')} isAnimationActive={false} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
