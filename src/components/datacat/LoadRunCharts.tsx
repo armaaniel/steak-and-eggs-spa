@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { AreaChart, BarChart, ComposedChart, Area, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import type { LoadCompareRow } from '../../lib/types.ts'
+import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
   rows: LoadCompareRow[]
   route: string
   step?: number
+  cpu?: RunMetricPoint[]
 }
 
 interface Mark {
@@ -19,6 +20,8 @@ interface Mark {
   band: [number, number] | null
   gap: number | null
   errors: number | null
+  cpuAvg: number | null
+  cpuBand: [number, number] | null
   row: LoadCompareRow | null
 }
 
@@ -42,9 +45,10 @@ const ms = (v: number | null | undefined) =>
 // One readout for all three panels: they share a syncId, so whichever panel the pointer
 // is over, the reader gets every measure for that bucket rather than the one they hit.
 const RunTooltip = ({ active, payload }: TooltipProps) => {
-  const row = payload?.[0]?.payload.row
+  const mark = payload?.[0]?.payload
+  const row = mark?.row
 
-  if (!active || !row) return null
+  if (!active || !mark || !row) return null
 
   return (
     <div className="lr-tooltip">
@@ -60,6 +64,9 @@ const RunTooltip = ({ active, payload }: TooltipProps) => {
       </p>
       <p><strong>{ms(row.queueP99)}</strong> queued<span className="lr-dim"> (p99 client − p99 server)</span></p>
       <p><strong>{row.gap.toLocaleString()}</strong> untraced<span className="lr-dim"> · {row.errors.toLocaleString()} errors</span></p>
+      {mark.cpuAvg !== null && (
+        <p><strong>{mark.cpuAvg.toFixed(1)}%</strong> cpu<span className="lr-dim">{mark.cpuBand ? ` · ${mark.cpuBand[0].toFixed(1)}–${mark.cpuBand[1].toFixed(1)} range` : ''}</span></p>
+      )}
     </div>
   )
 }
@@ -78,9 +85,9 @@ const peakLabel = (peak: number) => ({ x, y, index, value }: LabelProps) => {
   return <text x={Number(x)} y={Number(y) - 6} textAnchor="middle" className="lr-mark-label">{Number(value).toLocaleString()}</text>
 }
 
-type Panel = 'rps' | 'latency' | 'failures'
+type Panel = 'rps' | 'latency' | 'cpu' | 'failures'
 
-const LoadRunCharts = ({ rows, route, step = 15 }: Props) => {
+const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
   const [showTable, setShowTable] = useState(false)
   // the panels share a syncId so one pointer moves every crosshair, but that also gives
   // every panel its own tooltip at once — only the one under the pointer gets to speak
@@ -93,6 +100,9 @@ const LoadRunCharts = ({ rows, route, step = 15 }: Props) => {
   const gapMs = step * 2000
   const series: Mark[] = []
 
+  const cpuByTime = new Map(cpu.map((point) => [new Date(point.at).getTime(), point]))
+  const hasCpu = cpu.some((point) => point.average !== null)
+
   rows.forEach((row, index) => {
     const t = new Date(row.bucket).getTime()
     const previous = rows[index - 1]
@@ -101,12 +111,16 @@ const LoadRunCharts = ({ rows, route, step = 15 }: Props) => {
       const previousAt = new Date(previous.bucket).getTime()
 
       if (t - previousAt > gapMs) {
-        series.push({ t: previousAt + 1, rps: null, clientP99: null, serverP99: null, band: null, gap: null, errors: null, row: null })
+        series.push({ t: previousAt + 1, rps: null, clientP99: null, serverP99: null, band: null, gap: null, errors: null, cpuAvg: null, cpuBand: null, row: null })
       }
     }
 
+    const point = cpuByTime.get(t)
+
     series.push({
       t,
+      cpuAvg: point?.average ?? null,
+      cpuBand: point && point.minimum !== null && point.maximum !== null ? [point.minimum, point.maximum] : null,
       rps: row.rps,
       clientP99: row.clientP99,
       serverP99: row.serverP99,
@@ -200,7 +214,7 @@ const LoadRunCharts = ({ rows, route, step = 15 }: Props) => {
                 <XAxis {...axis} hide />
                 <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
                 <Tooltip content={readout('rps')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-                <Area type="monotone" dataKey="rps" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="var(--dc-series-1)" fillOpacity={0.1} dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--dc-surface)' }} isAnimationActive={false} />
+                <Area type="monotone" dataKey="rps" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="var(--dc-series-1)" fillOpacity={0.1} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -215,14 +229,32 @@ const LoadRunCharts = ({ rows, route, step = 15 }: Props) => {
                 <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
                 <Area type="monotone" dataKey="band" stroke="none" fill="var(--dc-series-2)" fillOpacity={0.1} legendType="none" tooltipType="none" activeDot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="clientP99" name="client p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--dc-surface)' }} isAnimationActive={false} label={endLabel(last, labelEnds)} />
-                <Line type="monotone" dataKey="serverP99" name="server p99" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--dc-surface)' }} isAnimationActive={false} label={endLabel(last, labelEnds)} />
+                <Line type="monotone" dataKey="clientP99" name="client p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} label={endLabel(last, labelEnds)} />
+                <Line type="monotone" dataKey="serverP99" name="server p99" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} label={endLabel(last, labelEnds)} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
 
           {/* Grouped, not stacked: a request that times out client-side is counted in both
               errors and untraced, so stacking them would double-count the same failure. */}
+          {hasCpu && (
+            <>
+              <p className="lr-panel-label">CPU (%) · band is min to max</p>
+              <div className="lr-chart" {...watch('cpu')}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={series} syncId="load-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
+                    <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
+                    <XAxis {...axis} hide />
+                    <YAxis width={56} domain={[0, (max: number) => Math.max(100, Math.ceil(max))]} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
+                    <Tooltip content={readout('cpu')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
+                    <Area type="monotone" dataKey="cpuBand" stroke="none" fill="var(--dc-series-1)" fillOpacity={0.1} connectNulls activeDot={false} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="cpuAvg" name="cpu" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} connectNulls activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--dc-surface)' }} isAnimationActive={false} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+
           <p className="lr-panel-label">Failed requests</p>
           <div className="lr-chart lr-chart-axis" {...watch('failures')}>
             <ResponsiveContainer width="100%" height="100%">

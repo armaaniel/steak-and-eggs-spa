@@ -161,6 +161,13 @@ export interface IngesterConnection {
 	p99MeanExcessMs:number | null
 }
 
+export interface RunMetricPoint {
+	at:string
+	minimum:number | null
+	maximum:number | null
+	average:number | null
+}
+
 export interface LoadRunSummary {
 	runId:string
 	route:string

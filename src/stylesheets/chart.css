@@ -5,11 +5,11 @@
 	color:var(--text-muted);
 }
 
-.recharts-active-dot .recharts-dot {
+.chart .recharts-active-dot .recharts-dot {
 	fill: var(--chart-line);
 	stroke: var(--chart-line);
 }
 
-.recharts-tooltip-cursor {
+.chart .recharts-tooltip-cursor {
 	stroke: var(--border-strong);
 }

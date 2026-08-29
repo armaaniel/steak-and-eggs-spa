@@ -82,8 +82,8 @@ const IngesterLagChart = ({ points, hours }: Props) => {
           <Legend wrapperStyle={{ fontSize: 12 }} />
           {/* zero is the feed's baseline delay — below it, events beat the baseline */}
           <ReferenceLine y={0} stroke="var(--dc-border-strong)" strokeWidth={1} />
-          <Line type="monotone" dataKey="maxExcessMs" name="worst lag (ms)" stroke="var(--dc-series-2)" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="meanExcessMs" name="mean lag (ms)" stroke="var(--dc-series-1)" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="maxExcessMs" name="worst lag (ms)" stroke="var(--dc-series-2)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+          <Line type="monotone" dataKey="meanExcessMs" name="mean lag (ms)" stroke="var(--dc-series-1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

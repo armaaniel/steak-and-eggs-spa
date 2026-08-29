@@ -2,7 +2,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import LoadRunCharts from '../../components/datacat/LoadRunCharts'
 import useTransition from '../../hooks/useTransition.ts'
-import type { LoadRunSummary, LoadCompareRow } from '../../lib/types.ts'
+import type { LoadRunSummary, LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
 const GET_LOAD_RUNS = gql`
@@ -35,8 +35,23 @@ const GET_LOAD_COMPARE = gql`
   }
 `
 
+const GET_RUN_METRICS = gql`
+  query getRunMetrics($runId: ID!) {
+    runMetrics(runId: $runId) {
+      at
+      minimum
+      maximum
+      average
+    }
+  }
+`
+
 interface RunsData {
   loadRuns: LoadRunSummary[]
+}
+
+interface MetricsData {
+  runMetrics: RunMetricPoint[]
 }
 
 interface CompareData {
@@ -68,8 +83,14 @@ const LoadRun = () => {
     skip: !current,
   })
 
+  const { data: metricsData } = useQuery<MetricsData>(GET_RUN_METRICS, {
+    variables: { runId: current?.runId },
+    skip: !current,
+  })
+
   const isLoaded = useTransition(loading, data || error)
   const rows = data?.loadCompare || []
+  const cpu = metricsData?.runMetrics || []
 
   // a run is identified by when it started, so the date leads — but the full locale string
   // spends its width on seconds and a four-digit year and pushes the count out of the box
@@ -141,7 +162,7 @@ const LoadRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} />
+          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} cpu={cpu} />
         )}
       </div>
     </>

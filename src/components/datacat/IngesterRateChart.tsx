@@ -37,8 +37,8 @@ const IngesterRateChart = ({ points }: Props) => {
           <YAxis width={44} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
           <Tooltip content={<RateTooltip />} cursor={false} />
           <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
-          <Line type="monotone" dataKey="eventsPerSec" name="events/sec" stroke="var(--dc-series-1)" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="framesPerSec" name="frames/sec" stroke="var(--dc-series-2)" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="eventsPerSec" name="events/sec" stroke="var(--dc-series-1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+          <Line type="monotone" dataKey="framesPerSec" name="frames/sec" stroke="var(--dc-series-2)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>
