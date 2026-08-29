@@ -180,25 +180,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
         </button>
       </div>
 
-      <div className="lr-stats">
-        <div className="lr-stat">
-          <p className="lr-stat-label">Sent</p>
-          <p className="lr-stat-value">{totals.sent.toLocaleString()}</p>
-        </div>
-        <div className="lr-stat">
-          <p className="lr-stat-label">Traced</p>
-          <p className="lr-stat-value">{totals.traced.toLocaleString()}</p>
-        </div>
-        <div className="lr-stat">
-          <p className="lr-stat-label">Untraced</p>
-          <p className={`lr-stat-value ${totals.gap > 0 ? 'warn' : ''}`}>{totals.gap.toLocaleString()}</p>
-        </div>
-        <div className="lr-stat">
-          <p className="lr-stat-label">Errors</p>
-          <p className={`lr-stat-value ${totals.errors > 0 ? 'critical' : ''}`}>{totals.errors.toLocaleString()}</p>
-        </div>
-      </div>
-
       {showTable ? (
         <div className="lr-table-scroll">
           <table className="lr-table">
@@ -279,6 +260,25 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
 
         </>
       )}
+
+      <div className="lr-stats">
+        <div className="lr-stat">
+          <p className="lr-stat-label">Sent</p>
+          <p className="lr-stat-value">{totals.sent.toLocaleString()}</p>
+        </div>
+        <div className="lr-stat">
+          <p className="lr-stat-label">Traced</p>
+          <p className="lr-stat-value">{totals.traced.toLocaleString()}</p>
+        </div>
+        <div className="lr-stat">
+          <p className="lr-stat-label">Untraced</p>
+          <p className={`lr-stat-value ${totals.gap > 0 ? 'warn' : ''}`}>{totals.gap.toLocaleString()}</p>
+        </div>
+        <div className="lr-stat">
+          <p className="lr-stat-label">Errors</p>
+          <p className={`lr-stat-value ${totals.errors > 0 ? 'critical' : ''}`}>{totals.errors.toLocaleString()}</p>
+        </div>
+      </div>
     </div>
   )
 }
