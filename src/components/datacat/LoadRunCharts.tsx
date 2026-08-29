@@ -243,7 +243,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
 
           {hasCpu && (
             <>
-              <p className="lr-panel-label">CPU (%) · band is min to max</p>
+              <p className="lr-panel-label">CPU (%)</p>
               <div className="lr-chart lr-chart-axis" {...watch('cpu')}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={series} syncId="load-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
