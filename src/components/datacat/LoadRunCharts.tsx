@@ -8,6 +8,7 @@ interface Props {
   route: string
   step?: number
   cpu?: RunMetricPoint[]
+  statsOpen?: boolean
 }
 
 interface Mark {
@@ -81,7 +82,7 @@ const endLabel = (last: number, show: boolean) => ({ x, y, index, value }: Label
 
 type Panel = 'rps' | 'latency' | 'cpu'
 
-const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
+const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = true }: Props) => {
   const [showTable, setShowTable] = useState(false)
   // the panels share a syncId so one pointer moves every crosshair, but that also gives
   // every panel its own tooltip at once — only the one under the pointer gets to speak
@@ -261,7 +262,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [] }: Props) => {
         </>
       )}
 
-      <div className="lr-stats">
+      <div className={`lr-stats ${statsOpen ? 'open' : ''}`}>
         <div className="lr-stat">
           <p className="lr-stat-label">Sent</p>
           <p className="lr-stat-value">{totals.sent.toLocaleString()}</p>

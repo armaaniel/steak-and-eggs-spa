@@ -71,6 +71,7 @@ const keyOf = (run: LoadRunSummary) => `${run.runId}|${run.route}`
 const LoadRun = () => {
   const [selected, setSelected] = useState<string | null>(null)
   const [step, setStep] = useState(15)
+  const [statsOpen, setStatsOpen] = useState(true)
 
   const { error: runsError, data: runsData } = useQuery<RunsData>(GET_LOAD_RUNS)
 
@@ -156,13 +157,19 @@ const LoadRun = () => {
             </svg>
           </div>
         </div>
+
+        <button type="button" className="lr-stats-toggle" onClick={() => setStatsOpen(!statsOpen)} aria-expanded={statsOpen} aria-label="Toggle run totals">
+          <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`lr-v ${statsOpen ? 'open' : ''}`}>
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
 
       <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} cpu={cpu} />
+          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} cpu={cpu} statsOpen={statsOpen} />
         )}
       </div>
     </>
