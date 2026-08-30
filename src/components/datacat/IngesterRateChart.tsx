@@ -10,8 +10,8 @@ interface TooltipProps {
   payload?: { payload: IngesterRatePoint }[]
 }
 
-// lag and symbols ride in the tooltip rather than on the plot: they are neither
-// per-second rates, and a second y-scale to fit them would misstate both series
+// symbols ride in the tooltip rather than on the plot: a symbol count is not a
+// per-second rate, and a second y-scale to fit it would misstate both series
 const RateTooltip = ({ active, payload }: TooltipProps) => {
   if (!active || !payload?.length) return null
 
@@ -22,7 +22,6 @@ const RateTooltip = ({ active, payload }: TooltipProps) => {
       <p className="ing-tooltip-time">{new Date(point.at).toLocaleString()}</p>
       <p>{point.eventsPerSec?.toFixed(1) ?? '-'} events/sec</p>
       <p>{point.framesPerSec?.toFixed(1) ?? '-'} frames/sec</p>
-      <p>{point.maxExcessMs?.toLocaleString() ?? '-'} ms peak lag</p>
       <p>{point.symbols ?? '-'} symbols</p>
     </div>
   )

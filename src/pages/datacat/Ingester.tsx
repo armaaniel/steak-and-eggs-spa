@@ -30,7 +30,6 @@ const GET_INGESTER = gql`
       at
       eventsPerSec
       framesPerSec
-      maxExcessMs
       symbols
     }
     ingesterTransitions(hours: $hours) {
@@ -44,7 +43,6 @@ const GET_INGESTER = gql`
     }
     ingesterLag(hours: $hours) {
       at
-      maxExcessMs
       meanExcessMs
       sampledEvents
       symbols

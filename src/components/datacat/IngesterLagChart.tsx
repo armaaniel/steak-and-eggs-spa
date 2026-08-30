@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ReferenceLine, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts'
 import type { IngesterLagPoint } from '../../lib/types.ts'
 
 interface Props {
@@ -8,7 +8,6 @@ interface Props {
 
 interface Mark {
   t: number
-  maxExcessMs: number | null
   meanExcessMs: number | null
   point: IngesterLagPoint | null
 }
@@ -30,7 +29,6 @@ const LagTooltip = ({ active, payload }: TooltipProps) => {
   return (
     <div className="ing-tooltip">
       <p className="ing-tooltip-time">{new Date(point.at).toLocaleString()}</p>
-      <p>{point.maxExcessMs?.toLocaleString() ?? '-'} ms worst</p>
       <p>{point.meanExcessMs === null ? '-' : `${Math.round(point.meanExcessMs).toLocaleString()} ms mean`}</p>
       <p>{point.sampledEvents?.toLocaleString() ?? '-'} events</p>
       <p>{point.symbols ?? '-'} symbols</p>
@@ -55,11 +53,11 @@ const IngesterLagChart = ({ points, hours }: Props) => {
       const previousAt = new Date(previous.at).getTime()
 
       if (at - previousAt > GAP_MS) {
-        series.push({ t: previousAt + 1, maxExcessMs: null, meanExcessMs: null, point: null })
+        series.push({ t: previousAt + 1, meanExcessMs: null, point: null })
       }
     }
 
-    series.push({ t: at, maxExcessMs: point.maxExcessMs, meanExcessMs: point.meanExcessMs, point })
+    series.push({ t: at, meanExcessMs: point.meanExcessMs, point })
   })
 
   const sameDay = hours <= 24
@@ -79,11 +77,9 @@ const IngesterLagChart = ({ points, hours }: Props) => {
           />
           <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
           <Tooltip content={<LagTooltip />} cursor={false} />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
           {/* zero is the feed's baseline delay — below it, events beat the baseline */}
           <ReferenceLine y={0} stroke="var(--dc-border-strong)" strokeWidth={1} />
-          <Line type="monotone" dataKey="maxExcessMs" name="worst lag (ms)" stroke="var(--dc-series-2)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-          <Line type="monotone" dataKey="meanExcessMs" name="mean lag (ms)" stroke="var(--dc-series-1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+          <Line type="monotone" dataKey="meanExcessMs" name="mean lag (ms)" stroke="var(--dc-series-2)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

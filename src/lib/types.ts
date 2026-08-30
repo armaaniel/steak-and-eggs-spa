@@ -134,7 +134,6 @@ export interface IngesterRatePoint {
 	at:string
 	eventsPerSec:number | null
 	framesPerSec:number | null
-	maxExcessMs:number | null
 	symbols:number | null
 }
 
@@ -192,7 +191,6 @@ export interface LoadCompareRow {
 
 export interface IngesterLagPoint {
 	at:string
-	maxExcessMs:number | null
 	meanExcessMs:number | null
 	sampledEvents:number | null
 	symbols:number | null
