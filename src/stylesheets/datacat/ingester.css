@@ -8,29 +8,6 @@
 	gap:0.5rem;
 }
 
-.ing-range-div {
-	width:230px;
-}
-
-#from-input,
-#to-input {
-	padding:12px 10px 4px 10px;
-	border:none;
-	border-radius:6px;
-	font-weight:600;
-	font-family: var(--font-ui);
-	font-size:14px;
-	height:32px;
-	flex:1;
-	color:var(--dc-text);
-	background-color:var(--dc-surface);
-}
-
-#from-input:focus,
-#to-input:focus {
-	outline:none;
-}
-
 .ing-uptime {
 	display:flex;
 	align-items:baseline;

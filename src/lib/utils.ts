@@ -1,3 +1,10 @@
+import type { DateRange } from './types.ts'
+
+export const toRange = (hours:number):DateRange => {
+	const to = Date.now()
+	return {from: to - hours * 60 * 60 * 1000, to}
+}
+
 export const toReadable = (value:number | null | string | undefined) => {
 	
 	if (value === null || value === undefined) {

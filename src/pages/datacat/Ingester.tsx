@@ -5,10 +5,11 @@ import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import IngesterRateChart from '../../components/datacat/IngesterRateChart'
 import IngesterLagChart from '../../components/datacat/IngesterLagChart'
+import DateRangePicker from '../../components/datacat/DateRangePicker'
 import useTransition from '../../hooks/useTransition.ts'
-import { toDuration } from '../../lib/utils.ts'
+import { toDuration, toRange } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
-import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType } from '../../lib/types.ts'
+import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, DateRange } from '../../lib/types.ts'
 
 const GET_INGESTER = gql`
   query getIngester($from: ISO8601DateTime!, $to: ISO8601DateTime!) {
@@ -30,6 +31,7 @@ const GET_INGESTER = gql`
       at
       eventsPerSec
       framesPerSec
+      meanExcessMs
       symbols
     }
     ingesterTransitions(from: $from, to: $to) {
@@ -84,38 +86,6 @@ interface IngesterData {
 type BootRow = IngesterBoot & { id: string }
 type ConnectionRow = IngesterConnection & { id: string }
 
-const windows = [
-  { hours: 1, label: '1h' },
-  { hours: 3, label: '3h' },
-  { hours: 6, label: '6h' },
-  { hours: 12, label: '12h' },
-  { hours: 24, label: '24h' },
-  { hours: 72, label: '3d' },
-  { hours: 168, label: '7d' },
-  { hours: 720, label: '30d' },
-]
-
-const HOUR_MS = 60 * 60 * 1000
-
-interface Range {
-  from: number
-  to: number
-}
-
-const toRange = (hours: number): Range => {
-  const to = Date.now()
-  return { from: to - hours * HOUR_MS, to }
-}
-
-const toInputValue = (ms: number) => {
-  if (!Number.isFinite(ms)) return ''
-
-  const localMs = ms - new Date(ms).getTimezoneOffset() * 60_000
-  return new Date(localMs).toISOString().slice(0, 16)
-}
-
-const toMilliseconds = (value: string) => new Date(value).getTime()
-
 const toIso = (ms: number) => (Number.isFinite(ms) ? new Date(ms).toISOString() : '')
 
 const bootColumns: Column<BootRow>[] = [
@@ -144,32 +114,18 @@ function Ingester() {
   const { selectedIngesterDetail, setSelectedIngesterDetail } = useOutletContext<OutletContextType>()
 
   const [preset, setPreset] = useState<number | 'custom'>(24)
-  const [range, setRange] = useState<Range>(() => toRange(24))
+  const [range, setRange] = useState<DateRange>(() => toRange(24))
 
-  const changePreset = (value: string) => {
+  const applyWindow = (nextPreset: number | 'custom', nextRange: DateRange) => {
     setSelectedIngesterDetail(null) // the selected row may not exist in the new window
-
-    if (value === 'custom') {
-      setPreset('custom')
-      return
-    }
-
-    setPreset(Number(value))
-    setRange(toRange(Number(value)))
+    setPreset(nextPreset)
+    setRange(nextRange)
   }
-
-  const changeRange = (edge: keyof Range, value: string) => {
-    setSelectedIngesterDetail(null)
-    setRange((current) => ({ ...current, [edge]: toMilliseconds(value) }))
-  }
-
-  const isRangeValid = Number.isFinite(range.from) && Number.isFinite(range.to) && range.from < range.to
 
   const recordsPerPage = 10
 
   const { loading, error, data } = useQuery<IngesterData>(GET_INGESTER, {
     variables: { from: toIso(range.from), to: toIso(range.to) },
-    skip: !isRangeValid,
   })
 
   const isLoaded = useTransition(loading, data || error)
@@ -206,53 +162,10 @@ function Ingester() {
   return (
     <>
       <div className="ing-header">
-        {preset === 'custom' && (
-          <>
-            <div className={`status-div ing-range-div ${isLoaded ? 'loaded' : ''}`}>
-              <label htmlFor="from-input" className="status-label">
-                From
-              </label>
-
-              <input id="from-input" type="datetime-local" value={toInputValue(range.from)} max={toInputValue(range.to)} onChange={(e) => changeRange('from', e.target.value)} />
-            </div>
-
-            <div className={`status-div ing-range-div ${isLoaded ? 'loaded' : ''}`}>
-              <label htmlFor="to-input" className="status-label">
-                To
-              </label>
-
-              <input id="to-input" type="datetime-local" value={toInputValue(range.to)} min={toInputValue(range.from)} onChange={(e) => changeRange('to', e.target.value)} />
-            </div>
-          </>
-        )}
-
-        <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
-          <label htmlFor="hours-select" className="status-label">
-            Window
-          </label>
-
-          <select id="hours-select" value={preset} onChange={(e) => changePreset(e.target.value)}>
-            {windows.map((option) => (
-              <option key={option.hours} value={option.hours}>
-                {option.label}
-              </option>
-            ))}
-            <option value="custom">Custom</option>
-          </select>
-
-          <div className="select-svg-div">
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
+        <DateRangePicker preset={preset} range={range} loaded={isLoaded} onApply={applyWindow} />
       </div>
 
-      {!isRangeValid ? (
-        <div className="positions-container loaded">
-          <p className="ing-message">From must be earlier than to</p>
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="positions-container loaded">
           <p className="ing-message">Unable to load ingester data, please try again</p>
         </div>
@@ -291,9 +204,9 @@ function Ingester() {
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-            <p className="ing-card-title">Lag above baseline</p>
+            <p className="ing-card-title">Mean lag</p>
 
-            {lag.length === 0 ? <p className="ing-message">No samples ran late in this window</p> : <IngesterLagChart points={lag} from={range.from} to={range.to} />}
+            {lag.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterLagChart points={lag} from={range.from} to={range.to} />}
           </div>
 
           <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
