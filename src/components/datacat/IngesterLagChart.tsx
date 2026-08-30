@@ -3,7 +3,8 @@ import type { IngesterLagPoint } from '../../lib/types.ts'
 
 interface Props {
   points: IngesterLagPoint[]
-  hours: number
+  from: number
+  to: number
 }
 
 interface Mark {
@@ -36,9 +37,7 @@ const LagTooltip = ({ active, payload }: TooltipProps) => {
   )
 }
 
-const IngesterLagChart = ({ points, hours }: Props) => {
-  const now = Date.now()
-  const windowStart = now - hours * 60 * 60 * 1000
+const IngesterLagChart = ({ points, from, to }: Props) => {
 
   // The resolver keeps only streaming samples, so overnights and outages leave holes.
   // A null between them breaks the line there rather than ruling a straight edge across
@@ -60,7 +59,7 @@ const IngesterLagChart = ({ points, hours }: Props) => {
     series.push({ t: at, meanExcessMs: point.meanExcessMs, point })
   })
 
-  const sameDay = hours <= 24
+  const sameDay = to - from <= 24 * 60 * 60 * 1000
 
   return (
     <div className="ing-chart">
@@ -69,7 +68,7 @@ const IngesterLagChart = ({ points, hours }: Props) => {
           <XAxis
             type="number"
             dataKey="t"
-            domain={[windowStart, now]}
+            domain={[from, to]}
             minTickGap={48}
             tickLine={false}
             tick={{ fontSize: 11 }}
