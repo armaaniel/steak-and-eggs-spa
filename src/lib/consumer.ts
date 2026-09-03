@@ -7,8 +7,7 @@ let globalConsumer: null | any = null
 
 export const getConsumer = () => {
 	if (!globalConsumer) {
-		const token = localStorage.getItem('authToken')
-		globalConsumer = createConsumer(`${WS}/cable?token=${token}`)
+		globalConsumer = createConsumer(`${WS}/cable`)
 		}
 	return globalConsumer
 }
