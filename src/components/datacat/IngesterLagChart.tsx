@@ -39,9 +39,10 @@ const LagTooltip = ({ active, payload }: TooltipProps) => {
 
 const IngesterLagChart = ({ points, from, to }: Props) => {
 
-  // The resolver keeps only streaming samples, so overnights and outages leave holes.
-  // A null between them breaks the line there rather than ruling a straight edge across
-  // a weekend as though the feed had been running the whole time.
+  // The resolver keeps any sample that carried events, so overnights and outages —
+  // stretches where nothing arrived at all — leave holes. A null between them breaks
+  // the line there rather than ruling a straight edge across a weekend as though the
+  // feed had been running the whole time.
   const series: Mark[] = []
 
   points.forEach((point, index) => {
