@@ -25,7 +25,7 @@ const Sidebar = () => {
       </NavLink>
 
       <NavLink to="/datacat/load" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
-        Load Runs
+        Load Tests
       </NavLink>
 
       <ThemeToggle className="dc-theme-toggle" />

@@ -195,6 +195,24 @@ export interface LoadCompareRow {
 	queueP99:number
 }
 
+export interface CableRunSummary {
+	runId:string
+	startedAt:string
+	endedAt:string
+	samples:number
+}
+
+export interface CableCompareRow {
+	at:string
+	published:number | null
+	received:number | null
+	clients:number | null
+	expected:number | null
+	peakClients:number | null
+	meanLagMs:number | null
+	p99LagMs:number | null
+}
+
 export interface IngesterLagPoint {
 	at:string
 	meanExcessMs:number | null

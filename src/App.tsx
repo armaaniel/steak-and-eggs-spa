@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './lib/auth'
 import Public from './layouts/Public'
 import ProtectedRoute from './layouts/ProtectedRoute'
@@ -17,6 +17,7 @@ import Connections from './pages/datacat/Connections'
 import Uptime from './pages/datacat/Uptime'
 import Ingester from './pages/datacat/Ingester'
 import LoadRun from './pages/datacat/LoadRun'
+import CableRun from './pages/datacat/CableRun'
 import DCSummary from './layouts/datacat/DCSummary'
 import DCList from './layouts/datacat/DCList'
 import NotFound from './pages/NotFound'
@@ -56,7 +57,9 @@ function App() {
             <Route path="/datacat/connections/" element={<Connections />} />
             <Route path="/datacat/uptime/" element={<Uptime />} />
             <Route path="/datacat/ingester/" element={<Ingester />} />
-            <Route path="/datacat/load/" element={<LoadRun />} />
+            <Route path="/datacat/load/" element={<Navigate to="/datacat/load/http" replace />} />
+            <Route path="/datacat/load/http" element={<LoadRun />} />
+            <Route path="/datacat/load/ws" element={<CableRun />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

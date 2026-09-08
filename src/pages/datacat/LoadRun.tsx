@@ -1,6 +1,7 @@
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import LoadRunCharts from '../../components/datacat/LoadRunCharts'
+import LoadNav from '../../components/datacat/LoadNav'
 import useTransition from '../../hooks/useTransition.ts'
 import type { LoadRunSummary, LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -158,7 +159,9 @@ const LoadRun = () => {
           </div>
         </div>
 
-        <button type="button" className="lr-stats-toggle" onClick={() => setStatsOpen(!statsOpen)} aria-expanded={statsOpen} aria-label="Toggle run totals">
+        <LoadNav />
+
+        <button type="button" className={`lr-stats-toggle ${isLoaded ? 'loaded' : ''}`} onClick={() => setStatsOpen(!statsOpen)} aria-expanded={statsOpen} aria-label="Toggle run totals">
           <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`lr-v ${statsOpen ? 'open' : ''}`}>
             <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

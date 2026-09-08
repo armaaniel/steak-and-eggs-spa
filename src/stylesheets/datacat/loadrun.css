@@ -96,6 +96,14 @@
 	border-radius:1px;
 }
 
+.lr-key-1 {
+	background-color:var(--dc-series-1);
+}
+
+.lr-key-2 {
+	background-color:var(--dc-series-2);
+}
+
 .lr-key-client {
 	background-color:var(--dc-series-2);
 }
@@ -168,6 +176,10 @@
 	max-width:100%;
 }
 
+.lr-header .endpoint-header-container {
+	margin-left:auto;
+}
+
 .lr-header #run-select {
 	max-width:400px;
 	text-overflow:ellipsis;
@@ -216,6 +228,12 @@
 	border:none;
 	background:none;
 	cursor:pointer;
+	opacity:0;
+	transition:opacity 150ms;
+}
+
+.lr-stats-toggle.loaded {
+	opacity:1;
 }
 
 .lr-v {
