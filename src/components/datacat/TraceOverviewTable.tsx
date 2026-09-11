@@ -4,6 +4,7 @@ import type { TraceSummary } from '../../lib/types.ts'
 import { ApolloError } from '@apollo/client'
 import usePagination from '../../hooks/usePagination'
 import PaginationControls from '../PaginationControls'
+import { toRouteLabel } from '../../lib/utils.ts'
 
 const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: TraceSummary[]; recordsPerPage: number; error: ApolloError | undefined }) => {
   const navigate = useNavigate()
@@ -85,7 +86,7 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
             {currentItems.map((trace) => (
               <tr key={trace.route} className="dc-row" onClick={() => handleSelect(trace)}>
                 <td className="dc-cell">
-                  <p className="details-text">{trace.route}</p>
+                  <p className="details-text">{toRouteLabel(trace.route)}</p>
                 </td>
 
                 <td className="dc-cell">

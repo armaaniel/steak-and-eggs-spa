@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { toRouteLabel } from '../../lib/utils.ts'
 
 interface NavProps {
   method: string | undefined
@@ -12,7 +13,7 @@ const EndpointNav = ({ method, path, endpoint, showCache, apiBoolean }: NavProps
   return (
     <div className="endpoint-header-container">
       <NavLink to={`/datacat/${method}/${path}`} className={({ isActive }) => `nav-button ${isActive ? 'active' : ''}`} state={{ showCache: showCache, apiBoolean: apiBoolean }}>
-        {endpoint}
+        {toRouteLabel(endpoint)}
       </NavLink>
 
       <NavLink to={`/datacat/cache/${method}/${path}`} className={({ isActive }) => `nav-button ${isActive ? 'active' : ''} ${showCache ? 'cache-visible' : 'cache-hidden'}`} state={{ showCache: showCache, apiBoolean: apiBoolean }} tabIndex={showCache ? 0 : -1}>

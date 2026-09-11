@@ -155,3 +155,8 @@ export const toPnlCurrency = (value: number | string | null | undefined) => {
 	
 	return number.toLocaleString('en-us', {minimumFractionDigits: 2, maximumFractionDigits: 2})
 }
+
+// route templates round-trip through a colon-free URL slug, so the ":" is re-added for display only
+export const toRouteLabel = (route:string) => {
+	return route.split('/').map((segment) => segment === 'symbol' ? ':symbol' : segment).join('/')
+}
