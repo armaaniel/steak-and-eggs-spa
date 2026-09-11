@@ -39,8 +39,6 @@ interface TraceStats {
 function DCList() {
   const location = useLocation()
 
-  /* the latent panel is static text with no query of its own, so Latent reports when
-     its table is ready and the note fades in alongside it */
   const [loaded, setLoaded] = useState(false)
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
   const [selectedConnection, setSelectedConnection] = useState<ConnectionWithID | null>(null)
@@ -52,8 +50,6 @@ function DCList() {
   })
 
   const { method, endpoint } = useEndpoint()
-  /* only the /datacat/:method/* routes carry an endpoint to fetch stats for; the static
-     pages (latent, uptime, ingester, load) match routes with no params at all */
   const isEndpointRoute = Boolean(method)
 
   const { data, loading } = useQuery<StatsData>(GET_STATS, {
@@ -62,8 +58,6 @@ function DCList() {
   })
 
   const stats = data?.traceStats
-  /* gate on this query rather than the child page's handshake, which resets on every
-     navigation — the endpoint and cache views share an endpoint, so the panel stays put */
   const statsLoaded = useTransition(loading, data)
 
   const toggleStats = () => {
