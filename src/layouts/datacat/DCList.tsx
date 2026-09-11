@@ -9,6 +9,7 @@ import CableConnectionDetailsPanel from '../../components/datacat/CableConnectio
 import IngesterDetailsPanel from '../../components/datacat/IngesterDetailsPanel'
 import StatsPanel from '../../components/datacat/StatsPanel'
 import useEndpoint from '../../hooks/useEndpoint'
+import useTransition from '../../hooks/useTransition.ts'
 import type { Trace, ConnectionWithID, IngesterDetail } from '../../lib/types.ts'
 
 const GET_STATS = gql`
@@ -38,6 +39,8 @@ interface TraceStats {
 function DCList() {
   const location = useLocation()
 
+  /* the latent panel is static text with no query of its own, so Latent reports when
+     its table is ready and the note fades in alongside it */
   const [loaded, setLoaded] = useState(false)
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
   const [selectedConnection, setSelectedConnection] = useState<ConnectionWithID | null>(null)
@@ -53,12 +56,15 @@ function DCList() {
      pages (latent, uptime, ingester, load) match routes with no params at all */
   const isEndpointRoute = Boolean(method)
 
-  const { data } = useQuery<StatsData>(GET_STATS, {
+  const { data, loading } = useQuery<StatsData>(GET_STATS, {
     variables: { endpoint },
     skip: !isEndpointRoute,
   })
 
   const stats = data?.traceStats
+  /* gate on this query rather than the child page's handshake, which resets on every
+     navigation — the endpoint and cache views share an endpoint, so the panel stays put */
+  const statsLoaded = useTransition(loading, data)
 
   const toggleStats = () => {
     const newValue = !statsOpen
@@ -107,7 +113,7 @@ function DCList() {
                 <StatsPanel
                   isOpen={statsOpen}
                   onToggle={toggleStats}
-                  loaded={loaded && (stats?.totalRequests ?? 0) > 0}
+                  loaded={statsLoaded && (stats?.totalRequests ?? 0) > 0}
                   triggerContent={<>P50: {stats?.p50?.toFixed(0)}ms</>}
                 >
                   <p>P95: {stats?.p95?.toFixed(0)}ms</p>
@@ -129,7 +135,7 @@ function DCList() {
         </div>
 
         <div className="dc-home-right">
-          <Outlet context={{ selectedTrace, setSelectedTrace, loaded, setLoaded, selectedConnection, setSelectedConnection, selectedIngesterDetail, setSelectedIngesterDetail }} />
+          <Outlet context={{ selectedTrace, setSelectedTrace, setLoaded, selectedConnection, setSelectedConnection, selectedIngesterDetail, setSelectedIngesterDetail }} />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useOutletContext, useLocation } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
 import EndpointNav from '../../components/datacat/EndpointNav'
 import useEndpoint from '../../hooks/useEndpoint'
@@ -31,7 +31,7 @@ interface TraceData {
 
 function Endpoint() {
   const location = useLocation()
-  const { selectedTrace, setSelectedTrace, setLoaded } = useOutletContext<OutletContextType>()
+  const { selectedTrace, setSelectedTrace } = useOutletContext<OutletContextType>()
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
@@ -50,10 +50,6 @@ function Endpoint() {
   const apiBoolean = traceList?.some((trace) => Object.values(trace.breakdown || {}).some((method) => 'used_api' in method))
   const persistedShowCache = (location.state?.showCache as boolean | undefined) || showCache
   const persistedApiBoolean = (location.state?.apiBoolean as boolean | undefined) ?? apiBoolean
-
-  useEffect(() => {
-    setLoaded(isLoaded)
-  }, [isLoaded])
 
   return (
     <>

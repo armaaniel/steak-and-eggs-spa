@@ -72,8 +72,7 @@ export interface OutletContextType {
 	setSelectedConnection: React.Dispatch<React.SetStateAction<ConnectionWithID | null>>
 	selectedIngesterDetail: IngesterDetail | null
 	setSelectedIngesterDetail: React.Dispatch<React.SetStateAction<IngesterDetail | null>>
-	loaded: boolean
-    setLoaded: React.Dispatch<React.SetStateAction<boolean>>
+	setLoaded: React.Dispatch<React.SetStateAction<boolean>>
 	
 }
 
