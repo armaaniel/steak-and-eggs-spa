@@ -48,10 +48,14 @@ function DCList() {
     return saved === null ? true : saved === 'true'
   })
 
-  const { endpoint } = useEndpoint()
+  const { method, endpoint } = useEndpoint()
+  /* only the /datacat/:method/* routes carry an endpoint to fetch stats for; the static
+     pages (latent, uptime, ingester, load) match routes with no params at all */
+  const isEndpointRoute = Boolean(method)
+
   const { data } = useQuery<StatsData>(GET_STATS, {
     variables: { endpoint },
-    skip: !(location.pathname.includes('/get') || location.pathname.includes('/post') || location.pathname.includes('/delete')),
+    skip: !isEndpointRoute,
   })
 
   const stats = data?.traceStats
@@ -99,7 +103,7 @@ function DCList() {
             <>
               <Sidebar />
 
-              {(location.pathname.includes('/get') || location.pathname.includes('/post')) && (
+              {isEndpointRoute && (
                 <StatsPanel
                   isOpen={statsOpen}
                   onToggle={toggleStats}

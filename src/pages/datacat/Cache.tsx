@@ -1,4 +1,5 @@
 import { useOutletContext, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import useEndpoint from '../../hooks/useEndpoint'
 import useTransition from '../../hooks/useTransition.ts'
 import EndpointNav from '../../components/datacat/EndpointNav'
@@ -48,7 +49,7 @@ interface TraceBreakdown {
 
 function Cache() {
   const location = useLocation()
-  const { selectedTrace, setSelectedTrace } = useOutletContext<OutletContextType>()
+  const { selectedTrace, setSelectedTrace, setLoaded } = useOutletContext<OutletContextType>()
 
   const { method, path, endpoint } = useEndpoint()
   const { loading, error, data } = useQuery<CacheData>(TRACE_BREAKDOWN, {
@@ -65,6 +66,10 @@ function Cache() {
   const dbApiQuery = data?.traceBreakdown?.dbApiQuery || []
   const apiBoolean = redisQuery?.some((trace) => Object.values(trace.breakdown || {}).some((method) => 'used_api' in method))
   const persistedApiBoolean = (location.state?.apiBoolean as boolean | undefined) ?? apiBoolean
+
+  useEffect(() => {
+    setLoaded(isLoaded)
+  }, [isLoaded])
 
   return (
     <>
