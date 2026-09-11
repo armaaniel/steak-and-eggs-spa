@@ -120,7 +120,7 @@ function DCList() {
               {location.pathname.includes('/latent') && (
                 <StatsPanel isOpen={statsOpen} onToggle={toggleStats} loaded={loaded}>
                   <p>
-                    Excludes POST /record <br /> & POST /graphql
+                    Excludes POST /graphql
                   </p>
                 </StatsPanel>
               )}
