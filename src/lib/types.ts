@@ -73,7 +73,8 @@ export interface OutletContextType {
 	selectedIngesterDetail: IngesterDetail | null
 	setSelectedIngesterDetail: React.Dispatch<React.SetStateAction<IngesterDetail | null>>
 	setLoaded: React.Dispatch<React.SetStateAction<boolean>>
-	
+	usesRedis: boolean
+	usesApi: boolean
 }
 
 export interface Column<T> {

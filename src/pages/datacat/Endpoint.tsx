@@ -1,4 +1,4 @@
-import { useOutletContext, useLocation } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
@@ -30,8 +30,7 @@ interface TraceData {
 }
 
 function Endpoint() {
-  const location = useLocation()
-  const { selectedTrace, setSelectedTrace } = useOutletContext<OutletContextType>()
+  const { selectedTrace, setSelectedTrace, usesRedis, usesApi } = useOutletContext<OutletContextType>()
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
@@ -46,15 +45,11 @@ function Endpoint() {
   const traceList = data?.traceList || []
   const statuses = [...new Set(traceList.map((trace) => trace.status))]
   const filteredTraces = statusFilter === 'all' ? traceList : traceList.filter((trace) => String(trace.status) === statusFilter)
-  const showCache = traceList?.some((trace) => Object.values(trace.breakdown || {}).some((method) => 'used_redis' in method))
-  const apiBoolean = traceList?.some((trace) => Object.values(trace.breakdown || {}).some((method) => 'used_api' in method))
-  const persistedShowCache = (location.state?.showCache as boolean | undefined) || showCache
-  const persistedApiBoolean = (location.state?.apiBoolean as boolean | undefined) ?? apiBoolean
 
   return (
     <>
       <div className="endpoint-nav-div">
-        <EndpointNav method={method} path={path} endpoint={endpoint} showCache={persistedShowCache} apiBoolean={persistedApiBoolean} />
+        <EndpointNav method={method} path={path} endpoint={endpoint} showCache={usesRedis} apiBoolean={usesApi} />
 
         <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
           <label htmlFor="status-select" className="status-label">

@@ -1,4 +1,4 @@
-import { useOutletContext, useLocation } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import useEndpoint from '../../hooks/useEndpoint'
 import useTransition from '../../hooks/useTransition.ts'
 import EndpointNav from '../../components/datacat/EndpointNav'
@@ -47,8 +47,7 @@ interface TraceBreakdown {
 }
 
 function Cache() {
-  const location = useLocation()
-  const { selectedTrace, setSelectedTrace } = useOutletContext<OutletContextType>()
+  const { selectedTrace, setSelectedTrace, usesApi } = useOutletContext<OutletContextType>()
 
   const { method, path, endpoint } = useEndpoint()
   const { loading, error, data } = useQuery<CacheData>(TRACE_BREAKDOWN, {
@@ -63,12 +62,10 @@ function Cache() {
   ]
   const redisQuery = data?.traceBreakdown?.redisQuery || []
   const dbApiQuery = data?.traceBreakdown?.dbApiQuery || []
-  const apiBoolean = redisQuery?.some((trace) => Object.values(trace.breakdown || {}).some((method) => 'used_api' in method))
-  const persistedApiBoolean = (location.state?.apiBoolean as boolean | undefined) ?? apiBoolean
 
   return (
     <>
-      <EndpointNav method={method} path={path} endpoint={endpoint} showCache={true} apiBoolean={persistedApiBoolean} />
+      <EndpointNav method={method} path={path} endpoint={endpoint} showCache={true} apiBoolean={usesApi} />
 
       <div className={`cache-parent-container ${isLoaded ? 'loaded' : ''}`}>
         <div className="cache-container">
@@ -80,7 +77,7 @@ function Cache() {
           <TraceTable traceData={dbApiQuery} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
           <p className="cache-text">
             {' '}
-            {apiBoolean ? 'API:' : 'DB:'} {dbApiQuery.length} traces
+            {usesApi ? 'API:' : 'DB:'} {dbApiQuery.length} traces
           </p>
         </div>
       </div>

@@ -20,6 +20,8 @@ const GET_STATS = gql`
       p50
       totalRequests
       errorRate
+      usesRedis
+      usesApi
     }
   }
 `
@@ -34,6 +36,8 @@ interface TraceStats {
   p50: number
   totalRequests: number
   errorRate: number
+  usesRedis: boolean
+  usesApi: boolean
 }
 
 function DCList() {
@@ -129,7 +133,7 @@ function DCList() {
         </div>
 
         <div className="dc-home-right">
-          <Outlet context={{ selectedTrace, setSelectedTrace, setLoaded, selectedConnection, setSelectedConnection, selectedIngesterDetail, setSelectedIngesterDetail }} />
+          <Outlet context={{ selectedTrace, setSelectedTrace, setLoaded, selectedConnection, setSelectedConnection, selectedIngesterDetail, setSelectedIngesterDetail, usesRedis: stats?.usesRedis ?? false, usesApi: stats?.usesApi ?? false }} />
         </div>
       </div>
     </div>
