@@ -6,10 +6,10 @@ import { gql, useQuery } from '@apollo/client'
 import TraceTable from '../../components/datacat/TraceTable'
 import type { Trace, OutletContextType, Column } from '../../lib/types.ts'
 
-const TRACE_BREAKDOWN = gql`
-  query getTraceBreakdown($endpoint: String!) {
-    traceBreakdown(endpoint: $endpoint) {
-      redisQuery {
+const CACHE_SPLIT = gql`
+  query getCacheSplit($endpoint: String!) {
+    cacheSplit(endpoint: $endpoint) {
+      cached {
         id
         createdAt
         endpoint
@@ -21,7 +21,7 @@ const TRACE_BREAKDOWN = gql`
         viewRuntime
         breakdown
       }
-      dbApiQuery {
+      uncached {
         id
         createdAt
         endpoint
@@ -38,19 +38,19 @@ const TRACE_BREAKDOWN = gql`
 `
 
 interface CacheData {
-  traceBreakdown: TraceBreakdown
+  cacheSplit: CacheSplit
 }
 
-interface TraceBreakdown {
-  redisQuery: Trace[]
-  dbApiQuery: Trace[]
+interface CacheSplit {
+  cached: Trace[]
+  uncached: Trace[]
 }
 
 function Cache() {
   const { selectedTrace, setSelectedTrace, usesApi } = useOutletContext<OutletContextType>()
 
   const { method, path, endpoint } = useEndpoint()
-  const { loading, error, data } = useQuery<CacheData>(TRACE_BREAKDOWN, {
+  const { loading, error, data } = useQuery<CacheData>(CACHE_SPLIT, {
     variables: { endpoint },
   })
 
@@ -60,8 +60,8 @@ function Cache() {
     { key: 'createdAt', label: 'Created At', sortable: true, render: (trace) => new Date(trace.createdAt).toLocaleString() },
     { key: 'duration', label: 'Duration', sortable: true, render: (trace) => `${trace.duration?.toFixed(0)} ms` },
   ]
-  const redisQuery = data?.traceBreakdown?.redisQuery || []
-  const dbApiQuery = data?.traceBreakdown?.dbApiQuery || []
+  const cached = data?.cacheSplit?.cached || []
+  const uncached = data?.cacheSplit?.uncached || []
 
   return (
     <>
@@ -69,15 +69,15 @@ function Cache() {
 
       <div className={`cache-parent-container ${isLoaded ? 'loaded' : ''}`}>
         <div className="cache-container">
-          <TraceTable traceData={redisQuery} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
-          <p className="cache-text">Redis: {redisQuery.length} traces</p>
+          <TraceTable traceData={cached} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
+          <p className="cache-text">Redis: {cached.length} traces</p>
         </div>
 
         <div className="cache-container">
-          <TraceTable traceData={dbApiQuery} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
+          <TraceTable traceData={uncached} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
           <p className="cache-text">
             {' '}
-            {usesApi ? 'API:' : 'DB:'} {dbApiQuery.length} traces
+            {usesApi ? 'API:' : 'DB:'} {uncached.length} traces
           </p>
         </div>
       </div>
