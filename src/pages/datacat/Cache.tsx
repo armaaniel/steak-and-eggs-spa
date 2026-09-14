@@ -47,7 +47,7 @@ interface CacheSplit {
 }
 
 function Cache() {
-  const { selectedTrace, setSelectedTrace, usesApi } = useOutletContext<OutletContextType>()
+  const { selectedTrace, setSelectedTrace, usedApi } = useOutletContext<OutletContextType>()
 
   const { method, path, endpoint } = useEndpoint()
   const { loading, error, data } = useQuery<CacheData>(CACHE_SPLIT, {
@@ -65,7 +65,7 @@ function Cache() {
 
   return (
     <>
-      <EndpointNav method={method} path={path} endpoint={endpoint} showCache={true} apiBoolean={usesApi} />
+      <EndpointNav method={method} path={path} endpoint={endpoint} showCache={true} apiBoolean={usedApi} />
 
       <div className={`cache-parent-container ${isLoaded ? 'loaded' : ''}`}>
         <div className="cache-container">
@@ -77,7 +77,7 @@ function Cache() {
           <TraceTable traceData={uncached} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
           <p className="cache-text">
             {' '}
-            {usesApi ? 'API:' : 'DB:'} {uncached.length} traces
+            {usedApi ? 'API:' : 'DB:'} {uncached.length} traces
           </p>
         </div>
       </div>

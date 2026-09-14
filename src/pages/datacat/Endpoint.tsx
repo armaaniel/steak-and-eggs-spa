@@ -30,7 +30,7 @@ interface TraceData {
 }
 
 function Endpoint() {
-  const { selectedTrace, setSelectedTrace, usesRedis, usesApi } = useOutletContext<OutletContextType>()
+  const { selectedTrace, setSelectedTrace, usedRedis, usedApi } = useOutletContext<OutletContextType>()
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
@@ -49,7 +49,7 @@ function Endpoint() {
   return (
     <>
       <div className="endpoint-nav-div">
-        <EndpointNav method={method} path={path} endpoint={endpoint} showCache={usesRedis} apiBoolean={usesApi} />
+        <EndpointNav method={method} path={path} endpoint={endpoint} showCache={usedRedis} apiBoolean={usedApi} />
 
         <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
           <label htmlFor="status-select" className="status-label">
