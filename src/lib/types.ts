@@ -125,7 +125,6 @@ export interface IngesterUptime {
 	streamingSeconds:number
 	idleSeconds:number
 	downSeconds:number
-	windowSeconds:number
 }
 
 export interface IngesterSpan {

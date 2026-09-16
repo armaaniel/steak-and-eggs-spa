@@ -18,7 +18,6 @@ const GET_INGESTER = gql`
       streamingSeconds
       idleSeconds
       downSeconds
-      windowSeconds
     }
     ingesterSpans(from: $from, to: $to) {
       at
