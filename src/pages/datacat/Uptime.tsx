@@ -12,6 +12,7 @@ const GET_BUCKETS = gql`
   query getSyntheticBuckets($range: String!) {
     syntheticBuckets(range: $range) {
       bucket
+      bucketEnd
       started
       completed
       failures
@@ -21,8 +22,8 @@ const GET_BUCKETS = gql`
 `
 
 const GET_RUNS = gql`
-  query getSyntheticRuns($range: String!, $bucket: ISO8601DateTime!) {
-    syntheticRuns(range: $range, bucket: $bucket) {
+  query getSyntheticRuns($bucket: ISO8601DateTime!, $bucketEnd: ISO8601DateTime!) {
+    syntheticRuns(bucket: $bucket, bucketEnd: $bucketEnd) {
       runId
       startedAt
       requestCount
@@ -46,7 +47,7 @@ function Uptime() {
   const { selectedTrace, setSelectedTrace } = useOutletContext<OutletContextType>()
 
   const [range, setRange] = useState('1h')
-  const [selectedBucket, setSelectedBucket] = useState<string | null>(null)
+  const [selectedBucket, setSelectedBucket] = useState<SyntheticBucket | null>(null)
 
   const { loading, error, data } = useQuery<BucketsData>(GET_BUCKETS, {
     variables: { range },
@@ -57,7 +58,7 @@ function Uptime() {
     error: runsError,
     data: runsData,
   } = useQuery<RunsData>(GET_RUNS, {
-    variables: { range, bucket: selectedBucket },
+    variables: { bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd },
     skip: !selectedBucket,
   })
 
@@ -96,13 +97,14 @@ function Uptime() {
         </div>
       </div>
 
-      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-        {error ? <p className="uptime-message">Unable to load uptime data, please try again</p> : <UptimeChart buckets={buckets} selectedBucket={selectedBucket} onSelect={setSelectedBucket} />}
+      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+        {error ? <p className="uptime-message">Unable to load uptime data, please try again</p> : 
+				<UptimeChart buckets={buckets} selectedBucket={selectedBucket} onSelect={setSelectedBucket} />}
       </div>
 
       {selectedBucket && (
-        <div className={`positions-container ${runsLoaded ? 'loaded' : ''}`}>
-          <p className="uptime-runs-title">Runs from {toBucketLabel(selectedBucket)}</p>
+        <div className={`positions-container ${runsLoaded && !runsLoading ? 'loaded' : ''}`}>
+          <p className="uptime-runs-title">Runs from {toBucketLabel(selectedBucket.bucket)}</p>
 
           {runsError ? (
             <p className="uptime-message">Unable to load runs, please try again</p>

@@ -3,8 +3,8 @@ import type { SyntheticBucket } from '../../lib/types.ts'
 
 interface Props {
   buckets: SyntheticBucket[]
-  selectedBucket: string | null
-  onSelect: (bucket: string) => void
+  selectedBucket: SyntheticBucket | null
+  onSelect: (bucket: SyntheticBucket) => void
 }
 
 // A bucket is judged only on what it can be judged on. `completed` lags `started` across
@@ -27,11 +27,11 @@ const UptimeChart = ({ buckets, selectedBucket, onSelect }: Props) => {
         <div className="uptime-chart">
           {buckets.map((bucket) => {
             const status = bucketStatus(bucket)
-            const isSelected = selectedBucket === bucket.bucket
+            const isSelected = selectedBucket?.bucket === bucket.bucket
             const ratio = bucket.expected > 0 ? Math.min(bucket.started / bucket.expected, 1) : 0
 
             return (
-              <button key={bucket.bucket} type="button" className={`uptime-bar ${isSelected ? 'selected' : ''}`} onClick={() => onSelect(bucket.bucket)} aria-pressed={isSelected}>
+              <button key={bucket.bucket} type="button" className={`uptime-bar ${isSelected ? 'selected' : ''}`} onClick={() => onSelect(bucket)} aria-pressed={isSelected}>
                 {status !== 'empty' && <span className={`uptime-bar-fill ${status}`} style={{ height: `${ratio * 100}%` }} />}
 
                 <span className="uptime-tooltip">

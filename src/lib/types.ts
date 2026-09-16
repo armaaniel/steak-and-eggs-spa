@@ -94,6 +94,7 @@ export interface TraceSummary {
 
 export interface SyntheticBucket {
 	bucket:string
+	bucketEnd:string
 	started:number
 	completed:number
 	failures:number

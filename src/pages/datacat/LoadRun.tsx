@@ -168,7 +168,7 @@ const LoadRun = () => {
         </button>
       </div>
 
-      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (

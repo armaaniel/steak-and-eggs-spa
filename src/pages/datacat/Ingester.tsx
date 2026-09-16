@@ -171,7 +171,7 @@ function Ingester() {
         </div>
       ) : (
         <>
-          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
             <div className="ing-uptime">
               <p className="ing-pct">{uptime?.pct?.toFixed(2) ?? '0.00'}%</p>
               <p className="ing-pct-label">streaming, excluding idle</p>
@@ -197,25 +197,25 @@ function Ingester() {
             </div>
           </div>
 
-          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
             <p className="ing-card-title">Throughput</p>
 
             {rate.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterRateChart points={rate} />}
           </div>
 
-          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
             <p className="ing-card-title">Mean lag</p>
 
             {lag.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterLagChart points={lag} from={range.from} to={range.to} />}
           </div>
 
-          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
             <p className="ing-card-title">Boots</p>
 
             <TraceTable traceData={boots} columns={bootColumns} selectedTrace={selectedBoot} setSelectedTrace={selectBoot} recordsPerPage={recordsPerPage} error={error} emptyMessage="No boots in this window" />
           </div>
 
-          <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
             <p className="ing-card-title">Connections</p>
 
             <TraceTable traceData={connections} columns={connectionColumns} selectedTrace={selectedConnection} setSelectedTrace={selectConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage="No connections in this window" />
