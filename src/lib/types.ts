@@ -158,6 +158,7 @@ export interface IngesterConnection {
 	bootId:string
 	spawnedAt:string
 	firstMessageAt:string | null
+	lastMessageAt:string | null
 	lastSeenAt:string
 	endedAt:string | null
 	endedBy:string

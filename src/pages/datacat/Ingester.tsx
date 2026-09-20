@@ -62,6 +62,7 @@ const GET_INGESTER = gql`
       bootId
       spawnedAt
       firstMessageAt
+      lastMessageAt
       lastSeenAt
       endedAt
       endedBy

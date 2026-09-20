@@ -65,6 +65,7 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
             <p>Boot: {detail.connection.bootId}</p>
             <p>Started: {new Date(detail.connection.spawnedAt).toLocaleString()}</p>
             <p>First message: {detail.connection.firstMessageAt ? new Date(detail.connection.firstMessageAt).toLocaleString() : 'none'}</p>
+            <p>Last message: {detail.connection.lastMessageAt ? new Date(detail.connection.lastMessageAt).toLocaleString() : 'none'}</p>
             <p>Last seen: {new Date(detail.connection.lastSeenAt).toLocaleString()}</p>
             <p>Lifetime: {toDuration(detail.connection.durationSeconds)}</p>
             <p>Events: {Number(detail.connection.events ?? 0).toLocaleString()}</p>
