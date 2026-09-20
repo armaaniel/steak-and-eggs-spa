@@ -64,6 +64,7 @@ const GET_INGESTER = gql`
       firstMessageAt
       lastMessageAt
       lastSeenAt
+      state
       endedAt
       endedBy
       durationSeconds

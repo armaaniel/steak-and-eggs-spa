@@ -70,6 +70,7 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
             <p>Lifetime: {toDuration(detail.connection.durationSeconds)}</p>
             <p>Events: {Number(detail.connection.events ?? 0).toLocaleString()}</p>
             <p>p99 mean lag: {detail.connection.p99MeanExcessMs === null ? '-' : `${detail.connection.p99MeanExcessMs.toLocaleString()} ms`}</p>
+            <p>State: {detail.connection.state}</p>
             <p>Exit: {detail.connection.endedBy}</p>
 
             {detail.transitions.length > 0 && <TransitionLines transitions={detail.transitions} />}

@@ -160,6 +160,7 @@ export interface IngesterConnection {
 	firstMessageAt:string | null
 	lastMessageAt:string | null
 	lastSeenAt:string
+	state:string
 	endedAt:string | null
 	endedBy:string
 	durationSeconds:number | null
