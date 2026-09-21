@@ -140,6 +140,8 @@ export interface IngesterRatePoint {
 	eventsPerSec:number | null
 	framesPerSec:number | null
 	meanExcessMs:number | null
+	meanProcessMs:number | null
+	meanIdleMs:number | null
 	symbols:number | null
 }
 

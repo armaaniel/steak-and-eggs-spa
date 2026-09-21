@@ -23,6 +23,8 @@ const RateTooltip = ({ active, payload }: TooltipProps) => {
       <p>{point.framesPerSec?.toFixed(1) ?? '-'} frames/sec</p>
       <p>{point.eventsPerSec?.toFixed(1) ?? '-'} events/sec</p>
       <p>{point.meanExcessMs === null ? '-' : `${Math.round(point.meanExcessMs).toLocaleString()} ms mean lag`}</p>
+      <p>{point.meanProcessMs === null ? '-' : `${point.meanProcessMs.toFixed(2)} ms process/frame`}</p>
+      <p>{point.meanIdleMs === null ? '-' : `${point.meanIdleMs.toFixed(2)} ms idle/frame`}</p>
       <p>{point.symbols ?? '-'} symbols</p>
     </div>
   )

@@ -31,6 +31,8 @@ const GET_INGESTER = gql`
       eventsPerSec
       framesPerSec
       meanExcessMs
+      meanProcessMs
+      meanIdleMs
       symbols
     }
     ingesterTransitions(from: $from, to: $to) {
