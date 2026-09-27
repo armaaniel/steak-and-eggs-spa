@@ -11,6 +11,7 @@ interface Props {
 
 interface Mark {
   t: number
+  published: number | null
   expected: number | null
   delivered: number | null
   shortfall: [number, number] | null
@@ -57,7 +58,7 @@ const CableTooltip = ({ active, payload }: TooltipProps) => {
     <div className="lr-tooltip">
       <p className="lr-tooltip-time">{new Date(row.at).toLocaleTimeString()}</p>
       <p>
-        <strong>{count(row.published)}</strong> published<span className="lr-dim"> · {count(row.clients)} of {count(row.peakClients)} reporting</span>
+        <strong>{rate(mark.published)}</strong> published
       </p>
       <p>
         <span className="lr-key lr-key-2" />
@@ -65,7 +66,7 @@ const CableTooltip = ({ active, payload }: TooltipProps) => {
       </p>
       <p>
         <span className="lr-key lr-key-1" />
-        <strong>{rate(mark.delivered)}</strong> delivered<span className="lr-dim"> · {count(row.received)} frames</span>
+        <strong>{rate(mark.delivered)}</strong> received<span className="lr-dim"> · {count(row.received)} frames</span>
       </p>
       {dropped !== null && (
         <p><strong>{dropped.toLocaleString()}</strong> dropped</p>
@@ -109,7 +110,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
     const previousAt = times[index - 1]
 
     if (previousAt !== undefined && t - previousAt > gapMs) {
-      series.push({ t: previousAt + 1, expected: null, delivered: null, shortfall: null, p50Lag: null, p99Lag: null, lagBand: null, cpuAvg: null, cpuBand: null, row: null })
+      series.push({ t: previousAt + 1, published: null, expected: null, delivered: null, shortfall: null, p50Lag: null, p99Lag: null, lagBand: null, cpuAvg: null, cpuBand: null, row: null })
     }
 
     const point = cpuByTime.get(Math.floor(t / 60000) * 60000)
@@ -119,6 +120,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
 
     series.push({
       t,
+      published: row.published === null ? null : row.published / bucketSeconds,
       expected,
       delivered,
       shortfall: expected !== null && delivered !== null ? [delivered, expected] : null,
@@ -195,7 +197,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
           <table className="lr-table">
             <thead>
               <tr>
-                <th>Bucket</th><th>Published</th><th>Reporting</th><th>Expected</th><th>Delivered</th><th>Dropped</th>
+                <th>Bucket</th><th>Published</th><th>Reporting</th><th>Expected</th><th>Received</th><th>Dropped</th>
                 <th>p50 lag</th><th>p99 lag</th>
               </tr>
             </thead>
@@ -228,7 +230,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
                 <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
                 <Area type="monotone" dataKey="shortfall" stroke="none" fill="var(--dc-series-2)" fillOpacity={0.1} legendType="none" tooltipType="none" activeDot={false} isAnimationActive={false} />
                 <Line type="monotone" dataKey="expected" name="expected" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('fanout')} isAnimationActive={false} />
-                <Line type="monotone" dataKey="delivered" name="delivered" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('fanout')} isAnimationActive={false} />
+                <Line type="monotone" dataKey="delivered" name="received" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('fanout')} isAnimationActive={false} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -287,7 +289,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
           <p className="lr-stat-value">{totals.expected.toLocaleString()}</p>
         </div>
         <div className="lr-stat">
-          <p className="lr-stat-label">Delivered</p>
+          <p className="lr-stat-label">Received</p>
           <p className="lr-stat-value">{totals.delivered.toLocaleString()}</p>
         </div>
         <div className="lr-stat">
