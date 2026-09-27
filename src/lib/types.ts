@@ -196,7 +196,6 @@ export interface LoadCompareRow {
 	clientP99:number
 	serverP50:number
 	serverP99:number
-	queueP99:number
 }
 
 export interface CableRunSummary {

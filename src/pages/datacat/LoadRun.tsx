@@ -31,7 +31,6 @@ const GET_LOAD_COMPARE = gql`
       clientP99
       serverP50
       serverP99
-      queueP99
     }
   }
 `

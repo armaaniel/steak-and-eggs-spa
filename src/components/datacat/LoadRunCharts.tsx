@@ -63,8 +63,9 @@ const RunTooltip = ({ active, payload }: TooltipProps) => {
         <span className="lr-key lr-key-server" />
         <strong>{ms(row.serverP99)}</strong> server p99<span className="lr-dim"> · p50 {ms(row.serverP50)}</span>
       </p>
-      <p><strong>{ms(row.queueP99)}</strong> queued<span className="lr-dim"> (p99 client − p99 server)</span></p>
-      <p><strong>{row.gap.toLocaleString()}</strong> untraced<span className="lr-dim"> · {row.errors.toLocaleString()} errors</span></p>
+      {(row.gap > 0 || row.errors > 0) && (
+        <p><strong>{row.gap.toLocaleString()}</strong> untraced<span className="lr-dim"> · {row.errors.toLocaleString()} errors</span></p>
+      )}
       {mark.cpuAvg !== null && (
         <p><strong>{mark.cpuAvg.toFixed(1)}%</strong> cpu<span className="lr-dim">{mark.cpuBand ? ` · ${mark.cpuBand[0].toFixed(1)}–${mark.cpuBand[1].toFixed(1)} range` : ''}</span></p>
       )}
@@ -187,7 +188,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
             <thead>
               <tr>
                 <th>Bucket</th><th>rps</th><th>Sent</th><th>Traced</th><th>Untraced</th><th>Errors</th>
-                <th>Client p50</th><th>Client p99</th><th>Server p50</th><th>Server p99</th><th>Queued p99</th>
+                <th>Client p50</th><th>Client p99</th><th>Server p50</th><th>Server p99</th>
               </tr>
             </thead>
             <tbody>
@@ -203,7 +204,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
                   <td>{Math.round(row.clientP99).toLocaleString()}</td>
                   <td>{Math.round(row.serverP50).toLocaleString()}</td>
                   <td>{Math.round(row.serverP99).toLocaleString()}</td>
-                  <td>{Math.round(row.queueP99).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
