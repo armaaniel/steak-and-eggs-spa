@@ -14,7 +14,7 @@ interface Mark {
   expected: number | null
   delivered: number | null
   shortfall: [number, number] | null
-  meanLag: number | null
+  p50Lag: number | null
   p99Lag: number | null
   lagBand: [number, number] | null
   cpuAvg: number | null
@@ -71,7 +71,7 @@ const CableTooltip = ({ active, payload }: TooltipProps) => {
         <p><strong>{dropped.toLocaleString()}</strong> dropped</p>
       )}
       {mark.p99Lag !== null && (
-        <p><strong>{ms(mark.p99Lag)}</strong> lag p99<span className="lr-dim"> · mean {ms(mark.meanLag)}</span></p>
+        <p><strong>{ms(mark.p99Lag)}</strong> lag p99<span className="lr-dim"> · p50 {ms(mark.p50Lag)}</span></p>
       )}
       {mark.cpuAvg !== null && (
         <p><strong>{mark.cpuAvg.toFixed(1)}%</strong> cpu<span className="lr-dim">{mark.cpuBand ? ` · ${mark.cpuBand[0].toFixed(1)}–${mark.cpuBand[1].toFixed(1)} range` : ''}</span></p>
@@ -100,7 +100,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
 
   const cpuByTime = new Map(cpu.map((point) => [new Date(point.at).getTime(), point]))
   const hasCpu = cpu.some((point) => point.average !== null)
-  const hasLag = rows.some((row) => row.meanLagMs !== null || row.p99LagMs !== null)
+  const hasLag = rows.some((row) => row.p50LagMs !== null || row.p99LagMs !== null)
 
   const series: Mark[] = []
 
@@ -109,22 +109,22 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
     const previousAt = times[index - 1]
 
     if (previousAt !== undefined && t - previousAt > gapMs) {
-      series.push({ t: previousAt + 1, expected: null, delivered: null, shortfall: null, meanLag: null, p99Lag: null, lagBand: null, cpuAvg: null, cpuBand: null, row: null })
+      series.push({ t: previousAt + 1, expected: null, delivered: null, shortfall: null, p50Lag: null, p99Lag: null, lagBand: null, cpuAvg: null, cpuBand: null, row: null })
     }
 
     const point = cpuByTime.get(Math.floor(t / 60000) * 60000)
     const expected = row.expected === null ? null : row.expected / bucketSeconds
     const delivered = row.received === null ? null : row.received / bucketSeconds
-    const bothLags = row.meanLagMs !== null && row.p99LagMs !== null
+    const bothLags = row.p50LagMs !== null && row.p99LagMs !== null
 
     series.push({
       t,
       expected,
       delivered,
       shortfall: expected !== null && delivered !== null ? [delivered, expected] : null,
-      meanLag: row.meanLagMs,
+      p50Lag: row.p50LagMs,
       p99Lag: row.p99LagMs,
-      lagBand: bothLags ? [row.meanLagMs!, row.p99LagMs!] : null,
+      lagBand: bothLags ? [row.p50LagMs!, row.p99LagMs!] : null,
       cpuAvg: point?.average ?? null,
       cpuBand: point && point.minimum !== null && point.maximum !== null ? [point.minimum, point.maximum] : null,
       row
@@ -135,7 +135,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
   const last = series.length - 1
   const tail = series[last]
   const spread = Math.max(...rows.map((row) => row.p99LagMs ?? 0))
-  const labelEnds = tail.meanLag !== null && tail.p99Lag !== null && Math.abs(tail.p99Lag - tail.meanLag) > spread * 0.08
+  const labelEnds = tail.p50Lag !== null && tail.p99Lag !== null && Math.abs(tail.p99Lag - tail.p50Lag) > spread * 0.08
 
   const totals = rows.reduce(
     (sum, row) => {
@@ -196,7 +196,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
             <thead>
               <tr>
                 <th>Bucket</th><th>Published</th><th>Reporting</th><th>Expected</th><th>Delivered</th><th>Dropped</th>
-                <th>Mean lag</th><th>p99 lag</th>
+                <th>p50 lag</th><th>p99 lag</th>
               </tr>
             </thead>
             <tbody>
@@ -208,7 +208,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
                   <td>{count(row.expected)}</td>
                   <td>{count(row.received)}</td>
                   <td>{row.expected === null || row.received === null ? '-' : (row.expected - row.received).toLocaleString()}</td>
-                  <td>{row.meanLagMs === null ? '-' : Math.round(row.meanLagMs).toLocaleString()}</td>
+                  <td>{row.p50LagMs === null ? '-' : Math.round(row.p50LagMs).toLocaleString()}</td>
                   <td>{row.p99LagMs === null ? '-' : Math.round(row.p99LagMs).toLocaleString()}</td>
                 </tr>
               ))}
@@ -246,7 +246,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
                     <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
                     <Area type="monotone" dataKey="lagBand" stroke="none" fill="var(--dc-series-2)" fillOpacity={0.1} legendType="none" tooltipType="none" activeDot={false} isAnimationActive={false} />
                     <Line type="monotone" dataKey="p99Lag" name="p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('lag')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
-                    <Line type="monotone" dataKey="meanLag" name="mean" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('lag')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
+                    <Line type="monotone" dataKey="p50Lag" name="p50" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('lag')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>

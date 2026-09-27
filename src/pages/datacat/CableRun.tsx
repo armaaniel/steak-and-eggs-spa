@@ -26,7 +26,7 @@ const GET_CABLE_COMPARE = gql`
       clients
       expected
       peakClients
-      meanLagMs
+      p50LagMs
       p99LagMs
     }
   }

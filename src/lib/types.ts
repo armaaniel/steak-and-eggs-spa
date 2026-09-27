@@ -213,7 +213,7 @@ export interface CableCompareRow {
 	clients:number | null
 	expected:number | null
 	peakClients:number | null
-	meanLagMs:number | null
+	p50LagMs:number | null
 	p99LagMs:number | null
 }
 
