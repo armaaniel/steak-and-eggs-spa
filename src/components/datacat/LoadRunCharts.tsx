@@ -174,7 +174,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
       <div className="lr-head">
         <div>
           <h3 className="lr-title">{route}</h3>
-          <p className="lr-subtitle">{step}s buckets · shaded band is queue delay, the p99 the client waited that Rails never saw</p>
+          <p className="lr-subtitle">{step}s buckets</p>
         </div>
         <button type="button" className="lr-toggle" onClick={() => setShowTable(!showTable)}>
           {showTable ? 'Show charts' : 'Show table'}

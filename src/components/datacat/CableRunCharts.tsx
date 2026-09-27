@@ -185,7 +185,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
       <div className="lr-head">
         <div>
           <h3 className="lr-title">PriceChannel broadcast</h3>
-          <p className="lr-subtitle">{bucketSeconds}s buckets · shaded band is the fan-out shortfall, frames the publisher sent that no client reported</p>
+          <p className="lr-subtitle">{bucketSeconds}s buckets</p>
         </div>
         <button type="button" className="lr-toggle" onClick={() => setShowTable(!showTable)}>
           {showTable ? 'Show charts' : 'Show table'}
