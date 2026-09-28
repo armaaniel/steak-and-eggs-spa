@@ -2,6 +2,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import CableRunCharts from '../../components/datacat/CableRunCharts'
 import LoadNav from '../../components/datacat/LoadNav'
+import Select from '../../components/datacat/Select'
 import useTransition from '../../hooks/useTransition.ts'
 import type { CableRunSummary, CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -85,6 +86,8 @@ const CableRun = () => {
     return `${started} · ${seconds}s · ${run.samples.toLocaleString()}`
   }
 
+  const runOptions = runs.map((run) => ({ value: run.runId, label: label(run) }))
+
   if (runsError) {
     return (
       <div className="positions-container loaded">
@@ -104,25 +107,7 @@ const CableRun = () => {
   return (
     <>
       <div className="lr-header">
-        <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
-          <label htmlFor="run-select" className="status-label">
-            Run
-          </label>
-
-          <select id="run-select" value={current?.runId || ''} onChange={(e) => setSelected(e.target.value)}>
-            {runs.map((run) => (
-              <option key={run.runId} value={run.runId}>
-                {label(run)}
-              </option>
-            ))}
-          </select>
-
-          <div className="select-svg-div">
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
+        <Select id="run-select" label="Run" value={current?.runId || ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
 
         <LoadNav />
 

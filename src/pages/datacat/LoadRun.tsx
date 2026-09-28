@@ -2,6 +2,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import LoadRunCharts from '../../components/datacat/LoadRunCharts'
 import LoadNav from '../../components/datacat/LoadNav'
+import Select from '../../components/datacat/Select'
 import useTransition from '../../hooks/useTransition.ts'
 import type { LoadRunSummary, LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -58,11 +59,11 @@ interface CompareData {
   loadCompare: LoadCompareRow[]
 }
 
-const steps = [
-  { step: 5, label: '5s buckets' },
-  { step: 15, label: '15s buckets' },
-  { step: 30, label: '30s buckets' },
-  { step: 60, label: '1m buckets' },
+const stepOptions = [
+  { value: 5, label: '5s buckets' },
+  { value: 15, label: '15s buckets' },
+  { value: 30, label: '30s buckets' },
+  { value: 60, label: '1m buckets' },
 ]
 
 const keyOf = (run: LoadRunSummary) => `${run.runId}|${run.route}`
@@ -94,6 +95,8 @@ const LoadRun = () => {
   const label = (run: LoadRunSummary) =>
     `${new Date(run.startedAt).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${run.route} · ${run.samples.toLocaleString()}`
 
+  const runOptions = runs.map((run) => ({ value: keyOf(run), label: label(run) }))
+
   if (runsError) {
     return (
       <div className="positions-container loaded">
@@ -113,45 +116,9 @@ const LoadRun = () => {
   return (
     <>
       <div className="lr-header">
-        <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
-          <label htmlFor="run-select" className="status-label">
-            Run
-          </label>
+        <Select id="run-select" label="Run" value={current ? keyOf(current) : ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
 
-          <select id="run-select" value={current ? keyOf(current) : ''} onChange={(e) => setSelected(e.target.value)}>
-            {runs.map((run) => (
-              <option key={keyOf(run)} value={keyOf(run)}>
-                {label(run)}
-              </option>
-            ))}
-          </select>
-
-          <div className="select-svg-div">
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
-
-        <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
-          <label htmlFor="step-select" className="status-label">
-            Bucket
-          </label>
-
-          <select id="step-select" value={step} onChange={(e) => setStep(Number(e.target.value))}>
-            {steps.map((option) => (
-              <option key={option.step} value={option.step}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <div className="select-svg-div">
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
+        <Select id="step-select" label="Bucket" value={step} onChange={(value) => setStep(Number(value))} options={stepOptions} loaded={isLoaded} />
 
         <LoadNav />
 

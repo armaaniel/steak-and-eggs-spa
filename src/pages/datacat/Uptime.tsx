@@ -3,6 +3,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import UptimeChart from '../../components/datacat/UptimeChart'
 import SyntheticRunRow from '../../components/datacat/SyntheticRunRow'
+import Select from '../../components/datacat/Select'
 import useTransition from '../../hooks/useTransition.ts'
 import { toBucketLabel } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/uptime.css'
@@ -42,6 +43,7 @@ interface RunsData {
 }
 
 const ranges = ['1h', '12h', '24h', '7d', '14d', '30d']
+const rangeOptions = ranges.map((range) => ({ value: range, label: range }))
 
 function Uptime() {
   const { detail, setDetail } = useOutletContext<OutletContextType>()
@@ -78,25 +80,7 @@ function Uptime() {
   return (
     <>
       <div className="uptime-header">
-        <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
-          <label htmlFor="range-select" className="status-label">
-            Range
-          </label>
-
-          <select id="range-select" value={range} onChange={(e) => changeRange(e.target.value)}>
-            {ranges.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-
-          <div className="select-svg-div">
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
+        <Select id="range-select" label="Range" value={range} onChange={changeRange} options={rangeOptions} loaded={isLoaded} />
       </div>
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>

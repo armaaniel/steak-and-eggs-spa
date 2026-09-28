@@ -3,6 +3,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
 import EndpointNav from '../../components/datacat/EndpointNav'
+import Select from '../../components/datacat/Select'
 import useEndpoint from '../../hooks/useEndpoint'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns } from '../../lib/traceColumns'
@@ -47,32 +48,14 @@ function Endpoint() {
   const traceList = data?.traceList || []
   const statuses = [...new Set(traceList.map((trace) => trace.status))]
   const filteredTraces = statusFilter === 'all' ? traceList : traceList.filter((trace) => String(trace.status) === statusFilter)
+  const statusOptions = [{ value: 'all', label: 'All' }, ...statuses.map((status) => ({ value: status, label: String(status) }))]
 
   return (
     <>
       <div className="endpoint-nav-div">
         <EndpointNav method={method} path={path} endpoint={endpoint} showCache={usedRedis} apiBoolean={usedApi} />
 
-        <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
-          <label htmlFor="status-select" className="status-label">
-            Status
-          </label>
-
-          <select id="status-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="all">All</option>
-            {statuses.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-
-          <div className="select-svg-div">
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
-        </div>
+        <Select id="status-select" label="Status" value={statusFilter} onChange={setStatusFilter} options={statusOptions} loaded={isLoaded} />
       </div>
 
       <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
