@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { toRange } from '../../lib/utils.ts'
+import useClickOutside from '../../hooks/useClickOutside'
 import '../../stylesheets/datacat/daterange.css'
 import type { DateRange } from '../../lib/types.ts'
 
@@ -145,18 +146,7 @@ const DateRangePicker = ({ preset, range, loaded, onApply }: Props) => {
   const [cursor, setCursor] = useState(() => addMonths(range.to, 0))
   const panelRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!open) return
-
-    function handleClickOutside(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open])
+  useClickOutside(panelRef, () => setOpen(false), open)
 
   const draftFrom = toMilliseconds(draft.startDate, draft.startTime)
   const draftTo = toMilliseconds(draft.endDate, draft.endTime)

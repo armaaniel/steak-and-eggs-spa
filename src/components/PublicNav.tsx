@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import Logo from './Logo'
 import Searchbar from './Searchbar'
+import useClickOutside from '../hooks/useClickOutside'
 import type { DemoContext } from '../layouts/Public'
 
 interface Props {
@@ -16,15 +17,7 @@ const PublicNav = ({ showSearch = true, demo }: Props) => {
   const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'))
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setDropdownOpen(false))
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'

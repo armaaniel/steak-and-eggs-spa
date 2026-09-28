@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import Searchbar from './Searchbar'
 import Logo from './Logo'
@@ -6,6 +6,7 @@ import ChangePasswordModal from './ChangePasswordModal'
 import DeleteAccountModal from './DeleteAccountModal'
 import { resetConsumer } from '../lib/consumer.ts'
 import { useAuth } from '../lib/auth'
+import useClickOutside from '../hooks/useClickOutside'
 
 
 function Navbar() {
@@ -17,15 +18,7 @@ function Navbar() {
   const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'))
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setDropdownOpen(false))
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'

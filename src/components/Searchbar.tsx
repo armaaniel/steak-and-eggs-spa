@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import '../stylesheets/searchbar.css'
 import type { Error } from '../lib/types.ts'
 import apiFetch from '../lib/apiFetch'
+import useClickOutside from '../hooks/useClickOutside'
 
 interface SearchResults {
   created_at: string
@@ -30,19 +31,7 @@ const Searchbar = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)
   const handleSelect = () => setSearchTerm('')
 
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClick)
-
-    return () => {
-      document.removeEventListener('mousedown', handleClick)
-    }
-  }, [])
+  useClickOutside(searchRef, () => setShowResults(false))
 
   useEffect(() => {
     if (debouncedSearchTerm) {
