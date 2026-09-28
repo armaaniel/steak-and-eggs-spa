@@ -25,6 +25,18 @@ interface OrderData {
   value: string
 }
 
+const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
+  <div className="bs-containers">
+    <div className="bs-width-wrapper">
+      <p>{label}</p>
+    </div>
+
+    <div>
+      <p>{value}</p>
+    </div>
+  </div>
+)
+
 const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, symbol }: Props) => {
 
   const { tryDemo, isSubmitting: isDemoSubmitting, error: demoError } = demo
@@ -133,15 +145,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
           </div>
 
           <div className="bs-gap-container">
-            <div className="bs-containers">
-              <div className="bs-width-wrapper">
-                <p>Order Type</p>
-              </div>
-
-              <div>
-                <p>Market {isBuy ? 'Buy' : 'Sell'}</p>
-              </div>
-            </div>
+            <Row label="Order Type" value={`Market ${isBuy ? 'Buy' : 'Sell'}`} />
 
             <div className="bs-containers">
               <div className="bs-shares-wrapper">
@@ -153,15 +157,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
               </div>
             </div>
 
-            <div className="bs-containers">
-              <div className="bs-width-wrapper">
-                <p>Estimated {isBuy ? 'Cost' : 'Value'}</p>
-              </div>
-
-              <div>
-                <p>{price === null ? '$0.00 USD' : `$${toCurrency(estimatedCost)} USD`}</p>
-              </div>
-            </div>
+            <Row label={`Estimated ${isBuy ? 'Cost' : 'Value'}`} value={price === null ? '$0.00 USD' : `$${toCurrency(estimatedCost)} USD`} />
 
             <div className="bs-next-parent">
 							{isAuthenticated ? (
@@ -209,35 +205,11 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
           </div>
 
           <div className="bs-gap-container">
-            <div className="bs-containers">
-              <div className="bs-width-wrapper">
-                <p>Order</p>
-              </div>
+            <Row label="Order" value={`Market ${isBuy ? 'Buy' : 'Sell'} ${symbol}`} />
 
-              <div>
-                <p>Market {isBuy ? 'Buy' : 'Sell'} {symbol}</p>
-              </div>
-            </div>
+            <Row label="Shares" value={parseFloat(quantity).toLocaleString()} />
 
-            <div className="bs-containers">
-              <div className="bs-width-wrapper">
-                <p>Shares</p>
-              </div>
-
-              <div>
-                <p>{parseFloat(quantity).toLocaleString()}</p>
-              </div>
-            </div>
-
-            <div className="bs-containers">
-              <div className="bs-width-wrapper">
-                <p>Estimated {isBuy ? 'Cost' : 'Value'}</p>
-              </div>
-
-              <div>
-                <p> ${toCurrency(estimatedCost)} USD </p>
-              </div>
-            </div>
+            <Row label={`Estimated ${isBuy ? 'Cost' : 'Value'}`} value={`$${toCurrency(estimatedCost)} USD`} />
             <hr className="bs-line" />
 
             <form onSubmit={handleSubmit}>
@@ -260,45 +232,13 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
             <p>Today at {time}</p>
           </div>
 
-          <div className="bs-containers">
-            <div className="bs-width-wrapper">
-              <p>Order</p>
-            </div>
+          <Row label="Order" value={`Market ${isBuy ? 'Buy' : 'Sell'} ${orderData.symbol}`} />
 
-            <div>
-              <p>Market {isBuy ? 'Buy' : 'Sell'} {orderData.symbol}</p>
-            </div>
-          </div>
+          <Row label={isBuy ? 'Cost' : 'Value'} value={`$${toCurrency(orderData.value)} USD`} />
 
-          <div className="bs-containers">
-            <div className="bs-width-wrapper">
-              <p>{isBuy ? 'Cost' : 'Value'}</p>
-            </div>
+          <Row label="Shares" value={orderData.quantity.toLocaleString()} />
 
-            <div>
-              <p> ${toCurrency(orderData.value)} USD </p>
-            </div>
-          </div>
-
-          <div className="bs-containers">
-            <div className="bs-width-wrapper">
-              <p>Shares</p>
-            </div>
-
-            <div>
-              <p>{orderData.quantity.toLocaleString()}</p>
-            </div>
-          </div>
-
-          <div className="bs-containers">
-            <div className="bs-width-wrapper">
-              <p>Price Per Share</p>
-            </div>
-
-            <div>
-              <p> ${toCurrency(orderData.market_price)} USD </p>
-            </div>
-          </div>
+          <Row label="Price Per Share" value={`$${toCurrency(orderData.market_price)} USD`} />
 
           <hr className="bs-line" />
 
@@ -317,25 +257,9 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
             <p>Today at {time}</p>
           </div>
 
-          <div className="bs-containers">
-            <div className="bs-width-wrapper">
-              <p>Order</p>
-            </div>
+          <Row label="Order" value={`Market ${isBuy ? 'Buy' : 'Sell'} ${symbol}`} />
 
-            <div>
-              <p>Market {isBuy ? 'Buy' : 'Sell'} {symbol}</p>
-            </div>
-          </div>
-
-          <div className="bs-containers">
-            <div className="bs-width-wrapper">
-              <p>Shares</p>
-            </div>
-
-            <div>
-              <p>{quantity}</p>
-            </div>
-          </div>
+          <Row label="Shares" value={quantity} />
 
           <div className="bs-containers">
             <div className="bs-width-wrapper">
