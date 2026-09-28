@@ -159,3 +159,15 @@ export const toPnlCurrency = (value: number | string | null | undefined) => {
 export const toRouteLabel = (route:string) => {
 	return route.split('/').map((segment) => segment === 'symbol' ? ':symbol' : segment).join('/')
 }
+
+export const toChange = (current: string | number | null, baseline: number | null) => {
+  const decimals = baseline !== null && Math.abs(baseline) < 1 ? 4 : 2
+  const percentChange = toPercent(current, baseline, decimals)
+  const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
+  const change = baseline !== null && current !== null ? Number(current) - baseline : null
+  const label = change === null || isNaN(change) || percentChange === null
+    ? null
+    : `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change), decimals)} (${percentChange})`
+
+  return { label, isPositive, decimals }
+}

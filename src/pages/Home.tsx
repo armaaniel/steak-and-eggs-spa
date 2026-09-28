@@ -5,7 +5,7 @@ import useStoredRange from '../hooks/useStoredRange'
 import PositionsTable from '../components/PositionsTable'
 import FundsButton from '../components/FundsButton'
 import { useEffect, useMemo, useState } from 'react'
-import { toPortfolio, toCurrency, toPercent } from '../lib/utils.ts'
+import { toPortfolio, toChange } from '../lib/utils.ts'
 import { useThrottledCallback } from 'use-debounce'
 import type { Positions, ChartData } from '../lib/types.ts'
 import useApi from '../hooks/useApi'
@@ -76,16 +76,8 @@ function Home() {
 	}, [chartData, chartRange])
 
 	const baseline = visibleChart?.[0]?.value ?? null
-	const decimals = baseline !== null && Math.abs(baseline) < 1 ? 4 : 2
 	const current = hoveredPoint?.value ?? portfolio?.aum ?? null
-
-	const percentChange = toPercent(current, baseline, decimals)
-	const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
-
-	const change = baseline !== null && current !== null ? Number(current) - baseline : null
-	const changeLabel = change === null || isNaN(change) || percentChange === null
-		? null
-		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change), decimals)} (${percentChange})`
+	const { label: changeLabel, isPositive, decimals } = toChange(current, baseline)
 
   const updatePortfolio = useThrottledCallback(
     () => {

@@ -8,7 +8,7 @@ import PositionTable from '../components/PositionTable'
 import BuySell from '../components/BuySell'
 import NotFoundTwo from '../components/NotFoundTwo'
 import { useDemo } from '../layouts/Public'
-import { toReadable, toCurrency, toPercent } from '../lib/utils.ts'
+import { toReadable, toCurrency, toChange } from '../lib/utils.ts'
 import apiFetch from '../lib/apiFetch'
 import useApi from '../hooks/useApi'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
@@ -111,16 +111,8 @@ function Stocks() {
 	}
 
 	const baseline = chartData?.[0]?.value ?? null
-	const decimals = baseline !== null && Math.abs(baseline) < 1 ? 4 : 2
 	const current = hoveredPoint?.value ?? price
-
-	const percentChange = toPercent(current, baseline, decimals)
-	const isPositive = Boolean(percentChange && percentChange.startsWith('+'))
-
-	const change = baseline !== null && current !== null ? Number(current) - baseline : null
-	const changeLabel = change === null || isNaN(change) || percentChange === null
-		? null
-		: `${change >= 0 ? '+' : '-'}$${toCurrency(Math.abs(change), decimals)} (${percentChange})`
+	const { label: changeLabel, isPositive, decimals } = toChange(current, baseline)
 	
 	const { data: companyData } = useApi<CompanyData>(`/stocks/${symbol}/companydata`,
 	{ market_cap: 'N/A', description: 'N/A'})
