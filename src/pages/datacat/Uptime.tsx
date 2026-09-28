@@ -6,7 +6,7 @@ import SyntheticRunRow from '../../components/datacat/SyntheticRunRow'
 import useTransition from '../../hooks/useTransition.ts'
 import { toBucketLabel } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/uptime.css'
-import type { SyntheticBucket, SyntheticRun, OutletContextType } from '../../lib/types.ts'
+import type { SyntheticBucket, SyntheticRun, OutletContextType, Trace } from '../../lib/types.ts'
 
 const GET_BUCKETS = gql`
   query getSyntheticBuckets($range: String!) {
@@ -44,7 +44,9 @@ interface RunsData {
 const ranges = ['1h', '12h', '24h', '7d', '14d', '30d']
 
 function Uptime() {
-  const { selectedTrace, setSelectedTrace } = useOutletContext<OutletContextType>()
+  const { detail, setDetail } = useOutletContext<OutletContextType>()
+  const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
+  const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const [range, setRange] = useState('1h')
   const [selectedBucket, setSelectedBucket] = useState<SyntheticBucket | null>(null)
@@ -113,7 +115,7 @@ function Uptime() {
           ) : (
             <div className="uptime-runs">
               {runs.map((run) => (
-                <SyntheticRunRow key={run.runId} run={run} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} />
+                <SyntheticRunRow key={run.runId} run={run} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} />
               ))}
             </div>
           )}

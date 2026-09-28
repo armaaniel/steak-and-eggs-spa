@@ -26,7 +26,7 @@ interface TracesData {
 interface Props {
   run: SyntheticRun
   selectedTrace: Trace | null
-  setSelectedTrace: React.Dispatch<React.SetStateAction<Trace | null>>
+  setSelectedTrace: (trace: Trace) => void
 }
 
 const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {

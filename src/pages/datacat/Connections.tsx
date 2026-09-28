@@ -22,7 +22,9 @@ interface ConnectionsData {
 }
 
 function Connections() {
-  const { selectedConnection, setSelectedConnection } = useOutletContext<OutletContextType>()
+  const { detail, setDetail } = useOutletContext<OutletContextType>()
+  const selectedConnection = detail?.kind === 'cable' ? detail.connection : null
+  const selectConnection = (connection: ConnectionWithID) => setDetail({ kind: 'cable', connection })
 
   const recordsPerPage = 18
 
@@ -44,7 +46,7 @@ function Connections() {
 
   return (
     <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-      <TraceTable traceData={connections} columns={columns} selectedTrace={selectedConnection} setSelectedTrace={setSelectedConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage={emptyMessage} />
+      <TraceTable traceData={connections} columns={columns} selectedTrace={selectedConnection} setSelectedTrace={selectConnection} recordsPerPage={recordsPerPage} error={error} emptyMessage={emptyMessage} />
     </div>
   )
 }

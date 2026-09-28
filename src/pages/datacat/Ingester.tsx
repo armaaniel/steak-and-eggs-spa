@@ -109,13 +109,13 @@ const connectionColumns: Column<ConnectionRow>[] = [
 ]
 
 function Ingester() {
-  const { selectedIngesterDetail, setSelectedIngesterDetail } = useOutletContext<OutletContextType>()
+  const { detail, setDetail } = useOutletContext<OutletContextType>()
 
   const [preset, setPreset] = useState<number | 'custom'>(24)
   const [range, setRange] = useState<DateRange>(() => toRange(24))
 
   const applyWindow = (nextPreset: number | 'custom', nextRange: DateRange) => {
-    setSelectedIngesterDetail(null)
+    setDetail(null)
     setPreset(nextPreset)
     setRange(nextRange)
   }
@@ -138,7 +138,7 @@ function Ingester() {
   const connections: ConnectionRow[] = (data?.ingesterConnections || []).map((connection) => ({ ...connection, id: connection.connectionId }))
 
   const selectBoot = (boot: BootRow) =>
-    setSelectedIngesterDetail({
+    setDetail({
       kind: 'boot',
       boot,
       transitions: transitions.filter((transition) => transition.bootId === boot.bootId),
@@ -146,14 +146,14 @@ function Ingester() {
     })
 
   const selectConnection = (connection: ConnectionRow) =>
-    setSelectedIngesterDetail({
+    setDetail({
       kind: 'connection',
       connection,
       transitions: transitions.filter((transition) => transition.connectionId === connection.connectionId),
     })
 
-  const selectedBoot = selectedIngesterDetail?.kind === 'boot' ? boots.find((boot) => boot.bootId === selectedIngesterDetail.boot.bootId) || null : null
-  const selectedConnection = selectedIngesterDetail?.kind === 'connection' ? connections.find((row) => row.connectionId === selectedIngesterDetail.connection.connectionId) || null : null
+  const selectedBoot = detail?.kind === 'boot' ? boots.find((boot) => boot.bootId === detail.boot.bootId) || null : null
+  const selectedConnection = detail?.kind === 'connection' ? connections.find((row) => row.connectionId === detail.connection.connectionId) || null : null
 
   return (
     <>

@@ -65,13 +65,14 @@ export interface ConnectionWithID extends Connection {
   id: number
 }
 
+export type Detail =
+	| {kind:'trace'; trace:Trace}
+	| {kind:'cable'; connection:ConnectionWithID}
+	| IngesterDetail
+
 export interface OutletContextType {
-	selectedTrace: Trace | null
-	setSelectedTrace: React.Dispatch<React.SetStateAction<Trace | null>>
-	selectedConnection: ConnectionWithID | null
-	setSelectedConnection: React.Dispatch<React.SetStateAction<ConnectionWithID | null>>
-	selectedIngesterDetail: IngesterDetail | null
-	setSelectedIngesterDetail: React.Dispatch<React.SetStateAction<IngesterDetail | null>>
+	detail: Detail | null
+	setDetail: React.Dispatch<React.SetStateAction<Detail | null>>
 	setLoaded: React.Dispatch<React.SetStateAction<boolean>>
 	usedRedis: boolean
 	usedApi: boolean

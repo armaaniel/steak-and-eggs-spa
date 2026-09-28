@@ -30,7 +30,9 @@ interface TraceData {
 }
 
 function Endpoint() {
-  const { selectedTrace, setSelectedTrace, usedRedis, usedApi } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, usedRedis, usedApi } = useOutletContext<OutletContextType>()
+  const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
+  const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
@@ -74,7 +76,7 @@ function Endpoint() {
       </div>
 
       <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-        <TraceTable traceData={filteredTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={setSelectedTrace} recordsPerPage={recordsPerPage} error={error} />
+        <TraceTable traceData={filteredTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
       </div>
     </>
   )
