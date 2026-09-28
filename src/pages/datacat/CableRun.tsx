@@ -34,7 +34,7 @@ const GET_CABLE_COMPARE = gql`
 
 const GET_RUN_METRICS = gql`
   query getRunMetrics($runId: ID!) {
-    runMetrics(runId: $runId) {
+    runMetrics(runId: $runId, kind: "cable") {
       at
       minimum
       maximum
