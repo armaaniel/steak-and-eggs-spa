@@ -7,9 +7,6 @@
 	flex:1;
 }
 
-/* Absolute so it stays out of .ls-desktop's centring. The 8px padding is the round
-   hover target; left is set by eye rather than derived from the navbar's 1rem, so the
-   icon sits inboard of the logo above it. */
 .ls-back {
 	position:absolute;
 	top:0;
@@ -150,9 +147,6 @@
 	color:var(--text-muted);
 	font-family: var(--font-body);
 }
-
-/* Rules drawn as pseudo-elements either side of the label, so the "or" keeps the
-   container's own background instead of needing one painted behind it. */
 
 .ls-or::before,
 .ls-or::after {

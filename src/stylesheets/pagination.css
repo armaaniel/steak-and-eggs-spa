@@ -1,4 +1,3 @@
-/* Owned by PaginationControls. Always applied as the base class; callers extend via the className prop. */
 .pagination-container {
 	display:flex;
 	justify-content:space-evenly;

@@ -69,7 +69,7 @@ function Uptime() {
   const runs = runsData?.syntheticRuns || []
 
   const changeRange = (value: string) => {
-    setSelectedBucket(null) // the bucket boundaries move with the range, so the selection can't survive it
+    setSelectedBucket(null)
     setRange(value)
   }
 

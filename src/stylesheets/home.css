@@ -83,12 +83,10 @@
 	font-family: var(--font-body);
 }
 
-/* Third-party overrides: these style Recharts internals, not our own markup */
 .chart svg {
   outline: none
 }
 
-/* CSS wins over the SVG stroke attribute Recharts sets, so the line color lives with the tokens */
 .chart .recharts-line-curve {
 	stroke: var(--chart-line);
 }

@@ -10,8 +10,6 @@ interface TooltipProps {
   payload?: { payload: IngesterRatePoint }[]
 }
 
-// symbols ride in the tooltip rather than on the plot: a symbol count is not a
-// per-second rate, and a second y-scale to fit it would misstate both series
 const RateTooltip = ({ active, payload }: TooltipProps) => {
   if (!active || !payload?.length) return null
 

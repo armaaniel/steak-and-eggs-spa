@@ -28,8 +28,6 @@
 	box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px 0px, rgba(0, 0, 0, 0.1) 0px 3px 8px 0px;
 }
 
-/* The shadow lift above reads on a light page but disappears against a dark surface,
-   so dark mode gets the accent border instead — same cue as .nav-search-div:hover. */
 [data-theme="dark"] .add-withdraw-button:hover {
 	border-color:var(--accent-emphasis);
 }

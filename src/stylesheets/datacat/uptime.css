@@ -1,8 +1,3 @@
-/* Uptime's bar chart. Every bar is a meter: the track is one bucket of the probe
-   schedule, the fill is how many of that bucket's expected runs actually started.
-   Color comes from the reserved status set (--dc-status-*), never a series color,
-   and the legend names each state so it never rides on hue alone. */
-
 .uptime-header {
 	display:flex;
 	justify-content:end;
@@ -18,7 +13,7 @@
 	display:flex;
 	justify-content:space-between;
 	align-items:end;
-	column-gap:2px; /* the surface gap — what separates neighbouring bars */
+	column-gap:2px;
 	height:140px;
 }
 
@@ -31,7 +26,7 @@
 	height:100%;
 	padding:0;
 	border:none;
-	border-radius:4px 4px 0 0; /* rounded data-end, square at the baseline */
+	border-radius:4px 4px 0 0;
 	background-color:var(--dc-surface-2);
 	cursor:pointer;
 }
@@ -43,7 +38,7 @@
 
 .uptime-bar-fill {
 	width:100%;
-	min-height:3px; /* one run out of a 288-run bucket still has to be visible */
+	min-height:3px;
 	border-radius:4px 4px 0 0;
 }
 
@@ -76,8 +71,6 @@
 	opacity:1;
 }
 
-/* a centred tooltip on the end bars would hang off the card — anchor those to the edge.
-   Three deep on each side covers the 30-bar ranges, where the slots are narrowest. */
 .uptime-bar:nth-child(-n+3) .uptime-tooltip {
 	left:0;
 	transform:none;
@@ -197,7 +190,7 @@
 	row-gap:0.5rem;
 	max-height:0;
 	overflow:hidden;
-	padding-left:calc(10px + 0.75rem); /* lines the detail up with the status label, past the swatch */
+	padding-left:calc(10px + 0.75rem);
 	font-family: var(--font-ui);
 	font-size:14px;
 	color:var(--dc-text);
@@ -206,7 +199,7 @@
 }
 
 .uptime-run-details.open {
-	max-height:900px; /* clears the detail lines plus every request the probe script makes */
+	max-height:900px;
 	padding-bottom:0.5rem;
 	opacity:1;
 }
@@ -237,7 +230,6 @@
 	background-color:var(--dc-hover);
 }
 
-/* must come after :hover (equal specificity) so the row in the details panel stays marked while hovered */
 .uptime-request.selected {
 	background-color:var(--dc-surface-2);
 }

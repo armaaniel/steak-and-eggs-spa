@@ -65,7 +65,6 @@ const steps = [
   { step: 60, label: '1m buckets' },
 ]
 
-// a run and a route together are what the charts are scoped to, so they travel as one value
 const keyOf = (run: LoadRunSummary) => `${run.runId}|${run.route}`
 
 const LoadRun = () => {
@@ -76,7 +75,6 @@ const LoadRun = () => {
   const { error: runsError, data: runsData } = useQuery<RunsData>(GET_LOAD_RUNS)
 
   const runs = runsData?.loadRuns || []
-  // nothing is selected until the reader picks one; until then the newest run is the answer
   const current = runs.find((run) => keyOf(run) === selected) || runs[0] || null
 
   const { loading, error, data } = useQuery<CompareData>(GET_LOAD_COMPARE, {
@@ -93,8 +91,6 @@ const LoadRun = () => {
   const rows = data?.loadCompare || []
   const cpu = metricsData?.runMetrics || []
 
-  // a run is identified by when it started, so the date leads — but the full locale string
-  // spends its width on seconds and a four-digit year and pushes the count out of the box
   const label = (run: LoadRunSummary) =>
     `${new Date(run.startedAt).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${run.route} · ${run.samples.toLocaleString()}`
 
@@ -116,7 +112,6 @@ const LoadRun = () => {
 
   return (
     <>
-      {/* one filter row above everything it scopes — both selects re-render every panel */}
       <div className="lr-header">
         <div className={`status-div ${isLoaded ? 'loaded' : ''}`}>
           <label htmlFor="run-select" className="status-label">

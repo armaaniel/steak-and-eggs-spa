@@ -1,7 +1,3 @@
-/* The ingester page. Feed state uses the reserved status set (--dc-status-*); the two
-   throughput series use the categorical slots (--dc-series-*). The two never mix — a
-   status colour here always means feed health, never "the other line". */
-
 .ing-header {
 	display:flex;
 	justify-content:end;
@@ -30,7 +26,7 @@
 .ing-timeline {
 	display:flex;
 	border-radius:4px;
-	overflow:hidden; /* the end spans inherit the strip's rounded corners */
+	overflow:hidden;
 	background-color:var(--dc-surface-2);
 }
 
@@ -83,8 +79,6 @@
 
 .ing-chart {
 	height:220px;
-	/* recharts renders its legend as plain HTML and its ticks as SVG text, neither of which
-	   picks up a font on its own — the container hands both the same one the cards use */
 	font-family: var(--font-ui);
 }
 
@@ -120,5 +114,5 @@
 
 .ing-detail-value {
 	white-space:pre-wrap;
-	word-break:break-word; /* connection strings and exception text arrive unwrapped */
+	word-break:break-word;
 }

@@ -25,8 +25,6 @@
 	padding:0.25rem 0rem;
 }
 
-/* Empty/error state rows of the holdings table (data rows are .portfolio-row-two).
-   Previously borrowed DataCat's .portfolio-row, whose pinned-light hover leaked into dark mode. */
 .positions-state-row {
 	text-align:left;
 	font-family: var(--font-ui);

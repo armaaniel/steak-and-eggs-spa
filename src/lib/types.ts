@@ -233,8 +233,6 @@ export interface IngesterTransition {
 	detail:Record<string, unknown> | null
 }
 
-// One selection for the whole ingester page rather than three parallel ones. The page owns
-// the filtering, so each payload arrives self-contained and the panel just renders it.
 export type IngesterDetail =
 	| {kind:'boot'; boot:IngesterBoot; transitions:IngesterTransition[]; connections:IngesterConnection[]}
 	| {kind:'connection'; connection:IngesterConnection; transitions:IngesterTransition[]}

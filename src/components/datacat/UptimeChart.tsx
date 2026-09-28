@@ -7,9 +7,6 @@ interface Props {
   onSelect: (bucket: SyntheticBucket) => void
 }
 
-// A bucket is judged only on what it can be judged on. `completed` lags `started` across
-// bucket boundaries — a run that signs up at 2:59 tears down inside the next bucket — so a
-// bucket is never called incomplete for it; the tooltip reports the count and leaves it there.
 const bucketStatus = (bucket: SyntheticBucket) => {
   if (bucket.started === 0) return 'empty'
   if (bucket.failures > 0) return 'critical'

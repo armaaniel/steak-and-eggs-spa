@@ -1,5 +1,3 @@
-/* These pages sit inside the Public layout, whose chrome is already themed. The body
-   paints --page-bg / --text, so this sheet only needs to not fight it. */
 .privacy-main {
 	display:flex;
 	flex-direction:column;

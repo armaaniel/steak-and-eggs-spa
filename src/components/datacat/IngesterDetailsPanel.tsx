@@ -5,12 +5,8 @@ interface Props {
   detail: IngesterDetail
 }
 
-// detail payloads are written by the ingester and their shape varies by cause, so whatever
-// keys are present get printed rather than special-casing each one
 const toValue = (value: unknown) => (value !== null && typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value))
 
-// the query returns newest-first for scanning; inside a panel these are a narrative, so
-// they read forward. Copied rather than sorted in place — the array belongs to the page.
 const byTime = (a: { at: string }, b: { at: string }) => new Date(a.at).getTime() - new Date(b.at).getTime()
 
 const TransitionLines = ({ transitions }: { transitions: IngesterTransition[] }) => (

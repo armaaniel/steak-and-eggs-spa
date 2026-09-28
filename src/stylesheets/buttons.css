@@ -1,6 +1,3 @@
-/* The app's button system. Role classes (.btn-*) own identity — shape, font, colors, states.
-   Site classes own geometry only, written as .btn.<site> so they out-rank role rules
-   regardless of stylesheet import order. */
 .btn {
 	font-family: var(--font-ui);
 	font-weight:500;
@@ -33,9 +30,6 @@
 	background-color:var(--btn-secondary-hover);
 }
 
-/* Reads as .btn-secondary in light. In dark, --surface floats as a raised chip against
-   the near-black page, so the fill drops to --page-bg and the border carries the shape.
-   The :hover rule ties the dark rule on specificity (0,2,0), so it has to stay below it. */
 .btn-ghost {
 	background:var(--surface);
 	color:var(--text-strong);
@@ -49,9 +43,6 @@
 	background-color:var(--btn-secondary-hover);
 }
 
-/* Mirrors .btn.next:disabled in buysell.css, so the demo button reads the same in flight
-   wherever it appears. Sits after :hover, which it ties on specificity — source order is
-   what stops a disabled button still lighting up under the cursor. */
 .btn-ghost:disabled {
 	background:var(--surface);
 	color:var(--text);

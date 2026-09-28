@@ -10,7 +10,6 @@ interface Props {
   showSearch?: boolean
 }
 
-/* One instance for the whole public surface. */
 export interface DemoContext {
   tryDemo: (destination?: string) => Promise<void>
   isSubmitting: boolean

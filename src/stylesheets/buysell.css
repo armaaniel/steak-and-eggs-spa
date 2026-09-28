@@ -109,7 +109,6 @@
 	padding:1rem;
 }
 
-/* text matches the button background on purpose: blanks the label while the request is in flight */
 .btn.next.submitting:disabled {
 	background:var(--btn-bg);
 	color:var(--btn-bg);

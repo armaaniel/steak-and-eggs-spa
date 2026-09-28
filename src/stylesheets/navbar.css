@@ -1,5 +1,3 @@
-/* Shared navbar chrome. Both PublicNav and the authenticated Navbar use these
-   classes; anything only one of them needs lives with that component's own rules. */
 .nav {
 	display:flex;
 	flex-direction:row;
@@ -18,7 +16,6 @@
 	column-gap:1rem;
 	position:relative;
 	top:9px;
-	/* Same 9px drop as the nav text.*/
 }
 
 .nav-logo {
@@ -50,7 +47,6 @@ button.nav-text.submitting {
 	cursor:not-allowed;
 }
 
-/* Try Demo's failure message. Last in .nav-left */
 .nav-error {
 	font-family: var(--font-body);
 	font-weight:500;
@@ -66,8 +62,6 @@ button.nav-text.submitting {
 	opacity:1;
 }
 
-/* The steak sits low in the logo's cropped viewBox (the eggs take the top), so its centre lands ~9px under the flex 
-centreline at the current 77px logo. Drop the links to meet it */
 .nav-left .nav-text {
 	position:relative;
 	top:9px;
@@ -88,7 +82,6 @@ centreline at the current 77px logo. Drop the links to meet it */
 	color:var(--accent-emphasis);
 }
 
-/* The searchbar is flex:1, so its container needs a width to size against. */
 .nav-right.with-search {
 	width:400px;
 }

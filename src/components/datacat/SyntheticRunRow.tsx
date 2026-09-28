@@ -35,7 +35,6 @@ const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
 	const status = run.result === 'pass' ? 'good' : run.result === 'fail' ? 'critical' : 'warn'
 	const label  = run.result === 'pass' ? 'Passed' : run.result === 'fail' ? 'Failed' : 'No verdict'
 
-  // only an expanded run pays for its traces — a 30d bucket holds 288 of them
   const { error, data } = useQuery<TracesData>(GET_RUN_TRACES, {
     variables: { runId: run.runId },
     skip: !isOpen,

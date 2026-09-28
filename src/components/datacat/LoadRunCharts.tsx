@@ -16,8 +16,6 @@ interface Mark {
   rps: number | null
   clientP99: number | null
   serverP99: number | null
-  // the vertical distance between the two p99 lines — time the request existed but
-  // Rails wasn't working on it yet. Recharts draws a [low, high] pair as a band.
   band: [number, number] | null
   gap: number | null
   errors: number | null
@@ -31,8 +29,6 @@ interface TooltipProps {
   payload?: { payload: Mark }[]
 }
 
-// recharts hands its label renderers x/y as either number or string, and wants a
-// element back rather than null — an empty <g> is how a label opts out of drawing.
 interface LabelProps {
   x?: number | string
   y?: number | string
@@ -43,8 +39,6 @@ interface LabelProps {
 const ms = (v: number | null | undefined) =>
   v === null || v === undefined ? '-' : `${Math.round(v).toLocaleString()} ms`
 
-// One readout for all three panels: they share a syncId, so whichever panel the pointer
-// is over, the reader gets every measure for that bucket rather than the one they hit.
 const RunTooltip = ({ active, payload }: TooltipProps) => {
   const mark = payload?.[0]?.payload
   const row = mark?.row
@@ -73,8 +67,6 @@ const RunTooltip = ({ active, payload }: TooltipProps) => {
   )
 }
 
-// Direct labels ride the marks, but only where they say something: the end of each
-// latency line, and the single worst failure column. A number on every bucket is noise.
 const endLabel = (last: number, show: boolean) => ({ x, y, index, value }: LabelProps) => {
   if (!show || index !== last || value === null || value === undefined || x === undefined || y === undefined) return <g />
 
@@ -85,14 +77,10 @@ type Panel = 'rps' | 'latency' | 'cpu'
 
 const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: Props) => {
   const [showTable, setShowTable] = useState(false)
-  // the panels share a syncId so one pointer moves every crosshair, but that also gives
-  // every panel its own tooltip at once — only the one under the pointer gets to speak
   const [hovered, setHovered] = useState<Panel | null>(null)
 
   if (!rows.length) return <p className="lr-message">No samples for this route yet.</p>
 
-  // A bucket with no samples isn't returned at all, so a paused or crashed generator
-  // would otherwise get a straight line ruled across the hole. A null breaks it instead.
   const gapMs = step * 2000
   const series: Mark[] = []
 
@@ -132,8 +120,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
   const tail = series[last]
   const spread = Math.max(...rows.map((r) => r.clientP99))
 
-  // When the two lines finish on top of each other, two end labels land on top of each
-  // other too. Leave them off and let the legend and tooltip carry it.
   const labelEnds = !!tail.row && Math.abs(tail.row.clientP99 - tail.row.serverP99) > spread * 0.08
 
   const totals = rows.reduce(
@@ -154,17 +140,12 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
 
   const ticked = { minTickGap: 48, tickLine: false, tick: { fontSize: 11 }, tickFormatter: clock }
 
-  // recharts paints legend text in the series color by default; identity belongs to the
-  // mark beside the label, so the text goes back to the ordinary ink token
   const legendText = (value: string) => <span className="lr-legend-text">{value}</span>
 
   const readout = (panel: Panel) => (hovered === panel ? <RunTooltip /> : () => null)
 
   const dot = (panel: Panel) => (hovered === panel ? { r: 4, strokeWidth: 0 } : false)
 
-  // native pointer events on the wrapper: recharts 3 doesn't forward onMouseMove from the
-  // chart, and pointermove (rather than pointerenter) still fires if the panel re-renders
-  // under a pointer that is already sitting inside it
   const watch = (panel: Panel) => ({
     onPointerMove: () => setHovered((current) => (current === panel ? current : panel)),
     onPointerLeave: () => setHovered((current) => (current === panel ? null : current))
@@ -211,7 +192,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
         </div>
       ) : (
         <>
-          {/* Offered load. Its own panel because rps and milliseconds cannot share a y-axis. */}
           <p className="lr-panel-label">Throughput (rps)</p>
           <div className="lr-chart" {...watch('rps')}>
             <ResponsiveContainer width="100%" height="100%">

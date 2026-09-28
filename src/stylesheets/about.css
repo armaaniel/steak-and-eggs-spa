@@ -1,6 +1,3 @@
-/* Sits inside the Public layout, whose chrome is already themed. The body paints
-   --page-bg / --text, so this sheet only needs to not fight it. Deliberately parallel
-   to privacy.css — if a third prose page turns up, the two should merge. */
 .about-main {
 	display:flex;
 	flex-direction:column;
@@ -22,7 +19,6 @@
 	margin-bottom:12px;
 }
 
-/* First heading sits against the container's own top margin. */
 .about-section-title:first-child {
 	margin-top:0;
 }
@@ -44,8 +40,6 @@
 	margin-bottom:6px;
 }
 
-/* .btn carries no margin, so the row's spacing lives here — same 1rem the
-   root page's pitch actions use. */
 .about-actions {
 	display:flex;
 	align-items:center;
@@ -54,9 +48,6 @@
 	margin-top:40px;
 }
 
-/* Mirrors .af-error-container in addwithdraw.css: always in the tree so the reveal has
-   something to run on, and .visible does the work. Sits in the actions row rather than
-   under it, so it grows to the right of Try Demo. */
 .about-error-container {
 	overflow:hidden;
 	display:flex;
@@ -71,8 +62,6 @@
 	opacity:1;
 }
 
-/* Type comes from .about-parent p like the rest of the page; only the bottom margin
-   is dropped, since in a centred row it would push the text off the buttons' baseline. */
 .about-error-container p {
 	margin-bottom:0;
 }
@@ -83,8 +72,6 @@
 	border-top:1px solid var(--border);
 }
 
-/* Beats the .about-parent p sizing, which would otherwise pull the footer
-   back up to body size. */
 .about-footer p {
 	color:var(--text-muted);
 	font-size:0.9rem;

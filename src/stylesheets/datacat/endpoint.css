@@ -92,7 +92,6 @@
 	background-color:var(--dc-hover);
 }
 
-/* must come after :hover (equal specificity) so a selected row keeps its background while hovered */
 .portfolio-row.selected {
 	background-color:var(--dc-surface-2);
 }
@@ -213,13 +212,13 @@
 	right:0px;
 	top:0px;
 	pointer-events:none;
-	color:var(--dc-text-muted); /* chevron svg uses stroke="currentColor" */
+	color:var(--dc-text-muted);
 }
 
 .stats-v {
   transition: transform 0.2s ease;
   transform: translateY(1px) rotate(-180deg);
-  color:var(--dc-text-muted); /* chevron svg uses stroke="currentColor" */
+  color:var(--dc-text-muted);
 }
 
 .stats-v.open {

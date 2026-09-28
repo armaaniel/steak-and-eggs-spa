@@ -36,7 +36,6 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
         data={chartData}
         margin={{ top: 28, right: 5, bottom: 5, left: 5 }}
         onMouseMove={(state) => {
-          // recharts v3 hands activeTooltipIndex over as a string ("3"), not a number.
           const rawIndex = state?.activeTooltipIndex
           const index = rawIndex == null ? -1 : Number(rawIndex)
           const isHovering = state?.isTooltipActive === true && index >= 0

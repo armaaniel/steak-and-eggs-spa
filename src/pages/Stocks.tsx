@@ -128,7 +128,6 @@ function Stocks() {
 	const { data: marketData } = useApi<MarketData>(`/stocks/${symbol}/marketdata`, 
 	{ open: 'N/A', high: 'N/A', low: 'N/A', volume: 'N/A' })
 	
-	/* one-way: nothing sets it false, so a load starting after the first reveal can't hide a page that's already up */
 	const [isReady, setIsReady] = useState(false)
 
 	useEffect(() => {

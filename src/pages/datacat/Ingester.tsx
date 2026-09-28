@@ -96,20 +96,15 @@ const bootColumns: Column<BootRow>[] = [
   { key: 'durationSeconds', label: 'Lifetime', sortable: false, render: (boot) => toDuration(boot.durationSeconds) },
   { key: 'connections', label: 'Connections', sortable: false, render: (boot) => boot.connections },
   { key: 'reconnects', label: 'Reconnects', sortable: false, render: (boot) => boot.reconnects },
-  // the server decides the state; 'none' is the only value that reads better spelled out
   { key: 'exitState', label: 'Exit', sortable: false, render: (boot) => (boot.exitState === 'none' ? 'no sigterm' : boot.exitState) },
 ]
 
 const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'spawnedAt', label: 'Started', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
   { key: 'durationSeconds', label: 'Lifetime', sortable: false, render: (connection) => toDuration(connection.durationSeconds) },
-  // the timestamp rather than the delta from spawn: a connection opened outside market hours
-  // waits on the first trade, not on the socket, and a duration there reads as latency it isn't
   { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? new Date(connection.firstMessageAt).toLocaleString() : 'none') },
   { key: 'events', label: 'Events', sortable: false, render: (connection) => Number(connection.events ?? 0).toLocaleString() },
   { key: 'p99MeanExcessMs', label: 'p99 Mean Lag', sortable: false, render: (connection) => (connection.p99MeanExcessMs === null ? '-' : `${connection.p99MeanExcessMs.toLocaleString()} ms`) },
-  // endedBy is now always present ('open' / 'no record' / the cause); only a real terminal
-  // cause carries a timestamp with it
   { key: 'endedBy', label: 'Exit', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },
 ]
 
@@ -120,7 +115,7 @@ function Ingester() {
   const [range, setRange] = useState<DateRange>(() => toRange(24))
 
   const applyWindow = (nextPreset: number | 'custom', nextRange: DateRange) => {
-    setSelectedIngesterDetail(null) // the selected row may not exist in the new window
+    setSelectedIngesterDetail(null)
     setPreset(nextPreset)
     setRange(nextRange)
   }
@@ -142,8 +137,6 @@ function Ingester() {
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
   const connections: ConnectionRow[] = (data?.ingesterConnections || []).map((connection) => ({ ...connection, id: connection.connectionId }))
 
-  // the page already holds every transition and connection, and both carry bootId — so the
-  // drill-down is a filter over data in hand rather than another round trip
   const selectBoot = (boot: BootRow) =>
     setSelectedIngesterDetail({
       kind: 'boot',

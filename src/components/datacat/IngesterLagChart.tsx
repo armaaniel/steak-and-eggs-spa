@@ -18,8 +18,6 @@ interface TooltipProps {
   payload?: { payload: Mark }[]
 }
 
-// the ingester samples once a minute; anything past two and a half intervals is a
-// stretch where it wasn't streaming, not a slow tick
 const GAP_MS = 150_000
 
 const LagTooltip = ({ active, payload }: TooltipProps) => {
@@ -39,10 +37,6 @@ const LagTooltip = ({ active, payload }: TooltipProps) => {
 
 const IngesterLagChart = ({ points, from, to }: Props) => {
 
-  // The resolver keeps any sample that carried events, so overnights and outages —
-  // stretches where nothing arrived at all — leave holes. A null between them breaks
-  // the line there rather than ruling a straight edge across a weekend as though the
-  // feed had been running the whole time.
   const series: Mark[] = []
 
   points.forEach((point, index) => {
@@ -77,7 +71,6 @@ const IngesterLagChart = ({ points, from, to }: Props) => {
           />
           <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
           <Tooltip content={<LagTooltip />} cursor={false} />
-          {/* zero is the feed's baseline delay — below it, events beat the baseline */}
           <ReferenceLine y={0} stroke="var(--dc-border-strong)" strokeWidth={1} />
           <Line type="monotone" dataKey="meanExcessMs" name="mean lag (ms)" stroke="var(--dc-series-1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
         </LineChart>

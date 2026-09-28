@@ -10,9 +10,6 @@
 	text-decoration:none;
 	white-space:nowrap;
 	padding:1.25rem;
-	/* The steak sits low in the cropped viewBox (the eggs take the top), so its centre
-	   lands ~9px under the flex centreline at the current 77px logo. Drop the text to
-	   meet it rather than lifting the logo into the navbar's top padding. */
 	transform:translateY(9px);
 }
 
@@ -24,13 +21,11 @@
 	color:var(--accent-emphasis);
 }
 
-/* The 9px drop comes from .nav-left .nav-text in navbar.css, not from here. */
 .nav-links {
 	display:flex;
 	align-items:center;
 }
 
-/* Profile dropdown */
 .profile-dropdown-wrapper {
 	position: relative;
 }
@@ -102,7 +97,6 @@
 	background-color: var(--danger-bg);
 }
 
-/* Modals */
 .modal-overlay {
 	position: fixed;
 	inset: 0;
@@ -208,7 +202,6 @@
 	cursor: not-allowed;
 }
 
-/* everything matches the modal surface on purpose: hides the button while the request is in flight */
 .btn.modal-delete-btn.submitting:disabled {
 	background:var(--surface);
 	color:var(--surface);

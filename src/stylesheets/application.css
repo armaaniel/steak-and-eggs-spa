@@ -1,14 +1,10 @@
-/* Design tokens — light values. The main set is redefined under [data-theme="dark"];
-   the --dc-* set is deliberately not (DataCat stays light until its own dark pass). */
 :root {
 	color-scheme: light;
 
-	/* fonts */
 	--font-display: Futura, "Trebuchet MS", Arial, sans-serif;
 	--font-body: Avenir, "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	--font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-	/* main app palette (themable) */
 	--page-bg: #fcfcfc;
 	--surface: white;
 	--text: rgb(50, 48, 47);
@@ -36,14 +32,9 @@
 	--danger-border: #f5c6c4;
 	--on-danger: white;
 	--shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
-	/* Light mode darkens and saturates the accent rather than tinting it. Emphasis
-	   moves away from the background, so on white it goes deeper than the base;
-	   in dark mode the same token goes lighter. Hence "emphasis", not "bright". */
 	--chart-line: #5147D1;
 	--accent-emphasis: #2C1ED0;
 
-	/* DataCat palette — its own cool/slate identity, themed separately from the main app.
-	   Values matching the main palette is coincidence; diverging is the point. */
 	--dc-page-bg: #fcfcfc;
 	--dc-surface: white;
 	--dc-surface-2: #EAECEF;
@@ -58,20 +49,14 @@
 	--dc-shadow-card: rgba(0, 0, 0, 0.06) 0px 0px 2px 1px;
 	--dc-sort-indicator: rgba(0, 0, 0, 0.6);
 
-	/* Reserved status set — state, never a series color. Deliberately not themed: the same
-	   three steps clear 3:1 on the dark surface, and warn is faint on the light one by design,
-	   where the label beside the swatch is what carries the meaning. */
 	--dc-status-good: #0ca30c;
 	--dc-status-warn: #fab219;
 	--dc-status-critical: #d03b3b;
 
-	/* categorical series slots, for charts plotting two measures of the same unit */
 	--dc-series-1: #2a78d6;
 	--dc-series-2: #eb6834;
 }
 
-/* Dark theme: same roles, warm-dark values. Set by the inline script in index.html
-   (localStorage 'theme', falling back to the OS preference) and the Navbar toggle. */
 [data-theme="dark"] {
 	color-scheme: dark;
 
@@ -104,7 +89,6 @@
 	--chart-line: #a29ded;
 	--accent-emphasis: #b5b0f5;
 
-	/* DataCat stays cool-tinted where the main app is pure neutral — same separation as light mode */
 	--dc-page-bg: #0e1013;
 	--dc-surface: #16191d;
 	--dc-surface-2: #23272e;
@@ -117,11 +101,8 @@
 	--dc-link: #9aa3d6;
 	--dc-shadow-card: rgba(0, 0, 0, 0.5) 0px 0px 2px 1px;
 	--dc-sort-indicator: rgba(255, 255, 255, 0.7);
-	/* the same two hues, stepped for the dark surface rather than flipped */
 	--dc-series-1: #3987e5;
 	--dc-series-2: #d95926;
-	/* --dc-active (#A78BFA, violet-400) is unchanged: already designed for dark backgrounds,
-	   as is the --dc-status-* set, which is fixed across both themes */
 }
 
 *{
@@ -143,7 +124,6 @@ body {
   height:100%;
 }
 
-/* Shared ticker logo: fades itself in once the image loads */
 .ticker-logo {
   opacity: 0;
   transition: opacity 50ms;
@@ -153,7 +133,6 @@ body {
   opacity: 1;
 }
 
-/* Ticker logos with dark glyphs vanish on dark cards — keep their chip light in dark mode */
 [data-theme="dark"] .ticker-logo {
   background-color: white;
   border-radius: 6px;

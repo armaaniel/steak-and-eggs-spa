@@ -109,7 +109,6 @@ opacity:0;
 	row-gap:1.5rem;
 }
 
-/* Marketing block under the chart, in the shape of a broker's stock-page pitch. */
 .stock-pitch {
 	display:flex;
 	flex-direction:column;
@@ -131,8 +130,6 @@ opacity:0;
 	color:var(--text-muted);
 }
 
-/* .btn carries no margin, so the pair's spacing lives here — 1rem, the gap these
-   two had back in PublicNav. */
 .stock-pitch-actions {
 	display:flex;
 	align-items:center;
@@ -140,7 +137,6 @@ opacity:0;
 	margin-top:0.25rem;
 }
 
-/* error container */
 .stock-pitch-error {
 	display:flex;
 	align-items:center;

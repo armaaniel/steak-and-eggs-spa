@@ -1,5 +1,3 @@
-/* DataCat's page surface. Its palette is themed separately from the main app (--dc-* tokens),
-   but it follows the same light/dark switch. */
 .dc-root {
 	display:flex;
 	flex-direction:column;
@@ -118,8 +116,6 @@
 	width: 13.3%;
 }
 
-/* Extends PaginationControls' base .pagination-container class.
-   The shared component uses main-app tokens, so restate it in DataCat's palette */
 .dc-pagination-container {
 	padding-bottom:1rem;
 	color:var(--dc-text);
@@ -219,8 +215,6 @@
 	justify-content:end;
 }
 
-/* Theme toggle in the DataCat sidebar. Borderless and padded to match .side-button
-   so the icon lines up with the links above it. */
 .dc-theme-toggle {
 	display:flex;
 	align-items:center;
