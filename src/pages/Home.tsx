@@ -106,6 +106,11 @@ function Home() {
     updatePortfolio()
   }, [prices, portfolio?.positions, portfolio?.balance, updatePortfolio])
 
+  const refreshPortfolio = () => {
+    getPortfolioData()
+    getChartData()
+  }
+
   return (
     <>
       <main className={`home ${portfolio ? 'loaded' : ''}`}>
@@ -144,8 +149,8 @@ function Home() {
           </div>
 
           <div className="button-container">
-            <FundsButton mode='deposit' getPortfolioData={getPortfolioData} getChartData={getChartData} />
-            <FundsButton mode='withdraw' getPortfolioData={getPortfolioData} getChartData={getChartData} balance={portfolio?.balance} />
+            <FundsButton mode='deposit' onSuccess={refreshPortfolio} />
+            <FundsButton mode='withdraw' onSuccess={refreshPortfolio} balance={portfolio?.balance} />
           </div>
         </div>
       </main>

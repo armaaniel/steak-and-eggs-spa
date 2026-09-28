@@ -11,7 +11,7 @@ import type { DemoContext } from '../layouts/Public'
 interface Props {
   demo: DemoContext
   isAuthenticated: boolean
-  getUserData: () => Promise<void>
+  onComplete: () => void
   balance: string | undefined
   position: Position | undefined
   price: Price
@@ -25,7 +25,7 @@ interface OrderData {
   value: string
 }
 
-const BuySell = ({ demo, isAuthenticated, getUserData, balance, position, price, symbol }: Props) => {
+const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, symbol }: Props) => {
 
   const { tryDemo, isSubmitting: isDemoSubmitting, error: demoError } = demo
 
@@ -104,7 +104,7 @@ const BuySell = ({ demo, isAuthenticated, getUserData, balance, position, price,
       setError('Something went wrong, please try again later')
     } finally {
       setIsSubmitting(false)
-      getUserData()
+      onComplete()
       setTime(new Date().toLocaleTimeString())
       nextStep()
     }

@@ -262,7 +262,7 @@ function Stocks() {
         </div>
 
         <div className='stocks-right'>
-          <BuySell demo={demo} isAuthenticated={isAuthenticated} getUserData={getUserData} balance={userData?.balance} price={price} position={userData?.position} symbol={symbol} />
+          <BuySell demo={demo} isAuthenticated={isAuthenticated} onComplete={getUserData} balance={userData?.balance} price={price} position={userData?.position} symbol={symbol} />
         </div>
       </main>
     </>

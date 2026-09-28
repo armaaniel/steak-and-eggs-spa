@@ -7,12 +7,11 @@ import apiFetch from '../lib/apiFetch'
 
 interface Props {
   mode: 'deposit' | 'withdraw'
-  getPortfolioData: () => Promise<void>
-  getChartData: () => Promise<void>
+  onSuccess: () => void
   balance?: string
 }
 
-const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) => {
+const FundsButton = ({ mode, onSuccess, balance }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [amount, setAmount] = useState('')
@@ -58,8 +57,7 @@ const FundsButton = ({ mode, getPortfolioData, getChartData, balance }: Props) =
 			if (!response) return
       if (response.ok) {
         setAmount('')
-        getPortfolioData()
-        getChartData()
+        onSuccess()
         setIsOpen(false)
       } else {
         const errorData = await response.json()
