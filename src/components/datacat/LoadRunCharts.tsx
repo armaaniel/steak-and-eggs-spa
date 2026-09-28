@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { AreaChart, ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
+import CpuPanel, { CpuReadout } from './CpuPanel'
+import { ms, endLabel, axis, ticked, legendText, toCpuLookup } from './runCharts'
 import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
@@ -29,16 +31,6 @@ interface TooltipProps {
   payload?: { payload: Mark }[]
 }
 
-interface LabelProps {
-  x?: number | string
-  y?: number | string
-  index?: number
-  value?: number | string | boolean | null
-}
-
-const ms = (v: number | null | undefined) =>
-  v === null || v === undefined ? '-' : `${Math.round(v).toLocaleString()} ms`
-
 const RunTooltip = ({ active, payload }: TooltipProps) => {
   const mark = payload?.[0]?.payload
   const row = mark?.row
@@ -60,17 +52,9 @@ const RunTooltip = ({ active, payload }: TooltipProps) => {
       {(row.gap > 0 || row.errors > 0) && (
         <p><strong>{row.gap.toLocaleString()}</strong> untraced<span className="lr-dim"> · {row.errors.toLocaleString()} errors</span></p>
       )}
-      {mark.cpuAvg !== null && (
-        <p><strong>{mark.cpuAvg.toFixed(1)}%</strong> cpu<span className="lr-dim">{mark.cpuBand ? ` · ${mark.cpuBand[0].toFixed(1)}–${mark.cpuBand[1].toFixed(1)} range` : ''}</span></p>
-      )}
+      <CpuReadout avg={mark.cpuAvg} band={mark.cpuBand} />
     </div>
   )
-}
-
-const endLabel = (last: number, show: boolean) => ({ x, y, index, value }: LabelProps) => {
-  if (!show || index !== last || value === null || value === undefined || x === undefined || y === undefined) return <g />
-
-  return <text x={Number(x) - 8} y={Number(y) - 10} textAnchor="end" className="lr-mark-label">{ms(Number(value))}</text>
 }
 
 type Panel = 'rps' | 'latency' | 'cpu'
@@ -84,7 +68,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
   const gapMs = step * 2000
   const series: Mark[] = []
 
-  const cpuByTime = new Map(cpu.map((point) => [new Date(point.at).getTime(), point]))
+  const cpuAt = toCpuLookup(cpu)
   const hasCpu = cpu.some((point) => point.average !== null)
 
   rows.forEach((row, index) => {
@@ -99,12 +83,9 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
       }
     }
 
-    const point = cpuByTime.get(Math.floor(t / 60000) * 60000)
-
     series.push({
       t,
-      cpuAvg: point?.average ?? null,
-      cpuBand: point && point.minimum !== null && point.maximum !== null ? [point.minimum, point.maximum] : null,
+      ...cpuAt(t),
       rps: row.rps,
       clientP99: row.clientP99,
       serverP99: row.serverP99,
@@ -115,7 +96,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
     })
   })
 
-  const clock = (t: number) => new Date(t).toLocaleTimeString('en-us', { hour: 'numeric', minute: '2-digit' })
   const last = series.length - 1
   const tail = series[last]
   const spread = Math.max(...rows.map((r) => r.clientP99))
@@ -131,16 +111,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
     }),
     { sent: 0, traced: 0, gap: 0, errors: 0 }
   )
-
-  const axis = {
-    type: 'number' as const,
-    dataKey: 't',
-    domain: ['dataMin', 'dataMax'] as [string, string]
-  }
-
-  const ticked = { minTickGap: 48, tickLine: false, tick: { fontSize: 11 }, tickFormatter: clock }
-
-  const legendText = (value: string) => <span className="lr-legend-text">{value}</span>
 
   const readout = (panel: Panel) => (hovered === panel ? <RunTooltip /> : () => null)
 
@@ -221,23 +191,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
             </ResponsiveContainer>
           </div>
 
-          {hasCpu && (
-            <>
-              <p className="lr-panel-label">CPU (%)</p>
-              <div className="lr-chart lr-chart-axis" {...watch('cpu')}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={series} syncId="load-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-                    <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                    <XAxis {...axis} {...ticked} />
-                    <YAxis width={56} domain={[0, (max: number) => Math.max(100, Math.ceil(max))]} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-                    <Tooltip content={readout('cpu')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-                    <Area type="monotone" dataKey="cpuBand" stroke="none" fill="var(--dc-series-1)" fillOpacity={0.1} connectNulls activeDot={false} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="cpuAvg" name="cpu" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} connectNulls activeDot={dot('cpu')} isAnimationActive={false} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </>
-          )}
+          {hasCpu && <CpuPanel series={series} syncId="load-run" tooltip={readout('cpu')} activeDot={dot('cpu')} pointerHandlers={watch('cpu')} />}
 
         </>
       )}
