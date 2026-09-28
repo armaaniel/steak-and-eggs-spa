@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import Logo from './Logo'
 import Searchbar from './Searchbar'
 import useClickOutside from '../hooks/useClickOutside'
+import { currentTheme, toggleTheme } from '../lib/theme'
 import type { DemoContext } from '../layouts/Public'
 
 interface Props {
@@ -14,17 +15,10 @@ const PublicNav = ({ showSearch = true, demo }: Props) => {
   const { tryDemo, isSubmitting, error } = demo
   const { pathname } = useLocation()
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'))
+  const [theme, setTheme] = useState(currentTheme)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useClickOutside(dropdownRef, () => setDropdownOpen(false))
-
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark'
-    document.documentElement.dataset.theme = next
-    localStorage.setItem('theme', next)
-    setTheme(next)
-  }
 
   /* '/' and /stocks/:symbol both render Stocks, so stay put else go to home  */
   const isStocksRoute = pathname === '/' || pathname.startsWith('/stocks/')
@@ -101,7 +95,7 @@ const PublicNav = ({ showSearch = true, demo }: Props) => {
                 Github
               </a>
               <hr className="profile-dropdown-divider" />
-              <button className="profile-dropdown-item" onClick={toggleTheme}>
+              <button className="profile-dropdown-item" onClick={() => setTheme(toggleTheme())}>
                 {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
               </button>
             </div>

@@ -7,6 +7,7 @@ import DeleteAccountModal from './DeleteAccountModal'
 import { resetConsumer } from '../lib/consumer.ts'
 import { useAuth } from '../lib/auth'
 import useClickOutside from '../hooks/useClickOutside'
+import { currentTheme, toggleTheme } from '../lib/theme'
 
 
 function Navbar() {
@@ -15,17 +16,10 @@ function Navbar() {
   const { setToken } = useAuth()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [openModal, setOpenModal] = useState<'password' | 'delete' | null>(null)
-  const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'))
+  const [theme, setTheme] = useState(currentTheme)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useClickOutside(dropdownRef, () => setDropdownOpen(false))
-
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark'
-    document.documentElement.dataset.theme = next
-    localStorage.setItem('theme', next)
-    setTheme(next)
-  }
 
   const handleLogout = () => {
     localStorage.removeItem('authToken')
@@ -76,7 +70,7 @@ function Navbar() {
               <div className="profile-dropdown">
                 <div className="profile-dropdown-username">{USERNAME}</div>
                 <hr className="profile-dropdown-divider" />
-                <button className="profile-dropdown-item" onClick={toggleTheme}>
+                <button className="profile-dropdown-item" onClick={() => setTheme(toggleTheme())}>
                   {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </button>
                 <a
