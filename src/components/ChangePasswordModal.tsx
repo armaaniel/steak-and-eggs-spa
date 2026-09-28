@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import apiFetch from '../lib/apiFetch'
+import Modal from './Modal'
 
 interface Props {
   onClose: () => void
@@ -50,49 +51,43 @@ const ChangePasswordModal = ({ onClose }: Props) => {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">Change Password</h2>
-          <button className="modal-close" onClick={onClose} aria-label="Close">&#x2715;</button>
-        </div>
-        <div className={`ls-error-container ${(success || error) && !hasTyped && !isSubmitting ? 'visible' : 'hidden'}`}>
-          <p className={success ? 'modal-success' : 'modal-error'}>{success ?? error}</p>
-        </div>
-        <form className="modal-form" onSubmit={handleSubmit}>
-          <div className="ls-input-container">
-            <input
-              id="new-password"
-              type="password"
-              className="ls-input"
-              placeholder=" "
-              value={newPassword}
-              onChange={e => { setNewPassword(e.target.value); setHasTyped(true) }}
-            />
-            <label htmlFor="new-password" className="ls-label">New Password</label>
-          </div>
-          <div className="ls-input-container">
-            <input
-              id="confirm-password"
-              type="password"
-              className="ls-input"
-              placeholder=" "
-              value={confirmPassword}
-              onChange={e => { setConfirmPassword(e.target.value); setHasTyped(true) }}
-            />
-            <label htmlFor="confirm-password" className="ls-label">Confirm New Password</label>
-          </div>
-          <div className="modal-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className={`btn btn-primary modal-save ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting}>
-              Update Password
-            </button>
-          </div>
-        </form>
+    <Modal title="Change Password" onClose={onClose}>
+      <div className={`ls-error-container ${(success || error) && !hasTyped && !isSubmitting ? 'visible' : 'hidden'}`}>
+        <p className={success ? 'modal-success' : 'modal-error'}>{success ?? error}</p>
       </div>
-    </div>
+      <form className="modal-form" onSubmit={handleSubmit}>
+        <div className="ls-input-container">
+          <input
+            id="new-password"
+            type="password"
+            className="ls-input"
+            placeholder=" "
+            value={newPassword}
+            onChange={e => { setNewPassword(e.target.value); setHasTyped(true) }}
+          />
+          <label htmlFor="new-password" className="ls-label">New Password</label>
+        </div>
+        <div className="ls-input-container">
+          <input
+            id="confirm-password"
+            type="password"
+            className="ls-input"
+            placeholder=" "
+            value={confirmPassword}
+            onChange={e => { setConfirmPassword(e.target.value); setHasTyped(true) }}
+          />
+          <label htmlFor="confirm-password" className="ls-label">Confirm New Password</label>
+        </div>
+        <div className="modal-actions">
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className={`btn btn-primary modal-save ${isSubmitting ? 'submitting' : ''}`} disabled={isSubmitting}>
+            Update Password
+          </button>
+        </div>
+      </form>
+    </Modal>
   )
 }
 
