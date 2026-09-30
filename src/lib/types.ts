@@ -127,6 +127,14 @@ export interface CanarySlo {
 	budgetUsed:number
 }
 
+export interface PolygonCalls {
+	calls:number
+	failures:number
+	p50:number | null
+	p99:number | null
+	lastSuccessAt:string | null
+}
+
 export interface ServiceBucket {
 	bucket:string
 	requests:number

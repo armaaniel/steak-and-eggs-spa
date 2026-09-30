@@ -4,7 +4,7 @@ import { useState } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
 import { ms } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
-import type { CanarySlo, DependencyNode, IngesterLagPoint, IngesterSpan, IngesterUptime, OutletContextType, ServiceBucket, TraceSummary } from '../../lib/types.ts'
+import type { CanarySlo, DependencyNode, IngesterLagPoint, IngesterSpan, IngesterUptime, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
   query getDependencies($from: ISO8601DateTime!, $to: ISO8601DateTime!) {
@@ -25,11 +25,12 @@ const GET_DEPENDENCIES = gql`
       p95
       p99
     }
-    traceSummary(range: "1h") {
-      route
-      totalRequests
+    polygonCalls(range: "1h") {
+      calls
+      failures
+      p50
       p99
-      cacheHitRate
+      lastSuccessAt
     }
     ingesterUptime(from: $from, to: $to) {
       pct
@@ -69,7 +70,7 @@ const GET_DEPENDENCIES = gql`
 interface DependencyData {
   canarySlo: CanarySlo
   serviceTimeseries: ServiceBucket[]
-  traceSummary: Pick<TraceSummary, 'route' | 'totalRequests' | 'p99' | 'cacheHitRate'>[]
+  polygonCalls: PolygonCalls
   ingesterUptime: IngesterUptime
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
   ingesterLag: Pick<IngesterLagPoint, 'at' | 'meanExcessMs'>[]
@@ -103,8 +104,6 @@ const STATUS_LABELS: Record<Status, string> = {
   critical: 'Down',
   none: 'No health signal yet',
 }
-
-const POLYGON_ROUTES = ['GET /stocks/symbol/marketdata', 'GET /stocks/symbol/chartdata', 'GET /stocks/symbol/companydata']
 
 const NOT_INSTRUMENTED = 'Not instrumented.'
 
@@ -149,7 +148,14 @@ const makeNode = (id: string, title: string, role: string, status: Status, rest:
 
 const percent = (part: number, whole: number) => (whole > 0 ? `${((part / whole) * 100).toFixed(2)}%` : '-')
 
-const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
+const ago = (at: string, now: number) => {
+  const minutes = Math.round((now - new Date(at).getTime()) / 60000)
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes} min ago`
+  return `${Math.floor(minutes / 60)} hr ago`
+}
+
+const buildNodes = (data: DependencyData | undefined, now: number): DependencyNode[] => {
   const buckets = data?.serviceTimeseries ?? []
   const requests = buckets.reduce((sum, bucket) => sum + bucket.requests, 0)
   const errors = buckets.reduce((sum, bucket) => sum + bucket.errors, 0)
@@ -175,12 +181,8 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
   const postgres = cloudwatch(healthFor('postgres'))
   const redis = cloudwatch(healthFor('redis'))
 
-  const summary = data?.traceSummary ?? []
-  const polygonRows = POLYGON_ROUTES.flatMap((route) => summary.filter((row) => row.route === route))
-  const cachedRows = summary
-    .filter((row) => row.cacheHitRate !== null && row.cacheHitRate > 0)
-    .sort((a, b) => b.totalRequests - a.totalRequests)
-    .slice(0, 4)
+  const polygon = data?.polygonCalls
+  const polygonStatus: Status = !polygon || polygon.calls === 0 ? 'none' : polygon.failures === polygon.calls ? 'critical' : polygon.failures > 0 ? 'warn' : 'good'
 
   return [
     makeNode('vercel', 'Vercel', 'Static hosting', 'none', { note: NOT_INSTRUMENTED }),
@@ -206,17 +208,17 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
           ]
         : [],
     }),
-    makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', redis.status, {
-      metrics: [...redis.metrics, ...cachedRows.map((row) => ({ label: `${row.route} hit rate`, value: `${row.cacheHitRate}%` }))],
-      note: redis.note,
-    }),
+    makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', redis.status, { metrics: redis.metrics, note: redis.note }),
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note }),
-    makeNode('polygon', 'Polygon.io', 'Market data provider', 'none', {
-      metrics: [
-        ...polygonRows.map((row) => ({ label: `${row.route} p99`, value: ms(row.p99) })),
-        ...(state ? [{ label: 'Price feed', value: `ingester ${state}` }] : []),
-      ],
-      note: 'No direct health check yet; these are the routes and the feed that depend on it.',
+    makeNode('polygon', 'Polygon.io', 'Market data provider', polygonStatus, {
+      metrics: polygon
+        ? [
+            { label: 'Last successful call', value: polygon.lastSuccessAt ? ago(polygon.lastSuccessAt, now) : 'none in the last day' },
+            { label: 'Calls', value: polygon.calls.toLocaleString() },
+            { label: 'Failed', value: polygon.failures.toLocaleString() },
+            { label: 'p50 / p99', value: `${ms(polygon.p50)} / ${ms(polygon.p99)}` },
+          ]
+        : [],
     }),
     makeNode('ingester', 'Ingester', 'ECS Fargate · prices', worst(ingesterStatus, ingesterTask.status), {
       metrics: data
@@ -247,7 +249,7 @@ function Dependencies() {
 
   const isLoaded = useTransition(loading, data || error)
 
-  const nodes = buildNodes(data)
+  const nodes = buildNodes(data, Date.parse(lastHour.to))
   const selectedId = detail?.kind === 'dependency' ? detail.node.id : null
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })
 
