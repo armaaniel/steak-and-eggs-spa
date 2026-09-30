@@ -1,0 +1,10 @@
+.ov-header {
+	display:flex;
+	justify-content:end;
+}
+
+.ov-message {
+	font-family: var(--font-ui);
+	font-weight:400;
+	color:var(--dc-text);
+}

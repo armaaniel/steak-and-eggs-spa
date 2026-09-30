@@ -5,7 +5,7 @@ const Sidebar = () => {
   return (
     <div className="sidebar-button-container">
       <NavLink to="/datacat" end className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
-        All Routes
+        Overview
       </NavLink>
 
       <NavLink to="/datacat/latent" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>

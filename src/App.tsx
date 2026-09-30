@@ -9,7 +9,7 @@ import Stocks from './pages/Stocks'
 import Activity from './pages/Activity'
 import Privacy from './pages/Privacy'
 import DeleteAccount from './pages/DeleteAccount'
-import AllRoutes from './pages/datacat/AllRoutes'
+import Overview from './pages/datacat/Overview'
 import Endpoint from './pages/datacat/Endpoint'
 import Cache from './pages/datacat/Cache'
 import Latent from './pages/datacat/Latent'
@@ -47,7 +47,7 @@ function App() {
 
 
           <Route element={<DCSummary />}>
-            <Route path="/datacat" element={<AllRoutes />} />
+            <Route path="/datacat" element={<Overview />} />
           </Route>
 
           <Route element={<DCList />}>
