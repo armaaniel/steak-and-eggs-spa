@@ -23,6 +23,8 @@ const GET_BUCKETS = gql`
       target
       good
       expected
+      periodGood
+      periodExpected
       budgetAllowed
       budgetUsed
     }
@@ -45,6 +47,8 @@ interface CanarySlo {
   target: number
   good: number
   expected: number
+  periodGood: number
+  periodExpected: number
   budgetAllowed: number
   budgetUsed: number
 }
@@ -91,6 +95,8 @@ function Uptime() {
   const slo = data?.canarySlo
   const sli = slo && slo.expected > 0 ? (slo.good / slo.expected) * 100 : null
   const belowTarget = slo !== undefined && sli !== null && sli < slo.target * 100
+  const periodSli = slo && slo.periodExpected > 0 ? (slo.periodGood / slo.periodExpected) * 100 : null
+  const periodBelowTarget = slo !== undefined && periodSli !== null && periodSli < slo.target * 100
   const budgetLeft = slo && slo.budgetAllowed > 0 ? Math.max(0, 1 - slo.budgetUsed / slo.budgetAllowed) * 100 : null
   const budgetSpent = slo !== undefined && slo.budgetUsed > slo.budgetAllowed
 
@@ -115,9 +121,9 @@ function Uptime() {
             </div>
 
             <div>
-              <p className="uptime-slo-label">SLO</p>
-              <p className="uptime-slo-value">{(slo.target * 100).toFixed(1)}%</p>
-              <p className="uptime-slo-detail">of canary runs pass, over 30 days</p>
+              <p className="uptime-slo-label">SLO: {(slo.target * 100).toFixed(1)}% over 30 days</p>
+              <p className={`uptime-slo-value ${periodBelowTarget ? 'critical' : ''}`}>{periodSli === null ? '-' : `${periodSli.toFixed(2)}%`}</p>
+              <p className="uptime-slo-detail">{slo.periodGood.toLocaleString()} / {slo.periodExpected.toLocaleString()} runs passed</p>
             </div>
 
             <div>
