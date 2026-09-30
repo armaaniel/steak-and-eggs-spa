@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useState } from 'react'
+import { useMemo } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
 import { ms } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
@@ -256,21 +256,27 @@ const LEGEND: Status[] = ['good', 'warn', 'critical']
 function Dependencies() {
   const { detail, setDetail, range } = useOutletContext<OutletContextType>()
 
-  const [clock, setClock] = useState(() => ({ range, at: Date.now() }))
-  if (clock.range !== range) setClock({ range, at: Date.now() })
+  const timeWindow = useMemo(() => {
+    const at = Date.now()
+    return {
+      at,
+      variables: {
+        range,
+        from: new Date(at - HOUR_MS).toISOString(),
+        to: new Date(at).toISOString(),
+        rangeFrom: new Date(at - DATACAT_RANGE_MS[range]).toISOString(),
+      },
+    }
+  }, [range])
 
   const { loading, error, data } = useQuery<DependencyData>(GET_DEPENDENCIES, {
-    variables: {
-      range,
-      from: new Date(clock.at - HOUR_MS).toISOString(),
-      to: new Date(clock.at).toISOString(),
-      rangeFrom: new Date(clock.at - DATACAT_RANGE_MS[range]).toISOString(),
-    },
+    variables: timeWindow.variables,
+    fetchPolicy: 'no-cache',
   })
 
   const isLoaded = useTransition(loading, data || error)
 
-  const nodes = buildNodes(data, clock.at)
+  const nodes = buildNodes(data, timeWindow.at)
   const selectedId = detail?.kind === 'dependency' ? detail.node.id : null
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })
 
