@@ -85,8 +85,8 @@ const ServiceCharts = ({ buckets }: Props) => {
             <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
             <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
             <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-            <Line type="monotone" dataKey="p99" name="p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
-            <Line type="monotone" dataKey="p50" name="p50" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
+            <Line type="linear" dataKey="p99" name="p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
+            <Line type="linear" dataKey="p50" name="p50" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -100,8 +100,8 @@ const ServiceCharts = ({ buckets }: Props) => {
             <YAxis width={56} allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
             <Tooltip content={readout('requests')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
             <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-            <Line type="monotone" dataKey="requests" name="requests" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
-            <Line type="monotone" dataKey="errors" name="errors" stroke="var(--dc-status-critical)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
+            <Line type="linear" dataKey="requests" name="requests" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
+            <Line type="linear" dataKey="errors" name="errors" stroke="var(--dc-status-critical)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
