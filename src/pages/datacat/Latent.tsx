@@ -2,13 +2,15 @@ import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useEffect } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
+import Select from '../../components/datacat/Select'
+import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns } from '../../lib/traceColumns'
 import type { Trace, OutletContextType } from '../../lib/types.ts'
 
 const GET_LATENT_TRACES = gql`
-  query getLatentTraces {
-    latentTraces {
+  query getLatentTraces($range: String) {
+    latentTraces(range: $range) {
       id
       createdAt
       endpoint
@@ -28,11 +30,13 @@ interface TraceData {
 }
 
 function Latent() {
-  const { detail, setDetail, setLoaded } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, setLoaded, range, setRange } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
-  const { loading, error, data } = useQuery<TraceData>(GET_LATENT_TRACES)
+  const { loading, error, data } = useQuery<TraceData>(GET_LATENT_TRACES, {
+    variables: { range },
+  })
 
   const recordsPerPage = 18
   const isLoaded = useTransition(loading, data || error)
@@ -42,9 +46,15 @@ function Latent() {
   }, [isLoaded])
 
   return (
-    <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-      <TraceTable traceData={data?.latentTraces || []} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
-    </div>
+    <>
+      <div className="range-header">
+        <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
+      </div>
+
+      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+        <TraceTable traceData={data?.latentTraces || []} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
+      </div>
+    </>
   )
 }
 

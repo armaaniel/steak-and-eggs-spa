@@ -254,3 +254,8 @@
 	display:flex;
 	column-gap:0.5rem;
 }
+
+.range-header {
+	display:flex;
+	justify-content:end;
+}

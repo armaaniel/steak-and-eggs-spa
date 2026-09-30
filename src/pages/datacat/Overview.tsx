@@ -48,7 +48,7 @@ function Overview() {
 
   return (
     <>
-      <div className="ov-header">
+      <div className="range-header">
         <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
       </div>
 
