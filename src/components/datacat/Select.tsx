@@ -1,25 +1,30 @@
-interface Option {
-  value: string | number
+interface Option<T> {
+  value: T
   label: string
 }
 
-interface Props {
+interface Props<T> {
   id: string
   label: string
-  value: string | number
-  onChange: (value: string) => void
-  options: Option[]
+  value: T
+  onChange: (value: T) => void
+  options: Option<T>[]
   loaded: boolean
 }
 
-const Select = ({ id, label, value, onChange, options, loaded }: Props) => {
+const Select = <T extends string | number>({ id, label, value, onChange, options, loaded }: Props<T>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const picked = options.find((option) => String(option.value) === e.target.value)
+    if (picked) onChange(picked.value)
+  }
+
   return (
     <div className={`status-div ${loaded ? 'loaded' : ''}`}>
       <label htmlFor={id} className="status-label">
         {label}
       </label>
 
-      <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+      <select id={id} value={value} onChange={handleChange}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

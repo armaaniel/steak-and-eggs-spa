@@ -249,3 +249,8 @@
   opacity:1;
   transition: opacity 150ms;
 }
+
+.endpoint-filters {
+	display:flex;
+	column-gap:0.5rem;
+}

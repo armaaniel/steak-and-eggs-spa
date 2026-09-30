@@ -2,13 +2,15 @@ import { useOutletContext } from 'react-router-dom'
 import useEndpoint from '../../hooks/useEndpoint'
 import useTransition from '../../hooks/useTransition.ts'
 import EndpointNav from '../../components/datacat/EndpointNav'
+import Select from '../../components/datacat/Select'
+import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import { gql, useQuery } from '@apollo/client'
 import TraceTable from '../../components/datacat/TraceTable'
 import type { Trace, OutletContextType, Column } from '../../lib/types.ts'
 
 const CACHE_SPLIT = gql`
-  query getCacheSplit($endpoint: String!) {
-    cacheSplit(endpoint: $endpoint) {
+  query getCacheSplit($endpoint: String!, $range: String) {
+    cacheSplit(endpoint: $endpoint, range: $range) {
       cached {
         id
         createdAt
@@ -47,13 +49,13 @@ interface CacheSplit {
 }
 
 function Cache() {
-  const { detail, setDetail, usedApi } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, usedApi, range, setRange } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const { method, path, endpoint } = useEndpoint()
   const { loading, error, data } = useQuery<CacheData>(CACHE_SPLIT, {
-    variables: { endpoint },
+    variables: { endpoint, range },
   })
 
   const recordsPerPage = 18
@@ -67,7 +69,10 @@ function Cache() {
 
   return (
     <>
-      <EndpointNav method={method} path={path} endpoint={endpoint} showCache={true} apiBoolean={usedApi} />
+      <div className="endpoint-nav-div">
+        <EndpointNav method={method} path={path} endpoint={endpoint} showCache={true} apiBoolean={usedApi} />
+        <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
+      </div>
 
       <div className={`cache-parent-container ${isLoaded ? 'loaded' : ''}`}>
         <div className="cache-container">

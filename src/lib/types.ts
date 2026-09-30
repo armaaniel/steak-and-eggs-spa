@@ -1,3 +1,5 @@
+import type { DatacatRange } from '../hooks/useDatacatRange'
+
 export interface Position {
 	average_price: string
 	shares: number
@@ -74,6 +76,8 @@ export interface OutletContextType {
 	detail: Detail | null
 	setDetail: React.Dispatch<React.SetStateAction<Detail | null>>
 	setLoaded: React.Dispatch<React.SetStateAction<boolean>>
+	range: DatacatRange
+	setRange: (range: DatacatRange) => void
 	usedRedis: boolean
 	usedApi: boolean
 }

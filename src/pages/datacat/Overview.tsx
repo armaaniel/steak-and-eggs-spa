@@ -1,9 +1,9 @@
 import { gql, useQuery } from '@apollo/client'
-import { useState } from 'react'
 import TraceOverviewTable from '../../components/datacat/TraceOverviewTable'
 import ServiceCharts from '../../components/datacat/ServiceCharts'
 import Select from '../../components/datacat/Select'
 import useTransition from '../../hooks/useTransition.ts'
+import useDatacatRange, { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import type { TraceSummary, ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/endpoint.css'
 import '../../stylesheets/datacat/overview.css'
@@ -33,11 +33,8 @@ interface OverviewData {
   traceSummary: TraceSummary[]
 }
 
-const ranges = ['1h', '12h', '24h', '7d', '14d', '30d']
-const rangeOptions = ranges.map((range) => ({ value: range, label: range }))
-
 function Overview() {
-  const [range, setRange] = useState('24h')
+  const [range, setRange] = useDatacatRange()
 
   const { loading, error, data } = useQuery<OverviewData>(GET_OVERVIEW, {
     variables: { range },
@@ -52,7 +49,7 @@ function Overview() {
   return (
     <>
       <div className="ov-header">
-        <Select id="range-select" label="Range" value={range} onChange={setRange} options={rangeOptions} loaded={isLoaded} />
+        <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
       </div>
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>

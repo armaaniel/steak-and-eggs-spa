@@ -9,12 +9,13 @@ import CableConnectionDetailsPanel from '../../components/datacat/CableConnectio
 import IngesterDetailsPanel from '../../components/datacat/IngesterDetailsPanel'
 import StatsPanel from '../../components/datacat/StatsPanel'
 import useEndpoint from '../../hooks/useEndpoint'
+import useDatacatRange from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import type { Detail } from '../../lib/types.ts'
 
 const GET_STATS = gql`
-  query getStats($endpoint: String!) {
-    traceStats(endpoint: $endpoint) {
+  query getStats($endpoint: String!, $range: String) {
+    traceStats(endpoint: $endpoint, range: $range) {
       p99
       p95
       p50
@@ -57,6 +58,7 @@ function DCList() {
 
   const [loaded, setLoaded] = useState(false)
   const [detail, setDetail] = useState<Detail | null>(null)
+  const [range, setRange] = useDatacatRange()
 
   const [statsOpen, setStatsOpen] = useState(() => {
     const saved = localStorage.getItem('statsOpen')
@@ -67,7 +69,7 @@ function DCList() {
   const isEndpointRoute = Boolean(method)
 
   const { data, loading } = useQuery<StatsData>(GET_STATS, {
-    variables: { endpoint },
+    variables: { endpoint, range },
     skip: !isEndpointRoute,
   })
 
@@ -135,7 +137,7 @@ function DCList() {
         </div>
 
         <div className="dc-home-right">
-          <Outlet context={{ detail, setDetail, setLoaded, usedRedis: stats?.usedRedis ?? false, usedApi: stats?.usedApi ?? false }} />
+          <Outlet context={{ detail, setDetail, setLoaded, range, setRange, usedRedis: stats?.usedRedis ?? false, usedApi: stats?.usedApi ?? false }} />
         </div>
       </div>
     </div>

@@ -118,7 +118,7 @@ const LoadRun = () => {
       <div className="lr-header">
         <Select id="run-select" label="Run" value={current ? keyOf(current) : ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
 
-        <Select id="step-select" label="Bucket" value={step} onChange={(value) => setStep(Number(value))} options={stepOptions} loaded={isLoaded} />
+        <Select id="step-select" label="Bucket" value={step} onChange={setStep} options={stepOptions} loaded={isLoaded} />
 
         <LoadNav />
 
