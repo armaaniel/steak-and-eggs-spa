@@ -98,7 +98,7 @@ function DCList() {
         <div className="home-left-two">
           {detail && (
             <div className="dc-side-header-container">
-              <h3 className="catlas-text">Details</h3>
+              <h3 className="catlas-text">{detail.kind === 'dependency' ? detail.node.title : 'Details'}</h3>
               <div className="dc-back-button-container">
                 <button className="dc-back-button" onClick={closeDetails}>
                   {' '}

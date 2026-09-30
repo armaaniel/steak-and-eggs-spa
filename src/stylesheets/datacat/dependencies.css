@@ -77,7 +77,6 @@
 .dep-status.good { fill:var(--dc-status-good); }
 .dep-status.warn { fill:var(--dc-status-warn); }
 .dep-status.critical { fill:var(--dc-status-critical); }
-.dep-status.idle { fill:var(--dc-text-muted); }
 
 .dep-legend {
 	display:flex;
@@ -105,20 +104,8 @@
 .dep-dot.good { background-color:var(--dc-status-good); }
 .dep-dot.warn { background-color:var(--dc-status-warn); }
 .dep-dot.critical { background-color:var(--dc-status-critical); }
-.dep-dot.idle { background-color:var(--dc-text-muted); }
-.dep-dot.none { border:1px solid var(--dc-text-muted); }
 
 .dep-message {
 	font-family: var(--font-ui);
 	color:var(--dc-text);
-}
-
-.dep-link {
-	color:var(--dc-active);
-}
-
-.dep-footnote {
-	font-family: var(--font-ui);
-	font-size:12px;
-	color:var(--dc-text-muted);
 }

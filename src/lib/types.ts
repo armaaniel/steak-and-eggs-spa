@@ -71,11 +71,10 @@ export interface DependencyNode {
 	id:string
 	title:string
 	role:string
-	status:'good' | 'warn' | 'critical' | 'idle' | 'none'
+	status:'good' | 'warn' | 'critical' | 'none'
 	statusLabel:string
 	metrics:{label:string; value:string}[]
 	note?:string
-	link?:{to:string; label:string}
 }
 
 export type Detail =

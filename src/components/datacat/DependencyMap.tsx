@@ -52,7 +52,6 @@ const EDGES = [
 
 const EDGE_LABELS: EdgeLabel[] = [
   { x: 226, y: 266, text: 'HTTPS + WSS' },
-  { x: 226, y: 346, text: 'synthetic' },
   { x: 489, y: 185, text: 'HTTP' },
   { x: 489, y: 207, text: 'WS' },
   { x: 781, y: 226, text: 'SET + PUB' },

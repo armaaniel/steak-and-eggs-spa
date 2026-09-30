@@ -96,7 +96,6 @@ const STATUS_LABELS: Record<Status, string> = {
   good: 'Healthy',
   warn: 'Degraded',
   critical: 'Down',
-  idle: 'Idle (market closed)',
   none: 'No health signal yet',
 }
 
@@ -106,12 +105,12 @@ const NOT_INSTRUMENTED = 'Not instrumented.'
 
 const GB = 1024 ** 3
 
-const RANK: Record<Status, number> = { none: 0, good: 1, idle: 2, warn: 3, critical: 4 }
+const RANK: Record<Status, number> = { none: 0, good: 1, warn: 2, critical: 3 }
 
 const worst = (a: Status, b: Status) => (RANK[a] >= RANK[b] ? a : b)
 
 const formatReading = ({ unit, now, peak, total }: DependencyReading) => {
-  if (total !== null) return `${Math.round(total).toLocaleString()} in the last hour`
+  if (total !== null) return Math.round(total).toLocaleString()
   if (now === null) return '-'
   if (unit === 'bytes') return `${(now / GB).toFixed(1)} GB`
   if (unit === 'percent') return `${now.toFixed(1)}% now, ${(peak ?? now).toFixed(1)}% peak`
@@ -123,7 +122,7 @@ const cloudwatch = (health: DependencyHealth | undefined) => {
   if (!health.configured) return { status: 'none' as Status, metrics: [], note: 'Not configured yet.' }
 
   const metrics = health.readings.map((reading) => ({ label: reading.label, value: formatReading(reading) }))
-  const note = health.status === 'none' ? 'No CloudWatch data in the last hour.' : undefined
+  const note = health.status === 'none' ? 'No CloudWatch data.' : undefined
 
   return { status: health.status, metrics, note }
 }
@@ -154,7 +153,7 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
   const spans = data?.ingesterSpans ?? []
   const lastSpan = spans.reduce<(typeof spans)[number] | null>((newest, span) => (!newest || span.at > newest.at ? span : newest), null)
   const state = lastSpan?.state
-  const ingesterStatus: Status = !state ? 'none' : state === 'streaming' ? 'good' : state === 'idle' ? 'idle' : 'critical'
+  const ingesterStatus: Status = !state ? 'none' : state === 'streaming' || state === 'idle' ? 'good' : 'critical'
   const lag = [...(data?.ingesterLag ?? [])].reverse().find((point) => point.meanExcessMs !== null)
   const uptime = data?.ingesterUptime
   const measured = uptime ? uptime.streamingSeconds + uptime.downSeconds : 0
@@ -180,24 +179,22 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
     makeNode('canary', 'Canary', 'Synthetic (k6)', canaryStatus, {
       metrics: slo
         ? [
-            { label: 'Runs passed, last hour', value: `${slo.good} / ${slo.expected}` },
+            { label: 'Runs passed', value: `${slo.good} / ${slo.expected}` },
             { label: '30-day result', value: `${percent(slo.periodGood, slo.periodExpected)} (target ${(slo.target * 100).toFixed(1)}%)` },
-            { label: 'Error budget left', value: budgetLeft },
+            { label: '30-day error budget left', value: budgetLeft },
           ]
         : [],
-      link: { to: '/datacat/uptime', label: 'Open Uptime' },
     }),
     makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note }),
     makeNode('rails', 'Rails app', 'ECS Fargate · API + cable', worst(railsStatus, railsTask.status), {
       metrics: data
         ? [
-            { label: 'Requests, last hour', value: requests.toLocaleString() },
-            { label: 'Errors, last hour', value: errors.toLocaleString() },
+            { label: 'Requests', value: requests.toLocaleString() },
+            { label: 'Errors', value: errors.toLocaleString() },
             { label: 'p50 / p99, latest 5 min', value: latest ? `${ms(latest.p50)} / ${ms(latest.p99)}` : '-' },
             ...railsTask.metrics,
           ]
         : [],
-      link: { to: '/datacat', label: 'Open Overview' },
     }),
     makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', redis.status, {
       metrics: [...redis.metrics, ...cachedRows.map((row) => ({ label: `${row.route} hit rate`, value: `${row.cacheHitRate}%` }))],
@@ -206,7 +203,7 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note }),
     makeNode('polygon', 'Polygon.io', 'Market data provider', 'none', {
       metrics: [
-        ...polygonRows.map((row) => ({ label: `${row.route} p99, last hour`, value: ms(row.p99) })),
+        ...polygonRows.map((row) => ({ label: `${row.route} p99`, value: ms(row.p99) })),
         ...(state ? [{ label: 'Price feed', value: `ingester ${state}` }] : []),
       ],
       note: 'No direct health check yet; these are the routes and the feed that depend on it.',
@@ -215,17 +212,16 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
       metrics: data
         ? [
             { label: 'State', value: state ?? '-' },
-            { label: 'Uptime, last hour', value: !uptime ? '-' : measured === 0 ? 'idle all hour' : `${uptime.pct.toFixed(2)}% (excluding idle)` },
+            { label: 'Uptime', value: !uptime ? '-' : measured === 0 ? 'idle all hour' : `${uptime.pct.toFixed(2)}% (excluding idle)` },
             { label: 'Mean lag, latest', value: ms(lag?.meanExcessMs) },
             ...ingesterTask.metrics,
           ]
         : [],
-      link: { to: '/datacat/ingester', label: 'Open Ingester' },
     }),
   ]
 }
 
-const LEGEND: Status[] = ['good', 'warn', 'critical', 'idle', 'none']
+const LEGEND: Status[] = ['good', 'warn', 'critical']
 
 function Dependencies() {
   const { detail, setDetail } = useOutletContext<OutletContextType>()
@@ -250,8 +246,6 @@ function Dependencies() {
       {error && <p className="dep-message">Unable to load health data, please try again</p>}
 
       <DependencyMap nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
-
-      <p className="dep-footnote">Server health comes from CloudWatch over the last hour, which runs a few minutes behind.</p>
 
       <div className="dep-legend">
         {LEGEND.map((status) => (

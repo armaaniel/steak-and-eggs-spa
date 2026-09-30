@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import type { DependencyNode } from '../../lib/types.ts'
 import '../../stylesheets/datacat/dependencies.css'
 
@@ -10,8 +9,7 @@ const DependencyDetailsPanel = ({ node }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
-        <p>{node.title}</p>
-        <p>{node.role}</p>
+        {node.metrics.length > 0 && <p>Last hour:</p>}
         <p>Status: {node.statusLabel}</p>
 
         {node.metrics.map((metric) => (
@@ -21,12 +19,6 @@ const DependencyDetailsPanel = ({ node }: Props) => {
         ))}
 
         {node.note && <p>{node.note}</p>}
-
-        {node.link && (
-          <Link to={node.link.to} className="dep-link">
-            {node.link.label}
-          </Link>
-        )}
       </div>
     </div>
   )
