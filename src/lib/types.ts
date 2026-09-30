@@ -49,6 +49,7 @@ export interface Trace {
 	status:number
 	dbRuntime:number
 	viewRuntime:number
+	source?:string
 	breakdown?: Record<string, Breakdown>
 }
 

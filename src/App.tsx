@@ -48,7 +48,7 @@ function App() {
             <Route path="/datacat/:method/*" element={<Endpoint />} />
             <Route path="/datacat/cache/:method/*" element={<Cache />} />
             <Route path="/datacat/dependencies/" element={<Navigate to="/datacat#dependencies" replace />} />
-            <Route path="/datacat/latent/" element={<Navigate to="/datacat#latent" replace />} />
+            <Route path="/datacat/traces/" element={<Navigate to="/datacat#traces" replace />} />
             <Route path="/datacat/connections/" element={<Connections />} />
             <Route path="/datacat/uptime/" element={<Navigate to="/datacat#uptime" replace />} />
             <Route path="/datacat/ingester/" element={<Ingester />} />

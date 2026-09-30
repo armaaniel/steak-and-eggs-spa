@@ -3,11 +3,11 @@ import { gql, useQuery } from '@apollo/client'
 import TraceTable from '../../components/datacat/TraceTable'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns } from '../../lib/traceColumns'
-import type { Trace, OutletContextType } from '../../lib/types.ts'
+import type { Column, Trace, OutletContextType } from '../../lib/types.ts'
 
-const GET_LATENT_TRACES = gql`
-  query getLatentTraces($range: String) {
-    latentTraces(range: $range) {
+const GET_RECENT_TRACES = gql`
+  query getRecentTraces($range: String) {
+    recentTraces(range: $range) {
       id
       createdAt
       endpoint
@@ -15,6 +15,7 @@ const GET_LATENT_TRACES = gql`
       controller
       action
       status
+      source
       dbRuntime
       viewRuntime
       breakdown
@@ -23,15 +24,19 @@ const GET_LATENT_TRACES = gql`
 `
 
 interface TraceData {
-  latentTraces: Trace[]
+  recentTraces: Trace[]
 }
 
-function Latent() {
+const sourceColumn: Column<Trace> = { key: 'source', label: 'Source', sortable: false, render: (trace) => trace.source ?? '-' }
+
+const columns = [...traceColumns.slice(0, 2), sourceColumn, ...traceColumns.slice(2)]
+
+function Traces() {
   const { detail, setDetail, range } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
-  const { loading, error, data } = useQuery<TraceData>(GET_LATENT_TRACES, {
+  const { loading, error, data } = useQuery<TraceData>(GET_RECENT_TRACES, {
     variables: { range },
   })
 
@@ -40,9 +45,9 @@ function Latent() {
 
   return (
     <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-      <TraceTable traceData={data?.latentTraces || []} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
+      <TraceTable traceData={data?.recentTraces || []} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
     </div>
   )
 }
 
-export default Latent
+export default Traces
