@@ -109,15 +109,15 @@ function Uptime() {
         <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
           <div className="uptime-slo">
             <div>
-              <p className="uptime-slo-label">Last {range}</p>
-              <p className={`uptime-slo-value ${belowTarget ? 'critical' : ''}`}>{sli === null ? '-' : `${sli.toFixed(2)}%`}</p>
-              <p className="uptime-slo-detail">{slo.good.toLocaleString()} / {slo.expected.toLocaleString()} runs passed</p>
-            </div>
-
-            <div>
               <p className="uptime-slo-label">SLO</p>
               <p className="uptime-slo-value">{(slo.target * 100).toFixed(1)}%</p>
               <p className="uptime-slo-detail">of canary runs pass, over 30 days</p>
+            </div>
+
+            <div>
+              <p className="uptime-slo-label">Last {range}</p>
+              <p className={`uptime-slo-value ${belowTarget ? 'critical' : ''}`}>{sli === null ? '-' : `${sli.toFixed(2)}%`}</p>
+              <p className="uptime-slo-detail">{slo.good.toLocaleString()} / {slo.expected.toLocaleString()} runs passed</p>
             </div>
 
             <div>
