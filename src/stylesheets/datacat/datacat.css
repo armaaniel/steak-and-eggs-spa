@@ -81,11 +81,11 @@
 	box-shadow:var(--dc-shadow-card);
 	border:1px solid var(--dc-border);
 	opacity:0;
-	transition:opacity 150ms;
 }
 
 .dc-overview.loaded {
 	opacity:1;
+	transition:opacity 150ms;
 }
 
 .dc-cell {
