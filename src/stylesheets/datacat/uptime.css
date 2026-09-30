@@ -241,3 +241,31 @@
 .uptime-request-endpoint {
 	flex:1;
 }
+
+.uptime-slo {
+	display:flex;
+	column-gap:2.5rem;
+	row-gap:1rem;
+	flex-wrap:wrap;
+	font-family: var(--font-ui);
+}
+
+.uptime-slo-label {
+	font-size:11px;
+	color:var(--dc-text-muted);
+}
+
+.uptime-slo-value {
+	font-size:18px;
+	font-weight:600;
+	color:var(--dc-text);
+}
+
+.uptime-slo-value.critical {
+	color:var(--dc-status-critical);
+}
+
+.uptime-slo-detail {
+	font-size:12px;
+	color:var(--dc-text-muted);
+}

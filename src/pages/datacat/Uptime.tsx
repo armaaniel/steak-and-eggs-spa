@@ -19,6 +19,13 @@ const GET_BUCKETS = gql`
       failures
       expected
     }
+    canarySlo(range: $range) {
+      target
+      good
+      expected
+      budgetAllowed
+      budgetUsed
+    }
   }
 `
 
@@ -34,8 +41,17 @@ const GET_RUNS = gql`
   }
 `
 
+interface CanarySlo {
+  target: number
+  good: number
+  expected: number
+  budgetAllowed: number
+  budgetUsed: number
+}
+
 interface BucketsData {
   syntheticBuckets: SyntheticBucket[]
+  canarySlo: CanarySlo
 }
 
 interface RunsData {
@@ -72,6 +88,12 @@ function Uptime() {
   const buckets = data?.syntheticBuckets || []
   const runs = runsData?.syntheticRuns || []
 
+  const slo = data?.canarySlo
+  const sli = slo && slo.expected > 0 ? (slo.good / slo.expected) * 100 : null
+  const belowTarget = slo !== undefined && sli !== null && sli < slo.target * 100
+  const budgetLeft = slo && slo.budgetAllowed > 0 ? Math.max(0, 1 - slo.budgetUsed / slo.budgetAllowed) * 100 : null
+  const budgetSpent = slo !== undefined && slo.budgetUsed > slo.budgetAllowed
+
   const changeRange = (value: string) => {
     setSelectedBucket(null)
     setRange(value)
@@ -83,8 +105,34 @@ function Uptime() {
         <Select id="range-select" label="Range" value={range} onChange={changeRange} options={rangeOptions} loaded={isLoaded} />
       </div>
 
+      {slo && (
+        <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+          <div className="uptime-slo">
+            <div>
+              <p className="uptime-slo-label">SLO</p>
+              <p className="uptime-slo-value">{(slo.target * 100).toFixed(1)}%</p>
+              <p className="uptime-slo-detail">of canary runs pass, over 30 days</p>
+            </div>
+
+            <div>
+              <p className="uptime-slo-label">Last {range}</p>
+              <p className={`uptime-slo-value ${belowTarget ? 'critical' : ''}`}>{sli === null ? '-' : `${sli.toFixed(2)}%`}</p>
+              <p className="uptime-slo-detail">{slo.good.toLocaleString()} / {slo.expected.toLocaleString()} runs passed</p>
+            </div>
+
+            <div>
+              <p className="uptime-slo-label">Error budget</p>
+              <p className={`uptime-slo-value ${budgetSpent ? 'critical' : ''}`}>{budgetLeft === null ? '-' : `${budgetLeft.toFixed(0)}% left`}</p>
+              <p className="uptime-slo-detail">{slo.budgetUsed.toLocaleString()} of {slo.budgetAllowed.toLocaleString()} bad runs used, last 30 days</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-        {error ? <p className="uptime-message">Unable to load uptime data, please try again</p> : 
+        {error ? 
+					<p className="uptime-message">Unable to load uptime data, please try again</p> 
+					: 
 				<UptimeChart buckets={buckets} selectedBucket={selectedBucket} onSelect={setSelectedBucket} />}
       </div>
 
