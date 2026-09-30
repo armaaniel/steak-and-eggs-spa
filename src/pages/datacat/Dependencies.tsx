@@ -5,7 +5,6 @@ import DependencyMap from '../../components/datacat/DependencyMap'
 import { ms } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
 import { DATACAT_RANGE_MS } from '../../hooks/useDatacatRange'
-import type { DatacatRange } from '../../hooks/useDatacatRange'
 import type { CanarySlo, DependencyNode, IngesterLagPoint, IngesterSpan, IngesterUptime, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
@@ -151,9 +150,7 @@ const cloudwatch = (health: DependencyHealth | undefined) => {
   return { status: health.status, metrics, note }
 }
 
-type NodeDraft = Omit<DependencyNode, 'range'>
-
-const makeNode = (id: string, title: string, role: string, status: Status, rest: Partial<NodeDraft> = {}): NodeDraft => ({
+const makeNode = (id: string, title: string, role: string, status: Status, rest: Partial<DependencyNode> = {}): DependencyNode => ({
   id,
   title,
   role,
@@ -174,7 +171,7 @@ const ago = (at: string, now: number) => {
 
 const total = (buckets: { requests: number; errors: number }[], key: 'requests' | 'errors') => buckets.reduce((sum, bucket) => sum + bucket[key], 0)
 
-const buildNodes = (data: DependencyData | undefined, now: number, range: DatacatRange): DependencyNode[] => {
+const buildNodes = (data: DependencyData | undefined, now: number): DependencyNode[] => {
   const recent = data?.serviceNow ?? []
   const latest = [...recent].reverse().find((bucket) => bucket.p99 !== null)
   const railsStatus: Status = !data ? 'none' : total(recent, 'requests') === 0 ? 'critical' : total(recent, 'errors') > 0 ? 'warn' : 'good'
@@ -205,7 +202,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
   const polygonStatus: Status = !polygonNow || polygonNow.calls === 0 ? 'none' : polygonNow.failures === polygonNow.calls ? 'critical' : polygonNow.failures > 0 ? 'warn' : 'good'
   const polygon = data?.polygonCalls
 
-  const drafts = [
+  return [
     makeNode('vercel', 'Vercel', 'Static hosting', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('browser', 'Browser', 'React SPA', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('mobile', 'React Native', 'Mobile app', 'none', { note: NOT_INSTRUMENTED }),
@@ -252,8 +249,6 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
         : [],
     }),
   ]
-
-  return drafts.map((node) => ({ ...node, range }))
 }
 
 const LEGEND: Status[] = ['good', 'warn', 'critical']
@@ -275,7 +270,7 @@ function Dependencies() {
 
   const isLoaded = useTransition(loading, data || error)
 
-  const nodes = buildNodes(data, clock.at, range)
+  const nodes = buildNodes(data, clock.at)
   const selectedId = detail?.kind === 'dependency' ? detail.node.id : null
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })
 
