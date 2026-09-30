@@ -75,6 +75,7 @@ export interface DependencyNode {
 	statusLabel:string
 	metrics:{label:string; value:string; points?:{at:string; value:number}[]; color?:string}[]
 	note?:string
+	range:DatacatRange
 }
 
 export type Detail =

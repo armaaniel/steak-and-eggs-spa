@@ -10,8 +10,8 @@ const DependencyDetailsPanel = ({ node }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
-        {node.metrics.length > 0 && <p>Last hour:</p>}
-        <p>Status: {node.statusLabel}</p>
+        {node.metrics.length > 0 && <p>Last {node.range}:</p>}
+        <p>Status now: {node.statusLabel}</p>
 
         {node.metrics.map((metric) => (
           <div key={metric.label}>

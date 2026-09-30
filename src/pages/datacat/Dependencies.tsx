@@ -4,11 +4,17 @@ import { useState } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
 import { ms } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
+import { DATACAT_RANGE_MS } from '../../hooks/useDatacatRange'
+import type { DatacatRange } from '../../hooks/useDatacatRange'
 import type { CanarySlo, DependencyNode, IngesterLagPoint, IngesterSpan, IngesterUptime, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
-  query getDependencies($from: ISO8601DateTime!, $to: ISO8601DateTime!) {
-    canarySlo(range: "1h") {
+  query getDependencies($range: String!, $from: ISO8601DateTime!, $to: ISO8601DateTime!, $rangeFrom: ISO8601DateTime!) {
+    canaryNow: canarySlo(range: "1h") {
+      good
+      expected
+    }
+    canarySlo(range: $range) {
       target
       good
       expected
@@ -17,22 +23,28 @@ const GET_DEPENDENCIES = gql`
       budgetAllowed
       budgetUsed
     }
-    serviceTimeseries(range: "1h") {
-      bucket
+    serviceNow: serviceTimeseries(range: "1h") {
       requests
       errors
       p50
-      p95
       p99
     }
-    polygonCalls(range: "1h") {
+    serviceTimeseries(range: $range) {
+      requests
+      errors
+    }
+    polygonNow: polygonCalls(range: "1h") {
+      calls
+      failures
+    }
+    polygonCalls(range: $range) {
       calls
       failures
       p50
       p99
       lastSuccessAt
     }
-    ingesterUptime(from: $from, to: $to) {
+    ingesterUptime(from: $rangeFrom, to: $to) {
       pct
       streamingSeconds
       idleSeconds
@@ -47,7 +59,7 @@ const GET_DEPENDENCIES = gql`
       at
       meanExcessMs
     }
-    dependencyHealth {
+    dependencyHealth(range: $range) {
       id
       configured
       status
@@ -68,8 +80,11 @@ const GET_DEPENDENCIES = gql`
 `
 
 interface DependencyData {
+  canaryNow: Pick<CanarySlo, 'good' | 'expected'>
   canarySlo: CanarySlo
-  serviceTimeseries: ServiceBucket[]
+  serviceNow: Pick<ServiceBucket, 'requests' | 'errors' | 'p50' | 'p99'>[]
+  serviceTimeseries: Pick<ServiceBucket, 'requests' | 'errors'>[]
+  polygonNow: Pick<PolygonCalls, 'calls' | 'failures'>
   polygonCalls: PolygonCalls
   ingesterUptime: IngesterUptime
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
@@ -136,7 +151,9 @@ const cloudwatch = (health: DependencyHealth | undefined) => {
   return { status: health.status, metrics, note }
 }
 
-const makeNode = (id: string, title: string, role: string, status: Status, rest: Partial<DependencyNode> = {}): DependencyNode => ({
+type NodeDraft = Omit<DependencyNode, 'range'>
+
+const makeNode = (id: string, title: string, role: string, status: Status, rest: Partial<NodeDraft> = {}): NodeDraft => ({
   id,
   title,
   role,
@@ -155,15 +172,18 @@ const ago = (at: string, now: number) => {
   return `${Math.floor(minutes / 60)} hr ago`
 }
 
-const buildNodes = (data: DependencyData | undefined, now: number): DependencyNode[] => {
-  const buckets = data?.serviceTimeseries ?? []
-  const requests = buckets.reduce((sum, bucket) => sum + bucket.requests, 0)
-  const errors = buckets.reduce((sum, bucket) => sum + bucket.errors, 0)
-  const latest = [...buckets].reverse().find((bucket) => bucket.p99 !== null)
-  const railsStatus: Status = !data ? 'none' : requests === 0 ? 'critical' : errors > 0 ? 'warn' : 'good'
+const total = (buckets: { requests: number; errors: number }[], key: 'requests' | 'errors') => buckets.reduce((sum, bucket) => sum + bucket[key], 0)
 
+const buildNodes = (data: DependencyData | undefined, now: number, range: DatacatRange): DependencyNode[] => {
+  const recent = data?.serviceNow ?? []
+  const latest = [...recent].reverse().find((bucket) => bucket.p99 !== null)
+  const railsStatus: Status = !data ? 'none' : total(recent, 'requests') === 0 ? 'critical' : total(recent, 'errors') > 0 ? 'warn' : 'good'
+  const requests = total(data?.serviceTimeseries ?? [], 'requests')
+  const errors = total(data?.serviceTimeseries ?? [], 'errors')
+
+  const canaryNow = data?.canaryNow
+  const canaryStatus: Status = !canaryNow || canaryNow.expected === 0 ? 'none' : canaryNow.good === canaryNow.expected ? 'good' : canaryNow.good === 0 ? 'critical' : 'warn'
   const slo = data?.canarySlo
-  const canaryStatus: Status = !slo || slo.expected === 0 ? 'none' : slo.good === slo.expected ? 'good' : slo.good === 0 ? 'critical' : 'warn'
   const budgetLeft = slo && slo.budgetAllowed > 0 ? `${(Math.max(0, 1 - slo.budgetUsed / slo.budgetAllowed) * 100).toFixed(0)}%` : '-'
 
   const spans = data?.ingesterSpans ?? []
@@ -181,10 +201,11 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
   const postgres = cloudwatch(healthFor('postgres'))
   const redis = cloudwatch(healthFor('redis'))
 
+  const polygonNow = data?.polygonNow
+  const polygonStatus: Status = !polygonNow || polygonNow.calls === 0 ? 'none' : polygonNow.failures === polygonNow.calls ? 'critical' : polygonNow.failures > 0 ? 'warn' : 'good'
   const polygon = data?.polygonCalls
-  const polygonStatus: Status = !polygon || polygon.calls === 0 ? 'none' : polygon.failures === polygon.calls ? 'critical' : polygon.failures > 0 ? 'warn' : 'good'
 
-  return [
+  const drafts = [
     makeNode('vercel', 'Vercel', 'Static hosting', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('browser', 'Browser', 'React SPA', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('mobile', 'React Native', 'Mobile app', 'none', { note: NOT_INSTRUMENTED }),
@@ -224,37 +245,42 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
       metrics: data
         ? [
             { label: 'State', value: state ?? '-' },
-            { label: 'Uptime', value: !uptime ? '-' : measured === 0 ? 'idle all hour' : `${uptime.pct.toFixed(2)}% (excluding idle)` },
+            { label: 'Uptime', value: !uptime ? '-' : measured === 0 ? 'idle throughout' : `${uptime.pct.toFixed(2)}% (excluding idle)` },
             { label: 'Mean lag, latest', value: ms(lag?.meanExcessMs) },
             ...ingesterTask.metrics,
           ]
         : [],
     }),
   ]
+
+  return drafts.map((node) => ({ ...node, range }))
 }
 
 const LEGEND: Status[] = ['good', 'warn', 'critical']
 
 function Dependencies() {
-  const { detail, setDetail } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, range } = useOutletContext<OutletContextType>()
 
-  const [lastHour] = useState(() => {
-    const to = Date.now()
-    return { from: new Date(to - HOUR_MS).toISOString(), to: new Date(to).toISOString() }
-  })
+  const [clock, setClock] = useState(() => ({ range, at: Date.now() }))
+  if (clock.range !== range) setClock({ range, at: Date.now() })
 
   const { loading, error, data } = useQuery<DependencyData>(GET_DEPENDENCIES, {
-    variables: lastHour,
+    variables: {
+      range,
+      from: new Date(clock.at - HOUR_MS).toISOString(),
+      to: new Date(clock.at).toISOString(),
+      rangeFrom: new Date(clock.at - DATACAT_RANGE_MS[range]).toISOString(),
+    },
   })
 
   const isLoaded = useTransition(loading, data || error)
 
-  const nodes = buildNodes(data, Date.parse(lastHour.to))
+  const nodes = buildNodes(data, clock.at, range)
   const selectedId = detail?.kind === 'dependency' ? detail.node.id : null
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })
 
   return (
-    <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+    <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
       {error && <p className="dep-message">Unable to load health data, please try again</p>}
 
       <DependencyMap nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
