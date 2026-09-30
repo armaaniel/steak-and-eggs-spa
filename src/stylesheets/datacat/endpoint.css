@@ -2,6 +2,25 @@
 	width:30%;
 }
 
+.home-left-two.sticky {
+	position:sticky;
+	top:1rem;
+	align-self:flex-start;
+	max-height:calc(100vh - 2rem);
+	overflow-y:auto;
+}
+
+.dc-section {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.5rem;
+	scroll-margin-top:1rem;
+}
+
+.dc-section + .dc-section {
+	margin-top:1.5rem;
+}
+
 .endpoint-header-container {
 	display:flex;
 }

@@ -3,9 +3,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import UptimeChart from '../../components/datacat/UptimeChart'
 import SyntheticRunRow from '../../components/datacat/SyntheticRunRow'
-import Select from '../../components/datacat/Select'
 import useTransition from '../../hooks/useTransition.ts'
-import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
 import { toBucketLabel } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/uptime.css'
@@ -55,11 +53,13 @@ interface RunsData {
 }
 
 function Uptime() {
-  const { detail, setDetail, range, setRange } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, range } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
-  const [selectedBucket, setSelectedBucket] = useState<SyntheticBucket | null>(null)
+  const [picked, setPicked] = useState<{ range: DatacatRange; bucket: SyntheticBucket } | null>(null)
+  const selectedBucket = picked?.range === range ? picked.bucket : null
+  const selectBucket = (bucket: SyntheticBucket) => setPicked({ range, bucket })
 
   const { loading, error, data } = useQuery<BucketsData>(GET_BUCKETS, {
     variables: { range },
@@ -88,17 +88,8 @@ function Uptime() {
   const budgetLeft = slo && slo.budgetAllowed > 0 ? Math.max(0, 1 - slo.budgetUsed / slo.budgetAllowed) * 100 : null
   const budgetSpent = slo !== undefined && slo.budgetUsed > slo.budgetAllowed
 
-  const changeRange = (value: DatacatRange) => {
-    setSelectedBucket(null)
-    setRange(value)
-  }
-
   return (
     <>
-      <div className="uptime-header">
-        <Select id="range-select" label="Range" value={range} onChange={changeRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
-      </div>
-
       {slo && (
         <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
           <div className="uptime-slo">
@@ -127,7 +118,7 @@ function Uptime() {
         {error ? 
 					<p className="uptime-message">Unable to load uptime data, please try again</p> 
 					: 
-				<UptimeChart buckets={buckets} selectedBucket={selectedBucket} onSelect={setSelectedBucket} />}
+				<UptimeChart buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} />}
       </div>
 
       {selectedBucket && (

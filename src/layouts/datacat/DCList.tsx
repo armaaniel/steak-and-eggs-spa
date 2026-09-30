@@ -1,6 +1,7 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import '../../stylesheets/datacat/datacat.css'
 import '../../stylesheets/datacat/endpoint.css'
 import Sidebar from '../../components/datacat/Sidebar'
 import DCNavbar from '../../components/datacat/DCNavbar'
@@ -57,9 +58,8 @@ const DetailPanel = ({ detail }: { detail: Detail }) => {
 }
 
 function DCList() {
-  const location = useLocation()
+  const onHome = useMatch('/datacat') !== null
 
-  const [loaded, setLoaded] = useState(false)
   const [detail, setDetail] = useState<Detail | null>(null)
   const [range, setRange] = useDatacatRange()
 
@@ -87,15 +87,11 @@ function DCList() {
 
   const closeDetails = () => setDetail(null)
 
-  useEffect(() => {
-    setLoaded(false)
-  }, [location.pathname])
-
   return (
     <div className="dc-root">
       <DCNavbar />
       <div className="dc-home-parent">
-        <div className="home-left-two">
+        <div className={`home-left-two ${onHome ? 'sticky' : ''}`}>
           {detail && (
             <div className="dc-side-header-container">
               <h3 className="catlas-text">{detail.kind === 'dependency' ? detail.node.title : 'Details'}</h3>
@@ -112,7 +108,7 @@ function DCList() {
             <DetailPanel detail={detail} />
           ) : (
             <>
-              <Sidebar />
+              <Sidebar onHome={onHome} />
 
               {isEndpointRoute && (
                 <StatsPanel
@@ -127,20 +123,12 @@ function DCList() {
                   <p>Error Rate: {stats?.errorRate}%</p>
                 </StatsPanel>
               )}
-
-              {location.pathname.includes('/latent') && (
-                <StatsPanel isOpen={statsOpen} onToggle={toggleStats} loaded={loaded}>
-                  <p>
-                    Excludes POST /graphql
-                  </p>
-                </StatsPanel>
-              )}
             </>
           )}
         </div>
 
         <div className="dc-home-right">
-          <Outlet context={{ detail, setDetail, setLoaded, range, setRange, usedRedis: stats?.usedRedis ?? false, usedApi: stats?.usedApi ?? false }} />
+          <Outlet context={{ detail, setDetail, range, setRange, usedRedis: stats?.usedRedis ?? false, usedApi: stats?.usedApi ?? false }} />
         </div>
       </div>
     </div>

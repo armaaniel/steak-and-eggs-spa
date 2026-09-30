@@ -9,17 +9,13 @@ import Stocks from './pages/Stocks'
 import Activity from './pages/Activity'
 import Privacy from './pages/Privacy'
 import DeleteAccount from './pages/DeleteAccount'
-import Overview from './pages/datacat/Overview'
+import DatacatHome from './pages/datacat/DatacatHome'
 import Endpoint from './pages/datacat/Endpoint'
 import Cache from './pages/datacat/Cache'
-import Latent from './pages/datacat/Latent'
 import Connections from './pages/datacat/Connections'
-import Uptime from './pages/datacat/Uptime'
-import Dependencies from './pages/datacat/Dependencies'
 import Ingester from './pages/datacat/Ingester'
 import LoadRun from './pages/datacat/LoadRun'
 import CableRun from './pages/datacat/CableRun'
-import DCSummary from './layouts/datacat/DCSummary'
 import DCList from './layouts/datacat/DCList'
 import NotFound from './pages/NotFound'
 
@@ -47,17 +43,14 @@ function App() {
   				</Route>
 
 
-          <Route element={<DCSummary />}>
-            <Route path="/datacat" element={<Overview />} />
-          </Route>
-
           <Route element={<DCList />}>
+            <Route path="/datacat" element={<DatacatHome />} />
             <Route path="/datacat/:method/*" element={<Endpoint />} />
             <Route path="/datacat/cache/:method/*" element={<Cache />} />
-            <Route path="/datacat/dependencies/" element={<Dependencies />} />
-            <Route path="/datacat/latent/" element={<Latent />} />
+            <Route path="/datacat/dependencies/" element={<Navigate to="/datacat#dependencies" replace />} />
+            <Route path="/datacat/latent/" element={<Navigate to="/datacat#latent" replace />} />
             <Route path="/datacat/connections/" element={<Connections />} />
-            <Route path="/datacat/uptime/" element={<Uptime />} />
+            <Route path="/datacat/uptime/" element={<Navigate to="/datacat#uptime" replace />} />
             <Route path="/datacat/ingester/" element={<Ingester />} />
             <Route path="/datacat/load/" element={<Navigate to="/datacat/load/http" replace />} />
             <Route path="/datacat/load/http" element={<LoadRun />} />

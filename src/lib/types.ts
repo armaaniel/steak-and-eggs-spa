@@ -86,7 +86,6 @@ export type Detail =
 export interface OutletContextType {
 	detail: Detail | null
 	setDetail: React.Dispatch<React.SetStateAction<Detail | null>>
-	setLoaded: React.Dispatch<React.SetStateAction<boolean>>
 	range: DatacatRange
 	setRange: (range: DatacatRange) => void
 	usedRedis: boolean
