@@ -62,7 +62,7 @@ function Endpoint() {
         </div>
       </div>
 
-      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         <TraceTable traceData={filteredTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
       </div>
     </>

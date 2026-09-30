@@ -74,7 +74,7 @@ function Cache() {
         <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
       </div>
 
-      <div className={`cache-parent-container ${isLoaded ? 'loaded' : ''}`}>
+      <div className={`cache-parent-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         <div className="cache-container">
           <TraceTable traceData={cached} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
           <p className="cache-text">Redis: {cached.length} traces</p>

@@ -118,7 +118,7 @@ function DCList() {
                 <StatsPanel
                   isOpen={statsOpen}
                   onToggle={toggleStats}
-                  loaded={statsLoaded && (stats?.totalRequests ?? 0) > 0}
+                  loaded={statsLoaded && !loading && (stats?.totalRequests ?? 0) > 0}
                   triggerContent={<>P50: {stats?.p50?.toFixed(0)}ms</>}
                 >
                   <p>P95: {stats?.p95?.toFixed(0)}ms</p>
