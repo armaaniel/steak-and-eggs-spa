@@ -7,7 +7,7 @@ import Select from '../../components/datacat/Select'
 import useTransition from '../../hooks/useTransition.ts'
 import { toBucketLabel } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/uptime.css'
-import type { SyntheticBucket, SyntheticRun, OutletContextType, Trace } from '../../lib/types.ts'
+import type { SyntheticBucket, SyntheticRun, OutletContextType, Trace, CanarySlo } from '../../lib/types.ts'
 
 const GET_BUCKETS = gql`
   query getSyntheticBuckets($range: String!) {
@@ -42,16 +42,6 @@ const GET_RUNS = gql`
     }
   }
 `
-
-interface CanarySlo {
-  target: number
-  good: number
-  expected: number
-  periodGood: number
-  periodExpected: number
-  budgetAllowed: number
-  budgetUsed: number
-}
 
 interface BucketsData {
   syntheticBuckets: SyntheticBucket[]

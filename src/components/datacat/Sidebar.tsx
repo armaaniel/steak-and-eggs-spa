@@ -8,6 +8,10 @@ const Sidebar = () => {
         Overview
       </NavLink>
 
+      <NavLink to="/datacat/dependencies" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
+        Dependencies
+      </NavLink>
+
       <NavLink to="/datacat/latent" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
         Most Latent
       </NavLink>

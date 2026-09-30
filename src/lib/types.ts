@@ -67,9 +67,21 @@ export interface ConnectionWithID extends Connection {
   id: number
 }
 
+export interface DependencyNode {
+	id:string
+	title:string
+	role:string
+	status:'good' | 'warn' | 'critical' | 'idle' | 'none'
+	statusLabel:string
+	metrics:{label:string; value:string}[]
+	note?:string
+	link?:{to:string; label:string}
+}
+
 export type Detail =
 	| {kind:'trace'; trace:Trace}
 	| {kind:'cable'; connection:ConnectionWithID}
+	| {kind:'dependency'; node:DependencyNode}
 	| IngesterDetail
 
 export interface OutletContextType {
@@ -104,6 +116,16 @@ export interface SyntheticBucket {
 	completed:number
 	failures:number
 	expected:number
+}
+
+export interface CanarySlo {
+	target:number
+	good:number
+	expected:number
+	periodGood:number
+	periodExpected:number
+	budgetAllowed:number
+	budgetUsed:number
 }
 
 export interface ServiceBucket {

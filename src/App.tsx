@@ -15,6 +15,7 @@ import Cache from './pages/datacat/Cache'
 import Latent from './pages/datacat/Latent'
 import Connections from './pages/datacat/Connections'
 import Uptime from './pages/datacat/Uptime'
+import Dependencies from './pages/datacat/Dependencies'
 import Ingester from './pages/datacat/Ingester'
 import LoadRun from './pages/datacat/LoadRun'
 import CableRun from './pages/datacat/CableRun'
@@ -53,6 +54,7 @@ function App() {
           <Route element={<DCList />}>
             <Route path="/datacat/:method/*" element={<Endpoint />} />
             <Route path="/datacat/cache/:method/*" element={<Cache />} />
+            <Route path="/datacat/dependencies/" element={<Dependencies />} />
             <Route path="/datacat/latent/" element={<Latent />} />
             <Route path="/datacat/connections/" element={<Connections />} />
             <Route path="/datacat/uptime/" element={<Uptime />} />

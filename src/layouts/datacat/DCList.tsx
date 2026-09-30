@@ -7,6 +7,7 @@ import DCNavbar from '../../components/datacat/DCNavbar'
 import TraceDetailsPanel from '../../components/datacat/TraceDetailsPanel'
 import CableConnectionDetailsPanel from '../../components/datacat/CableConnectionDetailsPanel'
 import IngesterDetailsPanel from '../../components/datacat/IngesterDetailsPanel'
+import DependencyDetailsPanel from '../../components/datacat/DependencyDetailsPanel'
 import StatsPanel from '../../components/datacat/StatsPanel'
 import useEndpoint from '../../hooks/useEndpoint'
 import useDatacatRange from '../../hooks/useDatacatRange'
@@ -47,6 +48,8 @@ const DetailPanel = ({ detail }: { detail: Detail }) => {
       return <TraceDetailsPanel trace={detail.trace} />
     case 'cable':
       return <CableConnectionDetailsPanel connection={detail.connection} />
+    case 'dependency':
+      return <DependencyDetailsPanel node={detail.node} />
     case 'boot':
     case 'connection':
       return <IngesterDetailsPanel detail={detail} />
