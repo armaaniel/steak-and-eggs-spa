@@ -59,7 +59,7 @@ function Uptime() {
 
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: SyntheticBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
-  const selectBucket = (bucket: SyntheticBucket) => setPicked({ range, bucket })
+  const selectBucket = (bucket: SyntheticBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
   const { loading, error, data } = useQuery<BucketsData>(GET_BUCKETS, {
     variables: { range },
