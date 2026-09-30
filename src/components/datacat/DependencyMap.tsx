@@ -11,6 +11,7 @@ interface Box {
   x: number
   y: number
   w: number
+  tone: string
 }
 
 interface EdgeLabel {
@@ -23,16 +24,16 @@ interface EdgeLabel {
 const BOX_HEIGHT = 56
 
 const LAYOUT: Record<string, Box> = {
-  vercel:   { x: 30,  y: 76,  w: 130 },
-  browser:  { x: 30,  y: 164, w: 130 },
-  mobile:   { x: 30,  y: 244, w: 130 },
-  canary:   { x: 30,  y: 324, w: 130 },
-  alb:      { x: 310, y: 164, w: 160 },
-  redis:    { x: 510, y: 70,  w: 180 },
-  rails:    { x: 510, y: 164, w: 180 },
-  postgres: { x: 510, y: 258, w: 180 },
-  polygon:  { x: 750, y: 70,  w: 180 },
-  ingester: { x: 750, y: 258, w: 180 },
+  vercel:   { x: 30,  y: 76,  w: 130, tone: 'purple' },
+  browser:  { x: 30,  y: 164, w: 130, tone: 'grey' },
+  mobile:   { x: 30,  y: 244, w: 130, tone: 'grey' },
+  canary:   { x: 30,  y: 324, w: 130, tone: 'grey' },
+  alb:      { x: 310, y: 164, w: 160, tone: 'blue' },
+  redis:    { x: 510, y: 70,  w: 180, tone: 'amber' },
+  rails:    { x: 510, y: 164, w: 180, tone: 'teal' },
+  postgres: { x: 510, y: 258, w: 180, tone: 'blue' },
+  polygon:  { x: 750, y: 70,  w: 180, tone: 'pink' },
+  ingester: { x: 750, y: 258, w: 180, tone: 'coral' },
 }
 
 const EDGES = [
@@ -89,7 +90,7 @@ const DependencyMap = ({ nodes, selectedId, onSelect }: Props) => {
         return (
           <g
             key={node.id}
-            className={`dep-node ${node.id === selectedId ? 'selected' : ''}`}
+            className={`dep-node ${box.tone} ${node.id === selectedId ? 'selected' : ''}`}
             role="button"
             tabIndex={0}
             aria-label={`${node.title}: ${node.statusLabel}`}
