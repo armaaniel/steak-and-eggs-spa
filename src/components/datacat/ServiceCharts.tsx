@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ComposedChart, BarChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { ms, legendText } from './runCharts'
 import type { ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -10,7 +10,7 @@ interface Props {
 
 interface Mark {
   t: number
-  ok: number
+  requests: number
   errors: number
   p50: number | null
   p99: number | null
@@ -54,7 +54,7 @@ const ServiceCharts = ({ buckets }: Props) => {
 
   const series: Mark[] = buckets.map((bucket) => ({
     t: new Date(bucket.bucket).getTime(),
-    ok: bucket.requests - bucket.errors,
+    requests: bucket.requests,
     errors: bucket.errors,
     p50: bucket.p50,
     p99: bucket.p99,
@@ -94,15 +94,15 @@ const ServiceCharts = ({ buckets }: Props) => {
       <p className="lr-panel-label">Requests</p>
       <div className="lr-chart lr-chart-axis" {...watch('requests')}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
+          <ComposedChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
             <XAxis dataKey="t" minTickGap={48} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={stamp} />
             <YAxis width={56} allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-            <Tooltip content={readout('requests')} cursor={{ fill: 'var(--dc-hover)' }} />
+            <Tooltip content={readout('requests')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
             <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-            <Bar dataKey="ok" name="ok" stackId="requests" fill="var(--dc-series-1)" isAnimationActive={false} />
-            <Bar dataKey="errors" name="errors" stackId="requests" fill="var(--dc-status-critical)" isAnimationActive={false} />
-          </BarChart>
+            <Line type="monotone" dataKey="requests" name="requests" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
+            <Line type="monotone" dataKey="errors" name="errors" stroke="var(--dc-status-critical)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
