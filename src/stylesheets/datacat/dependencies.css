@@ -109,3 +109,17 @@
 	font-family: var(--font-ui);
 	color:var(--dc-text);
 }
+
+.dep-spark {
+	height:36px;
+	margin:2px 0 6px;
+}
+
+.dep-spark-tooltip {
+	padding:2px 6px;
+	border-radius:4px;
+	background-color:var(--dc-surface-2);
+	font-family: var(--font-ui);
+	font-size:11px;
+	color:var(--dc-text);
+}
