@@ -116,3 +116,9 @@
 .dep-link {
 	color:var(--dc-active);
 }
+
+.dep-footnote {
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text-muted);
+}

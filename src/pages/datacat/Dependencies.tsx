@@ -46,6 +46,19 @@ const GET_DEPENDENCIES = gql`
       at
       meanExcessMs
     }
+    dependencyHealth {
+      id
+      configured
+      status
+      readings {
+        key
+        label
+        unit
+        now
+        peak
+        total
+      }
+    }
   }
 `
 
@@ -56,6 +69,23 @@ interface DependencyData {
   ingesterUptime: IngesterUptime
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
   ingesterLag: Pick<IngesterLagPoint, 'at' | 'meanExcessMs'>[]
+  dependencyHealth: DependencyHealth[]
+}
+
+interface DependencyReading {
+  key: string
+  label: string
+  unit: 'percent' | 'count' | 'bytes'
+  now: number | null
+  peak: number | null
+  total: number | null
+}
+
+interface DependencyHealth {
+  id: string
+  configured: boolean
+  status: Status
+  readings: DependencyReading[]
 }
 
 type Status = DependencyNode['status']
@@ -72,9 +102,31 @@ const STATUS_LABELS: Record<Status, string> = {
 
 const POLYGON_ROUTES = ['GET /stocks/symbol/marketdata', 'GET /stocks/symbol/chartdata', 'GET /stocks/symbol/companydata']
 
-const NOT_COLLECTED = 'Server health metrics are not collected yet.'
-
 const NOT_INSTRUMENTED = 'Not instrumented.'
+
+const GB = 1024 ** 3
+
+const RANK: Record<Status, number> = { none: 0, good: 1, idle: 2, warn: 3, critical: 4 }
+
+const worst = (a: Status, b: Status) => (RANK[a] >= RANK[b] ? a : b)
+
+const formatReading = ({ unit, now, peak, total }: DependencyReading) => {
+  if (total !== null) return `${Math.round(total).toLocaleString()} in the last hour`
+  if (now === null) return '-'
+  if (unit === 'bytes') return `${(now / GB).toFixed(1)} GB`
+  if (unit === 'percent') return `${now.toFixed(1)}% now, ${(peak ?? now).toFixed(1)}% peak`
+  return `${Math.round(now)} now, ${Math.round(peak ?? now)} peak`
+}
+
+const cloudwatch = (health: DependencyHealth | undefined) => {
+  if (!health) return { status: 'none' as Status, metrics: [], note: 'CloudWatch data is unavailable right now.' }
+  if (!health.configured) return { status: 'none' as Status, metrics: [], note: 'Not configured yet.' }
+
+  const metrics = health.readings.map((reading) => ({ label: reading.label, value: formatReading(reading) }))
+  const note = health.status === 'none' ? 'No CloudWatch data in the last hour.' : undefined
+
+  return { status: health.status, metrics, note }
+}
 
 const makeNode = (id: string, title: string, role: string, status: Status, rest: Partial<DependencyNode> = {}): DependencyNode => ({
   id,
@@ -107,6 +159,13 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
   const uptime = data?.ingesterUptime
   const measured = uptime ? uptime.streamingSeconds + uptime.downSeconds : 0
 
+  const healthFor = (id: string) => (data?.dependencyHealth ?? []).find((health) => health.id === id)
+  const alb = cloudwatch(healthFor('alb'))
+  const railsTask = cloudwatch(healthFor('rails'))
+  const ingesterTask = cloudwatch(healthFor('ingester'))
+  const postgres = cloudwatch(healthFor('postgres'))
+  const redis = cloudwatch(healthFor('redis'))
+
   const summary = data?.traceSummary ?? []
   const polygonRows = POLYGON_ROUTES.flatMap((route) => summary.filter((row) => row.route === route))
   const cachedRows = summary
@@ -128,22 +187,23 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
         : [],
       link: { to: '/datacat/uptime', label: 'Open Uptime' },
     }),
-    makeNode('alb', 'ALB', 'TLS termination', 'none', { note: NOT_COLLECTED }),
-    makeNode('rails', 'Rails app', 'ECS Fargate · API + cable', railsStatus, {
+    makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note }),
+    makeNode('rails', 'Rails app', 'ECS Fargate · API + cable', worst(railsStatus, railsTask.status), {
       metrics: data
         ? [
             { label: 'Requests, last hour', value: requests.toLocaleString() },
             { label: 'Errors, last hour', value: errors.toLocaleString() },
             { label: 'p50 / p99, latest 5 min', value: latest ? `${ms(latest.p50)} / ${ms(latest.p99)}` : '-' },
+            ...railsTask.metrics,
           ]
         : [],
       link: { to: '/datacat', label: 'Open Overview' },
     }),
-    makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', 'none', {
-      metrics: cachedRows.map((row) => ({ label: `${row.route} hit rate`, value: `${row.cacheHitRate}%` })),
-      note: `Hit rates come from traces, for routes that use the cache. ${NOT_COLLECTED}`,
+    makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', redis.status, {
+      metrics: [...redis.metrics, ...cachedRows.map((row) => ({ label: `${row.route} hit rate`, value: `${row.cacheHitRate}%` }))],
+      note: redis.note,
     }),
-    makeNode('postgres', 'RDS Postgres', 'Persistent storage', 'none', { note: NOT_COLLECTED }),
+    makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note }),
     makeNode('polygon', 'Polygon.io', 'Market data provider', 'none', {
       metrics: [
         ...polygonRows.map((row) => ({ label: `${row.route} p99, last hour`, value: ms(row.p99) })),
@@ -151,12 +211,13 @@ const buildNodes = (data: DependencyData | undefined): DependencyNode[] => {
       ],
       note: 'No direct health check yet; these are the routes and the feed that depend on it.',
     }),
-    makeNode('ingester', 'Ingester', 'ECS Fargate · prices', ingesterStatus, {
+    makeNode('ingester', 'Ingester', 'ECS Fargate · prices', worst(ingesterStatus, ingesterTask.status), {
       metrics: data
         ? [
             { label: 'State', value: state ?? '-' },
             { label: 'Uptime, last hour', value: !uptime ? '-' : measured === 0 ? 'idle all hour' : `${uptime.pct.toFixed(2)}% (excluding idle)` },
             { label: 'Mean lag, latest', value: ms(lag?.meanExcessMs) },
+            ...ingesterTask.metrics,
           ]
         : [],
       link: { to: '/datacat/ingester', label: 'Open Ingester' },
@@ -189,6 +250,8 @@ function Dependencies() {
       {error && <p className="dep-message">Unable to load health data, please try again</p>}
 
       <DependencyMap nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
+
+      <p className="dep-footnote">Server health comes from CloudWatch over the last hour, which runs a few minutes behind.</p>
 
       <div className="dep-legend">
         {LEGEND.map((status) => (
