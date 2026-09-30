@@ -5,6 +5,8 @@ import UptimeChart from '../../components/datacat/UptimeChart'
 import SyntheticRunRow from '../../components/datacat/SyntheticRunRow'
 import Select from '../../components/datacat/Select'
 import useTransition from '../../hooks/useTransition.ts'
+import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
+import type { DatacatRange } from '../../hooks/useDatacatRange'
 import { toBucketLabel } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/uptime.css'
 import type { SyntheticBucket, SyntheticRun, OutletContextType, Trace, CanarySlo } from '../../lib/types.ts'
@@ -52,15 +54,11 @@ interface RunsData {
   syntheticRuns: SyntheticRun[]
 }
 
-const ranges = ['1h', '12h', '24h', '7d', '14d', '30d']
-const rangeOptions = ranges.map((range) => ({ value: range, label: range }))
-
 function Uptime() {
-  const { detail, setDetail } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, range, setRange } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
-  const [range, setRange] = useState('1h')
   const [selectedBucket, setSelectedBucket] = useState<SyntheticBucket | null>(null)
 
   const { loading, error, data } = useQuery<BucketsData>(GET_BUCKETS, {
@@ -90,7 +88,7 @@ function Uptime() {
   const budgetLeft = slo && slo.budgetAllowed > 0 ? Math.max(0, 1 - slo.budgetUsed / slo.budgetAllowed) * 100 : null
   const budgetSpent = slo !== undefined && slo.budgetUsed > slo.budgetAllowed
 
-  const changeRange = (value: string) => {
+  const changeRange = (value: DatacatRange) => {
     setSelectedBucket(null)
     setRange(value)
   }
@@ -98,7 +96,7 @@ function Uptime() {
   return (
     <>
       <div className="uptime-header">
-        <Select id="range-select" label="Range" value={range} onChange={changeRange} options={rangeOptions} loaded={isLoaded} />
+        <Select id="range-select" label="Range" value={range} onChange={changeRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
       </div>
 
       {slo && (
