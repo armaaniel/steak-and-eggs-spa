@@ -9,7 +9,7 @@ import type { CanarySlo, DependencyNode, IngesterLagPoint, IngesterSpan, Ingeste
 
 const GET_DEPENDENCIES = gql`
   query getDependencies($range: String!, $from: ISO8601DateTime!, $to: ISO8601DateTime!, $rangeFrom: ISO8601DateTime!) {
-    canaryNow: canarySlo(range: "1h") {
+    canaryNow: canarySlo(range: "10m") {
       good
       expected
     }
@@ -22,7 +22,7 @@ const GET_DEPENDENCIES = gql`
       budgetAllowed
       budgetUsed
     }
-    serviceNow: serviceTimeseries(range: "1h") {
+    serviceNow: serviceTimeseries(range: "10m") {
       requests
       errors
       p50
@@ -32,7 +32,7 @@ const GET_DEPENDENCIES = gql`
       requests
       errors
     }
-    polygonNow: polygonCalls(range: "1h") {
+    polygonNow: polygonCalls(range: "10m") {
       calls
       failures
     }
