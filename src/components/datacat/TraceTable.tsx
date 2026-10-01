@@ -12,13 +12,14 @@ interface TableProps<T> {
   recordsPerPage: number
   error: ApolloError | undefined
   emptyMessage?: string | undefined
+  loaded?: boolean
 }
 
 interface HasID {
   id: string | number
 }
 
-const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSelectedTrace, recordsPerPage, error, emptyMessage }: TableProps<T>) => {
+const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSelectedTrace, recordsPerPage, error, emptyMessage, loaded = true }: TableProps<T>) => {
   const [sorted, setSorted] = useState(false)
   const [direction, setDirection] = useState('desc')
   const [sortField, setSortField] = useState('createdAt')
@@ -62,7 +63,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
 
   return (
     <>
-      <table className="overview-stock-table">
+      <table className={`overview-stock-table table-fade ${loaded ? 'loaded' : ''}`}>
         <thead>
           <tr>
             {columns.map((column) => (
@@ -104,7 +105,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         )}
       </table>
 
-      <PaginationControls currentPage={currentPage} totalPages={totalPages} onNext={next} onPrev={prev} />
+      <PaginationControls currentPage={currentPage} totalPages={totalPages} onNext={next} onPrev={prev} className={`table-fade ${loaded ? 'loaded' : ''}`} />
     </>
   )
 }

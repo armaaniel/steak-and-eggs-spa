@@ -59,7 +59,7 @@ function Overview() {
         {error ? <p className="ov-message">Unable to load the overview, please try again</p> : <ServiceCharts buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} />}
       </div>
 
-      <Traces bucket={selectedBucket} />
+      <Traces key={range} bucket={selectedBucket} />
 
       <div className={`dc-overview ${isLoaded && !loading ? 'loaded' : ''}`}>
         <TraceOverviewTable traceData={traceData} recordsPerPage={recordsPerPage} error={error} />

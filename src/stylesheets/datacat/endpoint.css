@@ -73,6 +73,15 @@
     transition: opacity 150ms;
 }
 
+.table-fade {
+	opacity:0;
+}
+
+.table-fade.loaded {
+	opacity:1;
+	transition:opacity 150ms;
+}
+
 .stats-container {
 	display:flex;
 	flex-direction:column;

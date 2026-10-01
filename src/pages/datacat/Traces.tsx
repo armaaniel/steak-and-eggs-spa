@@ -41,18 +41,19 @@ function Traces({ bucket }: Props) {
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
-  const { loading, error, data } = useQuery<TraceData>(GET_RECENT_TRACES, {
+  const { loading, error, data, previousData } = useQuery<TraceData>(GET_RECENT_TRACES, {
     variables: { range, bucket: bucket?.bucket, bucketEnd: bucket?.bucketEnd },
   })
 
   const recordsPerPage = 10
   const isLoaded = useTransition(loading, data || error)
+  const traces = (data ?? previousData)?.recentTraces || []
 
   return (
-    <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+    <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
       {bucket && <p className="ov-traces-title">Traces from {toBucketLabel(bucket.bucket)}</p>}
 
-      <TraceTable traceData={data?.recentTraces || []} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} />
+      <TraceTable traceData={traces} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading} />
     </div>
   )
 }
