@@ -5,5 +5,5 @@ export const traceColumns: Column<Trace>[] = [
   { key: 'endpoint', label: 'Endpoint', sortable: false, render: (trace) => trace.endpoint },
   { key: 'duration', label: 'Duration', sortable: true, render: (trace) => `${trace.duration?.toFixed(0)} ms` },
   { key: 'controllerMethod', label: 'Controller Method', sortable: false, render: (trace) => `${trace.controller}#${trace.action}` },
-  { key: 'status', label: 'Status', sortable: false, render: (trace) => trace.status },
+  { key: 'status', label: 'Status', sortable: true, render: (trace) => trace.status },
 ]

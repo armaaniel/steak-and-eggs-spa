@@ -31,8 +31,8 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         aValue = new Date(a.createdAt)
         bValue = new Date(b.createdAt)
       } else {
-        aValue = a.duration
-        bValue = b.duration
+        aValue = a[sortField]
+        bValue = b[sortField]
       }
       if (direction === 'asc') {
         return aValue - bValue
