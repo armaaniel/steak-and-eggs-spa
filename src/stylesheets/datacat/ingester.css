@@ -77,9 +77,20 @@
 	background-color:var(--dc-status-critical);
 }
 
-.ing-chart {
-	height:220px;
+.ing-panel {
+	height:130px;
 	font-family: var(--font-ui);
+}
+
+.ing-panel.axis {
+	height:156px;
+}
+
+.ing-panel-label {
+	font-family: var(--font-ui);
+	font-size:12px;
+	color:var(--dc-text-muted);
+	margin:0;
 }
 
 .ing-tooltip {

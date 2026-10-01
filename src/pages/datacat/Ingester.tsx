@@ -94,6 +94,8 @@ interface IngesterData {
 }
 
 type BootRow = IngesterBoot & { id: string }
+
+type Panel = 'rate' | 'lag' | 'resources'
 type ConnectionRow = IngesterConnection & { id: string }
 
 const toIso = (ms: number) => (Number.isFinite(ms) ? new Date(ms).toISOString() : '')
@@ -141,6 +143,10 @@ function Ingester() {
   const lag = data?.ingesterLag || []
   const resources = data?.ingesterResources || []
   const transitions = data?.ingesterTransitions || []
+
+  const [hovered, setHovered] = useState<Panel | null>(null)
+  const bottom = ([['resources', resources], ['lag', lag], ['rate', rate]] as const).find(([, points]) => points.length > 0)?.[0]
+  const watch = (panel: Panel) => ({ onPointerEnter: () => setHovered(panel), onPointerLeave: () => setHovered(null) })
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
   const connections: ConnectionRow[] = (data?.ingesterConnections || []).map((connection) => ({ ...connection, id: connection.connectionId }))
@@ -202,21 +208,32 @@ function Ingester() {
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-            <p className="ing-card-title">Throughput</p>
+            <p className="ing-panel-label">Throughput</p>
+            {rate.length === 0 ? (
+              <p className="ing-message">No samples in this window</p>
+            ) : (
+              <div {...watch('rate')}>
+                <IngesterRateChart points={rate} from={range.from} to={range.to} axis={bottom === 'rate'} readout={hovered === 'rate'} />
+              </div>
+            )}
 
-            {rate.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterRateChart points={rate} />}
-          </div>
+            <p className="ing-panel-label">Mean lag (ms)</p>
+            {lag.length === 0 ? (
+              <p className="ing-message">No samples in this window</p>
+            ) : (
+              <div {...watch('lag')}>
+                <IngesterLagChart points={lag} from={range.from} to={range.to} axis={bottom === 'lag'} readout={hovered === 'lag'} />
+              </div>
+            )}
 
-          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-            <p className="ing-card-title">Mean lag</p>
-
-            {lag.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterLagChart points={lag} from={range.from} to={range.to} />}
-          </div>
-
-          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-            <p className="ing-card-title">CPU and memory</p>
-
-            {resources.length === 0 ? <p className="ing-message">No CloudWatch data in this window</p> : <IngesterResourceChart points={resources} from={range.from} to={range.to} />}
+            <p className="ing-panel-label">CPU and memory</p>
+            {resources.length === 0 ? (
+              <p className="ing-message">No CloudWatch data in this window</p>
+            ) : (
+              <div {...watch('resources')}>
+                <IngesterResourceChart points={resources} from={range.from} to={range.to} axis={bottom === 'resources'} readout={hovered === 'resources'} />
+              </div>
+            )}
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>

@@ -1,19 +1,31 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { INGESTER_SYNC, nearestTick, timeTick } from './ingesterTime'
 import type { IngesterRatePoint } from '../../lib/types.ts'
 
 interface Props {
   points: IngesterRatePoint[]
+  from: number
+  to: number
+  axis: boolean
+  readout: boolean
+}
+
+interface Mark {
+  t: number
+  eventsPerSec: number | null
+  framesPerSec: number | null
+  point: IngesterRatePoint
 }
 
 interface TooltipProps {
   active?: boolean
-  payload?: { payload: IngesterRatePoint }[]
+  payload?: { payload: Mark }[]
 }
 
 const RateTooltip = ({ active, payload }: TooltipProps) => {
-  if (!active || !payload?.length) return null
+  const point = payload?.[0]?.payload.point
 
-  const point = payload[0].payload
+  if (!active || !point) return null
 
   return (
     <div className="ing-tooltip">
@@ -28,14 +40,16 @@ const RateTooltip = ({ active, payload }: TooltipProps) => {
   )
 }
 
-const IngesterRateChart = ({ points }: Props) => {
+const IngesterRateChart = ({ points, from, to, axis, readout }: Props) => {
+  const series: Mark[] = points.map((point) => ({ t: new Date(point.at).getTime(), eventsPerSec: point.eventsPerSec, framesPerSec: point.framesPerSec, point }))
+
   return (
-    <div className="ing-chart">
+    <div className={`ing-panel ${axis ? 'axis' : ''}`}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-          <XAxis dataKey="at" minTickGap={48} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(at) => new Date(at).toLocaleTimeString('en-us', { hour: 'numeric', minute: '2-digit' })} />
-          <YAxis width={44} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-          <Tooltip content={<RateTooltip />} cursor={false} />
+        <LineChart data={series} syncId={INGESTER_SYNC} syncMethod={nearestTick} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+          <XAxis type="number" dataKey="t" domain={[from, to]} hide={!axis} minTickGap={48} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={timeTick(from, to)} />
+          <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+          <Tooltip content={readout ? <RateTooltip /> : () => null} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
           <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
           <Line type="monotone" dataKey="eventsPerSec" name="events/sec" stroke="var(--dc-series-1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
           <Line type="monotone" dataKey="framesPerSec" name="frames/sec" stroke="var(--dc-series-2)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
