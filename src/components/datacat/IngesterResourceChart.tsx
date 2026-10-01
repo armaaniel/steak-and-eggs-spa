@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { INGESTER_SYNC, nearestTick, timeTick } from './ingesterTime'
+import { INGESTER_SYNC, nearestTick, panelHeight, timeTick } from './ingesterTime'
 import type { ResourcePoint } from '../../lib/types.ts'
 
 interface Props {
@@ -53,8 +53,8 @@ const IngesterResourceChart = ({ points, from, to, axis, readout }: Props) => {
   })
 
   return (
-    <div className={`ing-panel ${axis ? 'axis' : ''}`}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="ing-panel">
+      <ResponsiveContainer width="100%" height={panelHeight(axis)}>
         <LineChart data={series} syncId={INGESTER_SYNC} syncMethod={nearestTick} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
           <XAxis type="number" dataKey="t" domain={[from, to]} hide={!axis} minTickGap={48} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={timeTick(from, to)} />
           <YAxis width={56} domain={[0, 100]} ticks={[0, 50, 100]} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />

@@ -145,7 +145,8 @@ function Ingester() {
   const transitions = data?.ingesterTransitions || []
 
   const [hovered, setHovered] = useState<Panel | null>(null)
-  const bottom = ([['resources', resources], ['lag', lag], ['rate', rate]] as const).find(([, points]) => points.length > 0)?.[0]
+  const [showResources, setShowResources] = useState(false)
+  const bottom = ([['resources', showResources ? resources : []], ['lag', lag], ['rate', rate]] as const).find(([, points]) => points.length > 0)?.[0]
   const watch = (panel: Panel) => ({ onPointerEnter: () => setHovered(panel), onPointerLeave: () => setHovered(null) })
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
@@ -226,14 +227,20 @@ function Ingester() {
               </div>
             )}
 
-            <p className="ing-panel-label">CPU and memory</p>
-            {resources.length === 0 ? (
-              <p className="ing-message">No CloudWatch data in this window</p>
-            ) : (
-              <div {...watch('resources')}>
-                <IngesterResourceChart points={resources} from={range.from} to={range.to} axis={bottom === 'resources'} readout={hovered === 'resources'} />
-              </div>
-            )}
+            <button type="button" className="ing-panel-toggle" onClick={() => setShowResources(!showResources)} aria-expanded={showResources}>
+              CPU and memory
+              <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`stats-v ${showResources ? 'open' : ''}`}>
+                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            {showResources &&
+              (resources.length === 0 ? (
+                <p className="ing-message">No CloudWatch data in this window</p>
+              ) : (
+                <div {...watch('resources')}>
+                  <IngesterResourceChart points={resources} from={range.from} to={range.to} axis={bottom === 'resources'} readout={hovered === 'resources'} />
+                </div>
+              ))}
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>

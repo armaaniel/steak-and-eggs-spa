@@ -1,5 +1,7 @@
 export const INGESTER_SYNC = 'ingester'
 
+export const panelHeight = (axis: boolean) => (axis ? 220 : 190)
+
 export const timeTick = (from: number, to: number) => (t: number) =>
   new Date(t).toLocaleString('en-us', to - from <= 24 * 60 * 60 * 1000 ? { hour: 'numeric', minute: '2-digit' } : { month: 'short', day: 'numeric' })
 
