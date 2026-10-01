@@ -73,15 +73,6 @@ function Navbar() {
                 <button className="profile-dropdown-item" onClick={() => setTheme(toggleTheme())}>
                   {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </button>
-                <a
-                  href="https://www.notion.so/Steak-Eggs-3487e61da1f98087811cd2dd38b7f662?source=copy_link"
-                  className="profile-dropdown-item"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  Notion
-                </a>
                 <button
                   className="profile-dropdown-item"
                   onClick={() => { setDropdownOpen(false); setOpenModal('password') }}

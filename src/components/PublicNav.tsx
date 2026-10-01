@@ -76,16 +76,6 @@ const PublicNav = ({ showSearch = true, demo }: Props) => {
               </Link>
               <hr className="profile-dropdown-divider" />
               <a
-                href="https://www.notion.so/Steak-Eggs-3487e61da1f98087811cd2dd38b7f662?source=copy_link"
-                className="profile-dropdown-item"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setDropdownOpen(false)}
-              >
-                Notion
-              </a>
-              <hr className="profile-dropdown-divider" />
-              <a
                 href="https://github.com/armaaniel"
                 className="profile-dropdown-item"
                 target="_blank"
