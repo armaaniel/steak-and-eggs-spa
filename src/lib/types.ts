@@ -137,6 +137,7 @@ export interface PolygonCalls {
 
 export interface ServiceBucket {
 	bucket:string
+	bucketEnd:string
 	requests:number
 	errors:number
 	p50:number | null

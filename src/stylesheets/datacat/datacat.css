@@ -230,3 +230,7 @@
 .dc-theme-toggle:hover {
 	background-color:var(--dc-hover);
 }
+
+.recharts-surface > g:focus {
+	outline:none;
+}

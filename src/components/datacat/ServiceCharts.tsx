@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { ComposedChart, Line, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { ms, legendText } from './runCharts'
 import type { ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
   buckets: ServiceBucket[]
+  selectedBucket: ServiceBucket | null
+  onSelect: (bucket: ServiceBucket) => void
 }
 
 interface Mark {
   t: number
-  requests: number
+  ok: number
   errors: number
   p50: number | null
   p99: number | null
@@ -47,14 +49,14 @@ const ServiceTooltip = ({ active, payload }: TooltipProps) => {
   )
 }
 
-const ServiceCharts = ({ buckets }: Props) => {
+const ServiceCharts = ({ buckets, selectedBucket, onSelect }: Props) => {
   const [hovered, setHovered] = useState<Panel | null>(null)
 
   if (!buckets.length) return <p className="lr-message">No requests in this range.</p>
 
   const series: Mark[] = buckets.map((bucket) => ({
     t: new Date(bucket.bucket).getTime(),
-    requests: bucket.requests,
+    ok: bucket.requests - bucket.errors,
     errors: bucket.errors,
     p50: bucket.p50,
     p99: bucket.p99,
@@ -69,6 +71,13 @@ const ServiceCharts = ({ buckets }: Props) => {
 
   const dot = (panel: Panel) => (hovered === panel ? { r: 4, strokeWidth: 0 } : false)
 
+  const fade = (mark: Mark) => (selectedBucket && selectedBucket.bucket !== mark.bucket.bucket ? 0.35 : 1)
+
+  const select = ({ activeTooltipIndex }: { activeTooltipIndex?: number | string | null }) => {
+    const mark = series[Number(activeTooltipIndex)]
+    if (activeTooltipIndex != null && mark) onSelect(mark.bucket)
+  }
+
   const watch = (panel: Panel) => ({
     onPointerMove: () => setHovered((current) => (current === panel ? current : panel)),
     onPointerLeave: () => setHovered((current) => (current === panel ? null : current))
@@ -81,7 +90,7 @@ const ServiceCharts = ({ buckets }: Props) => {
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-            <XAxis dataKey="t" hide />
+            <XAxis dataKey="t" scale="band" hide />
             <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
             <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
             <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
@@ -94,14 +103,18 @@ const ServiceCharts = ({ buckets }: Props) => {
       <p className="lr-panel-label">Requests</p>
       <div className="lr-chart lr-chart-axis" {...watch('requests')}>
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
+          <ComposedChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }} onClick={select} style={{ cursor: 'pointer' }}>
             <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
             <XAxis dataKey="t" minTickGap={48} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={stamp} />
             <YAxis width={56} allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-            <Tooltip content={readout('requests')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
+            <Tooltip content={readout('requests')} cursor={{ fill: 'var(--dc-hover)' }} />
             <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-            <Line type="linear" dataKey="requests" name="requests" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
-            <Line type="linear" dataKey="errors" name="errors" stroke="var(--dc-status-critical)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('requests')} isAnimationActive={false} />
+            <Bar dataKey="ok" name="requests" stackId="requests" fill="var(--dc-series-1)" isAnimationActive={false}>
+              {series.map((mark) => <Cell key={mark.t} fillOpacity={fade(mark)} />)}
+            </Bar>
+            <Bar dataKey="errors" name="errors" stackId="requests" fill="var(--dc-status-critical)" isAnimationActive={false}>
+              {series.map((mark) => <Cell key={mark.t} fillOpacity={fade(mark)} />)}
+            </Bar>
           </ComposedChart>
         </ResponsiveContainer>
       </div>
