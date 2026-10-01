@@ -8,6 +8,7 @@ import IngesterLagChart from '../../components/datacat/IngesterLagChart'
 import IngesterResourceChart from '../../components/datacat/IngesterResourceChart'
 import DateRangePicker from '../../components/datacat/DateRangePicker'
 import useTransition from '../../hooks/useTransition.ts'
+import { panelHeight } from '../../components/datacat/ingesterTime'
 import { toDuration, toRange } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
 import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, DateRange, ResourcePoint } from '../../lib/types.ts'
@@ -146,7 +147,6 @@ function Ingester() {
 
   const [hovered, setHovered] = useState<Panel | null>(null)
   const [showResources, setShowResources] = useState(false)
-  const bottom = ([['resources', showResources ? resources : []], ['lag', lag], ['rate', rate]] as const).find(([, points]) => points.length > 0)?.[0]
   const watch = (panel: Panel) => ({ onPointerEnter: () => setHovered(panel), onPointerLeave: () => setHovered(null) })
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
@@ -214,7 +214,7 @@ function Ingester() {
               <p className="ing-message">No samples in this window</p>
             ) : (
               <div {...watch('rate')}>
-                <IngesterRateChart points={rate} from={range.from} to={range.to} axis={bottom === 'rate'} readout={hovered === 'rate'} />
+                <IngesterRateChart points={rate} from={range.from} to={range.to} axis={lag.length === 0} readout={hovered === 'rate'} />
               </div>
             )}
 
@@ -223,24 +223,28 @@ function Ingester() {
               <p className="ing-message">No samples in this window</p>
             ) : (
               <div {...watch('lag')}>
-                <IngesterLagChart points={lag} from={range.from} to={range.to} axis={bottom === 'lag'} readout={hovered === 'lag'} />
+                <IngesterLagChart points={lag} from={range.from} to={range.to} axis readout={hovered === 'lag'} />
               </div>
             )}
 
-            <button type="button" className="ing-panel-toggle" onClick={() => setShowResources(!showResources)} aria-expanded={showResources}>
-              CPU and memory
-              <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`stats-v ${showResources ? 'open' : ''}`}>
-                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            {showResources &&
-              (resources.length === 0 ? (
-                <p className="ing-message">No CloudWatch data in this window</p>
-              ) : (
-                <div {...watch('resources')}>
-                  <IngesterResourceChart points={resources} from={range.from} to={range.to} axis={bottom === 'resources'} readout={hovered === 'resources'} />
-                </div>
-              ))}
+            <div>
+              <button type="button" className="ing-panel-toggle" onClick={() => setShowResources(!showResources)} aria-expanded={showResources}>
+                CPU and memory
+                <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`stats-v ${showResources ? 'open' : ''}`}>
+                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
+              <div className={`ing-drawer ${showResources ? 'open' : ''}`} style={{ maxHeight: showResources ? panelHeight(true) : 0 }} inert={!showResources}>
+                {resources.length === 0 ? (
+                  <p className="ing-message">No CloudWatch data in this window</p>
+                ) : (
+                  <div {...watch('resources')}>
+                    <IngesterResourceChart points={resources} from={range.from} to={range.to} axis readout={hovered === 'resources'} />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>

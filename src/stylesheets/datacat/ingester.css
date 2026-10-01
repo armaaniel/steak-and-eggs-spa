@@ -106,6 +106,15 @@
 	color:var(--dc-text);
 }
 
+.ing-drawer {
+	overflow:hidden;
+	transition:max-height 0.3s ease, margin 0.3s ease;
+}
+
+.ing-drawer.open {
+	margin-top:1rem;
+}
+
 .ing-tooltip {
 	display:flex;
 	flex-direction:column;
