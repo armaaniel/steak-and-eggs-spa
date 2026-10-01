@@ -4,6 +4,7 @@ import { useLocation, useOutletContext } from 'react-router-dom'
 import Overview from './Overview'
 import Dependencies from './Dependencies'
 import Uptime from './Uptime'
+import Routes from './Routes'
 import Select from '../../components/datacat/Select'
 import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import { DATACAT_SECTIONS } from '../../lib/datacatSections.ts'
@@ -13,8 +14,9 @@ import '../../stylesheets/datacat/endpoint.css'
 
 const SECTION_PAGES: Record<DatacatSection, ComponentType> = {
   overview: Overview,
-  dependencies: Dependencies,
   uptime: Uptime,
+  dependencies: Dependencies,
+  routes: Routes,
 }
 
 function DatacatHome() {
