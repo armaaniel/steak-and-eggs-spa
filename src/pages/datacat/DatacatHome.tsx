@@ -25,7 +25,8 @@ function DatacatHome() {
 
   useEffect(() => {
     const target = hash ? document.getElementById(hash.slice(1)) : null
-    if (!target) return
+    const sections = target?.parentElement
+    if (!target || !sections) return
 
     const align = () => target.scrollIntoView({ block: 'start' })
     const observer = new ResizeObserver(align)
@@ -37,7 +38,7 @@ function DatacatHome() {
     }
 
     align()
-    observer.observe(document.body)
+    observer.observe(sections)
     window.addEventListener('wheel', stop, { passive: true })
     window.addEventListener('touchstart', stop, { passive: true })
     window.addEventListener('keydown', stop)
