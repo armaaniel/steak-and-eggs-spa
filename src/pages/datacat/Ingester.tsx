@@ -5,11 +5,12 @@ import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import IngesterRateChart from '../../components/datacat/IngesterRateChart'
 import IngesterLagChart from '../../components/datacat/IngesterLagChart'
+import IngesterResourceChart from '../../components/datacat/IngesterResourceChart'
 import DateRangePicker from '../../components/datacat/DateRangePicker'
 import useTransition from '../../hooks/useTransition.ts'
 import { toDuration, toRange } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
-import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, DateRange } from '../../lib/types.ts'
+import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, DateRange, ResourcePoint } from '../../lib/types.ts'
 
 const GET_INGESTER = gql`
   query getIngester($from: ISO8601DateTime!, $to: ISO8601DateTime!) {
@@ -50,6 +51,11 @@ const GET_INGESTER = gql`
       sampledEvents
       symbols
     }
+    ingesterResources(from: $from, to: $to) {
+      at
+      cpu
+      memory
+    }
     ingesterBoots(from: $from, to: $to) {
       bootId
       startedAt
@@ -82,6 +88,7 @@ interface IngesterData {
   ingesterRate: IngesterRatePoint[]
   ingesterTransitions: IngesterTransition[]
   ingesterLag: IngesterLagPoint[]
+  ingesterResources: ResourcePoint[]
   ingesterBoots: IngesterBoot[]
   ingesterConnections: IngesterConnection[]
 }
@@ -132,6 +139,7 @@ function Ingester() {
   const spans = data?.ingesterSpans || []
   const rate = data?.ingesterRate || []
   const lag = data?.ingesterLag || []
+  const resources = data?.ingesterResources || []
   const transitions = data?.ingesterTransitions || []
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
@@ -203,6 +211,12 @@ function Ingester() {
             <p className="ing-card-title">Mean lag</p>
 
             {lag.length === 0 ? <p className="ing-message">No samples in this window</p> : <IngesterLagChart points={lag} from={range.from} to={range.to} />}
+          </div>
+
+          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+            <p className="ing-card-title">CPU and memory</p>
+
+            {resources.length === 0 ? <p className="ing-message">No CloudWatch data in this window</p> : <IngesterResourceChart points={resources} from={range.from} to={range.to} />}
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>

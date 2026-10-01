@@ -266,6 +266,12 @@ export interface IngesterLagPoint {
 	symbols:number | null
 }
 
+export interface ResourcePoint {
+	at:string
+	cpu:number | null
+	memory:number | null
+}
+
 export interface IngesterTransition {
 	id:string
 	at:string
