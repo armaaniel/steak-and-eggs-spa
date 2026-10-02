@@ -138,6 +138,7 @@ export interface PolygonCalls {
 export interface ServiceBucket {
 	bucket:string
 	bucketEnd:string
+	partial?:boolean
 	requests:number
 	errors:number
 	p50:number | null
@@ -286,3 +287,11 @@ export interface IngesterTransition {
 export type IngesterDetail =
 	| {kind:'boot'; boot:IngesterBoot; transitions:IngesterTransition[]; connections:IngesterConnection[]}
 	| {kind:'connection'; connection:IngesterConnection; transitions:IngesterTransition[]}
+
+export interface ScatterPoint {
+	id:string
+	at:string
+	status:number | null
+	duration:number
+	count:number
+}

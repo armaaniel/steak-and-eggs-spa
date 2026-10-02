@@ -36,7 +36,7 @@ const ServiceTooltip = ({ active, payload }: TooltipProps) => {
 
   return (
     <div className="lr-tooltip">
-      <p className="lr-tooltip-time">{new Date(bucket.bucket).toLocaleString()}</p>
+      <p className="lr-tooltip-time">{new Date(bucket.bucket).toLocaleString()}{bucket.partial ? ' · in progress' : ''}</p>
       <p>
         <span className="lr-key lr-key-2" />
         <strong>{ms(bucket.p99)}</strong> p99<span className="lr-dim"> · p95 {ms(bucket.p95)}</span>
@@ -72,7 +72,7 @@ const ServiceCharts = ({ buckets, selectedBucket, onSelect, latency = true }: Pr
 
   const dot = (panel: Panel) => (hovered === panel ? { r: 4, strokeWidth: 0 } : false)
 
-  const fade = (mark: Mark) => (selectedBucket && selectedBucket.bucket !== mark.bucket.bucket ? 0.35 : 1)
+  const fade = (mark: Mark) => (selectedBucket && selectedBucket.bucket !== mark.bucket.bucket ? 0.35 : 1) * (mark.bucket.partial ? 0.5 : 1)
 
   const select = ({ activeTooltipIndex }: { activeTooltipIndex?: number | string | null }) => {
     const mark = series[Number(activeTooltipIndex)]
