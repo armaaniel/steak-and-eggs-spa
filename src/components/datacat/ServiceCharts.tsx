@@ -13,6 +13,7 @@ interface Props {
 
 interface Mark {
   t: number
+  mid: number
   ok: number
   errors: number
   p50: number | null
@@ -57,6 +58,7 @@ const ServiceCharts = ({ buckets, selectedBucket, onSelect, latency = true }: Pr
 
   const series: Mark[] = buckets.map((bucket) => ({
     t: new Date(bucket.bucket).getTime(),
+    mid: (new Date(bucket.bucket).getTime() + new Date(bucket.bucketEnd).getTime()) / 2,
     ok: bucket.requests - bucket.errors,
     errors: bucket.errors,
     p50: bucket.p50,
@@ -64,6 +66,8 @@ const ServiceCharts = ({ buckets, selectedBucket, onSelect, latency = true }: Pr
     bucket
   }))
 
+  const from = series[0].t
+  const to = new Date(buckets[buckets.length - 1].bucketEnd).getTime()
   const span = series[series.length - 1].t - series[0].t
   const format: Intl.DateTimeFormatOptions = span > DAY_MS ? { month: 'short', day: 'numeric' } : { hour: 'numeric', minute: '2-digit' }
   const stamp = (t: number) => new Date(t).toLocaleString('en-us', format)
@@ -93,7 +97,7 @@ const ServiceCharts = ({ buckets, selectedBucket, onSelect, latency = true }: Pr
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
                 <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                <XAxis dataKey="t" scale="band" hide />
+                <XAxis type="number" dataKey="mid" domain={[from, to]} hide />
                 <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
                 <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
