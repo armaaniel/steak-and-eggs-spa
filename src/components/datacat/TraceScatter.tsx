@@ -49,8 +49,8 @@ const density = (count: number) => 1 - (1 - DOT_OPACITY) ** count
 const TraceScatter = ({ points, from, to, selectedId, onSelect }: Props) => {
   const marks: Mark[] = points.map((point) => ({ t: new Date(point.at).getTime(), duration: Math.max(point.duration, 1), point }))
 
-  const top = 10 ** Math.ceil(Math.log10(Math.max(10, ...marks.map((mark) => mark.duration))))
-  const ticks = Array.from({ length: Math.log10(top) + 1 }, (_, power) => 10 ** power)
+  const top = Math.max(1, ...marks.map((mark) => mark.duration)) * 1.2
+  const ticks = Array.from({ length: Math.floor(Math.log10(top)) + 1 }, (_, power) => 10 ** power)
 
   const dot = ({ cx, cy, payload }: DotProps) => {
     if (cx == null || cy == null || !payload) return <g />
@@ -63,11 +63,11 @@ const TraceScatter = ({ points, from, to, selectedId, onSelect }: Props) => {
 
   return (
     <>
-      <p className="lr-panel-label">Latency (ms, log scale) · one dot per request, darker where they overlap</p>
+      <p className="lr-panel-label">Latency (ms, log scale)</p>
       <div className="lr-chart">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
+            <CartesianGrid vertical={false} horizontalValues={ticks} stroke="var(--dc-border)" strokeDasharray="none" />
             <XAxis type="number" dataKey="t" domain={[from, to]} hide />
             <YAxis type="number" dataKey="duration" scale="log" domain={[1, top]} ticks={ticks} width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} allowDataOverflow />
             <Tooltip content={<ScatterTooltip />} cursor={false} isAnimationActive={false} />
