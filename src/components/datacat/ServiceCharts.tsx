@@ -8,6 +8,7 @@ interface Props {
   buckets: ServiceBucket[]
   selectedBucket: ServiceBucket | null
   onSelect: (bucket: ServiceBucket) => void
+  latency?: boolean
 }
 
 interface Mark {
@@ -49,7 +50,7 @@ const ServiceTooltip = ({ active, payload }: TooltipProps) => {
   )
 }
 
-const ServiceCharts = ({ buckets, selectedBucket, onSelect }: Props) => {
+const ServiceCharts = ({ buckets, selectedBucket, onSelect, latency = true }: Props) => {
   const [hovered, setHovered] = useState<Panel | null>(null)
 
   if (!buckets.length) return <p className="lr-message">No requests in this range.</p>
@@ -85,20 +86,24 @@ const ServiceCharts = ({ buckets, selectedBucket, onSelect }: Props) => {
 
   return (
     <div className="lr-panels">
-      <p className="lr-panel-label">Latency (ms)</p>
-      <div className="lr-chart" {...watch('latency')}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-            <XAxis dataKey="t" scale="band" hide />
-            <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-            <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-            <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-            <Line type="linear" dataKey="p99" name="p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
-            <Line type="linear" dataKey="p50" name="p50" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      {latency && (
+        <>
+          <p className="lr-panel-label">Latency (ms)</p>
+          <div className="lr-chart" {...watch('latency')}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={series} syncId="overview" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
+                <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
+                <XAxis dataKey="t" scale="band" hide />
+                <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
+                <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
+                <Line type="linear" dataKey="p99" name="p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
+                <Line type="linear" dataKey="p50" name="p50" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      )}
 
       <p className="lr-panel-label">Requests</p>
       <div className="lr-chart lr-chart-axis" {...watch('requests')}>
