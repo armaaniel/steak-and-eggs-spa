@@ -21,12 +21,32 @@ interface TooltipRow {
 type Percentile = 'p99' | 'p50'
 
 const Y_LABEL_COUNT = 4
+const Y_LABEL_GAP = 2
 
 const P99_COLOR = 'var(--dc-latency-p99)'
 const P50_COLOR = 'var(--dc-latency-p50)'
 
 function formatYAxisDuration(ms: number) {
   return ms.toLocaleString('en-us', { maximumFractionDigits: 2 })
+}
+
+function findWidestYLabel(labels: string[]) {
+  const context = document.createElement('canvas').getContext('2d')
+
+  if (context === null) {
+    return 0
+  }
+
+  const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-ui')
+  context.font = `11px ${fontFamily}`
+
+  let widest = 0
+
+  for (const label of labels) {
+    widest = Math.max(widest, context.measureText(label).width)
+  }
+
+  return Math.ceil(widest)
 }
 
 function formatTooltipDuration(ms: number | null) {
@@ -114,13 +134,9 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
     return null
   }
 
-  const chartLeft = MARGIN.left
   const chartRight = width - MARGIN.right
   const chartTop = MARGIN.top
   const chartBottom = HEIGHT - MARGIN.bottom
-  const plotWidth = chartRight - chartLeft
-
-  const xScale = timeScale(chartBuckets, width)
 
   const highestLatency = findHighestLatency(chartBuckets, showP99, showP50)
 
@@ -131,6 +147,13 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
   }
 	// scales data values to pixel position
   const yScale = scaleLinear().domain([0, yMax]).nice(Y_LABEL_COUNT).range([chartBottom, chartTop])
+
+  const yLabelValues = yScale.ticks(Y_LABEL_COUNT)
+
+  const chartLeft = findWidestYLabel(yLabelValues.map(formatYAxisDuration)) + Y_LABEL_GAP
+  const plotWidth = chartRight - chartLeft
+
+  const xScale = timeScale(chartBuckets, chartLeft, chartRight)
 
   const makeP99Path = line<ChartBucket>()
     .defined(function (chartBucket) {
@@ -161,8 +184,6 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
   const p99Path = makeP99Path(edgeToEdgeBuckets) ?? undefined
   const p50Path = makeP50Path(edgeToEdgeBuckets) ?? undefined
 
-  const yLabelValues = yScale.ticks(Y_LABEL_COUNT)
-
   const xLabelCount = Math.max(2, Math.floor(plotWidth / 100))
   const xLabelDates = xScale.ticks(xLabelCount)
 
@@ -172,7 +193,7 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
     return (
       <g key={ms}>
         <line className="dc-grid" x1={chartLeft} x2={chartRight} y1={gridlineY} y2={gridlineY} />
-        <text x={chartLeft - 8} y={gridlineY} dy="0.32em" textAnchor="end">
+        <text x={chartLeft - Y_LABEL_GAP} y={gridlineY} dy="0.32em" textAnchor="end">
           {formatYAxisDuration(ms)}
         </text>
       </g>
@@ -309,9 +330,9 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
             <line x1={activeX} x2={activeX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />
           )}
 
-          {showP99 && <path d={p99Path} fill="none" stroke={P99_COLOR} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />}
+          {showP99 && <path d={p99Path} fill="none" stroke={P99_COLOR} strokeWidth={1.5} strokeLinejoin="round" />}
 
-          {showP50 && <path d={p50Path} fill="none" stroke={P50_COLOR} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />}
+          {showP50 && <path d={p50Path} fill="none" stroke={P50_COLOR} strokeWidth={1.5} strokeLinejoin="round" />}
 
           {focused && showP99 && activeChartBucket.p99 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p99)} r={3.5} fill={P99_COLOR} stroke="var(--dc-surface)" strokeWidth={2} />}
 
@@ -330,7 +351,7 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
         )}
       </div>
 
-      <div className="dc-legend">
+      <div className="dc-legend" style={{ paddingLeft: chartLeft }}>
         <span className={showP99 ? '' : 'off'}>
           <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
           p99

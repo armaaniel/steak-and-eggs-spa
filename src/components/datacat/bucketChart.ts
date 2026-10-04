@@ -23,7 +23,7 @@ export interface Hover {
 
 // The bottom margin fits the time labels.
 export const HEIGHT = 180
-export const MARGIN = { top: 12, right: 12, bottom: 22, left: 56 }
+export const MARGIN = { top: 12, right: 12, bottom: 22 }
 export const PLOT_BOTTOM = HEIGHT - MARGIN.bottom
 
 export const dropEmptyBucketInProgress = (buckets: ServiceBucket[]) =>
@@ -37,11 +37,11 @@ export const toChartBuckets = (buckets: ServiceBucket[]): ChartBucket[] =>
   })
 
 // scales time value to pixel position
-export const timeScale = (chartBuckets: ChartBucket[], width: number) => {
+export const timeScale = (chartBuckets: ChartBucket[], chartLeft: number, chartRight: number) => {
   const firstBucket = chartBuckets[0]
   const lastBucket = chartBuckets[chartBuckets.length - 1]
 
-  return scaleTime().domain([firstBucket.start, lastBucket.end]).range([MARGIN.left, width - MARGIN.right])
+  return scaleTime().domain([firstBucket.start, lastBucket.end]).range([chartLeft, chartRight])
 }
 
 // The bucket under the pointer, or null outside the plot.

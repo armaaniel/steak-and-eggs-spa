@@ -63,7 +63,7 @@
 .dc-legend {
 	display:flex;
 	column-gap:12px;
-	padding:4px 0 0 56px;
+	padding:4px 0 0;
 }
 
 .dc-legend > * {
