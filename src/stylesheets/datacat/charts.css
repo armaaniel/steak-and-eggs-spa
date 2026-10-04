@@ -16,7 +16,6 @@
 
 .dc-grid {
 	stroke:var(--dc-border);
-	stroke-dasharray:3 3;
 }
 
 /* dark in both themes, so it reads as a tooltip over the chart */
