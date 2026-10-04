@@ -36,7 +36,6 @@ function Overview() {
   const selectedBucket = picked?.range === range ? picked.bucket : null
   const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
-  // held here so other charts on the page can show the hovered bucket too
   const [hover, setHover] = useState<Hover | null>(null)
 
   const { loading, error, data } = useQuery<OverviewData>(GET_OVERVIEW, {
@@ -55,7 +54,7 @@ function Overview() {
         ) : (
           <>
             <div className="lr-panels">
-              <LatencyChart buckets={buckets} hover={hover} onHover={setHover} />
+              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} />
             </div>
             <ServiceCharts buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} latency={false} />
           </>

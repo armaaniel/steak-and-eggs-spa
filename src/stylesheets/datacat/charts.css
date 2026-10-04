@@ -19,8 +19,8 @@
 	stroke-dasharray:3 3;
 }
 
-/* dark in both themes, so it reads as a readout over the chart */
-.dc-readout {
+/* dark in both themes, so it reads as a tooltip over the chart */
+.dc-tooltip {
 	position:absolute;
 	width:max-content;
 	min-width:140px;
@@ -36,12 +36,12 @@
 	z-index:1;
 }
 
-.dc-readout-time {
+.dc-tooltip-time {
 	margin-bottom:4px;
 	color:#a3a8b3;
 }
 
-.dc-readout-row {
+.dc-tooltip-row {
 	display:grid;
 	grid-template-columns:10px 1fr auto;
 	align-items:center;
@@ -49,7 +49,7 @@
 	line-height:1.6;
 }
 
-.dc-readout-row strong {
+.dc-tooltip-row strong {
 	font-weight:500;
 	text-align:right;
 }
@@ -79,10 +79,6 @@
 	font-size:12px;
 }
 
-.dc-legend button {
-	cursor:pointer;
-}
-
-.dc-legend button.off {
+.dc-legend .off {
 	opacity:0.4;
 }
