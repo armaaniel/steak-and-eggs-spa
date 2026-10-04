@@ -6,7 +6,7 @@ import ServiceCharts from '../../components/datacat/ServiceCharts'
 import Traces from './Traces'
 import useTransition from '../../hooks/useTransition.ts'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
-import type { Hover } from '../../components/datacat/bucketChart'
+import { dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
 import type { ServiceBucket, OutletContextType } from '../../lib/types.ts'
 import '../../stylesheets/datacat/endpoint.css'
 import '../../stylesheets/datacat/overview.css'
@@ -44,7 +44,7 @@ function Overview() {
 
   const isLoaded = useTransition(loading, data || error)
 
-  const buckets = data?.serviceTimeseries || []
+  const buckets = dropEmptyBucketInProgress(data?.serviceTimeseries || [])
 
   return (
     <>

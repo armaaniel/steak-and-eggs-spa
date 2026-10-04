@@ -26,6 +26,9 @@ export const HEIGHT = 180
 export const MARGIN = { top: 12, right: 12, bottom: 22, left: 56 }
 export const PLOT_BOTTOM = HEIGHT - MARGIN.bottom
 
+export const dropEmptyBucketInProgress = (buckets: ServiceBucket[]) =>
+  buckets.filter((bucket) => bucket.requests > 0 || new Date(bucket.bucketEnd).getTime() <= Date.now())
+
 export const toChartBuckets = (buckets: ServiceBucket[]): ChartBucket[] =>
   buckets.map((bucket) => {
     const start = new Date(bucket.bucket).getTime()
