@@ -154,8 +154,12 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
       return yScale(chartBucket.p50 ?? 0)
     })
 
-  const p99Path = makeP99Path(chartBuckets) ?? undefined
-  const p50Path = makeP50Path(chartBuckets) ?? undefined
+  const firstBucket = chartBuckets[0]
+  const lastBucket = chartBuckets[chartBuckets.length - 1]
+  const edgeToEdgeBuckets = [{ ...firstBucket, mid: firstBucket.start }, ...chartBuckets, { ...lastBucket, mid: lastBucket.end }]
+
+  const p99Path = makeP99Path(edgeToEdgeBuckets) ?? undefined
+  const p50Path = makeP50Path(edgeToEdgeBuckets) ?? undefined
 
   const yLabelValues = yScale.ticks(Y_LABEL_COUNT)
 
