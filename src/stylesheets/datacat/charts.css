@@ -1,0 +1,88 @@
+/* the datacat d3 charts */
+
+.dc-chart {
+	position:relative;
+}
+
+.dc-chart svg {
+	display:block;
+}
+
+/* recharts' default tick color, so these match the datacat charts still on recharts */
+.dc-chart text {
+	font-size:11px;
+	fill:#666;
+}
+
+.dc-grid {
+	stroke:var(--dc-border);
+	stroke-dasharray:3 3;
+}
+
+/* dark in both themes, so it reads as a readout over the chart */
+.dc-readout {
+	position:absolute;
+	width:max-content;
+	min-width:140px;
+	padding:6px 8px;
+	border:1px solid rgba(255, 255, 255, 0.1);
+	border-radius:4px;
+	background-color:rgba(24, 26, 31, 0.96);
+	box-shadow:0 4px 12px rgba(0, 0, 0, 0.25);
+	color:#e8eaee;
+	font-size:12px;
+	font-variant-numeric:tabular-nums;
+	pointer-events:none;
+	z-index:1;
+}
+
+.dc-readout-time {
+	margin-bottom:4px;
+	color:#a3a8b3;
+}
+
+.dc-readout-row {
+	display:grid;
+	grid-template-columns:10px 1fr auto;
+	align-items:center;
+	column-gap:8px;
+	line-height:1.6;
+}
+
+.dc-readout-row strong {
+	font-weight:500;
+	text-align:right;
+}
+
+.dc-swatch {
+	display:inline-block;
+	width:10px;
+	height:3px;
+	border-radius:1px;
+}
+
+.dc-legend {
+	display:flex;
+	column-gap:12px;
+	padding:4px 0 0 56px;
+}
+
+.dc-legend > * {
+	display:inline-flex;
+	align-items:center;
+	column-gap:6px;
+	padding:0;
+	border:none;
+	background:none;
+	color:var(--dc-text);
+	font-family:inherit;
+	font-size:12px;
+}
+
+.dc-legend button {
+	cursor:pointer;
+}
+
+.dc-legend button.off {
+	opacity:0.4;
+}

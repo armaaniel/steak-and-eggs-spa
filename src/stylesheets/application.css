@@ -55,6 +55,9 @@
 
 	--dc-series-1: #2a78d6;
 	--dc-series-2: #eb6834;
+
+	--dc-latency-p50: #8b78f0;
+	--dc-latency-p99: #4527b8;
 }
 
 [data-theme="dark"] {
@@ -103,6 +106,8 @@
 	--dc-sort-indicator: rgba(255, 255, 255, 0.7);
 	--dc-series-1: #3987e5;
 	--dc-series-2: #d95926;
+	--dc-latency-p50: #6f5ed6;
+	--dc-latency-p99: #bcaeff;
 }
 
 *{

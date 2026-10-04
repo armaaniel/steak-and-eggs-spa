@@ -1,10 +1,12 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
+import LatencyChart from '../../components/datacat/LatencyChart'
 import ServiceCharts from '../../components/datacat/ServiceCharts'
 import Traces from './Traces'
 import useTransition from '../../hooks/useTransition.ts'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
+import type { Hover } from '../../components/datacat/bucketChart'
 import type { ServiceBucket, OutletContextType } from '../../lib/types.ts'
 import '../../stylesheets/datacat/endpoint.css'
 import '../../stylesheets/datacat/overview.css'
@@ -34,6 +36,9 @@ function Overview() {
   const selectedBucket = picked?.range === range ? picked.bucket : null
   const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
+  // held here so other charts on the page can show the hovered bucket too
+  const [hover, setHover] = useState<Hover | null>(null)
+
   const { loading, error, data } = useQuery<OverviewData>(GET_OVERVIEW, {
     variables: { range },
   })
@@ -45,7 +50,16 @@ function Overview() {
   return (
     <>
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-        {error ? <p className="ov-message">Unable to load the overview, please try again</p> : <ServiceCharts buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} />}
+        {error ? (
+          <p className="ov-message">Unable to load the overview, please try again</p>
+        ) : (
+          <>
+            <div className="lr-panels">
+              <LatencyChart buckets={buckets} hover={hover} onHover={setHover} />
+            </div>
+            <ServiceCharts buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} latency={false} />
+          </>
+        )}
       </div>
 
       <Traces key={range} bucket={selectedBucket} />
