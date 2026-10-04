@@ -29,7 +29,7 @@ export const PLOT_BOTTOM = HEIGHT - MARGIN.bottom
 export const toChartBuckets = (buckets: ServiceBucket[]): ChartBucket[] =>
   buckets.map((bucket) => {
     const start = new Date(bucket.bucket).getTime()
-    const end = new Date(bucket.bucketEnd).getTime()
+    const end = Math.max(start, Math.min(new Date(bucket.bucketEnd).getTime(), Date.now()))
     return { start, end, mid: (start + end) / 2, ok: bucket.requests - bucket.errors, errors: bucket.errors, p50: bucket.p50, p99: bucket.p99, bucket }
   })
 

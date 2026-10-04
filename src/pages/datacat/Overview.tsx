@@ -13,7 +13,7 @@ import '../../stylesheets/datacat/overview.css'
 
 const GET_OVERVIEW = gql`
   query getOverview($range: String!) {
-    serviceTimeseries(range: $range) {
+    serviceTimeseries(range: $range, includePartial: true) {
       bucket
       bucketEnd
       requests
