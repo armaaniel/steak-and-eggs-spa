@@ -71,6 +71,11 @@
 .dc-legend {
 	display:flex;
 	column-gap:12px;
+	font-variant-numeric:tabular-nums;
+}
+
+.dc-legend strong {
+	font-weight:500;
 }
 
 .dc-legend > * {

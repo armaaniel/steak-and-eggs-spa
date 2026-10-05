@@ -14,12 +14,6 @@ interface Props {
   setYLabelWidth: (width: number) => void
 }
 
-interface TooltipRow {
-  name: string
-  color: string
-  value: number | null
-}
-
 type Percentile = 'p99' | 'p50'
 
 const Y_LABEL_COUNT = 4
@@ -31,7 +25,7 @@ function formatYAxisDuration(ms: number) {
   return ms.toLocaleString('en-us', { maximumFractionDigits: 2 })
 }
 
-function formatTooltipDuration(ms: number | null) {
+function formatLegendDuration(ms: number | null) {
   if (ms === null) {
     return '–'
   }
@@ -68,13 +62,8 @@ function findActiveChartBucket(chartBuckets: ChartBucket[], hover: Hover | null)
   return chartBuckets[hover.index] ?? null
 }
 
-function slowestFirstTooltip(a: TooltipRow, b: TooltipRow) {
-  return (b.value ?? -1) - (a.value ?? -1)
-}
-
 const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: Props) => {
   const [width, setWidth] = useState(0)
-  const [mouseY, setMouseY] = useState(0)
   const [isolated, setIsolated] = useState<Percentile | null>(null)
 
   const showP99 = isolated === null || isolated === 'p99'
@@ -189,9 +178,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
   }
 
   function handlePointerMove(event: MouseEvent<SVGSVGElement>) {
-    const svgBox = event.currentTarget.getBoundingClientRect()
-    setMouseY(event.clientY - svgBox.top)
-
     const hoveredIndex = bucketAt(event, chartBuckets, xScale)
     const hoveringThisChart = hover !== null && hover.chart === 'latency'
 
@@ -239,56 +225,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
     activeX = xScale(activeChartBucket.start)
   }
 
-  const tooltipRows: TooltipRow[] = []
-  let tooltipTime = ''
-
-  if (activeChartBucket !== null) {
-    if (showP99) {
-      tooltipRows.push({ name: 'p99', color: P99_COLOR, value: activeChartBucket.p99 })
-    }
-
-    if (showP50) {
-      tooltipRows.push({ name: 'p50', color: P50_COLOR, value: activeChartBucket.p50 })
-    }
-
-    tooltipRows.sort(slowestFirstTooltip)
-
-    tooltipTime = new Date(activeChartBucket.start).toLocaleString('en-us', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    })
-  }
-
-  let tooltipShiftX = '12px'
-
-  if (activeX > width / 2) {
-    tooltipShiftX = 'calc(-100% - 12px)'
-  }
-
-  let tooltipShiftY = '8px'
-
-  if (mouseY > HEIGHT / 2) {
-    tooltipShiftY = 'calc(-100% - 8px)'
-  }
-
-  const tooltipStyle = {
-    left: activeX,
-    top: mouseY,
-    transform: `translate(${tooltipShiftX}, ${tooltipShiftY})`
-  }
-
-  function renderTooltipRow(row: TooltipRow) {
-    return (
-      <p key={row.name} className="dc-tooltip-row">
-        <span className="dc-swatch" style={{ backgroundColor: row.color }} />
-        <span>{row.name}</span>
-        <strong>{formatTooltipDuration(row.value)}</strong>
-      </p>
-    )
-  }
 
   return (
     <>
@@ -298,10 +234,12 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
           <span className={showP99 ? '' : 'off'}>
             <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
             p99
+            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p99)}</strong>}
           </span>
           <span className={showP50 ? '' : 'off'}>
             <span className="dc-swatch" style={{ backgroundColor: P50_COLOR }} />
             p50
+            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p50)}</strong>}
           </span>
         </div>
       </div>
@@ -326,13 +264,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
 
           {showP50 && <path d={p50Path} fill="none" stroke="transparent" strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pointerEvents="stroke" cursor="pointer" onClick={handleP50Click} />}
         </svg>
-
-        {focused && tooltipRows.length > 0 && (
-          <div className="dc-tooltip" style={tooltipStyle}>
-            <p className="dc-tooltip-time">{tooltipTime}</p>
-            {tooltipRows.map(renderTooltipRow)}
-          </div>
-        )}
       </div>
     </>
   )

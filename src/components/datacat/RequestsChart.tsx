@@ -15,12 +15,6 @@ interface Props {
   selectBucket: (bucket: ServiceBucket) => void
 }
 
-interface TooltipRow {
-  name: string
-  color: string
-  value: number
-}
-
 const Y_LABEL_COUNT = 4
 
 const FEW_BARS = 13
@@ -60,7 +54,6 @@ function findActiveChartBucket(chartBuckets: ChartBucket[], hover: Hover | null)
 
 const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, selectBucket }: Props) => {
   const [width, setWidth] = useState(0)
-  const [mouseY, setMouseY] = useState(0)
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -158,9 +151,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   }
 
   function handlePointerMove(event: MouseEvent<SVGSVGElement>) {
-    const svgBox = event.currentTarget.getBoundingClientRect()
-    setMouseY(event.clientY - svgBox.top)
-
     const hoveredIndex = bucketAt(event, chartBuckets, xScale)
     const hoveringThisChart = hover !== null && hover.chart === 'requests'
 
@@ -194,57 +184,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   }
 
   const activeChartBucket = findActiveChartBucket(chartBuckets, hover)
-  const focused = activeChartBucket !== null && hover !== null && hover.chart === 'requests'
-
-  let activeX = 0
-
-  if (activeChartBucket !== null) {
-    activeX = xScale(activeChartBucket.start)
-  }
-
-  const tooltipRows: TooltipRow[] = []
-  let tooltipTime = ''
-
-  if (activeChartBucket !== null) {
-    tooltipRows.push({ name: 'requests', color: OK_COLOR, value: activeChartBucket.requests })
-    tooltipRows.push({ name: 'errors', color: ERROR_COLOR, value: activeChartBucket.errors })
-
-    tooltipTime = new Date(activeChartBucket.start).toLocaleString('en-us', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    })
-  }
-
-  let tooltipShiftX = '12px'
-
-  if (activeX > width / 2) {
-    tooltipShiftX = 'calc(-100% - 12px)'
-  }
-
-  let tooltipShiftY = '8px'
-
-  if (mouseY > HEIGHT / 2) {
-    tooltipShiftY = 'calc(-100% - 8px)'
-  }
-
-  const tooltipStyle = {
-    left: activeX,
-    top: mouseY,
-    transform: `translate(${tooltipShiftX}, ${tooltipShiftY})`
-  }
-
-  function renderTooltipRow(row: TooltipRow) {
-    return (
-      <p key={row.name} className="dc-tooltip-row">
-        <span className="dc-swatch" style={{ backgroundColor: row.color }} />
-        <span>{row.name}</span>
-        <strong>{row.value.toLocaleString('en-us')}</strong>
-      </p>
-    )
-  }
 
   return (
     <>
@@ -254,10 +193,12 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
           <span>
             <span className="dc-swatch" style={{ backgroundColor: OK_COLOR }} />
             ok
+            {activeChartBucket !== null && <strong>{activeChartBucket.ok.toLocaleString('en-us')}</strong>}
           </span>
           <span>
             <span className="dc-swatch" style={{ backgroundColor: ERROR_COLOR }} />
             errors
+            {activeChartBucket !== null && <strong>{activeChartBucket.errors.toLocaleString('en-us')}</strong>}
           </span>
         </div>
       </div>
@@ -266,13 +207,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
           {yLabelValues.map(renderGridline)}
           {chartBuckets.map(renderBar)}
         </svg>
-
-        {focused && (
-          <div className="dc-tooltip" style={tooltipStyle}>
-            <p className="dc-tooltip-time">{tooltipTime}</p>
-            {tooltipRows.map(renderTooltipRow)}
-          </div>
-        )}
       </div>
     </>
   )
