@@ -2,7 +2,7 @@ import { useOutletContext } from 'react-router-dom'
 import { gql, useApolloClient, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
-import ServiceCharts from '../../components/datacat/ServiceCharts'
+import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
 import EndpointNav from '../../components/datacat/EndpointNav'
 import Select from '../../components/datacat/Select'
@@ -12,6 +12,7 @@ import type { DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns } from '../../lib/traceColumns'
 import { toBucketLabel } from '../../lib/utils.ts'
+import { Y_LABEL_GAP, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
 import type { Trace, OutletContextType, ServiceBucket, ScatterPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/overview.css'
 
@@ -95,6 +96,10 @@ function Endpoint() {
   const selectedBucket = picked?.range === range ? picked.bucket : null
   const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
+  const [hover, setHover] = useState<Hover | null>(null)
+  const [yLabelWidth, setYLabelWidth] = useState(0)
+  const chartLeft = yLabelWidth + Y_LABEL_GAP
+
   const { method, path, endpoint } = useEndpoint()
   const { loading, error, data } = useQuery<TraceData>(GET_TRACES, {
     variables: { endpoint, range },
@@ -116,6 +121,7 @@ function Endpoint() {
   const traceList = data?.traceList || []
   const statuses = [...new Set(traceList.map((trace) => trace.status))]
   const buckets = data?.serviceTimeseries || []
+  const requestBuckets = dropEmptyBucketInProgress(buckets)
   const from = buckets.length ? new Date(buckets[0].bucket).getTime() : 0
   const to = buckets.length ? new Date(buckets[buckets.length - 1].bucketEnd).getTime() : 0
   const statusTraces = statusFilter === 'all' ? traceList : traceList.filter((trace) => String(trace.status) === statusFilter)
@@ -138,7 +144,9 @@ function Endpoint() {
           <TraceScatter points={scatterData?.traceScatter || []} from={from} to={to} selectedId={selectedTrace?.id ?? null} onSelect={openPoint} />
         </div>
 
-        <ServiceCharts buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} latency={false} />
+        <div className="lr-panels">
+          <RequestsChart buckets={requestBuckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
+        </div>
       </div>
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
