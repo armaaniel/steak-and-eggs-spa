@@ -278,17 +278,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
           </div>
         )}
       </div>
-
-      <div className="dc-legend" style={{ paddingLeft: chartLeft }}>
-        <span>
-          <span className="dc-swatch" style={{ backgroundColor: OK_COLOR }} />
-          requests
-        </span>
-        <span>
-          <span className="dc-swatch" style={{ backgroundColor: ERROR_COLOR }} />
-          errors
-        </span>
-      </div>
     </>
   )
 }

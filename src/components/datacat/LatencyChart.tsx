@@ -322,17 +322,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
           </div>
         )}
       </div>
-
-      <div className="dc-legend" style={{ paddingLeft: chartLeft }}>
-        <span className={showP99 ? '' : 'off'}>
-          <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
-          p99
-        </span>
-        <span className={showP50 ? '' : 'off'}>
-          <span className="dc-swatch" style={{ backgroundColor: P50_COLOR }} />
-          p50
-        </span>
-      </div>
     </>
   )
 }
