@@ -103,7 +103,7 @@ export function findXLabels(chartBuckets: ChartBucket[], xScale: ScaleTime<numbe
     }
 
     labelledBuckets.add(chartBucket)
-    xLabels.push({ x: xScale(chartBucket.start), text: formatXAxisTime(new Date(chartBucket.start)) })
+    xLabels.push({ x: xScale(chartBucket.start), text: formatXAxisTime(date) })
   }
 
   return xLabels
