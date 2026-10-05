@@ -29,6 +29,7 @@ const FULL_PADDING_ABOVE = 75
 
 const OK_COLOR = '#8E87C2'
 const ERROR_COLOR = 'var(--dc-status-critical)'
+const HOVER_COLOR = 'var(--dc-latency-p99)'
 
 function formatYAxisCount(count: number) {
   return count.toLocaleString('en-us')
@@ -145,7 +146,7 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
     )
   }
 
-  function renderBar(chartBucket: ChartBucket) {
+  function renderBar(chartBucket: ChartBucket, index: number) {
     const barX = xScale(chartBucket.start) + barGap
     const barWidth = Math.max(1, xScale(chartBucket.end) - xScale(chartBucket.start) - 2 * barGap)
 
@@ -158,9 +159,15 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
       opacity = 0.35
     }
 
+    let okColor = OK_COLOR
+
+    if (hover !== null && hover.index === index) {
+      okColor = HOVER_COLOR
+    }
+
     return (
       <g key={chartBucket.start} opacity={opacity}>
-        <rect x={barX} y={okTop} width={barWidth} height={chartBottom - okTop} fill={OK_COLOR} />
+        <rect x={barX} y={okTop} width={barWidth} height={chartBottom - okTop} fill={okColor} />
         <rect x={barX} y={barTop} width={barWidth} height={okTop - barTop} fill={ERROR_COLOR} />
       </g>
     )
@@ -260,16 +267,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
       <p className="lr-panel-label">Requests</p>
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
-          {activeChartBucket !== null && (
-            <rect
-              x={xScale(activeChartBucket.start)}
-              y={chartTop}
-              width={xScale(activeChartBucket.end) - xScale(activeChartBucket.start)}
-              height={chartBottom - chartTop}
-              fill="var(--dc-hover)"
-            />
-          )}
-
           {yLabelValues.map(renderGridline)}
           {xLabelDates.map(renderXLabel)}
           {chartBuckets.map(renderBar)}
