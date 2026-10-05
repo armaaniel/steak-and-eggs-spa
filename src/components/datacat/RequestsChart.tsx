@@ -81,9 +81,11 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   }, [])
 
   const chartBuckets = toChartBuckets(buckets)
+	
+	const MARGIN_BOTTOM = 6
 
   const chartTop = MARGIN.top
-  const chartBottom = HEIGHT - MARGIN.bottom
+  const chartBottom = HEIGHT - MARGIN_BOTTOM
 
   const mostRequests = findMostRequests(chartBuckets)
 
