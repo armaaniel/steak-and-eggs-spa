@@ -37,6 +37,16 @@ function formatLegendDuration(ms: number | null) {
   return `${ms.toLocaleString('en-us', { maximumFractionDigits: 0 })} ms`
 }
 
+function formatHoverTime(date: Date) {
+  return date.toLocaleString('en-us', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  })
+}
+
 function findHighestLatency(chartBuckets: ChartBucket[], includeP99: boolean, includeP50: boolean) {
 	// for yAxis height
   let highestLatency = 0
@@ -225,6 +235,11 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
     activeX = xScale(activeChartBucket.start)
   }
 
+  let hoverTime = ''
+
+  if (activeChartBucket !== null) {
+    hoverTime = formatHoverTime(new Date(activeChartBucket.start))
+  }
 
   return (
     <>
@@ -241,6 +256,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
             p50
             {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p50)}</strong>}
           </span>
+          {activeChartBucket !== null && <span className="dc-hover-time">{hoverTime}</span>}
         </div>
       </div>
       <div ref={measureResize} className="dc-chart">
