@@ -8,6 +8,7 @@ export interface ChartBucket {
   start: number
   end: number
   mid: number
+  requests: number
   ok: number
   errors: number
   p50: number | null
@@ -25,6 +26,38 @@ export interface Hover {
 export const HEIGHT = 180
 export const MARGIN = { top: 12, right: 12, bottom: 22 }
 export const PLOT_BOTTOM = HEIGHT - MARGIN.bottom
+export const Y_LABEL_GAP = 2
+
+export function findWidestYLabel(labels: string[]) {
+  const context = document.createElement('canvas').getContext('2d')
+
+  if (context === null) {
+    return 0
+  }
+
+  const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-ui')
+  context.font = `11px ${fontFamily}`
+
+  let widest = 0
+
+  for (const label of labels) {
+    widest = Math.max(widest, context.measureText(label).width)
+  }
+
+  return Math.ceil(widest)
+}
+
+export function formatXAxisTime(date: Date) {
+  // Any time other than midnight: "18:00"
+  if (date.getHours() !== 0 || date.getMinutes() !== 0) {
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${hours}:${minutes}`
+  }
+
+  // Midnight: "Sep 27"
+  return date.toLocaleDateString('en-us', { month: 'short', day: 'numeric' })
+}
 
 export const dropEmptyBucketInProgress = (buckets: ServiceBucket[]) =>
   buckets.filter((bucket) => bucket.requests > 0 || new Date(bucket.bucketEnd).getTime() <= Date.now())
@@ -33,7 +66,7 @@ export const toChartBuckets = (buckets: ServiceBucket[]): ChartBucket[] =>
   buckets.map((bucket) => {
     const start = new Date(bucket.bucket).getTime()
     const end = Math.max(start, Math.min(new Date(bucket.bucketEnd).getTime(), Date.now()))
-    return { start, end, mid: (start + end) / 2, ok: bucket.requests - bucket.errors, errors: bucket.errors, p50: bucket.p50, p99: bucket.p99, bucket }
+    return { start, end, mid: (start + end) / 2, requests: bucket.requests, ok: bucket.requests - bucket.errors, errors: bucket.errors, p50: bucket.p50, p99: bucket.p99, bucket }
   })
 
 // scales time value to pixel position

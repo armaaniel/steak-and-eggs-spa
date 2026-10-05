@@ -1,7 +1,7 @@
-import { useCallback, useState, type MouseEvent } from 'react'
+import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
-import { HEIGHT, MARGIN, bucketAt, timeScale, toChartBuckets, type Hover, type ChartBucket } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, formatXAxisTime, timeScale, toChartBuckets, type Hover, type ChartBucket } from './bucketChart'
 import type { ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -10,6 +10,8 @@ interface Props {
   buckets: ServiceBucket[]
   hover: Hover | null
   setHover: (hover: Hover | null) => void
+  chartLeft: number
+  setYLabelWidth: (width: number) => void
 }
 
 interface TooltipRow {
@@ -21,32 +23,12 @@ interface TooltipRow {
 type Percentile = 'p99' | 'p50'
 
 const Y_LABEL_COUNT = 4
-const Y_LABEL_GAP = 2
 
 const P99_COLOR = 'var(--dc-latency-p99)'
 const P50_COLOR = 'var(--dc-latency-p50)'
 
 function formatYAxisDuration(ms: number) {
   return ms.toLocaleString('en-us', { maximumFractionDigits: 2 })
-}
-
-function findWidestYLabel(labels: string[]) {
-  const context = document.createElement('canvas').getContext('2d')
-
-  if (context === null) {
-    return 0
-  }
-
-  const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-ui')
-  context.font = `11px ${fontFamily}`
-
-  let widest = 0
-
-  for (const label of labels) {
-    widest = Math.max(widest, context.measureText(label).width)
-  }
-
-  return Math.ceil(widest)
 }
 
 function formatTooltipDuration(ms: number | null) {
@@ -59,18 +41,6 @@ function formatTooltipDuration(ms: number | null) {
   }
 
   return `${ms.toLocaleString('en-us', { maximumFractionDigits: 0 })} ms`
-}
-
-function formatXAxisTime(date: Date) {
-  // Any time other than midnight: "18:00"
-  if (date.getHours() !== 0 || date.getMinutes() !== 0) {
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${hours}:${minutes}`
-  }
-
-  // Midnight: "Sep 27"
-  return date.toLocaleDateString('en-us', { month: 'short', day: 'numeric' })
 }
 
 function findHighestLatency(chartBuckets: ChartBucket[], includeP99: boolean, includeP50: boolean) {
@@ -102,7 +72,7 @@ function slowestFirstTooltip(a: TooltipRow, b: TooltipRow) {
   return (b.value ?? -1) - (a.value ?? -1)
 }
 
-const LatencyChart = ({ buckets, hover, setHover }: Props) => {
+const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: Props) => {
   const [width, setWidth] = useState(0)
   const [mouseY, setMouseY] = useState(0)
   const [isolated, setIsolated] = useState<Percentile | null>(null)
@@ -130,11 +100,6 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
 
   const chartBuckets = toChartBuckets(buckets)
 
-  if (chartBuckets.length === 0) {
-    return null
-  }
-
-  const chartRight = width - MARGIN.right
   const chartTop = MARGIN.top
   const chartBottom = HEIGHT - MARGIN.bottom
 
@@ -149,8 +114,17 @@ const LatencyChart = ({ buckets, hover, setHover }: Props) => {
   const yScale = scaleLinear().domain([0, yMax]).nice(Y_LABEL_COUNT).range([chartBottom, chartTop])
 
   const yLabelValues = yScale.ticks(Y_LABEL_COUNT)
+  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisDuration))
 
-  const chartLeft = findWidestYLabel(yLabelValues.map(formatYAxisDuration)) + Y_LABEL_GAP
+  useLayoutEffect(() => {
+    setYLabelWidth(yLabelWidth)
+  }, [yLabelWidth, setYLabelWidth])
+
+  if (chartBuckets.length === 0) {
+    return null
+  }
+
+  const chartRight = width - MARGIN.right
   const plotWidth = chartRight - chartLeft
 
   const xScale = timeScale(chartBuckets, chartLeft, chartRight)

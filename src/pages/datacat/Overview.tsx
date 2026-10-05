@@ -2,11 +2,11 @@ import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import LatencyChart from '../../components/datacat/LatencyChart'
-import ServiceCharts from '../../components/datacat/ServiceCharts'
+import RequestsChart from '../../components/datacat/RequestsChart'
 import Traces from './Traces'
 import useTransition from '../../hooks/useTransition.ts'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
-import { dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
+import { Y_LABEL_GAP, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
 import type { ServiceBucket, OutletContextType } from '../../lib/types.ts'
 import '../../stylesheets/datacat/endpoint.css'
 import '../../stylesheets/datacat/overview.css'
@@ -38,6 +38,10 @@ function Overview() {
 
   const [hover, setHover] = useState<Hover | null>(null)
 
+  const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
+  const [requestsYLabelWidth, setRequestsYLabelWidth] = useState(0)
+  const chartLeft = Math.max(latencyYLabelWidth, requestsYLabelWidth) + Y_LABEL_GAP
+
   const { loading, error, data } = useQuery<OverviewData>(GET_OVERVIEW, {
     variables: { range },
   })
@@ -54,9 +58,11 @@ function Overview() {
         ) : (
           <>
             <div className="lr-panels">
-              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} />
+              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} />
             </div>
-            <ServiceCharts buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} latency={false} />
+            <div className="lr-panels">
+              <RequestsChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
+            </div>
           </>
         )}
       </div>
