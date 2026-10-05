@@ -248,7 +248,19 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
 
   return (
     <>
-      <p className="lr-panel-label">Requests</p>
+      <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
+        <p className="lr-panel-label">Requests</p>
+        <div className="dc-legend">
+          <span>
+            <span className="dc-swatch" style={{ backgroundColor: OK_COLOR }} />
+            ok
+          </span>
+          <span>
+            <span className="dc-swatch" style={{ backgroundColor: ERROR_COLOR }} />
+            errors
+          </span>
+        </div>
+      </div>
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
           {yLabelValues.map(renderGridline)}

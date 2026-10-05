@@ -292,7 +292,19 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
 
   return (
     <>
-      <p className="lr-panel-label">Latency (ms)</p>
+      <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
+        <p className="lr-panel-label">Latency (ms)</p>
+        <div className="dc-legend">
+          <span className={showP99 ? '' : 'off'}>
+            <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
+            p99
+          </span>
+          <span className={showP50 ? '' : 'off'}>
+            <span className="dc-swatch" style={{ backgroundColor: P50_COLOR }} />
+            p50
+          </span>
+        </div>
+      </div>
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
           {yLabelValues.map(renderGridline)}
