@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, formatXAxisTime, timeScale, toChartBuckets, type Hover, type ChartBucket } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, timeScale, toChartBuckets, type Hover, type ChartBucket, type XLabel } from './bucketChart'
 import type { ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -23,9 +23,10 @@ interface TooltipRow {
 
 const Y_LABEL_COUNT = 4
 
-const BAR_PADDING = 0.4
-const NO_PADDING_BELOW = 30
-const FULL_PADDING_ABOVE = 75
+const FEW_BARS = 13
+const MANY_BARS = 26
+const FEW_BARS_PADDING = 0.77
+const MANY_BARS_PADDING = 0.55
 
 const OK_COLOR = '#8E87C2'
 const ERROR_COLOR = 'var(--dc-status-critical)'
@@ -35,9 +36,8 @@ function formatYAxisCount(count: number) {
   return count.toLocaleString('en-us')
 }
 
-function findBarGap(bucketWidth: number) {
-  const padding = scaleLinear().domain([NO_PADDING_BELOW, FULL_PADDING_ABOVE]).range([0, BAR_PADDING]).clamp(true)(bucketWidth)
-  return bucketWidth * padding
+function findBarPadding(barCount: number) {
+  return scaleLinear().domain([FEW_BARS, MANY_BARS]).range([FEW_BARS_PADDING, MANY_BARS_PADDING]).clamp(true)(barCount)
 }
 
 function findMostRequests(chartBuckets: ChartBucket[]) {
@@ -112,10 +112,11 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   const xScale = timeScale(chartBuckets, chartLeft, chartRight)
 
   const firstBucket = chartBuckets[0]
-  const barGap = findBarGap(xScale(firstBucket.end) - xScale(firstBucket.start))
+  const firstBucketWidth = xScale(firstBucket.end) - xScale(firstBucket.start)
+  const barGap = (firstBucketWidth * findBarPadding(chartBuckets.length)) / 2
+  const fullBarWidth = firstBucketWidth - 2 * barGap
 
-  const xLabelCount = Math.max(2, Math.floor(plotWidth / 100))
-  const xLabelDates = xScale.ticks(xLabelCount)
+  const xLabels = findXLabels(chartBuckets, xScale, plotWidth)
 
   function renderGridline(count: number) {
     const gridlineY = yScale(count)
@@ -130,25 +131,27 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
     )
   }
 
-  function renderXLabel(date: Date) {
-    const labelX = xScale(date)
-    const label = formatXAxisTime(date)
-    const halfLabelWidth = label.length * 3.3
+  function renderXLabel(xLabel: XLabel) {
+    const halfLabelWidth = xLabel.text.length * 3.3
 
-    if (labelX - halfLabelWidth < 0 || labelX + halfLabelWidth > width) {
+    if (xLabel.x - halfLabelWidth < 0 || xLabel.x + halfLabelWidth > width) {
       return null
     }
 
     return (
-      <text key={labelX} x={labelX} y={chartBottom + 15} textAnchor="middle">
-        {label}
+      <text key={xLabel.x} x={xLabel.x} y={chartBottom + 15} textAnchor="middle">
+        {xLabel.text}
       </text>
     )
   }
 
   function renderBar(chartBucket: ChartBucket, index: number) {
     const barX = xScale(chartBucket.start) + barGap
-    const barWidth = Math.max(1, xScale(chartBucket.end) - xScale(chartBucket.start) - 2 * barGap)
+    const barWidth = Math.min(fullBarWidth, xScale(chartBucket.end) - barX)
+
+    if (barWidth < 1) {
+      return null
+    }
 
     const barTop = yScale(chartBucket.requests)
     const okTop = yScale(chartBucket.ok)
@@ -268,7 +271,7 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
           {yLabelValues.map(renderGridline)}
-          {xLabelDates.map(renderXLabel)}
+          {xLabels.map(renderXLabel)}
           {chartBuckets.map(renderBar)}
         </svg>
 

@@ -13,7 +13,13 @@ export interface ChartBucket {
   errors: number
   p50: number | null
   p99: number | null
+  inProgress: boolean
   bucket: ServiceBucket
+}
+
+export interface XLabel {
+  x: number
+  text: string
 }
 
 // Which chart the pointer is over and the bucket under it. Pages hold this so a hover on one chart shows on the other.
@@ -65,8 +71,9 @@ export const dropEmptyBucketInProgress = (buckets: ServiceBucket[]) =>
 export const toChartBuckets = (buckets: ServiceBucket[]): ChartBucket[] =>
   buckets.map((bucket) => {
     const start = new Date(bucket.bucket).getTime()
-    const end = Math.max(start, Math.min(new Date(bucket.bucketEnd).getTime(), Date.now()))
-    return { start, end, mid: (start + end) / 2, requests: bucket.requests, ok: bucket.requests - bucket.errors, errors: bucket.errors, p50: bucket.p50, p99: bucket.p99, bucket }
+    const bucketEnd = new Date(bucket.bucketEnd).getTime()
+    const end = Math.max(start, Math.min(bucketEnd, Date.now()))
+    return { start, end, mid: (start + end) / 2, requests: bucket.requests, ok: bucket.requests - bucket.errors, errors: bucket.errors, p50: bucket.p50, p99: bucket.p99, inProgress: bucketEnd > Date.now(), bucket }
   })
 
 // scales time value to pixel position
@@ -75,6 +82,31 @@ export const timeScale = (chartBuckets: ChartBucket[], chartLeft: number, chartR
   const lastBucket = chartBuckets[chartBuckets.length - 1]
 
   return scaleTime().domain([firstBucket.start, lastBucket.end]).range([chartLeft, chartRight])
+}
+
+export function findXLabels(chartBuckets: ChartBucket[], xScale: ScaleTime<number, number>, plotWidth: number) {
+  const labelCount = Math.min(chartBuckets.length, Math.max(2, Math.floor(plotWidth / 100)))
+  const labelledBuckets = new Set<ChartBucket>()
+  const xLabels: XLabel[] = []
+
+  for (const date of xScale.ticks(labelCount)) {
+    const time = date.getTime()
+
+    function containsTime(chartBucket: ChartBucket) {
+      return chartBucket.start <= time && time < chartBucket.end
+    }
+
+    const chartBucket = chartBuckets.find(containsTime)
+
+    if (chartBucket === undefined || chartBucket.inProgress || labelledBuckets.has(chartBucket)) {
+      continue
+    }
+
+    labelledBuckets.add(chartBucket)
+    xLabels.push({ x: xScale(chartBucket.mid), text: formatXAxisTime(date) })
+  }
+
+  return xLabels
 }
 
 // The bucket under the pointer, or null outside the plot.

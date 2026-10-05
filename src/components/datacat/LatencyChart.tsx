@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, formatXAxisTime, timeScale, toChartBuckets, type Hover, type ChartBucket } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, timeScale, toChartBuckets, type Hover, type ChartBucket, type XLabel } from './bucketChart'
 import type { ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -158,8 +158,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
   const p99Path = makeP99Path(edgeToEdgeBuckets) ?? undefined
   const p50Path = makeP50Path(edgeToEdgeBuckets) ?? undefined
 
-  const xLabelCount = Math.max(2, Math.floor(plotWidth / 100))
-  const xLabelDates = xScale.ticks(xLabelCount)
+  const xLabels = findXLabels(chartBuckets, xScale, plotWidth)
 
   function renderGridline(ms: number) {
     const gridlineY = yScale(ms)
@@ -174,18 +173,16 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
     )
   }
 
-  function renderXLabel(date: Date) {
-    const labelX = xScale(date)
-    const label = formatXAxisTime(date)
-    const halfLabelWidth = label.length * 3.3
+  function renderXLabel(xLabel: XLabel) {
+    const halfLabelWidth = xLabel.text.length * 3.3
 
-    if (labelX - halfLabelWidth < 0 || labelX + halfLabelWidth > width) {
+    if (xLabel.x - halfLabelWidth < 0 || xLabel.x + halfLabelWidth > width) {
       return null
     }
 
     return (
-      <text key={labelX} x={labelX} y={chartBottom + 15} textAnchor="middle">
-        {label}
+      <text key={xLabel.x} x={xLabel.x} y={chartBottom + 15} textAnchor="middle">
+        {xLabel.text}
       </text>
     )
   }
@@ -298,7 +295,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
           {yLabelValues.map(renderGridline)}
-          {xLabelDates.map(renderXLabel)}
+          {xLabels.map(renderXLabel)}
 
           {activeChartBucket !== null && (
             <line x1={activeX} x2={activeX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />
