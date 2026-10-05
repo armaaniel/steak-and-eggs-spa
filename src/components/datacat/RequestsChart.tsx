@@ -146,12 +146,8 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   }
 
   function renderBar(chartBucket: ChartBucket, index: number) {
-    const barX = xScale(chartBucket.start) + barGap
-    const barWidth = Math.min(fullBarWidth, xScale(chartBucket.end) - barX)
-
-    if (barWidth < 1) {
-      return null
-    }
+    const barX = xScale(chartBucket.start) - fullBarWidth / 2
+    const barWidth = fullBarWidth
 
     const barTop = yScale(chartBucket.requests)
     const okTop = yScale(chartBucket.ok)
@@ -218,7 +214,7 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   let activeX = 0
 
   if (activeChartBucket !== null) {
-    activeX = xScale(activeChartBucket.mid)
+    activeX = xScale(activeChartBucket.start)
   }
 
   const tooltipRows: TooltipRow[] = []

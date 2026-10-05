@@ -134,7 +134,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
       return chartBucket.p99 !== null
     })
     .x(function (chartBucket) {
-      return xScale(chartBucket.mid)
+      return xScale(chartBucket.start)
     })
     .y(function (chartBucket) {
       return yScale(chartBucket.p99 ?? 0)
@@ -145,7 +145,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
       return chartBucket.p50 !== null
     })
     .x(function (chartBucket) {
-      return xScale(chartBucket.mid)
+      return xScale(chartBucket.start)
     })
     .y(function (chartBucket) {
       return yScale(chartBucket.p50 ?? 0)
@@ -153,7 +153,8 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
 
   const firstBucket = chartBuckets[0]
   const lastBucket = chartBuckets[chartBuckets.length - 1]
-  const edgeToEdgeBuckets = [{ ...firstBucket, mid: firstBucket.start }, ...chartBuckets, { ...lastBucket, mid: lastBucket.end }]
+  const [axisStart, axisEnd] = xScale.domain()
+  const edgeToEdgeBuckets = [{ ...firstBucket, start: axisStart.getTime() }, ...chartBuckets, { ...lastBucket, start: axisEnd.getTime() }]
 
   const p99Path = makeP99Path(edgeToEdgeBuckets) ?? undefined
   const p50Path = makeP50Path(edgeToEdgeBuckets) ?? undefined
@@ -235,7 +236,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
   let activeX = 0
 
   if (activeChartBucket !== null) {
-    activeX = xScale(activeChartBucket.mid)
+    activeX = xScale(activeChartBucket.start)
   }
 
   const tooltipRows: TooltipRow[] = []

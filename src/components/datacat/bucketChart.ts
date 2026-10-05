@@ -7,13 +7,11 @@ import type { ServiceBucket } from '../../lib/types.ts'
 export interface ChartBucket {
   start: number
   end: number
-  mid: number
   requests: number
   ok: number
   errors: number
   p50: number | null
   p99: number | null
-  inProgress: boolean
   bucket: ServiceBucket
 }
 
@@ -73,7 +71,7 @@ export const toChartBuckets = (buckets: ServiceBucket[]): ChartBucket[] =>
     const start = new Date(bucket.bucket).getTime()
     const bucketEnd = new Date(bucket.bucketEnd).getTime()
     const end = Math.max(start, Math.min(bucketEnd, Date.now()))
-    return { start, end, mid: (start + end) / 2, requests: bucket.requests, ok: bucket.requests - bucket.errors, errors: bucket.errors, p50: bucket.p50, p99: bucket.p99, inProgress: bucketEnd > Date.now(), bucket }
+    return { start, end, requests: bucket.requests, ok: bucket.requests - bucket.errors, errors: bucket.errors, p50: bucket.p50, p99: bucket.p99, bucket }
   })
 
 // scales time value to pixel position
@@ -81,7 +79,9 @@ export const timeScale = (chartBuckets: ChartBucket[], chartLeft: number, chartR
   const firstBucket = chartBuckets[0]
   const lastBucket = chartBuckets[chartBuckets.length - 1]
 
-  return scaleTime().domain([firstBucket.start, lastBucket.end]).range([chartLeft, chartRight])
+  const halfBucket = (firstBucket.end - firstBucket.start) / 2
+
+  return scaleTime().domain([firstBucket.start - halfBucket, lastBucket.start + halfBucket]).range([chartLeft, chartRight])
 }
 
 export function findXLabels(chartBuckets: ChartBucket[], xScale: ScaleTime<number, number>, plotWidth: number) {
@@ -98,12 +98,12 @@ export function findXLabels(chartBuckets: ChartBucket[], xScale: ScaleTime<numbe
 
     const chartBucket = chartBuckets.find(containsTime)
 
-    if (chartBucket === undefined || chartBucket.inProgress || labelledBuckets.has(chartBucket)) {
+    if (chartBucket === undefined || labelledBuckets.has(chartBucket)) {
       continue
     }
 
     labelledBuckets.add(chartBucket)
-    xLabels.push({ x: xScale(chartBucket.mid), text: formatXAxisTime(date) })
+    xLabels.push({ x: xScale(chartBucket.start), text: formatXAxisTime(new Date(chartBucket.start)) })
   }
 
   return xLabels
@@ -116,6 +116,7 @@ export const bucketAt = (e: MouseEvent<SVGSVGElement>, chartBuckets: ChartBucket
   if (left < lo || left > hi) return null
 
   const time = +x.invert(left)
-  const index = chartBuckets.findIndex((chartBucket) => time < chartBucket.end)
+  const halfBucket = (chartBuckets[0].end - chartBuckets[0].start) / 2
+  const index = chartBuckets.findIndex((chartBucket) => time < chartBucket.start + halfBucket)
   return index === -1 ? chartBuckets.length - 1 : index
 }
