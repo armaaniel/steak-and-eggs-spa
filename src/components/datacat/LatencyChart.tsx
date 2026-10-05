@@ -16,10 +16,17 @@ interface Props {
 
 type Percentile = 'p99' | 'p50'
 
+interface LatencyLine {
+  key: Percentile
+  color: string
+}
+
 const Y_LABEL_COUNT = 4
 
-const P99_COLOR = 'var(--dc-latency-p99)'
-const P50_COLOR = 'var(--dc-latency-p50)'
+const LATENCY_LINES: LatencyLine[] = [
+  { key: 'p99', color: 'var(--dc-latency-p99)' },
+  { key: 'p50', color: 'var(--dc-latency-p50)' }
+]
 
 const DIMMED_OPACITY = 0.25
 
@@ -49,17 +56,13 @@ function formatHoverTime(date: Date) {
   })
 }
 
-function findHighestLatency(chartBuckets: ChartBucket[], includeP99: boolean, includeP50: boolean) {
+function findHighestLatency(chartBuckets: ChartBucket[], latencyLines: LatencyLine[]) {
 	// for yAxis height
   let highestLatency = 0
 
   for (const chartBucket of chartBuckets) {
-    if (includeP99) {
-      highestLatency = Math.max(highestLatency, chartBucket.p99 ?? 0)
-    }
-
-    if (includeP50) {
-      highestLatency = Math.max(highestLatency, chartBucket.p50 ?? 0)
+    for (const latencyLine of latencyLines) {
+      highestLatency = Math.max(highestLatency, chartBucket[latencyLine.key] ?? 0)
     }
   }
 
@@ -79,8 +82,11 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
   const [isolated, setIsolated] = useState<Percentile | null>(null)
   const [mouseY, setMouseY] = useState(0)
 
-  const showP99 = isolated === null || isolated === 'p99'
-  const showP50 = isolated === null || isolated === 'p50'
+  function isShown(latencyLine: LatencyLine) {
+    return isolated === null || isolated === latencyLine.key
+  }
+
+  const visibleLines = LATENCY_LINES.filter(isShown)
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -105,7 +111,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
   const chartTop = MARGIN.top
   const chartBottom = HEIGHT - MARGIN.bottom
 
-  const highestLatency = findHighestLatency(chartBuckets, showP99, showP50)
+  const highestLatency = findHighestLatency(chartBuckets, visibleLines)
 
   let yMax = highestLatency
 
@@ -131,35 +137,25 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
 
   const xScale = timeScale(chartBuckets, chartLeft, chartRight)
 
-  const makeP99Path = line<ChartBucket>()
-    .defined(function (chartBucket) {
-      return chartBucket.p99 !== null
-    })
-    .x(function (chartBucket) {
-      return xScale(chartBucket.start)
-    })
-    .y(function (chartBucket) {
-      return yScale(chartBucket.p99 ?? 0)
-    })
-
-  const makeP50Path = line<ChartBucket>()
-    .defined(function (chartBucket) {
-      return chartBucket.p50 !== null
-    })
-    .x(function (chartBucket) {
-      return xScale(chartBucket.start)
-    })
-    .y(function (chartBucket) {
-      return yScale(chartBucket.p50 ?? 0)
-    })
-
   const firstBucket = chartBuckets[0]
   const lastBucket = chartBuckets[chartBuckets.length - 1]
   const [axisStart, axisEnd] = xScale.domain()
   const edgeToEdgeBuckets = [{ ...firstBucket, start: axisStart.getTime() }, ...chartBuckets, { ...lastBucket, start: axisEnd.getTime() }]
 
-  const p99Path = makeP99Path(edgeToEdgeBuckets) ?? undefined
-  const p50Path = makeP50Path(edgeToEdgeBuckets) ?? undefined
+  function findPath(latencyLine: LatencyLine) {
+    const makePath = line<ChartBucket>()
+      .defined(function (chartBucket) {
+        return chartBucket[latencyLine.key] !== null
+      })
+      .x(function (chartBucket) {
+        return xScale(chartBucket.start)
+      })
+      .y(function (chartBucket) {
+        return yScale(chartBucket[latencyLine.key] ?? 0)
+      })
+
+    return makePath(edgeToEdgeBuckets) ?? undefined
+  }
 
   const xLabels = findXLabels(chartBuckets, xScale, plotWidth)
 
@@ -216,21 +212,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
     }
   }
 
-  function handleP99Click() {
-    if (isolated === 'p99') {
-      setIsolated(null)
-    } else {
-      setIsolated('p99')
-    }
-  }
-
-  function handleP50Click() {
-    if (isolated === 'p50') {
-      setIsolated(null)
-    } else {
-      setIsolated('p50')
-    }
-  }
   const activeChartBucket = findActiveChartBucket(chartBuckets, hover)
   const focused = activeChartBucket !== null && hover !== null && hover.chart === 'latency'
 
@@ -246,49 +227,81 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
     hoverTime = formatHoverTime(new Date(activeChartBucket.start))
   }
 
-  let tooltipLine: Percentile | null = null
-
-  if (focused) {
-    let p99Distance = Infinity
-    let p50Distance = Infinity
-
-    if (showP99 && activeChartBucket.p99 !== null) {
-      p99Distance = Math.abs(yScale(activeChartBucket.p99) - mouseY)
-    }
-
-    if (showP50 && activeChartBucket.p50 !== null) {
-      p50Distance = Math.abs(yScale(activeChartBucket.p50) - mouseY)
-    }
-
-    if (p99Distance !== Infinity && p99Distance <= p50Distance) {
-      tooltipLine = 'p99'
-    } else if (p50Distance !== Infinity) {
-      tooltipLine = 'p50'
-    }
-  }
-
-  let p99Opacity = 1
-  let p50Opacity = 1
-
-  if (tooltipLine === 'p99') {
-    p50Opacity = DIMMED_OPACITY
-  }
-
-  if (tooltipLine === 'p50') {
-    p99Opacity = DIMMED_OPACITY
-  }
-
-  let tooltipColor = P99_COLOR
+  let tooltipLine: LatencyLine | null = null
   let tooltipValue: number | null = null
 
-  if (activeChartBucket !== null && tooltipLine === 'p99') {
-    tooltipColor = P99_COLOR
-    tooltipValue = activeChartBucket.p99
+  if (focused) {
+    let nearestDistance = Infinity
+
+    for (const latencyLine of visibleLines) {
+      const value = activeChartBucket[latencyLine.key]
+
+      if (value === null) {
+        continue
+      }
+
+      const distance = Math.abs(yScale(value) - mouseY)
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance
+        tooltipLine = latencyLine
+        tooltipValue = value
+      }
+    }
   }
 
-  if (activeChartBucket !== null && tooltipLine === 'p50') {
-    tooltipColor = P50_COLOR
-    tooltipValue = activeChartBucket.p50
+  function findOpacity(latencyLine: LatencyLine) {
+    if (tooltipLine !== null && tooltipLine.key !== latencyLine.key) {
+      return DIMMED_OPACITY
+    }
+
+    return 1
+  }
+
+  function renderLine(latencyLine: LatencyLine) {
+    return <path key={latencyLine.key} d={findPath(latencyLine)} fill="none" stroke={latencyLine.color} strokeWidth={1.5} strokeLinejoin="round" opacity={findOpacity(latencyLine)} />
+  }
+
+  function renderHoverDot(latencyLine: LatencyLine) {
+    if (!focused || activeChartBucket === null) {
+      return null
+    }
+
+    const value = activeChartBucket[latencyLine.key]
+
+    if (value === null) {
+      return null
+    }
+
+    return <circle key={latencyLine.key} cx={activeX} cy={yScale(value)} r={3.5} fill={latencyLine.color} stroke="var(--dc-surface)" strokeWidth={2} opacity={findOpacity(latencyLine)} />
+  }
+
+  function renderClickArea(latencyLine: LatencyLine) {
+    function handleClick() {
+      if (isolated === latencyLine.key) {
+        setIsolated(null)
+      } else {
+        setIsolated(latencyLine.key)
+      }
+    }
+
+    return <path key={latencyLine.key} d={findPath(latencyLine)} fill="none" stroke="transparent" strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pointerEvents="stroke" cursor="pointer" onClick={handleClick} />
+  }
+
+  function renderLegendEntry(latencyLine: LatencyLine) {
+    let className = ''
+
+    if (!isShown(latencyLine)) {
+      className = 'off'
+    }
+
+    return (
+      <span key={latencyLine.key} className={className}>
+        <span className="dc-swatch" style={{ backgroundColor: latencyLine.color }} />
+        {latencyLine.key}
+        {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket[latencyLine.key])}</strong>}
+      </span>
+    )
   }
 
   const tooltipStyle = {
@@ -302,16 +315,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">Latency (ms)</p>
         <div className="dc-legend">
-          <span className={showP99 ? '' : 'off'}>
-            <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
-            p99
-            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p99)}</strong>}
-          </span>
-          <span className={showP50 ? '' : 'off'}>
-            <span className="dc-swatch" style={{ backgroundColor: P50_COLOR }} />
-            p50
-            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p50)}</strong>}
-          </span>
+          {LATENCY_LINES.map(renderLegendEntry)}
           {activeChartBucket !== null && <span className="dc-hover-time">{hoverTime}</span>}
         </div>
       </div>
@@ -324,24 +328,16 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
             <line x1={activeX} x2={activeX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />
           )}
 
-          {showP99 && <path d={p99Path} fill="none" stroke={P99_COLOR} strokeWidth={1.5} strokeLinejoin="round" opacity={p99Opacity} />}
-
-          {showP50 && <path d={p50Path} fill="none" stroke={P50_COLOR} strokeWidth={1.5} strokeLinejoin="round" opacity={p50Opacity} />}
-
-          {focused && showP99 && activeChartBucket.p99 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p99)} r={3.5} fill={P99_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p99Opacity} />}
-
-          {focused && showP50 && activeChartBucket.p50 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p50)} r={3.5} fill={P50_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p50Opacity} />}
-
-          {showP99 && <path d={p99Path} fill="none" stroke="transparent" strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pointerEvents="stroke" cursor="pointer" onClick={handleP99Click} />}
-
-          {showP50 && <path d={p50Path} fill="none" stroke="transparent" strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pointerEvents="stroke" cursor="pointer" onClick={handleP50Click} />}
+          {visibleLines.map(renderLine)}
+          {visibleLines.map(renderHoverDot)}
+          {visibleLines.map(renderClickArea)}
         </svg>
 
         {tooltipLine !== null && (
           <div className="dc-tooltip" style={tooltipStyle}>
             <p className="dc-tooltip-name">
-              <span className="dc-swatch" style={{ backgroundColor: tooltipColor }} />
-              {tooltipLine}
+              <span className="dc-swatch" style={{ backgroundColor: tooltipLine.color }} />
+              {tooltipLine.key}
             </p>
             <strong>{formatLegendDuration(tooltipValue)}</strong>
           </div>
