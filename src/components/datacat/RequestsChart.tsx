@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, timeScale, toChartBuckets, type Hover, type ChartBucket, type XLabel } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, timeScale, toChartBuckets, type Hover, type ChartBucket } from './bucketChart'
 import type { ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -107,7 +107,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   }
 
   const chartRight = width - MARGIN.right
-  const plotWidth = chartRight - chartLeft
 
   const xScale = timeScale(chartBuckets, chartLeft, chartRight)
 
@@ -115,8 +114,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   const firstBucketWidth = xScale(firstBucket.end) - xScale(firstBucket.start)
   const barGap = (firstBucketWidth * findBarPadding(chartBuckets.length)) / 2
   const fullBarWidth = firstBucketWidth - 2 * barGap
-
-  const xLabels = findXLabels(chartBuckets, xScale, plotWidth)
 
   function renderGridline(count: number) {
     const gridlineY = yScale(count)
@@ -128,20 +125,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
           {formatYAxisCount(count)}
         </text>
       </g>
-    )
-  }
-
-  function renderXLabel(xLabel: XLabel) {
-    const halfLabelWidth = xLabel.text.length * 3.3
-
-    if (xLabel.x - halfLabelWidth < 0 || xLabel.x + halfLabelWidth > width) {
-      return null
-    }
-
-    return (
-      <text key={xLabel.x} x={xLabel.x} y={chartBottom + 15} textAnchor="middle">
-        {xLabel.text}
-      </text>
     )
   }
 
@@ -267,7 +250,6 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
           {yLabelValues.map(renderGridline)}
-          {xLabels.map(renderXLabel)}
           {chartBuckets.map(renderBar)}
         </svg>
 
