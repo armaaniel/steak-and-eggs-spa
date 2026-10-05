@@ -34,6 +34,16 @@ function findBarPadding(barCount: number) {
   return scaleLinear().domain([FEW_BARS, MANY_BARS]).range([FEW_BARS_PADDING, MANY_BARS_PADDING]).clamp(true)(barCount)
 }
 
+function formatHoverTime(date: Date) {
+  return date.toLocaleString('en-us', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  })
+}
+
 function findMostRequests(chartBuckets: ChartBucket[]) {
   let mostRequests = 0
 
@@ -185,10 +195,17 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
 
   const activeChartBucket = findActiveChartBucket(chartBuckets, hover)
 
+  let hoverTime = ''
+
+  if (activeChartBucket !== null) {
+    hoverTime = formatHoverTime(new Date(activeChartBucket.start))
+  }
+
   return (
     <>
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">Requests</p>
+        {activeChartBucket !== null && <p className="dc-hover-time">{hoverTime}</p>}
         <div className="dc-legend">
           <span>
             <span className="dc-swatch" style={{ backgroundColor: OK_COLOR }} />

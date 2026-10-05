@@ -68,6 +68,13 @@
 	column-gap:12px;
 }
 
+.dc-chart-header .dc-hover-time {
+	font-size:12px;
+	color:var(--dc-text-muted);
+	white-space:nowrap;
+	font-variant-numeric:tabular-nums;
+}
+
 .dc-legend {
 	display:flex;
 	column-gap:12px;
