@@ -6,6 +6,7 @@ import SyntheticRunRow from '../../components/datacat/SyntheticRunRow'
 import useTransition from '../../hooks/useTransition.ts'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
 import { toBucketLabel } from '../../lib/utils.ts'
+import { Y_LABEL_GAP, type Hover } from '../../components/datacat/bucketChart'
 import '../../stylesheets/datacat/uptime.css'
 import type { SyntheticBucket, SyntheticRun, OutletContextType, Trace, CanarySlo } from '../../lib/types.ts'
 
@@ -60,6 +61,10 @@ function Uptime() {
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: SyntheticBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
   const selectBucket = (bucket: SyntheticBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
+
+  const [hover, setHover] = useState<Hover | null>(null)
+  const [yLabelWidth, setYLabelWidth] = useState(0)
+  const chartLeft = yLabelWidth + Y_LABEL_GAP
 
   const { loading, error, data } = useQuery<BucketsData>(GET_BUCKETS, {
     variables: { range },
@@ -118,7 +123,9 @@ function Uptime() {
         {error ? 
 					<p className="uptime-message">Unable to load uptime data, please try again</p> 
 					: 
-				<UptimeChart buckets={buckets} selectedBucket={selectedBucket} onSelect={selectBucket} />}
+				<div className="lr-panels">
+					<UptimeChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
+				</div>}
       </div>
 
       {selectedBucket && (

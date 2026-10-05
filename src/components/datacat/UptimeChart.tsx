@@ -1,77 +1,81 @@
-import { toBucketLabel } from '../../lib/utils.ts'
+import BucketBarChart from './BucketBarChart'
+import type { BarSeries, ChartBar, Hover } from './bucketChart'
 import type { SyntheticBucket } from '../../lib/types.ts'
 
 interface Props {
   buckets: SyntheticBucket[]
+  hover: Hover | null
+  setHover: (hover: Hover | null) => void
+  chartLeft: number
+  setYLabelWidth: (width: number) => void
   selectedBucket: SyntheticBucket | null
-  onSelect: (bucket: SyntheticBucket) => void
+  selectBucket: (bucket: SyntheticBucket) => void
 }
 
-const bucketStatus = (bucket: SyntheticBucket) => {
-  if (bucket.started === 0) return 'empty'
-  if (bucket.failures > 0) return 'critical'
-  if (bucket.started < bucket.expected) return 'warn'
-  return 'good'
+const HEALTHY_COLOR = 'var(--dc-status-good)'
+const HEALTHY_HOVER_COLOR = '#077507'
+const FAILING_COLOR = 'var(--dc-status-critical)'
+
+const UPTIME_SERIES: BarSeries[] = [
+  { key: 'healthy', label: 'healthy', color: HEALTHY_COLOR, hoverColor: HEALTHY_HOVER_COLOR },
+  { key: 'failing', label: 'failing', color: FAILING_COLOR }
+]
+
+function formatHoverTime(date: Date) {
+  return date.toLocaleString('en-us', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  })
 }
 
-const UptimeChart = ({ buckets, selectedBucket, onSelect }: Props) => {
-  const oldest = buckets[0]
-  const newest = buckets[buckets.length - 1]
+function toUptimeBar(bucket: SyntheticBucket): ChartBar {
+  const start = new Date(bucket.bucket).getTime()
+  const end = new Date(bucket.bucketEnd).getTime()
+
+  let segments: Record<string, number> = { healthy: bucket.started }
+
+  if (bucket.failures > 0) {
+    segments = { failing: bucket.started }
+  }
+
+  const hoverText = `${formatHoverTime(new Date(start))} · ${bucket.completed} / ${bucket.expected} passed · ${bucket.failures} failed`
+
+  return { start, end, segments, hoverText }
+}
+
+const UptimeChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, selectBucket }: Props) => {
+  const bars = buckets.map(toUptimeBar)
+
+  let selectedIndex: number | null = null
+
+  if (selectedBucket !== null) {
+    selectedIndex = buckets.findIndex(function (bucket) {
+      return bucket.bucket === selectedBucket.bucket
+    })
+  }
+
+  function selectBar(index: number) {
+    selectBucket(buckets[index])
+  }
 
   return (
-    <>
-      <div className="uptime-chart-body">
-        <div className="uptime-chart">
-          {buckets.map((bucket) => {
-            const status = bucketStatus(bucket)
-            const isSelected = selectedBucket?.bucket === bucket.bucket
-            const ratio = bucket.expected > 0 ? Math.min(bucket.started / bucket.expected, 1) : 0
-
-            return (
-              <button key={bucket.bucket} type="button" className={`uptime-bar ${isSelected ? 'selected' : ''}`} onClick={() => onSelect(bucket)} aria-pressed={isSelected}>
-                {status !== 'empty' && <span className={`uptime-bar-fill ${status}`} style={{ height: `${ratio * 100}%` }} />}
-
-                <span className="uptime-tooltip">
-                  <span className="uptime-tooltip-time">{toBucketLabel(bucket.bucket)}</span>
-                  <span>
-                    {bucket.started} / {bucket.expected} started
-                  </span>
-                  <span>{bucket.completed} completed</span>
-                  <span>{bucket.failures} failed</span>
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="uptime-axis">
-          <span>{oldest && toBucketLabel(oldest.bucket)}</span>
-          <span>{newest && toBucketLabel(newest.bucket)}</span>
-        </div>
-      </div>
-
-      <div className="uptime-legend">
-        <span className="uptime-legend-item">
-          <span className="uptime-swatch good" />
-          Healthy
-        </span>
-
-        <span className="uptime-legend-item">
-          <span className="uptime-swatch warn" />
-          Incomplete
-        </span>
-
-        <span className="uptime-legend-item">
-          <span className="uptime-swatch critical" />
-          Failing
-        </span>
-
-        <span className="uptime-legend-item">
-          <span className="uptime-swatch" />
-          No runs
-        </span>
-      </div>
-    </>
+    <BucketBarChart
+      title="Uptime"
+      emptyMessage="No runs in this range."
+      bars={bars}
+      series={UPTIME_SERIES}
+      chartName="uptime"
+      hover={hover}
+      setHover={setHover}
+      chartLeft={chartLeft}
+      setYLabelWidth={setYLabelWidth}
+      selectedIndex={selectedIndex}
+      selectBar={selectBar}
+      showTimeLabels
+    />
   )
 }
 

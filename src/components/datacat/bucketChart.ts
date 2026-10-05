@@ -22,6 +22,7 @@ export interface TimeSpan {
 
 export interface ChartBar extends TimeSpan {
   segments: Record<string, number>
+  hoverText?: string
 }
 
 export interface BarSeries {
@@ -38,7 +39,7 @@ export interface XLabel {
 
 // Which chart the pointer is over and the bucket under it. Pages hold this so a hover on one chart shows on the other.
 export interface Hover {
-  chart: 'latency' | 'requests'
+  chart: 'latency' | 'requests' | 'uptime'
   index: number
 }
 

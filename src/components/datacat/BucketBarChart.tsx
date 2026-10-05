@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, timeScale, type BarSeries, type ChartBar, type Hover } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, timeScale, type BarSeries, type ChartBar, type Hover, type XLabel } from './bucketChart'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
 
@@ -16,6 +16,7 @@ interface Props {
   setYLabelWidth: (width: number) => void
   selectedIndex: number | null
   selectBar: (index: number) => void
+  showTimeLabels?: boolean
 }
 
 const Y_LABEL_COUNT = 4
@@ -62,7 +63,7 @@ function findActiveBar(bars: ChartBar[], hover: Hover | null) {
   return bars[hover.index] ?? null
 }
 
-const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar }: Props) => {
+const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false }: Props) => {
   const [width, setWidth] = useState(0)
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
@@ -83,8 +84,14 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     }
   }, [])
 
+  let marginBottom = MARGIN_BOTTOM
+
+  if (showTimeLabels) {
+    marginBottom = MARGIN.bottom
+  }
+
   const chartTop = MARGIN.top
-  const chartBottom = HEIGHT - MARGIN_BOTTOM
+  const chartBottom = HEIGHT - marginBottom
 
   const tallestBar = findTallestBar(bars, series)
 
@@ -108,8 +115,15 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
   }
 
   const chartRight = width - MARGIN.right
+  const plotWidth = chartRight - chartLeft
 
   const xScale = timeScale(bars, chartLeft, chartRight)
+
+  let xLabels: XLabel[] = []
+
+  if (showTimeLabels) {
+    xLabels = findXLabels(bars, xScale, plotWidth)
+  }
 
   const firstBar = bars[0]
   const firstBucketWidth = xScale(firstBar.end) - xScale(firstBar.start)
@@ -126,6 +140,20 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
           {formatYAxisCount(count)}
         </text>
       </g>
+    )
+  }
+
+  function renderXLabel(xLabel: XLabel) {
+    const halfLabelWidth = xLabel.text.length * 3.3
+
+    if (xLabel.x - halfLabelWidth < 0 || xLabel.x + halfLabelWidth > width) {
+      return null
+    }
+
+    return (
+      <text key={xLabel.x} x={xLabel.x} y={chartBottom + 15} textAnchor="middle">
+        {xLabel.text}
+      </text>
     )
   }
 
@@ -198,13 +226,14 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
   }
 
   const activeBar = findActiveBar(bars, hover)
+  const showLegendValues = activeBar !== null && activeBar.hoverText === undefined
 
   function renderLegendEntry(barSeries: BarSeries) {
     return (
       <span key={barSeries.key}>
         <span className="dc-swatch" style={{ backgroundColor: barSeries.color }} />
         {barSeries.label}
-        {activeBar !== null && <strong>{(activeBar.segments[barSeries.key] ?? 0).toLocaleString('en-us')}</strong>}
+        {showLegendValues && <strong>{(activeBar.segments[barSeries.key] ?? 0).toLocaleString('en-us')}</strong>}
       </span>
     )
   }
@@ -215,11 +244,13 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
         <p className="lr-panel-label">{title}</p>
         <div className="dc-legend">
           {series.map(renderLegendEntry)}
+          {activeBar !== null && activeBar.hoverText !== undefined && <span className="dc-hover-time">{activeBar.hoverText}</span>}
         </div>
       </div>
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
           {yLabelValues.map(renderGridline)}
+          {xLabels.map(renderXLabel)}
           {bars.map(renderBar)}
         </svg>
       </div>
