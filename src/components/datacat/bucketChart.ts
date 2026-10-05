@@ -15,6 +15,22 @@ export interface ChartBucket {
   bucket: ServiceBucket
 }
 
+export interface TimeSpan {
+  start: number
+  end: number
+}
+
+export interface ChartBar extends TimeSpan {
+  segments: Record<string, number>
+}
+
+export interface BarSeries {
+  key: string
+  label: string
+  color: string
+  hoverColor?: string
+}
+
 export interface XLabel {
   x: number
   text: string
@@ -75,7 +91,7 @@ export const toChartBuckets = (buckets: ServiceBucket[]): ChartBucket[] =>
   })
 
 // scales time value to pixel position
-export const timeScale = (chartBuckets: ChartBucket[], chartLeft: number, chartRight: number) => {
+export const timeScale = (chartBuckets: TimeSpan[], chartLeft: number, chartRight: number) => {
   const firstBucket = chartBuckets[0]
   const lastBucket = chartBuckets[chartBuckets.length - 1]
 
@@ -84,15 +100,15 @@ export const timeScale = (chartBuckets: ChartBucket[], chartLeft: number, chartR
   return scaleTime().domain([firstBucket.start - halfBucket, lastBucket.start + halfBucket]).range([chartLeft, chartRight])
 }
 
-export function findXLabels(chartBuckets: ChartBucket[], xScale: ScaleTime<number, number>, plotWidth: number) {
+export function findXLabels(chartBuckets: TimeSpan[], xScale: ScaleTime<number, number>, plotWidth: number) {
   const labelCount = Math.min(chartBuckets.length, Math.max(2, Math.floor(plotWidth / 100)))
-  const labelledBuckets = new Set<ChartBucket>()
+  const labelledBuckets = new Set<TimeSpan>()
   const xLabels: XLabel[] = []
 
   for (const date of xScale.ticks(labelCount)) {
     const time = date.getTime()
 
-    function containsTime(chartBucket: ChartBucket) {
+    function containsTime(chartBucket: TimeSpan) {
       return chartBucket.start <= time && time < chartBucket.end
     }
 
@@ -110,7 +126,7 @@ export function findXLabels(chartBuckets: ChartBucket[], xScale: ScaleTime<numbe
 }
 
 // The bucket under the pointer, or null outside the plot.
-export const bucketAt = (e: MouseEvent<SVGSVGElement>, chartBuckets: ChartBucket[], x: ScaleTime<number, number>) => {
+export const bucketAt = (e: MouseEvent<SVGSVGElement>, chartBuckets: TimeSpan[], x: ScaleTime<number, number>) => {
   const left = e.clientX - e.currentTarget.getBoundingClientRect().left
   const [lo, hi] = x.range()
   if (left < lo || left > hi) return null
