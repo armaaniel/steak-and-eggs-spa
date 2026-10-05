@@ -21,8 +21,10 @@
 /* dark in both themes, so it reads as a tooltip over the chart */
 .dc-tooltip {
 	position:absolute;
+	display:flex;
+	flex-direction:column;
+	row-gap:2px;
 	width:max-content;
-	min-width:140px;
 	padding:6px 8px;
 	border:1px solid rgba(255, 255, 255, 0.1);
 	border-radius:4px;
@@ -33,6 +35,17 @@
 	font-variant-numeric:tabular-nums;
 	pointer-events:none;
 	z-index:1;
+}
+
+.dc-tooltip-name {
+	display:flex;
+	align-items:center;
+	column-gap:6px;
+	color:#a3a8b3;
+}
+
+.dc-tooltip strong {
+	font-weight:500;
 }
 
 .dc-tooltip-time {

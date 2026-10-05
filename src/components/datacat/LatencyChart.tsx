@@ -21,6 +21,8 @@ const Y_LABEL_COUNT = 4
 const P99_COLOR = 'var(--dc-latency-p99)'
 const P50_COLOR = 'var(--dc-latency-p50)'
 
+const DIMMED_OPACITY = 0.25
+
 function formatYAxisDuration(ms: number) {
   return ms.toLocaleString('en-us', { maximumFractionDigits: 2 })
 }
@@ -75,6 +77,7 @@ function findActiveChartBucket(chartBuckets: ChartBucket[], hover: Hover | null)
 const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: Props) => {
   const [width, setWidth] = useState(0)
   const [isolated, setIsolated] = useState<Percentile | null>(null)
+  const [mouseY, setMouseY] = useState(0)
 
   const showP99 = isolated === null || isolated === 'p99'
   const showP50 = isolated === null || isolated === 'p50'
@@ -188,6 +191,9 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
   }
 
   function handlePointerMove(event: MouseEvent<SVGSVGElement>) {
+    const svgBox = event.currentTarget.getBoundingClientRect()
+    setMouseY(event.clientY - svgBox.top)
+
     const hoveredIndex = bucketAt(event, chartBuckets, xScale)
     const hoveringThisChart = hover !== null && hover.chart === 'latency'
 
@@ -225,7 +231,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
       setIsolated('p50')
     }
   }
-
   const activeChartBucket = findActiveChartBucket(chartBuckets, hover)
   const focused = activeChartBucket !== null && hover !== null && hover.chart === 'latency'
 
@@ -241,6 +246,57 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
     hoverTime = formatHoverTime(new Date(activeChartBucket.start))
   }
 
+  let tooltipLine: Percentile | null = null
+
+  if (focused) {
+    let p99Distance = Infinity
+    let p50Distance = Infinity
+
+    if (showP99 && activeChartBucket.p99 !== null) {
+      p99Distance = Math.abs(yScale(activeChartBucket.p99) - mouseY)
+    }
+
+    if (showP50 && activeChartBucket.p50 !== null) {
+      p50Distance = Math.abs(yScale(activeChartBucket.p50) - mouseY)
+    }
+
+    if (p99Distance !== Infinity && p99Distance <= p50Distance) {
+      tooltipLine = 'p99'
+    } else if (p50Distance !== Infinity) {
+      tooltipLine = 'p50'
+    }
+  }
+
+  let p99Opacity = 1
+  let p50Opacity = 1
+
+  if (tooltipLine === 'p99') {
+    p50Opacity = DIMMED_OPACITY
+  }
+
+  if (tooltipLine === 'p50') {
+    p99Opacity = DIMMED_OPACITY
+  }
+
+  let tooltipColor = P99_COLOR
+  let tooltipValue: number | null = null
+
+  if (activeChartBucket !== null && tooltipLine === 'p99') {
+    tooltipColor = P99_COLOR
+    tooltipValue = activeChartBucket.p99
+  }
+
+  if (activeChartBucket !== null && tooltipLine === 'p50') {
+    tooltipColor = P50_COLOR
+    tooltipValue = activeChartBucket.p50
+  }
+
+  const tooltipStyle = {
+    left: activeX,
+    top: mouseY,
+    transform: 'translate(-50%, calc(-100% - 10px))'
+  }
+
   return (
     <>
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
@@ -249,12 +305,10 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
           <span className={showP99 ? '' : 'off'}>
             <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
             p99
-            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p99)}</strong>}
           </span>
           <span className={showP50 ? '' : 'off'}>
             <span className="dc-swatch" style={{ backgroundColor: P50_COLOR }} />
             p50
-            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p50)}</strong>}
           </span>
           {activeChartBucket !== null && <span className="dc-hover-time">{hoverTime}</span>}
         </div>
@@ -268,18 +322,28 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
             <line x1={activeX} x2={activeX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />
           )}
 
-          {showP99 && <path d={p99Path} fill="none" stroke={P99_COLOR} strokeWidth={1.5} strokeLinejoin="round" />}
+          {showP99 && <path d={p99Path} fill="none" stroke={P99_COLOR} strokeWidth={1.5} strokeLinejoin="round" opacity={p99Opacity} />}
 
-          {showP50 && <path d={p50Path} fill="none" stroke={P50_COLOR} strokeWidth={1.5} strokeLinejoin="round" />}
+          {showP50 && <path d={p50Path} fill="none" stroke={P50_COLOR} strokeWidth={1.5} strokeLinejoin="round" opacity={p50Opacity} />}
 
-          {focused && showP99 && activeChartBucket.p99 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p99)} r={3.5} fill={P99_COLOR} stroke="var(--dc-surface)" strokeWidth={2} />}
+          {focused && showP99 && activeChartBucket.p99 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p99)} r={3.5} fill={P99_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p99Opacity} />}
 
-          {focused && showP50 && activeChartBucket.p50 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p50)} r={3.5} fill={P50_COLOR} stroke="var(--dc-surface)" strokeWidth={2} />}
+          {focused && showP50 && activeChartBucket.p50 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p50)} r={3.5} fill={P50_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p50Opacity} />}
 
           {showP99 && <path d={p99Path} fill="none" stroke="transparent" strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pointerEvents="stroke" cursor="pointer" onClick={handleP99Click} />}
 
           {showP50 && <path d={p50Path} fill="none" stroke="transparent" strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pointerEvents="stroke" cursor="pointer" onClick={handleP50Click} />}
         </svg>
+
+        {tooltipLine !== null && (
+          <div className="dc-tooltip" style={tooltipStyle}>
+            <p className="dc-tooltip-name">
+              <span className="dc-swatch" style={{ backgroundColor: tooltipColor }} />
+              {tooltipLine}
+            </p>
+            <strong>{formatLegendDuration(tooltipValue)}</strong>
+          </div>
+        )}
       </div>
     </>
   )
