@@ -94,10 +94,6 @@ function findBaseOpacity(dotCount: number) {
   return scaleLinear().domain([FEW_DOTS, MANY_DOTS]).range([FEW_DOTS_OPACITY, MANY_DOTS_OPACITY]).clamp(true)(dotCount)
 }
 
-function findDotOpacity(baseOpacity: number, requestCount: number) {
-  return 1 - (1 - baseOpacity) ** requestCount
-}
-
 function formatYAxisDuration(ms: number) {
   return ms.toLocaleString('en-us')
 }
@@ -124,7 +120,7 @@ function formatHoverTime(date: Date) {
 const AllDots = ({ dots, baseOpacity }: { dots: Dot[]; baseOpacity: number }) => {
   function renderDot(dot: Dot) {
     return <circle key={dot.point.id} cx={dot.x} cy={dot.y} r={DOT_RADIUS} fill={findDotColor(dot.point)} 
-		fillOpacity={findDotOpacity(baseOpacity, dot.point.count)} />
+		fillOpacity={baseOpacity} />
   }
 
   return <g>{dots.map(renderDot)}</g>
