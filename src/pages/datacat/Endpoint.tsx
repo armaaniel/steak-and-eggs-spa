@@ -97,8 +97,9 @@ function Endpoint() {
   const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
   const [hover, setHover] = useState<Hover | null>(null)
-  const [yLabelWidth, setYLabelWidth] = useState(0)
-  const chartLeft = yLabelWidth + Y_LABEL_GAP
+  const [scatterYLabelWidth, setScatterYLabelWidth] = useState(0)
+  const [requestsYLabelWidth, setRequestsYLabelWidth] = useState(0)
+  const chartLeft = Math.max(scatterYLabelWidth, requestsYLabelWidth) + Y_LABEL_GAP
 
   const { method, path, endpoint } = useEndpoint()
   const { loading, error, data } = useQuery<TraceData>(GET_TRACES, {
@@ -122,8 +123,6 @@ function Endpoint() {
   const statuses = [...new Set(traceList.map((trace) => trace.status))]
   const buckets = data?.serviceTimeseries || []
   const requestBuckets = dropEmptyBucketInProgress(buckets)
-  const from = buckets.length ? new Date(buckets[0].bucket).getTime() : 0
-  const to = buckets.length ? new Date(buckets[buckets.length - 1].bucketEnd).getTime() : 0
   const statusTraces = statusFilter === 'all' ? traceList : traceList.filter((trace) => String(trace.status) === statusFilter)
   const filteredTraces = selectedBucket ? statusTraces.filter((trace) => inBucket(trace, selectedBucket)) : statusTraces
   const statusOptions = [{ value: 'all', label: 'All' }, ...statuses.map((status) => ({ value: String(status), label: String(status) }))]
@@ -141,11 +140,11 @@ function Endpoint() {
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         <div className="lr-panels">
-          <TraceScatter points={scatterData?.traceScatter || []} from={from} to={to} selectedId={selectedTrace?.id ?? null} onSelect={openPoint} />
+          <TraceScatter points={scatterData?.traceScatter || []} buckets={requestBuckets} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
         </div>
 
         <div className="lr-panels">
-          <RequestsChart buckets={requestBuckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
+          <RequestsChart buckets={requestBuckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
         </div>
       </div>
 
