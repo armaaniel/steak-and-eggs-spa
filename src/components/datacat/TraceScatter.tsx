@@ -331,7 +331,7 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
           )}
 
           {hoveredDot !== null && (
-            <circle cx={hoveredDot.x} cy={hoveredDot.y} r={ACTIVE_DOT_RADIUS} fill={findDotColor(hoveredDot.point)} />
+            <circle cx={hoveredDot.x} cy={hoveredDot.y} r={ACTIVE_DOT_RADIUS} fill={findDotColor(hoveredDot.point)} stroke="white" strokeWidth={1} />
           )}
         </svg>
 
