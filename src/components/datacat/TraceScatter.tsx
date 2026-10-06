@@ -1,6 +1,6 @@
 import { memo, useCallback, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleLog } from 'd3-scale'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, findXLabels, timeScale, toChartBuckets, type XLabel } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, findXLabels, timeScale, toChartBuckets, type Hover, type XLabel } from './bucketChart'
 import type { ScatterPoint, ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -8,6 +8,7 @@ import '../../stylesheets/datacat/charts.css'
 interface Props {
   points: ScatterPoint[]
   buckets: ServiceBucket[]
+  hover: Hover | null
   chartLeft: number
   setYLabelWidth: (width: number) => void
   selectedId: string | null
@@ -117,6 +118,16 @@ function formatHoverTime(date: Date) {
   })
 }
 
+function formatBucketTime(date: Date) {
+  return date.toLocaleString('en-us', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  })
+}
+
 const AllDots = ({ dots, baseOpacity }: { dots: Dot[]; baseOpacity: number }) => {
   function renderDot(dot: Dot) {
     return <circle key={dot.point.id} cx={dot.x} cy={dot.y} r={DOT_RADIUS} fill={findDotColor(dot.point)} 
@@ -128,7 +139,7 @@ const AllDots = ({ dots, baseOpacity }: { dots: Dot[]; baseOpacity: number }) =>
 
 const AllDotsDrawnOnce = memo(AllDots)
 
-const TraceScatter = ({ points, buckets, chartLeft, setYLabelWidth, selectedId, selectPoint }: Props) => {
+const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selectedId, selectPoint }: Props) => {
   const [width, setWidth] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
@@ -292,6 +303,8 @@ const TraceScatter = ({ points, buckets, chartLeft, setYLabelWidth, selectedId, 
 
   if (hoveredDot !== null) {
     hoverTime = formatHoverTime(new Date(hoveredDot.point.at))
+  } else if (hover !== null && chartBuckets[hover.index] !== undefined) {
+    hoverTime = formatBucketTime(new Date(chartBuckets[hover.index].start))
   }
 
   let cursor = 'default'
@@ -304,7 +317,7 @@ const TraceScatter = ({ points, buckets, chartLeft, setYLabelWidth, selectedId, 
     <>
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">Latency (ms, log scale)</p>
-        {hoveredDot !== null && <span className="dc-hover-time">{hoverTime}</span>}
+        {hoverTime !== '' && <span className="dc-hover-time">{hoverTime}</span>}
       </div>
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor }}>

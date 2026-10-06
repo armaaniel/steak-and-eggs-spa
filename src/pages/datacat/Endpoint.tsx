@@ -140,7 +140,7 @@ function Endpoint() {
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         <div className="lr-panels">
-          <TraceScatter points={scatterData?.traceScatter || []} buckets={requestBuckets} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
+          <TraceScatter points={scatterData?.traceScatter || []} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
         </div>
 
         <div className="lr-panels">
