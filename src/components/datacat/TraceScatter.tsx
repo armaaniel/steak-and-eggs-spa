@@ -31,7 +31,7 @@ interface Position {
   y: number
 }
 
-const DOT_RADIUS = 3
+const DOT_RADIUS = 4.5
 const ACTIVE_DOT_RADIUS = 5
 const FEW_DOTS = 600
 const MANY_DOTS = 2800
