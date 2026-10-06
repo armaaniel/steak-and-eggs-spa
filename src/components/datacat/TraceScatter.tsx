@@ -292,6 +292,12 @@ const TraceScatter = ({ points, buckets, chartLeft, setYLabelWidth, selectedId, 
     selectedDot = dots.find(isSelectedDot) ?? null
   }
 
+  let hoverTime = ''
+
+  if (hoveredDot !== null) {
+    hoverTime = formatHoverTime(new Date(hoveredDot.point.at))
+  }
+
   let cursor = 'default'
 
   if (hoveredDot !== null) {
@@ -302,6 +308,7 @@ const TraceScatter = ({ points, buckets, chartLeft, setYLabelWidth, selectedId, 
     <>
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">Latency (ms, log scale)</p>
+        {hoveredDot !== null && <span className="dc-hover-time">{hoverTime}</span>}
       </div>
       <div ref={measureResize} className="dc-chart">
         <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor }}>
@@ -321,11 +328,9 @@ const TraceScatter = ({ points, buckets, chartLeft, setYLabelWidth, selectedId, 
 
         {hoveredDot !== null && (
           <div className="dc-tooltip" style={{ left: hoveredDot.x, top: hoveredDot.y, transform: 'translate(-50%, calc(-100% - 10px))' }}>
-            <p className="dc-tooltip-time">{formatHoverTime(new Date(hoveredDot.point.at))}</p>
             <strong>
               {formatTooltipDuration(hoveredDot.point.duration)} · {hoveredDot.point.status ?? '–'}
             </strong>
-            {hoveredDot.point.count > 1 && <p className="dc-tooltip-name">slowest of {hoveredDot.point.count.toLocaleString('en-us')} requests here</p>}
           </div>
         )}
       </div>
