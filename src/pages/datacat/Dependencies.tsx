@@ -4,11 +4,10 @@ import { useMemo } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
 import { ms } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
-import { DATACAT_RANGE_MS } from '../../hooks/useDatacatRange'
-import type { DependencyNode, IngesterSpan, IngesterUptime, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
+import type { DependencyNode, IngesterSpan, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
-  query getDependencies($range: String!, $from: ISO8601DateTime!, $to: ISO8601DateTime!, $rangeFrom: ISO8601DateTime!) {
+  query getDependencies($range: String!, $from: ISO8601DateTime!, $to: ISO8601DateTime!) {
     serviceNow: serviceTimeseries(range: "10m") {
       requests
       errors
@@ -21,12 +20,6 @@ const GET_DEPENDENCIES = gql`
       p50
       p99
       lastSuccessAt
-    }
-    ingesterUptime(from: $rangeFrom, to: $to) {
-      pct
-      streamingSeconds
-      idleSeconds
-      downSeconds
     }
     ingesterSpans(from: $from, to: $to) {
       at
@@ -56,7 +49,6 @@ const GET_DEPENDENCIES = gql`
 interface DependencyData {
   serviceNow: Pick<ServiceBucket, 'requests' | 'errors' | 'p50' | 'p99'>[]
   polygonNow: PolygonCalls
-  ingesterUptime: IngesterUptime
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
   dependencyHealth: DependencyHealth[]
 }
@@ -150,8 +142,6 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
   const lastSpan = spans.reduce<(typeof spans)[number] | null>((newest, span) => (!newest || span.at > newest.at ? span : newest), null)
   const state = lastSpan?.state
   const ingesterStatus: Status = !state ? 'none' : state === 'streaming' || state === 'idle' ? 'good' : 'critical'
-  const uptime = data?.ingesterUptime
-  const measured = uptime ? uptime.streamingSeconds + uptime.downSeconds : 0
 
   const healthFor = (id: string) => (data?.dependencyHealth ?? []).find((health) => health.id === id)
   const alb = cloudwatch(healthFor('alb'))
@@ -195,7 +185,6 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
       metrics: data
         ? [
             { label: 'State', value: state ?? '-' },
-            { label: 'Uptime', value: !uptime ? '-' : measured === 0 ? 'idle throughout' : `${uptime.pct.toFixed(2)}% (excluding idle)` },
             ...ingesterTask.metrics,
           ]
         : [],
@@ -216,7 +205,6 @@ function Dependencies() {
         range,
         from: new Date(at - HOUR_MS).toISOString(),
         to: new Date(at).toISOString(),
-        rangeFrom: new Date(at - DATACAT_RANGE_MS[range]).toISOString(),
       },
     }
   }, [range])
