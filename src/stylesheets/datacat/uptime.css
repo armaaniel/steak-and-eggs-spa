@@ -7,7 +7,7 @@
 }
 
 .uptime-swatch.good {
-	background-color:var(--dc-status-good);
+	background-color:#95BA78;
 }
 
 .uptime-swatch.warn {

@@ -12,8 +12,8 @@ interface Props {
   selectBucket: (bucket: SyntheticBucket) => void
 }
 
-const HEALTHY_COLOR = 'var(--dc-status-good)'
-const HEALTHY_HOVER_COLOR = '#077507'
+const HEALTHY_COLOR = '#609135'
+const HEALTHY_HOVER_COLOR = '#95BA78'
 const FAILING_COLOR = 'var(--dc-status-critical)'
 
 const UPTIME_SERIES: BarSeries[] = [
