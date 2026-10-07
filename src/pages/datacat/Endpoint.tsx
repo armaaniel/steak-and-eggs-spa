@@ -12,7 +12,7 @@ import type { DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
 import { toBucketLabel } from '../../lib/utils.ts'
-import { Y_LABEL_GAP, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
+import { Y_LABEL_GAP, bucketFetchPolicy, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
 import type { Trace, OutletContextType, ServiceBucket, ScatterPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/overview.css'
 
@@ -206,6 +206,7 @@ function Endpoint() {
   const { loading: cappedLoading, error: cappedError, data: cappedData, previousData: previousCappedData } = useQuery<CappedTraceData>(GET_CAPPED_TRACES, {
     variables: { endpoint, range, bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd, status, cache, ...toSortVariables(sort) },
     skip: !askServer,
+    fetchPolicy: bucketFetchPolicy(selectedBucket),
   })
 
   const client = useApolloClient()

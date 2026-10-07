@@ -5,6 +5,7 @@ import TraceTable from '../../components/datacat/TraceTable'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
 import { toBucketLabel } from '../../lib/utils.ts'
+import { bucketFetchPolicy } from '../../components/datacat/bucketChart'
 import type { Column, Trace, OutletContextType, ServiceBucket } from '../../lib/types.ts'
 
 const GET_OVERVIEW_TRACES = gql`
@@ -53,6 +54,7 @@ function Traces({ bucket }: Props) {
 
   const { loading, error, data, previousData } = useQuery<TraceData>(GET_OVERVIEW_TRACES, {
     variables: { range, bucket: bucket?.bucket, bucketEnd: bucket?.bucketEnd, ...toSortVariables(sort) },
+    fetchPolicy: bucketFetchPolicy(bucket),
   })
 
   const recordsPerPage = 10

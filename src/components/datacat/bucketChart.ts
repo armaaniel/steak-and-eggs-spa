@@ -81,6 +81,16 @@ export function formatXAxisTime(date: Date) {
   return date.toLocaleDateString('en-us', { month: 'short', day: 'numeric' })
 }
 
+const BUCKET_SETTLE_MS = 60 * 1000
+
+export const bucketFetchPolicy = (bucket: ServiceBucket | null) => {
+  if (bucket !== null && new Date(bucket.bucketEnd).getTime() + BUCKET_SETTLE_MS <= Date.now()) {
+    return 'cache-first'
+  }
+
+  return 'no-cache'
+}
+
 export const dropEmptyBucketInProgress = (buckets: ServiceBucket[]) =>
   buckets.filter((bucket) => bucket.requests > 0 || new Date(bucket.bucketEnd).getTime() <= Date.now())
 
