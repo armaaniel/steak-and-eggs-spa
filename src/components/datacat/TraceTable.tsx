@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Column } from '../../lib/types.ts'
+import type { TraceSort } from '../../lib/traceColumns'
 import { ApolloError } from '@apollo/client'
 import usePagination from '../../hooks/usePagination'
 import PaginationControls from '../PaginationControls'
@@ -13,13 +14,14 @@ interface TableProps<T> {
   error: ApolloError | undefined
   emptyMessage?: string | undefined
   loaded?: boolean
+  onSortChange?: (sort: TraceSort) => void
 }
 
 interface HasID {
   id: string | number
 }
 
-const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSelectedTrace, recordsPerPage, error, emptyMessage, loaded = true }: TableProps<T>) => {
+const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSelectedTrace, recordsPerPage, error, emptyMessage, loaded = true, onSortChange }: TableProps<T>) => {
   const [sorted, setSorted] = useState(false)
   const [direction, setDirection] = useState('desc')
   const [sortField, setSortField] = useState('createdAt')
@@ -51,14 +53,14 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
   }
 
   const handleSort = (field: string) => {
+    let newDirection = 'desc'
+    if (sortField === field) newDirection = direction === 'asc' ? 'desc' : 'asc'
+
     setSorted(true)
-    if (sortField === field) {
-      setDirection(direction === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setDirection('desc')
-    }
+    setSortField(field)
+    setDirection(newDirection)
     reset()
+    onSortChange?.({ field, direction: newDirection })
   }
 
   return (

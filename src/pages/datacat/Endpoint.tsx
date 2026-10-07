@@ -10,7 +10,7 @@ import useEndpoint from '../../hooks/useEndpoint'
 import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
-import { traceColumns } from '../../lib/traceColumns'
+import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
 import { toBucketLabel } from '../../lib/utils.ts'
 import { Y_LABEL_GAP, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
 import type { Trace, OutletContextType, ServiceBucket, ScatterPoint } from '../../lib/types.ts'
@@ -72,9 +72,9 @@ const GET_TRACE = gql`
   }
 `
 
-const GET_BUCKET_TRACES = gql`
-  query getBucketTraces($endpoint: String!, $range: String, $bucket: ISO8601DateTime!, $bucketEnd: ISO8601DateTime!) {
-    traceList(endpoint: $endpoint, range: $range, bucket: $bucket, bucketEnd: $bucketEnd) {
+const GET_CAPPED_TRACES = gql`
+  query getCappedTraces($endpoint: String!, $range: String, $bucket: ISO8601DateTime, $bucketEnd: ISO8601DateTime, $status: Int, $sort: TraceSort, $direction: SortDirection) {
+    traceList(endpoint: $endpoint, range: $range, bucket: $bucket, bucketEnd: $bucketEnd, status: $status, sort: $sort, direction: $direction) {
       id
       createdAt
       endpoint
@@ -96,7 +96,7 @@ interface TraceData {
   serviceTimeseries: ServiceBucket[]
 }
 
-interface BucketTraceData {
+interface CappedTraceData {
   traceList: Trace[]
 }
 
@@ -115,6 +115,7 @@ function Endpoint() {
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [sort, setSort] = useState<TraceSort | null>(null)
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: ServiceBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
   const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
@@ -135,10 +136,12 @@ function Endpoint() {
 
   const traceList = data?.traceList || []
   const listIsComplete = traceList.length < TRACE_LIMIT
+  const status = statusFilter === 'all' ? null : Number(statusFilter)
+  const askServer = !listIsComplete && (selectedBucket !== null || status !== null || sort !== null)
 
-  const { loading: bucketLoading, error: bucketError, data: bucketData } = useQuery<BucketTraceData>(GET_BUCKET_TRACES, {
-    variables: { endpoint, range, bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd },
-    skip: listIsComplete || !selectedBucket,
+  const { loading: cappedLoading, error: cappedError, data: cappedData } = useQuery<CappedTraceData>(GET_CAPPED_TRACES, {
+    variables: { endpoint, range, bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd, status, ...toSortVariables(sort) },
+    skip: !askServer,
   })
 
   const client = useApolloClient()
@@ -150,13 +153,17 @@ function Endpoint() {
   const recordsPerPage = 18
   const isLoaded = useTransition(loading, data || error)
 
-  let bucketTraces = traceList
-  if (selectedBucket) bucketTraces = listIsComplete ? traceList.filter((trace) => inBucket(trace, selectedBucket)) : bucketData?.traceList || []
+  let tableTraces = traceList
+  if (askServer) {
+    tableTraces = cappedData?.traceList || []
+  } else {
+    if (selectedBucket) tableTraces = tableTraces.filter((trace) => inBucket(trace, selectedBucket))
+    if (status !== null) tableTraces = tableTraces.filter((trace) => trace.status === status)
+  }
 
-  const statuses = [...new Set([...traceList, ...bucketTraces].map((trace) => trace.status))]
+  const statuses = [...new Set([...traceList, ...tableTraces].map((trace) => trace.status))]
   const buckets = data?.serviceTimeseries || []
   const requestBuckets = dropEmptyBucketInProgress(buckets)
-  const filteredTraces = statusFilter === 'all' ? bucketTraces : bucketTraces.filter((trace) => String(trace.status) === statusFilter)
   const statusOptions = [{ value: 'all', label: 'All' }, ...statuses.map((status) => ({ value: String(status), label: String(status) }))]
 
   return (
@@ -183,7 +190,7 @@ function Endpoint() {
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         {selectedBucket && <p className="ov-traces-title">Traces from {toBucketLabel(selectedBucket.bucket)}</p>}
 
-        <TraceTable traceData={filteredTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || bucketError} loaded={!bucketLoading} />
+        <TraceTable traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} loaded={!cappedLoading} onSortChange={setSort} />
       </div>
     </>
   )

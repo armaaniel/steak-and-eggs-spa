@@ -7,3 +7,12 @@ export const traceColumns: Column<Trace>[] = [
   { key: 'controllerMethod', label: 'Controller Method', sortable: false, render: (trace) => `${trace.controller}#${trace.action}` },
   { key: 'status', label: 'Status', sortable: true, render: (trace) => trace.status },
 ]
+
+export interface TraceSort {
+  field: string
+  direction: string
+}
+
+const SORT_ENUMS: Record<string, string> = { createdAt: 'CREATED_AT', duration: 'DURATION', status: 'STATUS' }
+
+export const toSortVariables = (sort: TraceSort | null) => (sort ? { sort: SORT_ENUMS[sort.field], direction: sort.direction.toUpperCase() } : {})
