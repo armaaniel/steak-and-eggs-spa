@@ -89,6 +89,21 @@ const GET_CAPPED_TRACES = gql`
   }
 `
 
+const GET_FILTERED_TIMESERIES = gql`
+  query getFilteredTimeseries($endpoint: String!, $range: String, $status: Int, $cache: TraceCacheFilter) {
+    serviceTimeseries(range: $range, endpoint: $endpoint, includePartial: true, status: $status, cache: $cache) {
+      bucket
+      bucketEnd
+      partial
+      requests
+      errors
+      p50
+      p95
+      p99
+    }
+  }
+`
+
 const TRACE_LIMIT = 1000
 
 interface TraceData {
@@ -98,6 +113,10 @@ interface TraceData {
 
 interface CappedTraceData {
   traceList: Trace[]
+}
+
+interface TimeseriesData {
+  serviceTimeseries: ServiceBucket[]
 }
 
 interface ScatterData {
@@ -135,15 +154,21 @@ function Endpoint() {
     variables: { endpoint, range },
   })
 
+  const status = statusFilter === 'all' ? null : Number(statusFilter)
   const cache = usedRedis && cacheFilter !== 'all' ? cacheFilter : null
+  const filtering = status !== null || cache !== null
 
   const { data: scatterData } = useQuery<ScatterData>(GET_SCATTER, {
-    variables: { endpoint, range, status: statusFilter === 'all' ? null : Number(statusFilter), cache },
+    variables: { endpoint, range, status, cache },
+  })
+
+  const { data: filteredTimeseries } = useQuery<TimeseriesData>(GET_FILTERED_TIMESERIES, {
+    variables: { endpoint, range, status, cache },
+    skip: !filtering,
   })
 
   const traceList = data?.traceList || []
   const listIsComplete = traceList.length < TRACE_LIMIT
-  const status = statusFilter === 'all' ? null : Number(statusFilter)
   const askServer = !listIsComplete && (selectedBucket !== null || status !== null || cache !== null || sort !== null)
 
   const { loading: cappedLoading, error: cappedError, data: cappedData, previousData: previousCappedData } = useQuery<CappedTraceData>(GET_CAPPED_TRACES, {
@@ -171,7 +196,8 @@ function Endpoint() {
   }
 
   const statuses = [...new Set([...traceList, ...tableTraces].map((trace) => trace.status))]
-  const buckets = data?.serviceTimeseries || []
+  let buckets = data?.serviceTimeseries || []
+  if (filtering && filteredTimeseries) buckets = filteredTimeseries.serviceTimeseries
   const requestBuckets = dropEmptyBucketInProgress(buckets)
   const cacheOptions = [
     { value: 'all', label: 'All' },
