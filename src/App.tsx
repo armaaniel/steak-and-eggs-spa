@@ -11,7 +11,6 @@ import Privacy from './pages/Privacy'
 import DeleteAccount from './pages/DeleteAccount'
 import DatacatHome from './pages/datacat/DatacatHome'
 import Endpoint from './pages/datacat/Endpoint'
-import Cache from './pages/datacat/Cache'
 import Connections from './pages/datacat/Connections'
 import Ingester from './pages/datacat/Ingester'
 import LoadRun from './pages/datacat/LoadRun'
@@ -46,7 +45,6 @@ function App() {
           <Route element={<DCList />}>
             <Route path="/datacat" element={<DatacatHome />} />
             <Route path="/datacat/:method/*" element={<Endpoint />} />
-            <Route path="/datacat/cache/:method/*" element={<Cache />} />
             <Route path="/datacat/dependencies/" element={<Navigate to="/datacat#dependencies" replace />} />
             <Route path="/datacat/traces/" element={<Navigate to="/datacat#overview" replace />} />
             <Route path="/datacat/connections/" element={<Connections />} />

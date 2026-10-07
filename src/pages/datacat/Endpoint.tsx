@@ -44,8 +44,8 @@ const GET_TRACES = gql`
 `
 
 const GET_SCATTER = gql`
-  query getTraceScatter($endpoint: String!, $range: String, $status: Int) {
-    traceScatter(endpoint: $endpoint, range: $range, status: $status) {
+  query getTraceScatter($endpoint: String!, $range: String, $status: Int, $cache: TraceCacheFilter) {
+    traceScatter(endpoint: $endpoint, range: $range, status: $status, cache: $cache) {
       id
       at
       status
@@ -73,8 +73,8 @@ const GET_TRACE = gql`
 `
 
 const GET_CAPPED_TRACES = gql`
-  query getCappedTraces($endpoint: String!, $range: String, $bucket: ISO8601DateTime, $bucketEnd: ISO8601DateTime, $status: Int, $sort: TraceSort, $direction: SortDirection) {
-    traceList(endpoint: $endpoint, range: $range, bucket: $bucket, bucketEnd: $bucketEnd, status: $status, sort: $sort, direction: $direction) {
+  query getCappedTraces($endpoint: String!, $range: String, $bucket: ISO8601DateTime, $bucketEnd: ISO8601DateTime, $status: Int, $cache: TraceCacheFilter, $sort: TraceSort, $direction: SortDirection) {
+    traceList(endpoint: $endpoint, range: $range, bucket: $bucket, bucketEnd: $bucketEnd, status: $status, cache: $cache, sort: $sort, direction: $direction) {
       id
       createdAt
       endpoint
@@ -104,6 +104,10 @@ interface ScatterData {
   traceScatter: ScatterPoint[]
 }
 
+const usedCache = (trace: Trace) => Object.values(trace.breakdown ?? {}).some((call) => call.used_redis === true)
+
+const usedDbOrApi = (trace: Trace) => Object.values(trace.breakdown ?? {}).some((call) => call.used_db === true || call.used_api === true)
+
 const inBucket = (trace: Trace, bucket: ServiceBucket) => {
   const t = new Date(trace.createdAt).getTime()
   return t >= new Date(bucket.bucket).getTime() && t < new Date(bucket.bucketEnd).getTime()
@@ -115,6 +119,7 @@ function Endpoint() {
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [cacheFilter, setCacheFilter] = useState<string>('all')
   const [sort, setSort] = useState<TraceSort | null>(null)
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: ServiceBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
@@ -130,17 +135,19 @@ function Endpoint() {
     variables: { endpoint, range },
   })
 
+  const cache = usedRedis && cacheFilter !== 'all' ? cacheFilter : null
+
   const { data: scatterData } = useQuery<ScatterData>(GET_SCATTER, {
-    variables: { endpoint, range, status: statusFilter === 'all' ? null : Number(statusFilter) },
+    variables: { endpoint, range, status: statusFilter === 'all' ? null : Number(statusFilter), cache },
   })
 
   const traceList = data?.traceList || []
   const listIsComplete = traceList.length < TRACE_LIMIT
   const status = statusFilter === 'all' ? null : Number(statusFilter)
-  const askServer = !listIsComplete && (selectedBucket !== null || status !== null || sort !== null)
+  const askServer = !listIsComplete && (selectedBucket !== null || status !== null || cache !== null || sort !== null)
 
   const { loading: cappedLoading, error: cappedError, data: cappedData, previousData: previousCappedData } = useQuery<CappedTraceData>(GET_CAPPED_TRACES, {
-    variables: { endpoint, range, bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd, status, ...toSortVariables(sort) },
+    variables: { endpoint, range, bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd, status, cache, ...toSortVariables(sort) },
     skip: !askServer,
   })
 
@@ -159,20 +166,28 @@ function Endpoint() {
   } else {
     if (selectedBucket) tableTraces = tableTraces.filter((trace) => inBucket(trace, selectedBucket))
     if (status !== null) tableTraces = tableTraces.filter((trace) => trace.status === status)
+    if (cache === 'CACHED') tableTraces = tableTraces.filter(usedCache)
+    if (cache === 'UNCACHED') tableTraces = tableTraces.filter(usedDbOrApi)
   }
 
   const statuses = [...new Set([...traceList, ...tableTraces].map((trace) => trace.status))]
   const buckets = data?.serviceTimeseries || []
   const requestBuckets = dropEmptyBucketInProgress(buckets)
+  const cacheOptions = [
+    { value: 'all', label: 'All' },
+    { value: 'CACHED', label: 'Cache' },
+    { value: 'UNCACHED', label: usedApi ? 'API' : 'DB' },
+  ]
   const statusOptions = [{ value: 'all', label: 'All' }, ...statuses.map((status) => ({ value: String(status), label: String(status) }))]
 
   return (
     <>
       <div className="endpoint-nav-div">
-        <EndpointNav method={method} path={path} endpoint={endpoint} showCache={usedRedis} apiBoolean={usedApi} />
+        <EndpointNav method={method} path={path} endpoint={endpoint} />
 
         <div className="endpoint-filters">
           <Select id="status-select" label="Status" value={statusFilter} onChange={setStatusFilter} options={statusOptions} loaded={isLoaded} />
+          {usedRedis && <Select id="cache-select" label="Served by" value={cacheFilter} onChange={setCacheFilter} options={cacheOptions} loaded={isLoaded} />}
           <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
         </div>
       </div>
