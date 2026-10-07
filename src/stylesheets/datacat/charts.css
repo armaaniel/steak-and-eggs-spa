@@ -18,6 +18,14 @@
 	stroke:var(--dc-border);
 }
 
+.chart-fade {
+	transition:opacity 150ms;
+}
+
+.chart-fade.dimmed {
+	opacity:0.4;
+}
+
 /* dark in both themes, so it reads as a tooltip over the chart */
 .dc-tooltip {
 	position:absolute;

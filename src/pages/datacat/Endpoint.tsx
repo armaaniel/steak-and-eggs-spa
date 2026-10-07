@@ -132,6 +132,33 @@ const inBucket = (trace: Trace, bucket: ServiceBucket) => {
   return t >= new Date(bucket.bucket).getTime() && t < new Date(bucket.bucketEnd).getTime()
 }
 
+interface ScatterPanelProps {
+  endpoint: string
+  range: DatacatRange
+  status: number | null
+  cache: string | null
+  buckets: ServiceBucket[]
+  hover: Hover | null
+  chartLeft: number
+  setYLabelWidth: (width: number) => void
+  selectedId: string | null
+  selectPoint: (point: ScatterPoint) => void
+}
+
+const ScatterPanel = ({ endpoint, range, status, cache, buckets, hover, chartLeft, setYLabelWidth, selectedId, selectPoint }: ScatterPanelProps) => {
+  const { loading, data, previousData } = useQuery<ScatterData>(GET_SCATTER, {
+    variables: { endpoint, range, status, cache },
+  })
+
+  const points = (data ?? previousData)?.traceScatter || []
+
+  return (
+    <div className={`lr-panels chart-fade ${loading && previousData ? 'dimmed' : ''}`}>
+      <TraceScatter points={points} buckets={buckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setYLabelWidth} selectedId={selectedId} selectPoint={selectPoint} />
+    </div>
+  )
+}
+
 function Endpoint() {
   const { detail, setDetail, usedRedis, usedApi, range, setRange } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
@@ -158,11 +185,7 @@ function Endpoint() {
   const cache = usedRedis && cacheFilter !== 'all' ? cacheFilter : null
   const filtering = status !== null || cache !== null
 
-  const { data: scatterData } = useQuery<ScatterData>(GET_SCATTER, {
-    variables: { endpoint, range, status, cache },
-  })
-
-  const { data: filteredTimeseries } = useQuery<TimeseriesData>(GET_FILTERED_TIMESERIES, {
+  const { loading: filteredLoading, data: filteredTimeseries } = useQuery<TimeseriesData>(GET_FILTERED_TIMESERIES, {
     variables: { endpoint, range, status, cache },
     skip: !filtering,
   })
@@ -219,11 +242,9 @@ function Endpoint() {
       </div>
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-        <div className="lr-panels">
-          <TraceScatter points={scatterData?.traceScatter || []} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
-        </div>
+        <ScatterPanel key={`${endpoint} ${range}`} endpoint={endpoint} range={range} status={status} cache={cache} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
 
-        <div className="lr-panels">
+        <div className={`lr-panels chart-fade ${filteredLoading ? 'dimmed' : ''}`}>
           <RequestsChart buckets={requestBuckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
         </div>
       </div>
