@@ -5,38 +5,17 @@ import DependencyMap from '../../components/datacat/DependencyMap'
 import { ms } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
 import { DATACAT_RANGE_MS } from '../../hooks/useDatacatRange'
-import type { CanarySlo, DependencyNode, IngesterLagPoint, IngesterSpan, IngesterUptime, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
+import type { DependencyNode, IngesterSpan, IngesterUptime, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
   query getDependencies($range: String!, $from: ISO8601DateTime!, $to: ISO8601DateTime!, $rangeFrom: ISO8601DateTime!) {
-    canaryNow: canarySlo(range: "10m") {
-      good
-      expected
-    }
-    canarySlo(range: $range) {
-      target
-      good
-      expected
-      periodGood
-      periodExpected
-      budgetAllowed
-      budgetUsed
-    }
     serviceNow: serviceTimeseries(range: "10m") {
       requests
       errors
       p50
       p99
     }
-    serviceTimeseries(range: $range) {
-      requests
-      errors
-    }
     polygonNow: polygonCalls(range: "10m") {
-      calls
-      failures
-    }
-    polygonCalls(range: $range) {
       calls
       failures
       p50
@@ -53,10 +32,6 @@ const GET_DEPENDENCIES = gql`
       at
       state
       seconds
-    }
-    ingesterLag(from: $from, to: $to) {
-      at
-      meanExcessMs
     }
     dependencyHealth(range: $range) {
       id
@@ -79,15 +54,10 @@ const GET_DEPENDENCIES = gql`
 `
 
 interface DependencyData {
-  canaryNow: Pick<CanarySlo, 'good' | 'expected'>
-  canarySlo: CanarySlo
   serviceNow: Pick<ServiceBucket, 'requests' | 'errors' | 'p50' | 'p99'>[]
-  serviceTimeseries: Pick<ServiceBucket, 'requests' | 'errors'>[]
-  polygonNow: Pick<PolygonCalls, 'calls' | 'failures'>
-  polygonCalls: PolygonCalls
+  polygonNow: PolygonCalls
   ingesterUptime: IngesterUptime
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
-  ingesterLag: Pick<IngesterLagPoint, 'at' | 'meanExcessMs'>[]
   dependencyHealth: DependencyHealth[]
 }
 
@@ -160,8 +130,6 @@ const makeNode = (id: string, title: string, role: string, status: Status, rest:
   ...rest,
 })
 
-const percent = (part: number, whole: number) => (whole > 0 ? `${((part / whole) * 100).toFixed(2)}%` : '-')
-
 const ago = (at: string, now: number) => {
   const minutes = Math.round((now - new Date(at).getTime()) / 60000)
   if (minutes < 1) return 'just now'
@@ -174,20 +142,14 @@ const total = (buckets: { requests: number; errors: number }[], key: 'requests' 
 const buildNodes = (data: DependencyData | undefined, now: number): DependencyNode[] => {
   const recent = data?.serviceNow ?? []
   const latest = [...recent].reverse().find((bucket) => bucket.p99 !== null)
-  const railsStatus: Status = !data ? 'none' : total(recent, 'requests') === 0 ? 'critical' : total(recent, 'errors') > 0 ? 'warn' : 'good'
-  const requests = total(data?.serviceTimeseries ?? [], 'requests')
-  const errors = total(data?.serviceTimeseries ?? [], 'errors')
-
-  const canaryNow = data?.canaryNow
-  const canaryStatus: Status = !canaryNow || canaryNow.expected === 0 ? 'none' : canaryNow.good === canaryNow.expected ? 'good' : canaryNow.good === 0 ? 'critical' : 'warn'
-  const slo = data?.canarySlo
-  const budgetLeft = slo && slo.budgetAllowed > 0 ? `${(Math.max(0, 1 - slo.budgetUsed / slo.budgetAllowed) * 100).toFixed(0)}%` : '-'
+  const requests = total(recent, 'requests')
+  const errors = total(recent, 'errors')
+  const railsStatus: Status = !data ? 'none' : requests === 0 ? 'critical' : errors > 0 ? 'warn' : 'good'
 
   const spans = data?.ingesterSpans ?? []
   const lastSpan = spans.reduce<(typeof spans)[number] | null>((newest, span) => (!newest || span.at > newest.at ? span : newest), null)
   const state = lastSpan?.state
   const ingesterStatus: Status = !state ? 'none' : state === 'streaming' || state === 'idle' ? 'good' : 'critical'
-  const lag = [...(data?.ingesterLag ?? [])].reverse().find((point) => point.meanExcessMs !== null)
   const uptime = data?.ingesterUptime
   const measured = uptime ? uptime.streamingSeconds + uptime.downSeconds : 0
 
@@ -200,27 +162,18 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
 
   const polygonNow = data?.polygonNow
   const polygonStatus: Status = !polygonNow || polygonNow.calls === 0 ? 'none' : polygonNow.failures === polygonNow.calls ? 'critical' : polygonNow.failures > 0 ? 'warn' : 'good'
-  const polygon = data?.polygonCalls
 
   return [
     makeNode('vercel', 'Vercel', 'Static hosting', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('browser', 'Browser', 'React SPA', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('mobile', 'React Native', 'Mobile app', 'none', { note: NOT_INSTRUMENTED }),
-    makeNode('canary', 'Canary', 'Synthetic (k6)', canaryStatus, {
-      metrics: slo
-        ? [
-            { label: 'Runs passed', value: `${slo.good} / ${slo.expected}` },
-            { label: '30-day result', value: `${percent(slo.periodGood, slo.periodExpected)} (target ${(slo.target * 100).toFixed(1)}%)` },
-            { label: '30-day error budget left', value: budgetLeft },
-          ]
-        : [],
-    }),
+    makeNode('canary', 'Canary', 'Synthetic (k6)', 'none', { note: 'Results are in Uptime.' }),
     makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note }),
     makeNode('rails', 'Rails app', 'ECS Fargate · API + cable', worst(railsStatus, railsTask.status), {
       metrics: data
         ? [
-            { label: 'Requests', value: requests.toLocaleString() },
-            { label: 'Errors', value: errors.toLocaleString() },
+            { label: 'Requests, last 10 min', value: requests.toLocaleString() },
+            { label: 'Errors, last 10 min', value: errors.toLocaleString() },
             { label: 'p50 / p99, latest 5 min', value: latest ? `${ms(latest.p50)} / ${ms(latest.p99)}` : '-' },
             ...railsTask.metrics,
           ]
@@ -229,12 +182,12 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
     makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', redis.status, { metrics: redis.metrics, note: redis.note }),
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note }),
     makeNode('polygon', 'Polygon.io', 'Market data provider', polygonStatus, {
-      metrics: polygon
+      metrics: polygonNow
         ? [
-            { label: 'Last successful call', value: polygon.lastSuccessAt ? ago(polygon.lastSuccessAt, now) : 'none in the last day' },
-            { label: 'Calls', value: polygon.calls.toLocaleString() },
-            { label: 'Failed', value: polygon.failures.toLocaleString() },
-            { label: 'p50 / p99', value: `${ms(polygon.p50)} / ${ms(polygon.p99)}` },
+            { label: 'Last successful call', value: polygonNow.lastSuccessAt ? ago(polygonNow.lastSuccessAt, now) : 'none in the last day' },
+            { label: 'Calls, last 10 min', value: polygonNow.calls.toLocaleString() },
+            { label: 'Failed, last 10 min', value: polygonNow.failures.toLocaleString() },
+            { label: 'p50 / p99, last 10 min', value: `${ms(polygonNow.p50)} / ${ms(polygonNow.p99)}` },
           ]
         : [],
     }),
@@ -243,7 +196,6 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
         ? [
             { label: 'State', value: state ?? '-' },
             { label: 'Uptime', value: !uptime ? '-' : measured === 0 ? 'idle throughout' : `${uptime.pct.toFixed(2)}% (excluding idle)` },
-            { label: 'Mean lag, latest', value: ms(lag?.meanExcessMs) },
             ...ingesterTask.metrics,
           ]
         : [],
