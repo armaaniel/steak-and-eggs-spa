@@ -23,6 +23,7 @@ export interface TimeSpan {
 export interface ChartBar extends TimeSpan {
   segments: Record<string, number>
   hoverText?: string
+  legendValues?: Record<string, number>
 }
 
 export interface BarSeries {

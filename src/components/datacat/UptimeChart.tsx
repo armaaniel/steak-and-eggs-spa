@@ -14,10 +14,12 @@ interface Props {
 
 const HEALTHY_COLOR = '#609135'
 const HEALTHY_HOVER_COLOR = '#95BA78'
+const INCOMPLETE_COLOR = 'var(--dc-status-warn)'
 const FAILING_COLOR = 'var(--dc-status-critical)'
 
 const UPTIME_SERIES: BarSeries[] = [
   { key: 'healthy', label: 'healthy', color: HEALTHY_COLOR, hoverColor: HEALTHY_HOVER_COLOR },
+  { key: 'incomplete', label: 'incomplete', color: INCOMPLETE_COLOR },
   { key: 'failing', label: 'failing', color: FAILING_COLOR }
 ]
 
@@ -37,13 +39,19 @@ function toUptimeBar(bucket: SyntheticBucket): ChartBar {
 
   let segments: Record<string, number> = { healthy: bucket.started }
 
+  if (bucket.started < bucket.expected) {
+    segments = { incomplete: bucket.started }
+  }
+
   if (bucket.failures > 0) {
     segments = { failing: bucket.started }
   }
 
-  const hoverText = `${formatHoverTime(new Date(start))} · ${bucket.completed} / ${bucket.expected} passed · ${bucket.failures} failed`
+  const missingRuns = Math.max(0, bucket.expected - bucket.started)
+  const hoverText = formatHoverTime(new Date(start))
+  const legendValues = { healthy: bucket.completed, incomplete: missingRuns, failing: bucket.failures }
 
-  return { start, end, segments, hoverText }
+  return { start, end, segments, hoverText, legendValues }
 }
 
 const UptimeChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, selectBucket }: Props) => {

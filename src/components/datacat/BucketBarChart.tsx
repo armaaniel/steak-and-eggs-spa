@@ -226,14 +226,21 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
   }
 
   const activeBar = findActiveBar(bars, hover)
-  const showLegendValues = activeBar !== null && activeBar.hoverText === undefined
+
+  function findLegendValue(bar: ChartBar, barSeries: BarSeries) {
+    if (bar.legendValues !== undefined) {
+      return bar.legendValues[barSeries.key] ?? 0
+    }
+
+    return bar.segments[barSeries.key] ?? 0
+  }
 
   function renderLegendEntry(barSeries: BarSeries) {
     return (
       <span key={barSeries.key}>
         <span className="dc-swatch" style={{ backgroundColor: barSeries.color }} />
         {barSeries.label}
-        {showLegendValues && <strong>{(activeBar.segments[barSeries.key] ?? 0).toLocaleString('en-us')}</strong>}
+        {activeBar !== null && <strong>{findLegendValue(activeBar, barSeries).toLocaleString('en-us')}</strong>}
       </span>
     )
   }
@@ -243,8 +250,8 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">{title}</p>
         <div className="dc-legend">
-          {series.map(renderLegendEntry)}
           {activeBar !== null && activeBar.hoverText !== undefined && <span className="dc-hover-time">{activeBar.hoverText}</span>}
+          {series.map(renderLegendEntry)}
         </div>
       </div>
       <div ref={measureResize} className="dc-chart">
