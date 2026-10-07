@@ -165,7 +165,7 @@ function Endpoint() {
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [cacheFilter, setCacheFilter] = useState<string>('all')
+  const [cachePick, setCachePick] = useState<{ endpoint: string; value: string } | null>(null)
   const [sort, setSort] = useState<TraceSort | null>(null)
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: ServiceBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
@@ -177,6 +177,8 @@ function Endpoint() {
   const chartLeft = Math.max(scatterYLabelWidth, requestsYLabelWidth) + Y_LABEL_GAP
 
   const { method, path, endpoint } = useEndpoint()
+  const cacheFilter = cachePick?.endpoint === endpoint ? cachePick.value : 'all'
+  const setCacheFilter = (value: string) => setCachePick({ endpoint, value })
   const { loading, error, data } = useQuery<TraceData>(GET_TRACES, {
     variables: { endpoint, range },
   })

@@ -71,12 +71,13 @@ function DCList() {
   const { method, endpoint } = useEndpoint()
   const isEndpointRoute = Boolean(method)
 
-  const { data, loading } = useQuery<StatsData>(GET_STATS, {
+  const { data, previousData, loading } = useQuery<StatsData>(GET_STATS, {
     variables: { endpoint, range },
     skip: !isEndpointRoute,
   })
 
   const stats = data?.traceStats
+  const lastStats = (data ?? previousData)?.traceStats
   const statsLoaded = useTransition(loading, data)
 
   const toggleStats = () => {
@@ -128,7 +129,7 @@ function DCList() {
         </div>
 
         <div className="dc-home-right">
-          <Outlet context={{ detail, setDetail, range, setRange, usedRedis: stats?.usedRedis ?? false, usedApi: stats?.usedApi ?? false }} />
+          <Outlet context={{ detail, setDetail, range, setRange, usedRedis: lastStats?.usedRedis ?? false, usedApi: lastStats?.usedApi ?? false }} />
         </div>
       </div>
     </div>
