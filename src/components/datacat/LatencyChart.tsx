@@ -302,6 +302,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">Latency (ms)</p>
         <div className="dc-legend">
+          {activeChartBucket !== null && <span className="dc-hover-time">{hoverTime}</span>}
           <span className={showP99 ? '' : 'off'}>
             <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
             p99
@@ -312,7 +313,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
             p50
             {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p50)}</strong>}
           </span>
-          {activeChartBucket !== null && <span className="dc-hover-time">{hoverTime}</span>}
         </div>
       </div>
       <div ref={measureResize} className="dc-chart">
