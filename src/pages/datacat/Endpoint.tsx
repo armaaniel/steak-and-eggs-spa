@@ -167,8 +167,15 @@ function Endpoint() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [cachePick, setCachePick] = useState<{ endpoint: string; value: string } | null>(null)
   const [sort, setSort] = useState<TraceSort | null>(null)
+  const [sortBucket, setSortBucket] = useState<string | null>(null)
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: ServiceBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
+  const bucketKey = selectedBucket?.bucket ?? null
+
+  if (bucketKey !== sortBucket) {
+    setSortBucket(bucketKey)
+    setSort(null)
+  }
   const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
   const [hover, setHover] = useState<Hover | null>(null)
@@ -254,7 +261,7 @@ function Endpoint() {
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         {selectedBucket && <p className="ov-traces-title">Traces from {toBucketLabel(selectedBucket.bucket)}</p>}
 
-        <TraceTable traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} dimmed={cappedLoading} sortOnServer={!listIsComplete} onSortChange={setSort} />
+        <TraceTable key={bucketKey ?? 'all'} traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} dimmed={cappedLoading} sortOnServer={!listIsComplete} onSortChange={setSort} />
       </div>
     </>
   )

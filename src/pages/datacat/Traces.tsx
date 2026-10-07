@@ -43,6 +43,13 @@ function Traces({ bucket }: Props) {
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const [sort, setSort] = useState<TraceSort | null>(null)
+  const [sortBucket, setSortBucket] = useState<string | null>(null)
+  const bucketKey = bucket?.bucket ?? null
+
+  if (bucketKey !== sortBucket) {
+    setSortBucket(bucketKey)
+    setSort(null)
+  }
 
   const { loading, error, data, previousData } = useQuery<TraceData>(GET_OVERVIEW_TRACES, {
     variables: { range, bucket: bucket?.bucket, bucketEnd: bucket?.bucketEnd, ...toSortVariables(sort) },
@@ -56,7 +63,7 @@ function Traces({ bucket }: Props) {
     <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
       {bucket && <p className={`ov-traces-title table-fade ${loading ? '' : 'loaded'}`}>Traces from {toBucketLabel(bucket.bucket)}</p>}
 
-      <TraceTable traceData={traces} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
+      <TraceTable key={bucketKey ?? 'all'} traceData={traces} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
     </div>
   )
 }
