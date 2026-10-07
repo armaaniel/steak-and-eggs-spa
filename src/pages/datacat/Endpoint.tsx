@@ -139,7 +139,7 @@ function Endpoint() {
   const status = statusFilter === 'all' ? null : Number(statusFilter)
   const askServer = !listIsComplete && (selectedBucket !== null || status !== null || sort !== null)
 
-  const { loading: cappedLoading, error: cappedError, data: cappedData } = useQuery<CappedTraceData>(GET_CAPPED_TRACES, {
+  const { loading: cappedLoading, error: cappedError, data: cappedData, previousData: previousCappedData } = useQuery<CappedTraceData>(GET_CAPPED_TRACES, {
     variables: { endpoint, range, bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd, status, ...toSortVariables(sort) },
     skip: !askServer,
   })
@@ -155,7 +155,7 @@ function Endpoint() {
 
   let tableTraces = traceList
   if (askServer) {
-    tableTraces = cappedData?.traceList || []
+    tableTraces = (cappedData ?? previousCappedData)?.traceList ?? traceList
   } else {
     if (selectedBucket) tableTraces = tableTraces.filter((trace) => inBucket(trace, selectedBucket))
     if (status !== null) tableTraces = tableTraces.filter((trace) => trace.status === status)
@@ -190,7 +190,7 @@ function Endpoint() {
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         {selectedBucket && <p className="ov-traces-title">Traces from {toBucketLabel(selectedBucket.bucket)}</p>}
 
-        <TraceTable traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} loaded={!cappedLoading} onSortChange={setSort} />
+        <TraceTable traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} dimmed={cappedLoading} sortOnServer={!listIsComplete} onSortChange={setSort} />
       </div>
     </>
   )

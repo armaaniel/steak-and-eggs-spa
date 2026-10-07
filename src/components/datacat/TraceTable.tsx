@@ -14,20 +14,26 @@ interface TableProps<T> {
   error: ApolloError | undefined
   emptyMessage?: string | undefined
   loaded?: boolean
-  onSortChange?: (sort: TraceSort) => void
+  dimmed?: boolean
+  sortOnServer?: boolean
+  onSortChange?: (sort: TraceSort | null) => void
 }
+
+const DEFAULT_SORT_FIELD = 'createdAt'
+const DEFAULT_DIRECTION = 'desc'
 
 interface HasID {
   id: string | number
 }
 
-const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSelectedTrace, recordsPerPage, error, emptyMessage, loaded = true, onSortChange }: TableProps<T>) => {
+const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSelectedTrace, recordsPerPage, error, emptyMessage, loaded = true, dimmed = false, sortOnServer = false, onSortChange }: TableProps<T>) => {
   const [sorted, setSorted] = useState(false)
-  const [direction, setDirection] = useState('desc')
-  const [sortField, setSortField] = useState('createdAt')
+  const [direction, setDirection] = useState(DEFAULT_DIRECTION)
+  const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD)
+  const isDefaultSort = sortField === DEFAULT_SORT_FIELD && direction === DEFAULT_DIRECTION
 
   const sortTraces = () => {
-    if (!sorted) return traceData
+    if (!sorted || sortOnServer) return traceData
     return [...traceData].sort(function (a: any, b: any) {
       let aValue, bValue
       if (sortField === 'createdAt') {
@@ -60,16 +66,17 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
     setSortField(field)
     setDirection(newDirection)
     reset()
-    onSortChange?.({ field, direction: newDirection })
+    if (field === DEFAULT_SORT_FIELD && newDirection === DEFAULT_DIRECTION) onSortChange?.(null)
+    else onSortChange?.({ field, direction: newDirection })
   }
 
   return (
     <>
-      <table className={`overview-stock-table table-fade ${loaded ? 'loaded' : ''}`}>
+      <table className={`overview-stock-table table-fade ${loaded ? 'loaded' : ''} ${dimmed ? 'dimmed' : ''}`}>
         <thead>
           <tr>
             {columns.map((column) => (
-              <th key={column.key} className={`portfolio-row-heading ${column.sortable && sorted && sortField === column.key ? direction : ''}`} onClick={column.sortable ? () => handleSort(column.key) : undefined}>
+              <th key={column.key} className={`portfolio-row-heading ${column.sortable && sorted && !isDefaultSort && sortField === column.key ? direction : ''}`} onClick={column.sortable ? () => handleSort(column.key) : undefined}>
                 {column.label}
               </th>
             ))}
@@ -107,7 +114,7 @@ const TraceTable = <T extends HasID>({ traceData, columns, selectedTrace, setSel
         )}
       </table>
 
-      <PaginationControls currentPage={currentPage} totalPages={totalPages} onNext={next} onPrev={prev} className={`table-fade ${loaded ? 'loaded' : ''}`} />
+      <PaginationControls currentPage={currentPage} totalPages={totalPages} onNext={next} onPrev={prev} className={`table-fade ${loaded ? 'loaded' : ''} ${dimmed ? 'dimmed' : ''}`} />
     </>
   )
 }

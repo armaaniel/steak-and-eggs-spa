@@ -56,7 +56,7 @@ function Traces({ bucket }: Props) {
     <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
       {bucket && <p className={`ov-traces-title table-fade ${loading ? '' : 'loaded'}`}>Traces from {toBucketLabel(bucket.bucket)}</p>}
 
-      <TraceTable traceData={traces} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading} onSortChange={setSort} />
+      <TraceTable traceData={traces} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
     </div>
   )
 }

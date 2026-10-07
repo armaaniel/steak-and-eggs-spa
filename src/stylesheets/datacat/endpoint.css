@@ -82,6 +82,10 @@
 	transition:opacity 150ms;
 }
 
+.table-fade.loaded.dimmed {
+	opacity:0.4;
+}
+
 .stats-container {
 	display:flex;
 	flex-direction:column;
