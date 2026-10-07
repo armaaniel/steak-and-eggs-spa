@@ -72,9 +72,32 @@ const GET_TRACE = gql`
   }
 `
 
+const GET_BUCKET_TRACES = gql`
+  query getBucketTraces($endpoint: String!, $range: String, $bucket: ISO8601DateTime!, $bucketEnd: ISO8601DateTime!) {
+    traceList(endpoint: $endpoint, range: $range, bucket: $bucket, bucketEnd: $bucketEnd) {
+      id
+      createdAt
+      endpoint
+      duration
+      controller
+      action
+      status
+      dbRuntime
+      viewRuntime
+      breakdown
+    }
+  }
+`
+
+const TRACE_LIMIT = 1000
+
 interface TraceData {
   traceList: Trace[]
   serviceTimeseries: ServiceBucket[]
+}
+
+interface BucketTraceData {
+  traceList: Trace[]
 }
 
 interface ScatterData {
@@ -110,6 +133,14 @@ function Endpoint() {
     variables: { endpoint, range, status: statusFilter === 'all' ? null : Number(statusFilter) },
   })
 
+  const traceList = data?.traceList || []
+  const listIsComplete = traceList.length < TRACE_LIMIT
+
+  const { loading: bucketLoading, error: bucketError, data: bucketData } = useQuery<BucketTraceData>(GET_BUCKET_TRACES, {
+    variables: { endpoint, range, bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd },
+    skip: listIsComplete || !selectedBucket,
+  })
+
   const client = useApolloClient()
   const openPoint = async (point: ScatterPoint) => {
     const { data: traceData } = await client.query<{ trace: Trace | null }>({ query: GET_TRACE, variables: { id: point.id } })
@@ -119,12 +150,13 @@ function Endpoint() {
   const recordsPerPage = 18
   const isLoaded = useTransition(loading, data || error)
 
-  const traceList = data?.traceList || []
-  const statuses = [...new Set(traceList.map((trace) => trace.status))]
+  let bucketTraces = traceList
+  if (selectedBucket) bucketTraces = listIsComplete ? traceList.filter((trace) => inBucket(trace, selectedBucket)) : bucketData?.traceList || []
+
+  const statuses = [...new Set([...traceList, ...bucketTraces].map((trace) => trace.status))]
   const buckets = data?.serviceTimeseries || []
   const requestBuckets = dropEmptyBucketInProgress(buckets)
-  const statusTraces = statusFilter === 'all' ? traceList : traceList.filter((trace) => String(trace.status) === statusFilter)
-  const filteredTraces = selectedBucket ? statusTraces.filter((trace) => inBucket(trace, selectedBucket)) : statusTraces
+  const filteredTraces = statusFilter === 'all' ? bucketTraces : bucketTraces.filter((trace) => String(trace.status) === statusFilter)
   const statusOptions = [{ value: 'all', label: 'All' }, ...statuses.map((status) => ({ value: String(status), label: String(status) }))]
 
   return (
@@ -151,7 +183,7 @@ function Endpoint() {
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
         {selectedBucket && <p className="ov-traces-title">Traces from {toBucketLabel(selectedBucket.bucket)}</p>}
 
-        <TraceTable traceData={filteredTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} />
+        <TraceTable traceData={filteredTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || bucketError} loaded={!bucketLoading} />
       </div>
     </>
   )
