@@ -211,6 +211,11 @@ function Endpoint() {
 
   const client = useApolloClient()
   const openPoint = async (point: ScatterPoint) => {
+    if (selectedTrace?.id === point.id) {
+      setDetail(null)
+      return
+    }
+
     const { data: traceData } = await client.query<{ trace: Trace | null }>({ query: GET_TRACE, variables: { id: point.id } })
     if (traceData?.trace) selectTrace(traceData.trace)
   }
