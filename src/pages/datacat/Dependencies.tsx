@@ -11,8 +11,6 @@ const GET_DEPENDENCIES = gql`
     serviceNow: serviceTimeseries(range: "10m") {
       requests
       errors
-      p50
-      p99
     }
     polygonNow: polygonCalls(range: "10m") {
       calls
@@ -47,7 +45,7 @@ const GET_DEPENDENCIES = gql`
 `
 
 interface DependencyData {
-  serviceNow: Pick<ServiceBucket, 'requests' | 'errors' | 'p50' | 'p99'>[]
+  serviceNow: Pick<ServiceBucket, 'requests' | 'errors'>[]
   polygonNow: PolygonCalls
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
   dependencyHealth: DependencyHealth[]
@@ -133,7 +131,6 @@ const total = (buckets: { requests: number; errors: number }[], key: 'requests' 
 
 const buildNodes = (data: DependencyData | undefined, now: number): DependencyNode[] => {
   const recent = data?.serviceNow ?? []
-  const latest = [...recent].reverse().find((bucket) => bucket.p99 !== null)
   const requests = total(recent, 'requests')
   const errors = total(recent, 'errors')
   const railsStatus: Status = !data ? 'none' : requests === 0 ? 'critical' : errors > 0 ? 'warn' : 'good'
@@ -164,7 +161,6 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
         ? [
             { label: 'Requests, last 10 min', value: requests.toLocaleString() },
             { label: 'Errors, last 10 min', value: errors.toLocaleString() },
-            { label: 'p50 / p99, latest 5 min', value: latest ? `${ms(latest.p50)} / ${ms(latest.p99)}` : '-' },
             ...railsTask.metrics,
           ]
         : [],
