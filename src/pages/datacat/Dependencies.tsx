@@ -82,7 +82,7 @@ const STATUS_LABELS: Record<Status, string> = {
   none: 'No health signal yet',
 }
 
-const NOT_INSTRUMENTED = 'Not instrumented'
+const NOT_MONITORED = 'Not monitored'
 
 const GB = 1024 ** 3
 
@@ -164,9 +164,9 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
   const polygonStatus: Status = !polygonNow || polygonNow.calls === 0 ? 'none' : polygonNow.failures === polygonNow.calls ? 'critical' : polygonNow.failures > 0 ? 'warn' : 'good'
 
   return [
-    makeNode('vercel', 'Vercel', 'Static hosting', 'none', { note: NOT_INSTRUMENTED }),
-    makeNode('browser', 'Browser', 'React SPA', 'none', { note: NOT_INSTRUMENTED }),
-    makeNode('mobile', 'React Native', 'Mobile app', 'none', { note: NOT_INSTRUMENTED }),
+    makeNode('vercel', 'Vercel', 'Static hosting', 'none', { statusLabel: NOT_MONITORED }),
+    makeNode('browser', 'Browser', 'React SPA', 'none', { statusLabel: NOT_MONITORED }),
+    makeNode('mobile', 'React Native', 'Mobile app', 'none', { statusLabel: NOT_MONITORED }),
     makeNode('canary', 'Canary', 'Synthetic (k6)', canaryStatus, {
       metrics: data
         ? [
