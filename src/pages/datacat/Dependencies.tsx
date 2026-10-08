@@ -130,7 +130,7 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
   const recent = data?.serviceNow ?? []
   const requests = total(recent, 'requests')
   const errors = total(recent, 'errors')
-  const railsStatus: Status = !data ? 'none' : requests === 0 ? 'critical' : errors > 0 ? 'warn' : 'good'
+  const railsStatus: Status = !data ? 'none' : errors > 0 ? 'warn' : 'good'
 
   const spans = data?.ingesterSpans ?? []
   const lastSpan = spans.reduce<(typeof spans)[number] | null>((newest, span) => (!newest || span.at > newest.at ? span : newest), null)
