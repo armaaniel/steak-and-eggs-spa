@@ -1,18 +1,26 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { curveMonotoneX, line } from 'd3-shape'
 import useApi from '../hooks/useApi'
 import '../stylesheets/chart.css'
+import type { ChartData } from '../lib/types.ts'
 
 interface Props {
   symbol: string
   price: number | null
+  onHover?: (point: ChartData | null) => void
 }
 
 interface LivePoint {
   time: number
   value: number
   from?: number
+}
+
+interface LinePoint {
+  time: number
+  value: number
+  price: number
 }
 
 interface Size {
@@ -36,6 +44,7 @@ const MIN_SPAN_FRACTION = 0.0005
 const PADDING_FRACTION = 0.1
 const LINE_WIDTH = 2
 const HEAD_RADIUS = 4
+const DOT_RING_WIDTH = 2
 const LABEL_FONT_SIZE = 12
 
 const clockFormat = new Intl.DateTimeFormat('en-US', {
@@ -83,12 +92,12 @@ function findShownValue(point: LivePoint, windowEnd: number) {
   return point.from + (point.value - point.from) * easeOut(progress)
 }
 
-function findShownPoints(points: LivePoint[], windowStart: number, windowEnd: number, headValue: number, startingValue: number | null) {
-  const shownPoints: LivePoint[] = []
-  let pointBeforeWindow: LivePoint | null = null
+function findShownPoints(points: LivePoint[], windowStart: number, windowEnd: number, headValue: number, headPrice: number, startingValue: number | null) {
+  const shownPoints: LinePoint[] = []
+  let pointBeforeWindow: LinePoint | null = null
 
   for (const point of points) {
-    const shownPoint = { time: point.time, value: findShownValue(point, windowEnd) }
+    const shownPoint = { time: point.time, value: findShownValue(point, windowEnd), price: point.value }
 
     if (point.time < windowStart) {
       pointBeforeWindow = shownPoint
@@ -101,22 +110,22 @@ function findShownPoints(points: LivePoint[], windowStart: number, windowEnd: nu
     shownPoints.unshift(pointBeforeWindow)
   } else {
     const leftEdgeValue = startingValue ?? shownPoints[0]?.value ?? headValue
-    shownPoints.unshift({ time: windowStart - WINDOW_MS, value: leftEdgeValue })
+    shownPoints.unshift({ time: windowStart - WINDOW_MS, value: leftEdgeValue, price: leftEdgeValue })
   }
 
-  shownPoints.push({ time: windowEnd, value: headValue })
+  shownPoints.push({ time: windowEnd, value: headValue, price: headPrice })
 
   return holdUntilNextTrade(shownPoints)
 }
 
-function holdUntilNextTrade(points: LivePoint[]) {
-  const heldPoints: LivePoint[] = []
+function holdUntilNextTrade(points: LinePoint[]) {
+  const heldPoints: LinePoint[] = []
 
   for (const point of points) {
     const previous = heldPoints[heldPoints.length - 1]
 
     if (previous !== undefined && point.time - previous.time > HOLD_GAP_MS) {
-      heldPoints.push({ time: point.time - SECOND_MS, value: previous.value })
+      heldPoints.push({ time: point.time - SECOND_MS, value: previous.value, price: previous.price })
     }
 
     heldPoints.push(point)
@@ -125,7 +134,7 @@ function holdUntilNextTrade(points: LivePoint[]) {
   return heldPoints
 }
 
-function findValueAt(linePoints: LivePoint[], time: number) {
+function findValueAt(linePoints: LinePoint[], time: number) {
   for (let index = 1; index < linePoints.length; index++) {
     const before = linePoints[index - 1]
     const after = linePoints[index]
@@ -140,7 +149,7 @@ function findValueAt(linePoints: LivePoint[], time: number) {
   return linePoints[linePoints.length - 1].value
 }
 
-function findPriceRange(linePoints: LivePoint[], windowStart: number) {
+function findPriceRange(linePoints: LinePoint[], windowStart: number) {
   let lowest = findValueAt(linePoints, windowStart)
   let highest = lowest
 
@@ -174,6 +183,22 @@ function findDecimals(labelValues: number[]) {
   return Math.min(6, Math.max(2, Math.ceil(-Math.log10(step))))
 }
 
+function findNearestPoint(linePoints: LinePoint[], windowStart: number, pointerTime: number) {
+  let nearestPoint: LinePoint | null = null
+
+  for (const point of linePoints) {
+    if (point.time < windowStart) {
+      continue
+    }
+
+    if (nearestPoint === null || Math.abs(point.time - pointerTime) < Math.abs(nearestPoint.time - pointerTime)) {
+      nearestPoint = point
+    }
+  }
+
+  return nearestPoint
+}
+
 function pickLabelStep(plotWidth: number) {
   for (const labelStep of LABEL_STEPS_MS) {
     if ((plotWidth * labelStep) / WINDOW_MS >= MIN_LABEL_SPACING) {
@@ -184,12 +209,15 @@ function pickLabelStep(plotWidth: number) {
   return LABEL_STEPS_MS[LABEL_STEPS_MS.length - 1]
 }
 
-const LiveChart = ({ symbol, price }: Props) => {
+const LiveChart = ({ symbol, price, onHover }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [now, setNow] = useState(() => Date.now())
   const [livePoints, setLivePoints] = useState<LivePoint[]>([])
   const [startingPrice, setStartingPrice] = useState(price)
+  const [pointerX, setPointerX] = useState<number | null>(null)
+  const [labelWidth, setLabelWidth] = useState(0)
   const lastPrice = useRef(price)
+  const labelRef = useRef<HTMLDivElement>(null)
   const clipId = `live-clip-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
 
   const { data: seedPoints } = useApi<LivePoint[]>(`/stocks/${symbol}/livedata`, [])
@@ -285,9 +313,12 @@ const LiveChart = ({ symbol, price }: Props) => {
   const windowStart = windowEnd - WINDOW_MS
 
   let headValue = price
+  let headPrice = price
 
   if (allPoints.length > 0) {
-    headValue = findShownValue(allPoints[allPoints.length - 1], windowEnd)
+    const lastPoint = allPoints[allPoints.length - 1]
+    headValue = findShownValue(lastPoint, windowEnd)
+    headPrice = lastPoint.value
   }
 
   let startingValue = startingPrice
@@ -296,11 +327,11 @@ const LiveChart = ({ symbol, price }: Props) => {
     startingValue = null
   }
 
-  let shownPoints: LivePoint[] = []
+  let shownPoints: LinePoint[] = []
   let priceRange = [0, 1]
 
-  if (headValue !== null) {
-    shownPoints = findShownPoints(allPoints, windowStart, windowEnd, headValue, startingValue)
+  if (headValue !== null && headPrice !== null) {
+    shownPoints = findShownPoints(allPoints, windowStart, windowEnd, headValue, headPrice, startingValue)
     priceRange = findPriceRange(shownPoints, windowStart)
   }
 
@@ -314,6 +345,7 @@ const LiveChart = ({ symbol, price }: Props) => {
   const yLabels = yLabelValues.map(formatPrice)
   const yLabelKey = yLabels.join('|')
   const yLabelWidth = useMemo(() => measureWidestLabel(yLabelKey.split('|')), [yLabelKey])
+  const halfXLabelWidth = useMemo(() => measureWidestLabel([clockFormat.format(0)]) / 2, [])
 
   const plotLeft = MARGIN.left
   const plotRight = size.width - MARGIN.right - yLabelWidth - Y_LABEL_GAP
@@ -324,7 +356,7 @@ const LiveChart = ({ symbol, price }: Props) => {
   const xScale = scaleTime().domain([windowStart, windowEnd]).range([plotLeft, plotRight])
   const yScale = scaleLinear().domain(priceRange).range([plotBottom, plotTop])
 
-  const makePath = line<LivePoint>()
+  const makePath = line<LinePoint>()
     .x(function (point) {
       return xScale(point.time)
     })
@@ -344,7 +376,7 @@ const LiveChart = ({ symbol, price }: Props) => {
 
   function renderXLabel(labelTime: number) {
     const labelX = xScale(labelTime)
-    const distanceFromEdge = Math.min(labelX - plotLeft, plotRight - labelX)
+    const distanceFromEdge = Math.min(labelX - plotLeft, plotRight - labelX) - halfXLabelWidth
     const opacity = Math.min(1, Math.max(0, distanceFromEdge / EDGE_FADE))
 
     return (
@@ -373,10 +405,69 @@ const LiveChart = ({ symbol, price }: Props) => {
     headY = yScale(headValue)
   }
 
+  let hoveredPoint: LinePoint | null = null
+
+  if (pointerX !== null) {
+    hoveredPoint = findNearestPoint(shownPoints, windowStart, xScale.invert(pointerX).getTime())
+  }
+
+  let hoveredLabel: string | null = null
+  let hoveredPrice: number | null = null
+  let hoveredX = 0
+  let hoveredY = 0
+  let labelX = 0
+
+  if (hoveredPoint !== null) {
+    hoveredLabel = clockFormat.format(hoveredPoint.time)
+    hoveredPrice = hoveredPoint.price
+    hoveredX = xScale(hoveredPoint.time)
+    hoveredY = yScale(hoveredPoint.value)
+
+    const halfLabel = labelWidth / 2
+    labelX = Math.min(Math.max(hoveredX, plotLeft + halfLabel), plotRight - halfLabel)
+  }
+
+  useEffect(() => {
+    if (onHover === undefined) {
+      return
+    }
+
+    if (hoveredLabel === null || hoveredPrice === null) {
+      onHover(null)
+      return
+    }
+
+    onHover({ date: hoveredLabel, value: hoveredPrice })
+  }, [hoveredLabel, hoveredPrice, onHover])
+
+  useLayoutEffect(() => {
+    if (labelRef.current !== null) {
+      setLabelWidth(labelRef.current.offsetWidth)
+    }
+  }, [hoveredLabel])
+
+  function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
+    const svgBox = event.currentTarget.getBoundingClientRect()
+    const mouseX = event.clientX - svgBox.left
+    const mouseY = event.clientY - svgBox.top
+    const insidePlot = mouseX >= plotLeft && mouseX <= plotRight && mouseY >= plotTop && mouseY <= plotBottom
+
+    if (!insidePlot) {
+      setPointerX(null)
+      return
+    }
+
+    setPointerX(mouseX)
+  }
+
+  function clearPointer() {
+    setPointerX(null)
+  }
+
   return (
     <div ref={measureResize} className="chart-area">
       {size.width > 0 && (
-        <svg width={size.width} height={size.height}>
+        <svg width={size.width} height={size.height} onPointerDown={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={clearPointer}>
           <defs>
             <clipPath id={clipId}>
               <rect x={plotLeft} y={0} width={plotWidth} height={size.height} />
@@ -388,9 +479,19 @@ const LiveChart = ({ symbol, price }: Props) => {
 
           <path className="live-line" d={path} clipPath={`url(#${clipId})`} fill="none" strokeWidth={LINE_WIDTH} />
 
+          {hoveredPoint !== null && <line className="chart-cursor" x1={hoveredX} x2={hoveredX} y1={plotTop} y2={plotBottom} />}
+
           {headY !== null && <circle className="live-pulse" cx={plotRight} cy={headY} r={HEAD_RADIUS} />}
           {headY !== null && <circle className="chart-dot" cx={plotRight} cy={headY} r={HEAD_RADIUS} />}
+
+          {hoveredPoint !== null && <circle className="chart-dot" cx={hoveredX} cy={hoveredY} r={HEAD_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
         </svg>
+      )}
+
+      {hoveredLabel !== null && (
+        <div ref={labelRef} className="chart-label" style={{ left: labelX }}>
+          {hoveredLabel}
+        </div>
       )}
     </div>
   )

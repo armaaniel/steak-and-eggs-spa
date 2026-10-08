@@ -175,7 +175,7 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              {isLive && <LiveChart key={symbol} symbol={symbol} price={toPriceNumber(price)} />}
+              {isLive && <LiveChart key={symbol} symbol={symbol} price={toPriceNumber(price)} onHover={setHoveredPoint} />}
               {!isLive && chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
             </div>
 
