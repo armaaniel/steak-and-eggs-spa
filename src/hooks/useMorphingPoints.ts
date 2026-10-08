@@ -5,7 +5,14 @@ export interface ScreenPoint {
   y: number
 }
 
-const MORPH_MS = 1500
+interface Column {
+  x: number
+  startY: number
+  targetY: number
+}
+
+const MORPH_MS = 500
+const SAME_COLUMN_PX = 0.5
 
 function bezierAt(t: number, firstControl: number, secondControl: number) {
   const rest = 1 - t
@@ -35,14 +42,65 @@ function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-function blendPoints(startPoints: ScreenPoint[], targetPoints: ScreenPoint[], amount: number) {
-  return targetPoints.map(function (targetPoint, index) {
-    const startPoint = startPoints[Math.floor((index * startPoints.length) / targetPoints.length)]
+function findColumnXs(startPoints: ScreenPoint[], targetPoints: ScreenPoint[]) {
+  const allXs = [...startPoints, ...targetPoints]
+    .map(function (point) {
+      return point.x
+    })
+    .sort(function (first, second) {
+      return first - second
+    })
 
-    return {
-      x: startPoint.x + (targetPoint.x - startPoint.x) * amount,
-      y: startPoint.y + (targetPoint.y - startPoint.y) * amount,
+  const columnXs: number[] = []
+
+  for (const x of allXs) {
+    const previousX = columnXs[columnXs.length - 1]
+
+    if (previousX === undefined || x - previousX >= SAME_COLUMN_PX) {
+      columnXs.push(x)
     }
+  }
+
+  return columnXs
+}
+
+function readHeightsAt(points: ScreenPoint[], columnXs: number[]) {
+  const heights: number[] = []
+  let index = 0
+
+  for (const x of columnXs) {
+    while (index < points.length - 2 && points[index + 1].x < x) {
+      index++
+    }
+
+    const before = points[index]
+    const after = points[Math.min(index + 1, points.length - 1)]
+
+    if (x <= before.x || after.x === before.x) {
+      heights.push(before.y)
+    } else if (x >= after.x) {
+      heights.push(after.y)
+    } else {
+      heights.push(before.y + ((after.y - before.y) * (x - before.x)) / (after.x - before.x))
+    }
+  }
+
+  return heights
+}
+
+function lineUpColumns(startPoints: ScreenPoint[], targetPoints: ScreenPoint[]) {
+  const columnXs = findColumnXs(startPoints, targetPoints)
+  const startHeights = readHeightsAt(startPoints, columnXs)
+  const targetHeights = readHeightsAt(targetPoints, columnXs)
+
+  return columnXs.map(function (x, index): Column {
+    return { x, startY: startHeights[index], targetY: targetHeights[index] }
+  })
+}
+
+function blendColumns(columns: Column[], amount: number) {
+  return columns.map(function (column) {
+    return { x: column.x, y: column.startY + (column.targetY - column.startY) * amount }
   })
 }
 
@@ -59,8 +117,14 @@ const useMorphingPoints = (targetPoints: ScreenPoint[]) => {
 
     let duration = MORPH_MS
 
-    if (startPoints.length === 0 || prefersReducedMotion()) {
+    if (startPoints.length === 0 || targetPoints.length === 0 || prefersReducedMotion()) {
       duration = 0
+    }
+
+    let columns: Column[] = []
+
+    if (duration > 0) {
+      columns = lineUpColumns(startPoints, targetPoints)
     }
 
     const startTime = performance.now()
@@ -76,7 +140,7 @@ const useMorphingPoints = (targetPoints: ScreenPoint[]) => {
       let framePoints = targetPoints
 
       if (progress < 1) {
-        framePoints = blendPoints(startPoints, targetPoints, easeLikeCss(progress))
+        framePoints = blendColumns(columns, easeLikeCss(progress))
       }
 
       latestFrame.current = framePoints
