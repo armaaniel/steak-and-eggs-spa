@@ -74,7 +74,7 @@ export interface DependencyNode {
 	role:string
 	status:'good' | 'warn' | 'critical' | 'none'
 	statusLabel:string
-	metrics:{label:string; value:string; points?:{at:string; value:number}[]; color?:string}[]
+	metrics:{label:string; value:string}[]
 	note?:string
 }
 

@@ -38,10 +38,6 @@ const GET_DEPENDENCIES = gql`
         now
         peak
         total
-        points {
-          at
-          value
-        }
       }
     }
   }
@@ -62,7 +58,6 @@ interface DependencyReading {
   now: number | null
   peak: number | null
   total: number | null
-  points: { at: string; value: number }[]
 }
 
 interface DependencyHealth {
@@ -108,8 +103,6 @@ const cloudwatch = (health: DependencyHealth | undefined, range: DatacatRange) =
   const metrics = health.readings.map((reading) => ({
     label: reading.label,
     value: formatReading(reading, range),
-    points: reading.points.length > 0 ? reading.points : undefined,
-    color: reading.key === 'memory' ? 'var(--dc-latency-p50)' : 'var(--dc-latency-p99)',
   }))
   const note = health.status === 'none' ? 'No CloudWatch data.' : undefined
 

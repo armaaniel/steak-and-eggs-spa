@@ -1,4 +1,3 @@
-import Sparkline from './Sparkline'
 import type { DependencyNode } from '../../lib/types.ts'
 import '../../stylesheets/datacat/dependencies.css'
 
@@ -17,7 +16,6 @@ const DependencyDetailsPanel = ({ node }: Props) => {
             <p>
               {metric.label}: {metric.value}
             </p>
-            {metric.points && <Sparkline points={metric.points} color={metric.color ?? 'var(--dc-series-1)'} />}
           </div>
         ))}
 
