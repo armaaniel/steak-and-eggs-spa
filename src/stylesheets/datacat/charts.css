@@ -75,6 +75,12 @@
 	font-weight:500;
 }
 
+.dc-tooltip-name strong {
+	margin-left:auto;
+	padding-left:8px;
+	color:#e8eaee;
+}
+
 .dc-tooltip-time {
 	margin-bottom:4px;
 	color:#a3a8b3;

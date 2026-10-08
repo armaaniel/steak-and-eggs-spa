@@ -30,11 +30,13 @@ interface Props {
   setYLabelWidth?: (width: number) => void
   note?: string
   height?: number
+  tooltip?: boolean
 }
 
 const DEFAULT_HEIGHT = 110
 const MARGIN_TOP = 8
 const MARGIN_BOTTOM = 6
+const TOOLTIP_STYLE_TRANSFORM = 'translate(-50%, calc(-100% - 10px))'
 const PERCENT_LABEL_VALUES = [0, 50, 100]
 const AUTO_LABEL_COUNT = 3
 
@@ -66,8 +68,9 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false }: Props) => {
   const [width, setWidth] = useState(0)
+  const [pointerY, setPointerY] = useState<number | null>(null)
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -215,20 +218,52 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
     if (mouseX < plotLeft || mouseX > plotRight) {
       setHoveredTime(null)
+      setPointerY(null)
       return
     }
 
     setHoveredTime(xScale.invert(mouseX).getTime())
+
+    if (tooltip) {
+      setPointerY(event.clientY - svgBox.top)
+    }
   }
 
   function handlePointerLeave() {
     setHoveredTime(null)
+    setPointerY(null)
+  }
+
+  function renderTooltipRow(chartLine: ChartLine) {
+    const hoveredPoint = findHoveredPoint(chartLine)
+
+    if (hoveredPoint === null || hoveredPoint.value === null) {
+      return null
+    }
+
+    return (
+      <p key={chartLine.key} className="dc-tooltip-name">
+        <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
+        {chartLine.label}
+        <strong>{formatValue(hoveredPoint.value)}</strong>
+      </p>
+    )
   }
 
   let cursorX: number | null = null
 
   if (hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
     cursorX = xScale(hoveredTime)
+  }
+
+  let tooltipTime = hoveredTime
+
+  if (lines.length > 0) {
+    const firstHoveredPoint = findHoveredPoint(lines[0])
+
+    if (firstHoveredPoint !== null) {
+      tooltipTime = firstHoveredPoint.time
+    }
   }
 
   let zeroY: number | null = null
@@ -263,6 +298,13 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {lines.map(renderLine)}
             {lines.map(renderHoveredDot)}
           </svg>
+
+          {tooltip && pointerY !== null && cursorX !== null && tooltipTime !== null && (
+            <div className="dc-tooltip" style={{ left: cursorX, top: pointerY, transform: TOOLTIP_STYLE_TRANSFORM }}>
+              <p className="dc-tooltip-time">{formatHoverTime(tooltipTime)}</p>
+              {lines.map(renderTooltipRow)}
+            </div>
+          )}
         </div>
       )}
     </>

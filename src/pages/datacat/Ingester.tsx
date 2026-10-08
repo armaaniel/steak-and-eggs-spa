@@ -270,6 +270,7 @@ function Ingester() {
             <div className="lr-panels">
               <TimeSeriesChart
                 title="Throughput"
+                tooltip
                 lines={toRateLines(rate)}
                 from={range.from}
                 to={range.to}
