@@ -79,7 +79,7 @@ const STATUS_LABELS: Record<Status, string> = {
   none: 'No health signal yet',
 }
 
-const NOT_INSTRUMENTED = 'Not instrumented.'
+const NOT_INSTRUMENTED = 'Not instrumented'
 
 const GB = 1024 ** 3
 
@@ -154,7 +154,7 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
     makeNode('vercel', 'Vercel', 'Static hosting', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('browser', 'Browser', 'React SPA', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('mobile', 'React Native', 'Mobile app', 'none', { note: NOT_INSTRUMENTED }),
-    makeNode('canary', 'Canary', 'Synthetic (k6)', 'none', { note: 'Results are in Uptime.' }),
+    makeNode('canary', 'Canary', 'Synthetic (k6)', 'none', { note: 'See Uptime' }),
     makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note }),
     makeNode('rails', 'Rails app', 'ECS Fargate · API + cable', worst(railsStatus, railsTask.status), {
       metrics: data
