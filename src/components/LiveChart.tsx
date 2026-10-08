@@ -12,6 +12,7 @@ interface Props {
 interface LivePoint {
   time: number
   value: number
+  from?: number
 }
 
 interface Size {
@@ -24,6 +25,7 @@ const WINDOW_MS = 60_000
 const KEEP_MS = WINDOW_MS * 2
 const HOLD_GAP_MS = 2000
 const SECOND_MS = 1000
+const GLIDE_MS = 400
 const LABEL_STEPS_MS = [10_000, 20_000, 30_000, 60_000]
 const MIN_LABEL_SPACING = 72
 const EDGE_FADE = 24
@@ -67,15 +69,31 @@ function measureWidestLabel(labels: string[]) {
   return Math.ceil(widest)
 }
 
+function easeOut(progress: number) {
+  return 1 - Math.pow(1 - progress, 3)
+}
+
+function findShownValue(point: LivePoint, windowEnd: number) {
+  if (point.from === undefined) {
+    return point.value
+  }
+
+  const progress = Math.min(1, Math.max(0, (windowEnd - point.time) / GLIDE_MS))
+
+  return point.from + (point.value - point.from) * easeOut(progress)
+}
+
 function findShownPoints(points: LivePoint[], windowStart: number, windowEnd: number, headValue: number, startingValue: number | null) {
   const shownPoints: LivePoint[] = []
   let pointBeforeWindow: LivePoint | null = null
 
   for (const point of points) {
+    const shownPoint = { time: point.time, value: findShownValue(point, windowEnd) }
+
     if (point.time < windowStart) {
-      pointBeforeWindow = point
+      pointBeforeWindow = shownPoint
     } else if (point.time <= windowEnd) {
-      shownPoints.push(point)
+      shownPoints.push(shownPoint)
     }
   }
 
@@ -83,7 +101,7 @@ function findShownPoints(points: LivePoint[], windowStart: number, windowEnd: nu
     shownPoints.unshift(pointBeforeWindow)
   } else {
     const leftEdgeValue = startingValue ?? shownPoints[0]?.value ?? headValue
-    shownPoints.unshift({ time: windowStart, value: leftEdgeValue })
+    shownPoints.unshift({ time: windowStart - WINDOW_MS, value: leftEdgeValue })
   }
 
   shownPoints.push({ time: windowEnd, value: headValue })
@@ -107,13 +125,30 @@ function holdUntilNextTrade(points: LivePoint[]) {
   return heldPoints
 }
 
-function findPriceRange(shownPoints: LivePoint[]) {
-  let lowest = Infinity
-  let highest = -Infinity
+function findValueAt(linePoints: LivePoint[], time: number) {
+  for (let index = 1; index < linePoints.length; index++) {
+    const before = linePoints[index - 1]
+    const after = linePoints[index]
 
-  for (const point of shownPoints) {
-    lowest = Math.min(lowest, point.value)
-    highest = Math.max(highest, point.value)
+    if (after.time >= time) {
+      const fraction = Math.max(0, (time - before.time) / (after.time - before.time))
+
+      return before.value + (after.value - before.value) * fraction
+    }
+  }
+
+  return linePoints[linePoints.length - 1].value
+}
+
+function findPriceRange(linePoints: LivePoint[], windowStart: number) {
+  let lowest = findValueAt(linePoints, windowStart)
+  let highest = lowest
+
+  for (const point of linePoints) {
+    if (point.time >= windowStart) {
+      lowest = Math.min(lowest, point.value)
+      highest = Math.max(highest, point.value)
+    }
   }
 
   const minimumSpan = Math.abs(highest) * MIN_SPAN_FRACTION
@@ -205,22 +240,37 @@ const LiveChart = ({ symbol, price }: Props) => {
       return
     }
 
+    const previousPrice = lastPrice.current
     lastPrice.current = price
 
     if (startingPrice === null) {
       setStartingPrice(price)
       return
     }
+
     const arrivedAt = Date.now() - LIVE_DELAY_MS
+    const lastSeedPoint = seedPoints?.[seedPoints.length - 1]
+    let startValue = previousPrice ?? price
+
+    if (lastSeedPoint !== undefined) {
+      startValue = lastSeedPoint.value
+    }
 
     setLivePoints(function (oldPoints) {
+      const lastLivePoint = oldPoints[oldPoints.length - 1]
+      let from = startValue
+
+      if (lastLivePoint !== undefined) {
+        from = findShownValue(lastLivePoint, arrivedAt)
+      }
+
       const keptPoints = oldPoints.filter(function (point, index) {
         return point.time >= arrivedAt - KEEP_MS || index === oldPoints.length - 1
       })
 
-      return [...keptPoints, { time: arrivedAt, value: price }]
+      return [...keptPoints, { time: arrivedAt, value: price, from }]
     })
-  }, [price, startingPrice])
+  }, [price, startingPrice, seedPoints])
 
   const allPoints = useMemo(() => {
     const firstLivePoint = livePoints[0]
@@ -231,14 +281,14 @@ const LiveChart = ({ symbol, price }: Props) => {
     return [...earlierSeedPoints, ...livePoints]
   }, [seedPoints, livePoints])
 
+  const windowEnd = now - LIVE_DELAY_MS
+  const windowStart = windowEnd - WINDOW_MS
+
   let headValue = price
 
   if (allPoints.length > 0) {
-    headValue = allPoints[allPoints.length - 1].value
+    headValue = findShownValue(allPoints[allPoints.length - 1], windowEnd)
   }
-
-  const windowEnd = now - LIVE_DELAY_MS
-  const windowStart = windowEnd - WINDOW_MS
 
   let startingValue = startingPrice
 
@@ -251,7 +301,7 @@ const LiveChart = ({ symbol, price }: Props) => {
 
   if (headValue !== null) {
     shownPoints = findShownPoints(allPoints, windowStart, windowEnd, headValue, startingValue)
-    priceRange = findPriceRange(shownPoints)
+    priceRange = findPriceRange(shownPoints, windowStart)
   }
 
   const yLabelValues = scaleLinear().domain(priceRange).ticks(Y_LABEL_COUNT)
