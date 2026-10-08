@@ -2,7 +2,6 @@ import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useMemo } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
-import { ms } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
 import type { DependencyNode, IngesterSpan, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
 
@@ -15,8 +14,6 @@ const GET_DEPENDENCIES = gql`
     polygonNow: polygonCalls(range: "10m") {
       calls
       failures
-      p50
-      p99
       lastSuccessAt
     }
     ingesterSpans(from: $from, to: $to) {
@@ -173,7 +170,6 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
             { label: 'Last successful call', value: polygonNow.lastSuccessAt ? ago(polygonNow.lastSuccessAt, now) : 'none in the last day' },
             { label: 'Calls, last 10 min', value: polygonNow.calls.toLocaleString() },
             { label: 'Failed, last 10 min', value: polygonNow.failures.toLocaleString() },
-            { label: 'p50 / p99, last 10 min', value: `${ms(polygonNow.p50)} / ${ms(polygonNow.p99)}` },
           ]
         : [],
     }),

@@ -130,8 +130,6 @@ export interface CanarySlo {
 export interface PolygonCalls {
 	calls:number
 	failures:number
-	p50:number | null
-	p99:number | null
 	lastSuccessAt:string | null
 }
 
