@@ -3,6 +3,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useMemo } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
 import useTransition from '../../hooks/useTransition.ts'
+import type { DatacatRange } from '../../hooks/useDatacatRange'
 import type { DependencyNode, IngesterSpan, OutletContextType, PolygonCalls, ServiceBucket, SyntheticBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
@@ -92,21 +93,21 @@ const RANK: Record<Status, number> = { none: 0, good: 1, warn: 2, critical: 3 }
 
 const worst = (a: Status, b: Status) => (RANK[a] >= RANK[b] ? a : b)
 
-const formatReading = ({ unit, now, peak, total }: DependencyReading) => {
-  if (total !== null) return Math.round(total).toLocaleString()
+const formatReading = ({ unit, now, peak, total }: DependencyReading, range: DatacatRange) => {
+  if (total !== null) return `${Math.round(total).toLocaleString()} in the last ${range}`
   if (now === null) return '-'
   if (unit === 'bytes') return `${(now / GB).toFixed(1)} GB`
-  if (unit === 'percent') return `${now.toFixed(1)}% now, ${(peak ?? now).toFixed(1)}% peak`
-  return `${Math.round(now)} now, ${Math.round(peak ?? now)} peak`
+  if (unit === 'percent') return `${now.toFixed(1)}% now, ${(peak ?? now).toFixed(1)}% peak in the last ${range}`
+  return `${Math.round(now)} now, ${Math.round(peak ?? now)} peak in the last ${range}`
 }
 
-const cloudwatch = (health: DependencyHealth | undefined) => {
+const cloudwatch = (health: DependencyHealth | undefined, range: DatacatRange) => {
   if (!health) return { status: 'none' as Status, metrics: [], note: 'CloudWatch data is unavailable right now.' }
   if (!health.configured) return { status: 'none' as Status, metrics: [], note: 'Not configured yet.' }
 
   const metrics = health.readings.map((reading) => ({
     label: reading.label,
-    value: formatReading(reading),
+    value: formatReading(reading, range),
     points: reading.points.length > 0 ? reading.points : undefined,
     color: reading.key === 'memory' ? 'var(--dc-series-2)' : 'var(--dc-series-1)',
   }))
@@ -136,7 +137,7 @@ const total = (buckets: { requests: number; errors: number }[], key: 'requests' 
 
 const sum = (values: number[]) => values.reduce((runningTotal, value) => runningTotal + value, 0)
 
-const buildNodes = (data: DependencyData | undefined, now: number): DependencyNode[] => {
+const buildNodes = (data: DependencyData | undefined, now: number, range: DatacatRange): DependencyNode[] => {
   const recent = data?.serviceNow ?? []
   const requests = total(recent, 'requests')
   const errors = total(recent, 'errors')
@@ -154,11 +155,11 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
   const ingesterStatus: Status = !state ? 'none' : state === 'streaming' || state === 'idle' ? 'good' : 'critical'
 
   const healthFor = (id: string) => (data?.dependencyHealth ?? []).find((health) => health.id === id)
-  const alb = cloudwatch(healthFor('alb'))
-  const railsTask = cloudwatch(healthFor('rails'))
-  const ingesterTask = cloudwatch(healthFor('ingester'))
-  const postgres = cloudwatch(healthFor('postgres'))
-  const redis = cloudwatch(healthFor('redis'))
+  const alb = cloudwatch(healthFor('alb'), range)
+  const railsTask = cloudwatch(healthFor('rails'), range)
+  const ingesterTask = cloudwatch(healthFor('ingester'), range)
+  const postgres = cloudwatch(healthFor('postgres'), range)
+  const redis = cloudwatch(healthFor('redis'), range)
 
   const polygonNow = data?.polygonNow
   const polygonStatus: Status = !polygonNow || polygonNow.calls === 0 ? 'none' : polygonNow.failures === polygonNow.calls ? 'critical' : polygonNow.failures > 0 ? 'warn' : 'good'
@@ -232,7 +233,7 @@ function Dependencies() {
 
   const isLoaded = useTransition(loading, data || error)
 
-  const nodes = buildNodes(data, timeWindow.at)
+  const nodes = buildNodes(data, timeWindow.at, range)
   const selectedId = detail?.kind === 'dependency' ? detail.node.id : null
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })
 
