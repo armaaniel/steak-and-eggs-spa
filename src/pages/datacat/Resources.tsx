@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useMemo, useState } from 'react'
-import { curveLinear } from 'd3-shape'
+import { curveMonotoneX } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
 import { toTimePoint } from '../../components/datacat/timeSeries'
 import useTransition from '../../hooks/useTransition.ts'
@@ -51,10 +51,10 @@ const RESOURCE_ROWS = [
 
 function findLineColor(reading: ResourceReading) {
   if (reading.key === 'memory') {
-    return 'var(--dc-latency-p50)'
+    return '#F1B24B'
   }
 
-  return 'var(--dc-latency-p99)'
+  return '#59AED9'
 }
 
 function formatPercent(value: number) {
@@ -130,7 +130,7 @@ function Resources() {
           from={timeWindow.from}
           to={timeWindow.to}
           yAxis="percent"
-          curve={curveLinear}
+          curve={curveMonotoneX}
           formatValue={formatPercent}
           hoveredTime={hoveredTime}
           setHoveredTime={setHoveredTime}
