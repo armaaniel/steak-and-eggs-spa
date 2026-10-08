@@ -2,7 +2,7 @@ import { useState } from 'react'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
-import { MAIN_COLOR, SECOND_COLOR, describeCpu, formatCount, formatMs, formatPercent, toCpuLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeCpu, formatCount, formatMs, formatPercent, toCpuLines, toTime } from './runCharts'
 import type { CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
@@ -30,15 +30,15 @@ function perSecond(count: number | null, bucketSeconds: number) {
 
 function toFanoutLines(rows: CableCompareRow[], bucketSeconds: number): ChartLine[] {
   return [
-    { key: 'received', label: 'received', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.received, bucketSeconds) })) },
-    { key: 'expected', label: 'expected', color: SECOND_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.expected, bucketSeconds) })) },
+    { key: 'received', label: 'received', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.received, bucketSeconds) })) },
+    { key: 'expected', label: 'expected', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.expected, bucketSeconds) })) },
   ]
 }
 
 function toLagLines(rows: CableCompareRow[]): ChartLine[] {
   return [
-    { key: 'p99', label: 'p99', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: row.p99LagMs })) },
-    { key: 'p50', label: 'p50', color: SECOND_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: row.p50LagMs })) },
+    { key: 'p99', label: 'p99', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.at), value: row.p99LagMs })) },
+    { key: 'p50', label: 'p50', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.at), value: row.p50LagMs })) },
   ]
 }
 
@@ -161,6 +161,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
             chartLeft={chartLeft}
             setYLabelWidth={setFanoutYLabelWidth}
             height={HEIGHT}
+            strokeWidth={RUN_STROKE_WIDTH}
             tooltip
           />
 
@@ -179,6 +180,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
               chartLeft={chartLeft}
               setYLabelWidth={setLagYLabelWidth}
               height={HEIGHT}
+              strokeWidth={RUN_STROKE_WIDTH}
               tooltip
             />
           )}
@@ -199,6 +201,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
               chartLeft={chartLeft}
               setYLabelWidth={setCpuYLabelWidth}
               height={HEIGHT}
+              strokeWidth={RUN_STROKE_WIDTH}
               tooltip
             />
           )}

@@ -2,8 +2,9 @@ import type { RunMetricPoint } from '../../lib/types.ts'
 import type { ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 
-export const MAIN_COLOR = 'var(--dc-latency-p99)'
-export const SECOND_COLOR = 'var(--dc-latency-p50)'
+export const SERIES_ONE = 'var(--dc-series-1)'
+export const SERIES_TWO = 'var(--dc-series-2)'
+export const RUN_STROKE_WIDTH = 2
 
 export function toTime(at: string) {
   return new Date(at).getTime()
@@ -34,7 +35,7 @@ export function formatPercent(value: number) {
 }
 
 export function toCpuLines(cpu: RunMetricPoint[]): ChartLine[] {
-  return [{ key: 'cpu', label: 'cpu', color: MAIN_COLOR, points: cpu.map((point) => ({ time: toTime(point.at), value: point.average })) }]
+  return [{ key: 'cpu', label: 'cpu', color: SERIES_ONE, points: cpu.map((point) => ({ time: toTime(point.at), value: point.average })) }]
 }
 
 export function describeCpu(cpu: RunMetricPoint[], hoveredTime: number | null) {

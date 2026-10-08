@@ -2,7 +2,7 @@ import { useState } from 'react'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
-import { MAIN_COLOR, SECOND_COLOR, describeCpu, formatMs, formatPercent, formatWhole, toCpuLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeCpu, formatMs, formatPercent, formatWhole, toCpuLines, toTime } from './runCharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
@@ -15,13 +15,13 @@ interface Props {
 }
 
 function toRpsLines(rows: LoadCompareRow[]): ChartLine[] {
-  return [{ key: 'rps', label: 'rps', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
+  return [{ key: 'rps', label: 'rps', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
 }
 
 function toLatencyLines(rows: LoadCompareRow[]): ChartLine[] {
   return [
-    { key: 'client', label: 'client p99', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.clientP99 })), fill: true },
-    { key: 'server', label: 'server p99', color: SECOND_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.serverP99 })) },
+    { key: 'client', label: 'client p99', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.clientP99 })), fill: true },
+    { key: 'server', label: 'server p99', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.serverP99 })) },
   ]
 }
 
@@ -125,6 +125,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
             chartLeft={chartLeft}
             setYLabelWidth={setRpsYLabelWidth}
             height={HEIGHT}
+            strokeWidth={RUN_STROKE_WIDTH}
             tooltip
           />
 
@@ -143,6 +144,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
             chartLeft={chartLeft}
             setYLabelWidth={setLatencyYLabelWidth}
             height={HEIGHT}
+            strokeWidth={RUN_STROKE_WIDTH}
             tooltip
           />
 
@@ -162,6 +164,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
               chartLeft={chartLeft}
               setYLabelWidth={setCpuYLabelWidth}
               height={HEIGHT}
+              strokeWidth={RUN_STROKE_WIDTH}
               tooltip
             />
           )}

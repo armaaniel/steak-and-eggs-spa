@@ -32,6 +32,7 @@ interface Props {
   note?: string
   height?: number
   tooltip?: boolean
+  strokeWidth?: number
 }
 
 const DEFAULT_HEIGHT = 110
@@ -41,6 +42,7 @@ const TOOLTIP_STYLE_TRANSFORM = 'translate(-50%, calc(-100% - 10px))'
 const PERCENT_LABEL_VALUES = [0, 50, 100]
 const AUTO_LABEL_COUNT = 3
 const FILL_OPACITY = 0.1
+const DEFAULT_STROKE_WIDTH = 1.5
 
 function formatPercentLabel(value: number) {
   return `${value}%`
@@ -70,7 +72,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
 
@@ -207,7 +209,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   function renderLine(chartLine: ChartLine) {
     const path = makePath(breakAtGaps(chartLine.points)) ?? undefined
 
-    return <path key={chartLine.key} d={path} fill="none" stroke={chartLine.color} strokeWidth={1.5} strokeLinejoin="round" />
+    return <path key={chartLine.key} d={path} fill="none" stroke={chartLine.color} strokeWidth={strokeWidth} strokeLinejoin="round" />
   }
 
   function findHoveredPoint(chartLine: ChartLine) {
