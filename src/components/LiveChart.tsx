@@ -34,6 +34,9 @@ const KEEP_MS = WINDOW_MS * 2
 const HOLD_GAP_MS = 2000
 const SECOND_MS = 1000
 const GLIDE_MS = 400
+const FRAMES_PER_SECOND = 30
+const FRAME_TOLERANCE_MS = 4
+const FRAME_GAP_MS = 1000 / FRAMES_PER_SECOND - FRAME_TOLERANCE_MS
 const LABEL_STEPS_MS = [10_000, 20_000, 30_000, 60_000]
 const MIN_LABEL_SPACING = 72
 const EDGE_FADE = 24
@@ -251,9 +254,14 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
 
   useEffect(() => {
     let frameRequest = 0
+    let lastDrawnAt = 0
 
-    function moveForward() {
-      setNow(Date.now())
+    function moveForward(frameTime: number) {
+      if (frameTime - lastDrawnAt >= FRAME_GAP_MS) {
+        lastDrawnAt = frameTime
+        setNow(Date.now())
+      }
+
       frameRequest = requestAnimationFrame(moveForward)
     }
 
@@ -469,6 +477,8 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
 
   return (
     <div ref={measureResize} className="chart-area">
+      {size.width > 0 && headY !== null && <div className="live-pulse" style={{ left: plotRight, top: headY }} />}
+
       {size.width > 0 && (
         <svg width={size.width} height={size.height} onPointerDown={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={clearPointer}>
           <defs>
@@ -484,7 +494,6 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
 
           {hoveredPoint !== null && <line className="chart-cursor" x1={hoveredX} x2={hoveredX} y1={plotTop} y2={plotBottom} />}
 
-          {headY !== null && <circle className="live-pulse" cx={plotRight} cy={headY} r={HEAD_RADIUS} />}
           {headY !== null && <circle className="chart-dot" cx={plotRight} cy={headY} r={HEAD_RADIUS} />}
 
           {hoveredPoint !== null && <circle className="chart-dot" cx={hoveredX} cy={hoveredY} r={HEAD_RADIUS} strokeWidth={DOT_RING_WIDTH} />}

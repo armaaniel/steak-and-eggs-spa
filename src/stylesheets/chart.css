@@ -5,6 +5,7 @@
 }
 
 .chart-area svg {
+	position:relative;
 	display:block;
 	touch-action:pan-y;
 }
@@ -69,9 +70,14 @@
 }
 
 .live-pulse {
-	fill:var(--chart-line);
-	transform-box:fill-box;
-	transform-origin:center;
+	position:absolute;
+	width:8px;
+	height:8px;
+	margin:-4px 0 0 -4px;
+	border-radius:50%;
+	background-color:var(--chart-line);
+	pointer-events:none;
+	will-change:transform, opacity;
 	animation:live-pulse 1.6s ease-out infinite;
 }
 
