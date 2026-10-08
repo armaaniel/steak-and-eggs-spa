@@ -2,6 +2,10 @@
 	width:30%;
 }
 
+.home-left-two.narrow {
+	width:25%;
+}
+
 .home-left-two.sticky {
 	position:sticky;
 	top:1rem;

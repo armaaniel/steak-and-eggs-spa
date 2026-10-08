@@ -59,6 +59,7 @@ const DetailPanel = ({ detail }: { detail: Detail }) => {
 
 function DCList() {
   const onHome = useMatch('/datacat') !== null
+  const onIngester = useMatch('/datacat/ingester') !== null
 
   const [detail, setDetail] = useState<Detail | null>(null)
   const [range, setRange] = useDatacatRange()
@@ -92,7 +93,7 @@ function DCList() {
     <div className="dc-root">
       <DCNavbar />
       <div className="dc-home-parent">
-        <div className={`home-left-two ${onHome ? 'sticky' : ''}`}>
+        <div className={`home-left-two ${onHome ? 'sticky' : ''} ${onIngester ? 'narrow' : ''}`}>
           {detail && (
             <div className="dc-side-header-container">
               <h3 className="catlas-text">{detail.kind === 'dependency' ? detail.node.title : 'Details'}</h3>
