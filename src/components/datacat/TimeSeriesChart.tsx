@@ -40,7 +40,7 @@ const MARGIN_TOP = 8
 const MARGIN_BOTTOM = 6
 const TOOLTIP_STYLE_TRANSFORM = 'translate(-50%, calc(-100% - 10px))'
 const PERCENT_LABEL_VALUES = [0, 50, 100]
-const AUTO_LABEL_COUNT = 3
+const AUTO_LABEL_COUNT = 4
 const FILL_OPACITY = 0.1
 const DEFAULT_STROKE_WIDTH = 1.5
 
