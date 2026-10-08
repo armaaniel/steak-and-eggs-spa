@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
@@ -192,7 +193,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
               from={from}
               to={to}
               yAxis="percent"
-              curve="straight"
+              curve={curveLinear}
               formatValue={formatPercent}
               hoveredTime={hoveredTime}
               setHoveredTime={setHoveredTime}

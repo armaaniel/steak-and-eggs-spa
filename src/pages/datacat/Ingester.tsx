@@ -1,6 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
+import { curveLinear } from 'd3-shape'
 import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
@@ -325,7 +326,7 @@ function Ingester() {
                     from={range.from}
                     to={range.to}
                     yAxis="percent"
-                    curve="straight"
+                    curve={curveLinear}
                     formatValue={formatPercent}
                     hoveredTime={hoveredTime}
                     setHoveredTime={setHoveredTime}

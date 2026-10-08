@@ -1,6 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useMemo, useState } from 'react'
+import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
 import { toTimePoint } from '../../components/datacat/timeSeries'
 import useTransition from '../../hooks/useTransition.ts'
@@ -129,7 +130,7 @@ function Resources() {
           from={timeWindow.from}
           to={timeWindow.to}
           yAxis="percent"
-          curve="straight"
+          curve={curveLinear}
           formatValue={formatPercent}
           hoveredTime={hoveredTime}
           setHoveredTime={setHoveredTime}

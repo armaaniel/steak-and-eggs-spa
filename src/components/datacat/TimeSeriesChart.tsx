@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
-import { area, curveLinear, curveMonotoneX, line, type CurveFactory } from 'd3-shape'
+import { area, curveMonotoneX, line, type CurveFactory } from 'd3-shape'
 import { MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
 import { breakAtGaps, findNearestPoint, formatHoverTime, type TimePoint } from './timeSeries'
 import '../../stylesheets/datacat/loadrun.css'
@@ -33,7 +33,7 @@ interface Props {
   height?: number
   tooltip?: boolean
   strokeWidth?: number
-  curve?: 'smooth' | 'straight'
+  curve?: CurveFactory
 }
 
 const DEFAULT_HEIGHT = 110
@@ -73,7 +73,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = 'smooth' }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
 
@@ -134,12 +134,6 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
   const xScale = scaleTime().domain([from, to]).range([plotLeft, plotRight])
 
-  let lineCurve: CurveFactory = curveMonotoneX
-
-  if (curve === 'straight') {
-    lineCurve = curveLinear
-  }
-
   const makePath = line<TimePoint>()
     .defined(function (timePoint) {
       return timePoint.value !== null
@@ -150,7 +144,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     .y(function (timePoint) {
       return yScale(timePoint.value ?? 0)
     })
-    .curve(lineCurve)
+    .curve(curve)
 
   const [lowestValue, highestValue] = yScale.domain()
   const baselineY = yScale(Math.min(Math.max(0, lowestValue), highestValue))
@@ -166,7 +160,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     .y1(function (timePoint) {
       return yScale(timePoint.value ?? 0)
     })
-    .curve(lineCurve)
+    .curve(curve)
 
   let xLabelDates: Date[] = []
 
