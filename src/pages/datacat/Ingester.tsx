@@ -245,26 +245,26 @@ function Ingester() {
             <div className="ing-uptime">
               <p className="ing-pct">{uptime?.pct?.toFixed(2) ?? '0.00'}%</p>
               <p className="ing-pct-label">streaming, excluding idle</p>
+
+              <div className="ing-legend">
+                <span className="ing-legend-item">
+                  <span className="ing-swatch streaming" />
+                  Streaming {toDuration(uptime?.streamingSeconds)}
+                </span>
+
+                <span className="ing-legend-item">
+                  <span className="ing-swatch idle" />
+                  Idle {toDuration(uptime?.idleSeconds)}
+                </span>
+
+                <span className="ing-legend-item">
+                  <span className="ing-swatch down" />
+                  Down {toDuration(uptime?.downSeconds)}
+                </span>
+              </div>
             </div>
 
             <IngesterTimeline spans={spans} from={range.from} to={range.to} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} />
-
-            <div className="ing-legend">
-              <span className="ing-legend-item">
-                <span className="ing-swatch streaming" />
-                Streaming {toDuration(uptime?.streamingSeconds)}
-              </span>
-
-              <span className="ing-legend-item">
-                <span className="ing-swatch idle" />
-                Idle {toDuration(uptime?.idleSeconds)}
-              </span>
-
-              <span className="ing-legend-item">
-                <span className="ing-swatch down" />
-                Down {toDuration(uptime?.downSeconds)}
-              </span>
-            </div>
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
