@@ -160,7 +160,7 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
       metrics: data
         ? [
             { label: 'Requests, last 10 min', value: requests.toLocaleString() },
-            { label: 'Errors, last 10 min', value: errors.toLocaleString() },
+            { label: 'Errors', value: errors.toLocaleString() },
             ...railsTask.metrics,
           ]
         : [],
