@@ -109,7 +109,7 @@ const cloudwatch = (health: DependencyHealth | undefined, range: DatacatRange) =
     label: reading.label,
     value: formatReading(reading, range),
     points: reading.points.length > 0 ? reading.points : undefined,
-    color: reading.key === 'memory' ? 'var(--dc-series-2)' : 'var(--dc-series-1)',
+    color: reading.key === 'memory' ? 'var(--dc-latency-p50)' : 'var(--dc-latency-p99)',
   }))
   const note = health.status === 'none' ? 'No CloudWatch data.' : undefined
 
