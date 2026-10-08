@@ -18,6 +18,25 @@
 	stroke:var(--dc-border);
 }
 
+.dc-collapse-trigger {
+	display:flex;
+	align-items:center;
+	justify-content:space-between;
+	width:100%;
+	padding:0;
+	border:none;
+	background:none;
+	font-family: var(--font-ui);
+	color:var(--dc-text);
+	cursor:pointer;
+}
+
+.dc-collapse-body {
+	display:flex;
+	flex-direction:column;
+	row-gap:1rem;
+}
+
 .chart-fade {
 	transition:opacity 150ms;
 }

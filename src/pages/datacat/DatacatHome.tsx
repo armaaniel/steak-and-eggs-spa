@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import { useLocation, useOutletContext } from 'react-router-dom'
 import Overview from './Overview'
 import Dependencies from './Dependencies'
+import Resources from './Resources'
 import Uptime from './Uptime'
 import Routes from './Routes'
 import Select from '../../components/datacat/Select'
@@ -16,6 +17,7 @@ const SECTION_PAGES: Record<DatacatSection, ComponentType> = {
   overview: Overview,
   uptime: Uptime,
   dependencies: Dependencies,
+  resources: Resources,
   routes: Routes,
 }
 
