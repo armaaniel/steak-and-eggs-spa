@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { AreaChart, ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
+import { findNearestPoint } from './timeSeries'
+import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
+import { MAIN_COLOR, SECOND_COLOR, describeCpu, formatMs, formatPercent, formatWhole, toCpuLines, toTime } from './runCharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
-import CpuPanel, { CpuReadout } from './CpuPanel'
-import { ms, endLabel, axis, ticked, legendText, toCpuLookup } from './runCharts'
 import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
@@ -13,94 +14,50 @@ interface Props {
   statsOpen?: boolean
 }
 
-interface Mark {
-  t: number
-  rps: number | null
-  clientP99: number | null
-  serverP99: number | null
-  band: [number, number] | null
-  gap: number | null
-  errors: number | null
-  cpuAvg: number | null
-  cpuBand: [number, number] | null
-  row: LoadCompareRow | null
+function toRpsLines(rows: LoadCompareRow[]): ChartLine[] {
+  return [{ key: 'rps', label: 'rps', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
 }
 
-interface TooltipProps {
-  active?: boolean
-  payload?: { payload: Mark }[]
+function toLatencyLines(rows: LoadCompareRow[]): ChartLine[] {
+  return [
+    { key: 'client', label: 'client p99', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.clientP99 })), fill: true },
+    { key: 'server', label: 'server p99', color: SECOND_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.serverP99 })) },
+  ]
 }
 
-const RunTooltip = ({ active, payload }: TooltipProps) => {
-  const mark = payload?.[0]?.payload
-  const row = mark?.row
+function describeRps(row: LoadCompareRow) {
+  const sent = `${row.sent.toLocaleString()} sent`
 
-  if (!active || !mark || !row) return null
+  if (row.gap > 0 || row.errors > 0) {
+    return `${sent} · ${row.gap.toLocaleString()} untraced · ${row.errors.toLocaleString()} errors`
+  }
 
-  return (
-    <div className="lr-tooltip">
-      <p className="lr-tooltip-time">{new Date(row.bucket).toLocaleTimeString()}</p>
-      <p><strong>{row.rps.toLocaleString()}</strong> rps<span className="lr-dim"> · {row.sent.toLocaleString()} sent</span></p>
-      <p>
-        <span className="lr-key lr-key-client" />
-        <strong>{ms(row.clientP99)}</strong> client p99<span className="lr-dim"> · p50 {ms(row.clientP50)}</span>
-      </p>
-      <p>
-        <span className="lr-key lr-key-server" />
-        <strong>{ms(row.serverP99)}</strong> server p99<span className="lr-dim"> · p50 {ms(row.serverP50)}</span>
-      </p>
-      {(row.gap > 0 || row.errors > 0) && (
-        <p><strong>{row.gap.toLocaleString()}</strong> untraced<span className="lr-dim"> · {row.errors.toLocaleString()} errors</span></p>
-      )}
-      <CpuReadout avg={mark.cpuAvg} band={mark.cpuBand} />
-    </div>
-  )
+  return sent
 }
 
-type Panel = 'rps' | 'latency' | 'cpu'
+function describeLatency(row: LoadCompareRow) {
+  return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
+}
 
 const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: Props) => {
   const [showTable, setShowTable] = useState(false)
-  const [hovered, setHovered] = useState<Panel | null>(null)
+  const [hoveredTime, setHoveredTime] = useState<number | null>(null)
+  const [rpsYLabelWidth, setRpsYLabelWidth] = useState(0)
+  const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
+  const [cpuYLabelWidth, setCpuYLabelWidth] = useState(0)
 
   if (!rows.length) return <p className="lr-message">No samples for this route yet.</p>
 
-  const gapMs = step * 2000
-  const series: Mark[] = []
-
-  const cpuAt = toCpuLookup(cpu)
+  const chartLeft = Math.max(rpsYLabelWidth, latencyYLabelWidth, cpuYLabelWidth) + Y_LABEL_GAP
   const hasCpu = cpu.some((point) => point.average !== null)
+  const from = toTime(rows[0].bucket)
+  const to = toTime(rows[rows.length - 1].bucket)
 
-  rows.forEach((row, index) => {
-    const t = new Date(row.bucket).getTime()
-    const previous = rows[index - 1]
+  let hoveredRow: LoadCompareRow | null = null
 
-    if (previous) {
-      const previousAt = new Date(previous.bucket).getTime()
-
-      if (t - previousAt > gapMs) {
-        series.push({ t: previousAt + 1, rps: null, clientP99: null, serverP99: null, band: null, gap: null, errors: null, cpuAvg: null, cpuBand: null, row: null })
-      }
-    }
-
-    series.push({
-      t,
-      ...cpuAt(t),
-      rps: row.rps,
-      clientP99: row.clientP99,
-      serverP99: row.serverP99,
-      band: [row.serverP99, row.clientP99],
-      gap: row.gap,
-      errors: row.errors,
-      row
-    })
-  })
-
-  const last = series.length - 1
-  const tail = series[last]
-  const spread = Math.max(...rows.map((r) => r.clientP99))
-
-  const labelEnds = !!tail.row && Math.abs(tail.row.clientP99 - tail.row.serverP99) > spread * 0.08
+  if (hoveredTime !== null) {
+    hoveredRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.bucket), row })), hoveredTime)?.row ?? null
+  }
 
   const totals = rows.reduce(
     (sum, row) => ({
@@ -111,15 +68,6 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
     }),
     { sent: 0, traced: 0, gap: 0, errors: 0 }
   )
-
-  const readout = (panel: Panel) => (hovered === panel ? <RunTooltip /> : () => null)
-
-  const dot = (panel: Panel) => (hovered === panel ? { r: 4, strokeWidth: 0 } : false)
-
-  const watch = (panel: Panel) => ({
-    onPointerMove: () => setHovered((current) => (current === panel ? current : panel)),
-    onPointerLeave: () => setHovered((current) => (current === panel ? null : current))
-  })
 
   return (
     <div className="lr-panels">
@@ -162,36 +110,61 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
         </div>
       ) : (
         <>
-          <p className="lr-panel-label">Throughput (rps)</p>
-          <div className="lr-chart" {...watch('rps')}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={series} syncId="load-run" margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
-                <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                <XAxis {...axis} hide />
-                <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-                <Tooltip content={readout('rps')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-                <Area type="monotone" dataKey="rps" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="var(--dc-series-1)" fillOpacity={0.1} dot={false} activeDot={dot('rps')} isAnimationActive={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          <TimeSeriesChart
+            title="Throughput (rps)"
+            lines={toRpsLines(rows)}
+            from={from}
+            to={to}
+            yAxis="auto"
+            formatValue={formatWhole}
+            hoveredTime={hoveredTime}
+            setHoveredTime={setHoveredTime}
+            showTimeLabels={false}
+            showHoverTime
+            hoverDetail={hoveredRow ? describeRps(hoveredRow) : undefined}
+            chartLeft={chartLeft}
+            setYLabelWidth={setRpsYLabelWidth}
+            height={HEIGHT}
+            tooltip
+          />
 
-          <p className="lr-panel-label">p99 latency (ms)</p>
-          <div className={`lr-chart ${hasCpu ? '' : 'lr-chart-axis'}`} {...watch('latency')}>
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={series} syncId="load-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-                <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                <XAxis {...axis} {...(hasCpu ? { hide: true } : ticked)} />
-                <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-                <Tooltip content={readout('latency')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-                <Area type="monotone" dataKey="band" stroke="none" fill="var(--dc-series-2)" fillOpacity={0.1} legendType="none" tooltipType="none" activeDot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="clientP99" name="client p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
-                <Line type="monotone" dataKey="serverP99" name="server p99" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('latency')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+          <TimeSeriesChart
+            title="p99 latency (ms)"
+            lines={toLatencyLines(rows)}
+            from={from}
+            to={to}
+            yAxis="auto"
+            formatValue={formatMs}
+            hoveredTime={hoveredTime}
+            setHoveredTime={setHoveredTime}
+            showTimeLabels={!hasCpu}
+            showHoverTime={false}
+            hoverDetail={hoveredRow ? describeLatency(hoveredRow) : undefined}
+            chartLeft={chartLeft}
+            setYLabelWidth={setLatencyYLabelWidth}
+            height={HEIGHT}
+            tooltip
+          />
 
-          {hasCpu && <CpuPanel series={series} syncId="load-run" tooltip={readout('cpu')} activeDot={dot('cpu')} pointerHandlers={watch('cpu')} />}
+          {hasCpu && (
+            <TimeSeriesChart
+              title="CPU (%)"
+              lines={toCpuLines(cpu)}
+              from={from}
+              to={to}
+              yAxis="percent"
+              formatValue={formatPercent}
+              hoveredTime={hoveredTime}
+              setHoveredTime={setHoveredTime}
+              showTimeLabels
+              showHoverTime={false}
+              hoverDetail={describeCpu(cpu, hoveredTime)}
+              chartLeft={chartLeft}
+              setYLabelWidth={setCpuYLabelWidth}
+              height={HEIGHT}
+              tooltip
+            />
+          )}
 
         </>
       )}

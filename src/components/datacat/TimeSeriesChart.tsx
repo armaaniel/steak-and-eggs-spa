@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
-import { curveMonotoneX, line } from 'd3-shape'
+import { area, curveMonotoneX, line } from 'd3-shape'
 import { MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
 import { breakAtGaps, findNearestPoint, formatHoverTime, type TimePoint } from './timeSeries'
 import '../../stylesheets/datacat/loadrun.css'
@@ -11,6 +11,7 @@ export interface ChartLine {
   label: string
   color: string
   points: TimePoint[]
+  fill?: boolean
 }
 
 interface Props {
@@ -39,6 +40,7 @@ const MARGIN_BOTTOM = 6
 const TOOLTIP_STYLE_TRANSFORM = 'translate(-50%, calc(-100% - 10px))'
 const PERCENT_LABEL_VALUES = [0, 50, 100]
 const AUTO_LABEL_COUNT = 3
+const FILL_OPACITY = 0.1
 
 function formatPercentLabel(value: number) {
   return `${value}%`
@@ -99,7 +101,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   const chartTop = MARGIN_TOP
   const chartBottom = height - marginBottom
 
-  let yScale = scaleLinear().domain([0, 100]).range([chartBottom, chartTop])
+  let yScale = scaleLinear().domain([0, Math.max(100, findValueRange(lines)[1])]).range([chartBottom, chartTop])
   let yLabelValues = PERCENT_LABEL_VALUES
   let formatYLabel = formatPercentLabel
 
@@ -141,6 +143,22 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     })
     .curve(curveMonotoneX)
 
+  const [lowestValue, highestValue] = yScale.domain()
+  const baselineY = yScale(Math.min(Math.max(0, lowestValue), highestValue))
+
+  const makeArea = area<TimePoint>()
+    .defined(function (timePoint) {
+      return timePoint.value !== null
+    })
+    .x(function (timePoint) {
+      return xScale(timePoint.time)
+    })
+    .y0(baselineY)
+    .y1(function (timePoint) {
+      return yScale(timePoint.value ?? 0)
+    })
+    .curve(curveMonotoneX)
+
   let xLabelDates: Date[] = []
 
   if (showTimeLabels) {
@@ -174,6 +192,16 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
         {label}
       </text>
     )
+  }
+
+  function renderArea(chartLine: ChartLine) {
+    if (!chartLine.fill) {
+      return null
+    }
+
+    const areaPath = makeArea(breakAtGaps(chartLine.points)) ?? undefined
+
+    return <path key={`${chartLine.key}-fill`} d={areaPath} fill={chartLine.color} fillOpacity={FILL_OPACITY} stroke="none" />
   }
 
   function renderLine(chartLine: ChartLine) {
@@ -267,7 +295,6 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   }
 
   let zeroY: number | null = null
-  const [lowestValue, highestValue] = yScale.domain()
 
   if (zeroLine && lowestValue < 0 && highestValue > 0) {
     zeroY = yScale(0)
@@ -295,6 +322,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {zeroY !== null && <line x1={plotLeft} x2={plotRight} y1={zeroY} y2={zeroY} stroke="var(--dc-border-strong)" />}
             {cursorX !== null && <line x1={cursorX} x2={cursorX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />}
 
+            {lines.map(renderArea)}
             {lines.map(renderLine)}
             {lines.map(renderHoveredDot)}
           </svg>

@@ -44,67 +44,6 @@
 	color:var(--dc-text-muted);
 }
 
-.lr-chart {
-	height:170px;
-}
-
-.lr-chart-axis {
-	height:206px;
-}
-
-.lr-mark-label {
-	fill:var(--dc-text-muted);
-	font-family: var(--font-ui);
-	font-size:11px;
-}
-
-.lr-tooltip {
-	display:flex;
-	flex-direction:column;
-	row-gap:2px;
-	padding:0.5rem;
-	border-radius:6px;
-	border:1px solid var(--dc-border);
-	background-color:var(--dc-surface);
-	box-shadow:var(--dc-shadow-card);
-	font-family: var(--font-ui);
-	font-size:12px;
-	color:var(--dc-text);
-}
-
-.lr-tooltip-time {
-	color:var(--dc-text-muted);
-}
-
-.lr-dim {
-	color:var(--dc-text-muted);
-}
-
-.lr-key {
-	display:inline-block;
-	width:10px;
-	height:2px;
-	margin-right:6px;
-	vertical-align:middle;
-	border-radius:1px;
-}
-
-.lr-key-1 {
-	background-color:var(--dc-series-1);
-}
-
-.lr-key-2 {
-	background-color:var(--dc-series-2);
-}
-
-.lr-key-client {
-	background-color:var(--dc-series-2);
-}
-
-.lr-key-server {
-	background-color:var(--dc-series-1);
-}
-
 .lr-table-scroll {
 	overflow-x:auto;
 }
@@ -146,10 +85,6 @@
 	font-family: var(--font-ui);
 	font-size:13px;
 	color:var(--dc-text-muted);
-}
-
-.lr-legend-text {
-	color:var(--dc-text);
 }
 
 .lr-header {

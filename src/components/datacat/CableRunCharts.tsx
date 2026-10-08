@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
+import { findNearestPoint } from './timeSeries'
+import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
+import { MAIN_COLOR, SECOND_COLOR, describeCpu, formatCount, formatMs, formatPercent, toCpuLines, toTime } from './runCharts'
 import type { CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
-import CpuPanel, { CpuReadout } from './CpuPanel'
-import { ms, endLabel, axis, ticked, legendText, toCpuLookup } from './runCharts'
 import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
@@ -11,114 +12,82 @@ interface Props {
   statsOpen?: boolean
 }
 
-interface Mark {
-  t: number
-  published: number | null
-  expected: number | null
-  delivered: number | null
-  shortfall: [number, number] | null
-  p50Lag: number | null
-  p99Lag: number | null
-  lagBand: [number, number] | null
-  cpuAvg: number | null
-  cpuBand: [number, number] | null
-  row: CableCompareRow | null
-}
-
-interface TooltipProps {
-  active?: boolean
-  payload?: { payload: Mark }[]
-}
-
 type Panel = 'fanout' | 'lag' | 'cpu'
 
 const DEFAULT_BUCKET_MS = 5000
 
-const rate = (v: number | null) => (v === null ? '-' : `${Math.round(v).toLocaleString()}/s`)
+function formatRate(value: number) {
+  return `${Math.round(value).toLocaleString()}/s`
+}
 
-const count = (v: number | null | undefined) => (v === null || v === undefined ? '-' : v.toLocaleString())
+function perSecond(count: number | null, bucketSeconds: number) {
+  if (count === null) {
+    return null
+  }
 
-const CableTooltip = ({ active, payload }: TooltipProps) => {
-  const mark = payload?.[0]?.payload
-  const row = mark?.row
+  return count / bucketSeconds
+}
 
-  if (!active || !mark || !row) return null
+function toFanoutLines(rows: CableCompareRow[], bucketSeconds: number): ChartLine[] {
+  return [
+    { key: 'received', label: 'received', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.received, bucketSeconds) })) },
+    { key: 'expected', label: 'expected', color: SECOND_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.expected, bucketSeconds) })) },
+  ]
+}
 
-  const dropped = row.expected === null || row.received === null ? null : row.expected - row.received
+function toLagLines(rows: CableCompareRow[]): ChartLine[] {
+  return [
+    { key: 'p99', label: 'p99', color: MAIN_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: row.p99LagMs })) },
+    { key: 'p50', label: 'p50', color: SECOND_COLOR, points: rows.map((row) => ({ time: toTime(row.at), value: row.p50LagMs })) },
+  ]
+}
 
-  return (
-    <div className="lr-tooltip">
-      <p className="lr-tooltip-time">{new Date(row.at).toLocaleTimeString()}</p>
-      <p>
-        <strong>{rate(mark.published)}</strong> published
-      </p>
-      <p>
-        <span className="lr-key lr-key-2" />
-        <strong>{rate(mark.expected)}</strong> expected<span className="lr-dim"> · {count(row.expected)} frames</span>
-      </p>
-      <p>
-        <span className="lr-key lr-key-1" />
-        <strong>{rate(mark.delivered)}</strong> received<span className="lr-dim"> · {count(row.received)} frames</span>
-      </p>
-      {dropped !== null && (
-        <p><strong>{dropped.toLocaleString()}</strong> dropped</p>
-      )}
-      {mark.p99Lag !== null && (
-        <p><strong>{ms(mark.p99Lag)}</strong> lag p99<span className="lr-dim"> · p50 {ms(mark.p50Lag)}</span></p>
-      )}
-      <CpuReadout avg={mark.cpuAvg} band={mark.cpuBand} />
-    </div>
-  )
+function describeFanout(row: CableCompareRow, bucketSeconds: number) {
+  const published = perSecond(row.published, bucketSeconds)
+  const publishedText = `${published === null ? '-' : formatRate(published)} published`
+
+  if (row.expected === null || row.received === null) {
+    return publishedText
+  }
+
+  return `${publishedText} · ${(row.expected - row.received).toLocaleString()} dropped`
 }
 
 const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
   const [showTable, setShowTable] = useState(false)
-  const [hovered, setHovered] = useState<Panel | null>(null)
+  const [hoveredTime, setHoveredTime] = useState<number | null>(null)
+  const [fanoutYLabelWidth, setFanoutYLabelWidth] = useState(0)
+  const [lagYLabelWidth, setLagYLabelWidth] = useState(0)
+  const [cpuYLabelWidth, setCpuYLabelWidth] = useState(0)
 
   if (!rows.length) return <p className="lr-message">No samples for this run yet.</p>
 
-  const times = rows.map((row) => new Date(row.at).getTime())
+  const times = rows.map((row) => toTime(row.at))
   const deltas = times.slice(1).map((time, index) => time - times[index])
   const bucketMs = deltas.length ? Math.min(...deltas) : DEFAULT_BUCKET_MS
   const bucketSeconds = bucketMs / 1000
-  const gapMs = bucketMs * 2
 
-  const cpuAt = toCpuLookup(cpu)
+  const chartLeft = Math.max(fanoutYLabelWidth, lagYLabelWidth, cpuYLabelWidth) + Y_LABEL_GAP
   const hasCpu = cpu.some((point) => point.average !== null)
   const hasLag = rows.some((row) => row.p50LagMs !== null || row.p99LagMs !== null)
+  const from = times[0]
+  const to = times[times.length - 1]
 
-  const series: Mark[] = []
+  let axisPanel: Panel = 'fanout'
 
-  rows.forEach((row, index) => {
-    const t = times[index]
-    const previousAt = times[index - 1]
+  if (hasLag) {
+    axisPanel = 'lag'
+  }
 
-    if (previousAt !== undefined && t - previousAt > gapMs) {
-      series.push({ t: previousAt + 1, published: null, expected: null, delivered: null, shortfall: null, p50Lag: null, p99Lag: null, lagBand: null, cpuAvg: null, cpuBand: null, row: null })
-    }
+  if (hasCpu) {
+    axisPanel = 'cpu'
+  }
 
-    const expected = row.expected === null ? null : row.expected / bucketSeconds
-    const delivered = row.received === null ? null : row.received / bucketSeconds
-    const bothLags = row.p50LagMs !== null && row.p99LagMs !== null
+  let hoveredRow: CableCompareRow | null = null
 
-    series.push({
-      t,
-      published: row.published === null ? null : row.published / bucketSeconds,
-      expected,
-      delivered,
-      shortfall: expected !== null && delivered !== null ? [delivered, expected] : null,
-      p50Lag: row.p50LagMs,
-      p99Lag: row.p99LagMs,
-      lagBand: bothLags ? [row.p50LagMs!, row.p99LagMs!] : null,
-      ...cpuAt(t),
-      row
-    })
-  })
-
-  const last = series.length - 1
-  const tail = series[last]
-  const spread = Math.max(...rows.map((row) => row.p99LagMs ?? 0))
-  const labelEnds = tail.p50Lag !== null && tail.p99Lag !== null && Math.abs(tail.p99Lag - tail.p50Lag) > spread * 0.08
+  if (hoveredTime !== null) {
+    hoveredRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.at), row })), hoveredTime)?.row ?? null
+  }
 
   const totals = rows.reduce(
     (sum, row) => {
@@ -137,19 +106,6 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
 
   const dropped = totals.expected - totals.delivered
   const deliveryRate = totals.expected > 0 ? (totals.delivered / totals.expected) * 100 : null
-
-  const axisPanel: Panel = hasCpu ? 'cpu' : hasLag ? 'lag' : 'fanout'
-  const axisFor = (panel: Panel) => (panel === axisPanel ? ticked : { hide: true })
-  const chartClass = (panel: Panel) => `lr-chart ${panel === axisPanel ? 'lr-chart-axis' : ''}`
-
-  const readout = (panel: Panel) => (hovered === panel ? <CableTooltip /> : () => null)
-
-  const dot = (panel: Panel) => (hovered === panel ? { r: 4, strokeWidth: 0 } : false)
-
-  const watch = (panel: Panel) => ({
-    onPointerMove: () => setHovered((current) => (current === panel ? current : panel)),
-    onPointerLeave: () => setHovered((current) => (current === panel ? null : current))
-  })
 
   return (
     <div className="lr-panels">
@@ -176,10 +132,10 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
               {rows.map((row) => (
                 <tr key={row.at}>
                   <td>{new Date(row.at).toLocaleTimeString()}</td>
-                  <td>{count(row.published)}</td>
-                  <td>{count(row.clients)}</td>
-                  <td>{count(row.expected)}</td>
-                  <td>{count(row.received)}</td>
+                  <td>{formatCount(row.published)}</td>
+                  <td>{formatCount(row.clients)}</td>
+                  <td>{formatCount(row.expected)}</td>
+                  <td>{formatCount(row.received)}</td>
                   <td>{row.expected === null || row.received === null ? '-' : (row.expected - row.received).toLocaleString()}</td>
                   <td>{row.p50LagMs === null ? '-' : Math.round(row.p50LagMs).toLocaleString()}</td>
                   <td>{row.p99LagMs === null ? '-' : Math.round(row.p99LagMs).toLocaleString()}</td>
@@ -190,43 +146,62 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
         </div>
       ) : (
         <>
-          <p className="lr-panel-label">Fan-out (frames/s)</p>
-          <div className={chartClass('fanout')} {...watch('fanout')}>
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={series} syncId="cable-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-                <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                <XAxis {...axis} {...axisFor('fanout')} />
-                <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-                <Tooltip content={readout('fanout')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-                <Area type="monotone" dataKey="shortfall" stroke="none" fill="var(--dc-series-2)" fillOpacity={0.1} legendType="none" tooltipType="none" activeDot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="expected" name="expected" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('fanout')} isAnimationActive={false} />
-                <Line type="monotone" dataKey="delivered" name="received" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('fanout')} isAnimationActive={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+          <TimeSeriesChart
+            title="Fan-out (frames/s)"
+            lines={toFanoutLines(rows, bucketSeconds)}
+            from={from}
+            to={to}
+            yAxis="auto"
+            formatValue={formatRate}
+            hoveredTime={hoveredTime}
+            setHoveredTime={setHoveredTime}
+            showTimeLabels={axisPanel === 'fanout'}
+            showHoverTime
+            hoverDetail={hoveredRow ? describeFanout(hoveredRow, bucketSeconds) : undefined}
+            chartLeft={chartLeft}
+            setYLabelWidth={setFanoutYLabelWidth}
+            height={HEIGHT}
+            tooltip
+          />
 
           {hasLag && (
-            <>
-              <p className="lr-panel-label">Delivery lag (ms)</p>
-              <div className={chartClass('lag')} {...watch('lag')}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={series} syncId="cable-run" margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-                    <CartesianGrid vertical={false} stroke="var(--dc-border)" strokeDasharray="none" />
-                    <XAxis {...axis} {...axisFor('lag')} />
-                    <YAxis width={56} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => v.toLocaleString()} />
-                    <Tooltip content={readout('lag')} cursor={{ stroke: 'var(--dc-border-strong)', strokeWidth: 1 }} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
-                    <Area type="monotone" dataKey="lagBand" stroke="none" fill="var(--dc-series-2)" fillOpacity={0.1} legendType="none" tooltipType="none" activeDot={false} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="p99Lag" name="p99" stroke="var(--dc-series-2)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('lag')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
-                    <Line type="monotone" dataKey="p50Lag" name="p50" stroke="var(--dc-series-1)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={dot('lag')} isAnimationActive={false} label={endLabel(last, labelEnds)} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </>
+            <TimeSeriesChart
+              title="Delivery lag (ms)"
+              lines={toLagLines(rows)}
+              from={from}
+              to={to}
+              yAxis="auto"
+              formatValue={formatMs}
+              hoveredTime={hoveredTime}
+              setHoveredTime={setHoveredTime}
+              showTimeLabels={axisPanel === 'lag'}
+              showHoverTime={false}
+              chartLeft={chartLeft}
+              setYLabelWidth={setLagYLabelWidth}
+              height={HEIGHT}
+              tooltip
+            />
           )}
 
-          {hasCpu && <CpuPanel series={series} syncId="cable-run" tooltip={readout('cpu')} activeDot={dot('cpu')} pointerHandlers={watch('cpu')} />}
+          {hasCpu && (
+            <TimeSeriesChart
+              title="CPU (%)"
+              lines={toCpuLines(cpu)}
+              from={from}
+              to={to}
+              yAxis="percent"
+              formatValue={formatPercent}
+              hoveredTime={hoveredTime}
+              setHoveredTime={setHoveredTime}
+              showTimeLabels={axisPanel === 'cpu'}
+              showHoverTime={false}
+              hoverDetail={describeCpu(cpu, hoveredTime)}
+              chartLeft={chartLeft}
+              setYLabelWidth={setCpuYLabelWidth}
+              height={HEIGHT}
+              tooltip
+            />
+          )}
         </>
       )}
 

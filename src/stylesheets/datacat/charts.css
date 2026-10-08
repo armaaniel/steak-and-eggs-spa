@@ -8,7 +8,6 @@
 	display:block;
 }
 
-/* recharts' default tick color, so these match the datacat charts still on recharts */
 .dc-chart text {
 	font-size:11px;
 	fill:#666;

@@ -231,7 +231,3 @@
 	background-color:var(--dc-hover);
 }
 
-.recharts-surface:focus:not(:focus-visible),
-.recharts-surface > g:focus {
-	outline:none;
-}
