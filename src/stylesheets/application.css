@@ -50,6 +50,7 @@
 	--dc-sort-indicator: rgba(0, 0, 0, 0.6);
 
 	--dc-status-good: #0ca30c;
+	--dc-healthy: #609135;
 	--dc-status-warn: #fab219;
 	--dc-status-critical: #d03b3b;
 

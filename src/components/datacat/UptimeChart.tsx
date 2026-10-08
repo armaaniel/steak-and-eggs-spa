@@ -12,7 +12,7 @@ interface Props {
   selectBucket: (bucket: SyntheticBucket) => void
 }
 
-const HEALTHY_COLOR = '#609135'
+const HEALTHY_COLOR = 'var(--dc-healthy)'
 const HEALTHY_HOVER_COLOR = '#95BA78'
 const INCOMPLETE_COLOR = 'var(--dc-status-warn)'
 const FAILING_COLOR = 'var(--dc-status-critical)'
