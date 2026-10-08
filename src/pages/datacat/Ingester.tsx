@@ -246,7 +246,7 @@ function Ingester() {
               <p className="ing-pct-label">streaming, excluding idle</p>
             </div>
 
-            <IngesterTimeline spans={spans} />
+            <IngesterTimeline spans={spans} from={range.from} to={range.to} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} />
 
             <div className="ing-legend">
               <span className="ing-legend-item">

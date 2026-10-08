@@ -24,10 +24,11 @@
 }
 
 .ing-timeline {
-	display:flex;
-	border-radius:4px;
-	overflow:hidden;
-	background-color:var(--dc-surface-2);
+	position:relative;
+}
+
+.ing-timeline svg {
+	display:block;
 }
 
 .ing-span.streaming {
