@@ -3,13 +3,18 @@ import { gql, useQuery } from '@apollo/client'
 import { useMemo } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
 import useTransition from '../../hooks/useTransition.ts'
-import type { DependencyNode, IngesterSpan, OutletContextType, PolygonCalls, ServiceBucket } from '../../lib/types.ts'
+import type { DependencyNode, IngesterSpan, OutletContextType, PolygonCalls, ServiceBucket, SyntheticBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
   query getDependencies($range: String!, $from: ISO8601DateTime!, $to: ISO8601DateTime!) {
     serviceNow: serviceTimeseries(range: "10m") {
       requests
       errors
+    }
+    canaryNow: syntheticBuckets(range: "10m") {
+      completed
+      failures
+      expected
     }
     polygonNow: polygonCalls(range: "10m") {
       calls
@@ -43,6 +48,7 @@ const GET_DEPENDENCIES = gql`
 
 interface DependencyData {
   serviceNow: Pick<ServiceBucket, 'requests' | 'errors'>[]
+  canaryNow: Pick<SyntheticBucket, 'completed' | 'failures' | 'expected'>[]
   polygonNow: PolygonCalls
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
   dependencyHealth: DependencyHealth[]
@@ -126,11 +132,19 @@ const ago = (at: string, now: number) => {
 
 const total = (buckets: { requests: number; errors: number }[], key: 'requests' | 'errors') => buckets.reduce((sum, bucket) => sum + bucket[key], 0)
 
+const sum = (values: number[]) => values.reduce((runningTotal, value) => runningTotal + value, 0)
+
 const buildNodes = (data: DependencyData | undefined, now: number): DependencyNode[] => {
   const recent = data?.serviceNow ?? []
   const requests = total(recent, 'requests')
   const errors = total(recent, 'errors')
   const railsStatus: Status = !data ? 'none' : errors > 0 ? 'warn' : 'good'
+
+  const canaryRuns = data?.canaryNow ?? []
+  const canaryExpected = sum(canaryRuns.map((bucket) => bucket.expected))
+  const canaryPassed = sum(canaryRuns.map((bucket) => bucket.completed))
+  const canaryFailed = sum(canaryRuns.map((bucket) => bucket.failures))
+  const canaryStatus: Status = !data || canaryExpected === 0 ? 'none' : canaryPassed === 0 ? 'critical' : canaryFailed > 0 || canaryPassed < canaryExpected ? 'warn' : 'good'
 
   const spans = data?.ingesterSpans ?? []
   const lastSpan = spans.reduce<(typeof spans)[number] | null>((newest, span) => (!newest || span.at > newest.at ? span : newest), null)
@@ -151,7 +165,15 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
     makeNode('vercel', 'Vercel', 'Static hosting', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('browser', 'Browser', 'React SPA', 'none', { note: NOT_INSTRUMENTED }),
     makeNode('mobile', 'React Native', 'Mobile app', 'none', { note: NOT_INSTRUMENTED }),
-    makeNode('canary', 'Canary', 'Synthetic (k6)', 'none', { note: 'See Uptime' }),
+    makeNode('canary', 'Canary', 'Synthetic (k6)', canaryStatus, {
+      metrics: data
+        ? [
+            { label: 'Runs passed, last 10 min', value: `${canaryPassed} / ${canaryExpected}` },
+            { label: 'Failed, last 10 min', value: canaryFailed.toLocaleString() },
+          ]
+        : [],
+      note: 'See Uptime',
+    }),
     makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note }),
     makeNode('rails', 'Rails app', 'ECS Fargate · API + cable', worst(railsStatus, railsTask.status), {
       metrics: data
