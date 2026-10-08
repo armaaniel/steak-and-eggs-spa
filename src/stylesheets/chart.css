@@ -51,3 +51,45 @@
 	font-size:1rem;
 	color:var(--text-muted);
 }
+
+.live-line {
+	stroke:var(--chart-line);
+}
+
+.live-grid {
+	stroke:var(--border);
+	stroke-width:1;
+}
+
+.live-label {
+	font-family: var(--font-body);
+	font-size:12px;
+	font-variant-numeric:tabular-nums;
+	fill:var(--text-muted);
+}
+
+.live-pulse {
+	fill:var(--chart-line);
+	transform-box:fill-box;
+	transform-origin:center;
+	animation:live-pulse 1.6s ease-out infinite;
+}
+
+@keyframes live-pulse {
+	from {
+		transform:scale(1);
+		opacity:0.5;
+	}
+
+	to {
+		transform:scale(3);
+		opacity:0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.live-pulse {
+		animation:none;
+		opacity:0;
+	}
+}

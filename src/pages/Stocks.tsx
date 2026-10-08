@@ -1,5 +1,6 @@
 import '../stylesheets/stocks.css'
 import Chart from '../components/Chart'
+import LiveChart from '../components/LiveChart'
 import ChartRanges from '../components/ChartRanges'
 import useStoredRange from '../hooks/useStoredRange'
 import { useParams, useNavigate, Link } from 'react-router-dom'
@@ -35,11 +36,12 @@ interface Quote {
 
 const DEFAULT_SYMBOL = 'AAPL'
 
-const CHART_RANGES = ['1D', '1W', '1M', '3M', 'YTD', '1Y', '5Y'] as const
+const CHART_RANGES = ['Live', '1D', '1W', '1M', '3M', 'YTD', '1Y', '5Y'] as const
 type ChartRange = (typeof CHART_RANGES)[number]
 const DEFAULT_RANGE: ChartRange = '1D'
 
 const RANGE_PHRASES: Record<ChartRange, string> = {
+  'Live': 'Today',
   '1D': 'Today',
   '1W': 'Past week',
   '1M': 'Past month',
@@ -47,6 +49,16 @@ const RANGE_PHRASES: Record<ChartRange, string> = {
   'YTD': 'Year to date',
   '1Y': 'Past year',
   '5Y': 'Past 5 years'
+}
+
+function toPriceNumber(value: Price | Open | undefined) {
+  const number = Number(value)
+
+  if (value === null || value === undefined || !Number.isFinite(number) || number <= 0) {
+    return null
+  }
+
+  return number
 }
 
 function Stocks() {
@@ -100,7 +112,9 @@ function Stocks() {
 		getTickerData()
 	}, [symbol])
 	
-	const { data: chartData } = useApi<ChartData[]>(`/stocks/${symbol}/chartdata?range=${chartRange}`, [
+	const isLive = chartRange === 'Live'
+
+	const { data: chartData } = useApi<ChartData[]>(isLive ? null : `/stocks/${symbol}/chartdata?range=${chartRange}`, [
 	{ date: new Date().toLocaleDateString(), value: 0 },
 	{ date: new Date().toLocaleDateString(), value: 0 }
 	])
@@ -110,7 +124,11 @@ function Stocks() {
 		setHoveredPoint(null)
 	}
 
-	const baseline = chartData?.[0]?.value ?? null
+	let baseline = chartData?.[0]?.value ?? null
+
+	if (isLive) {
+		baseline = toPriceNumber(quote?.open)
+	}
 	const current = hoveredPoint?.value ?? price
 	const { label: changeLabel, isPositive, decimals } = toChange(current, baseline)
 	
@@ -157,7 +175,8 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              {chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
+              {isLive && <LiveChart key={symbol} symbol={symbol} price={toPriceNumber(price)} />}
+              {!isLive && chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
             </div>
 
             <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
