@@ -86,6 +86,8 @@ const NOT_INSTRUMENTED = 'Not instrumented'
 
 const GB = 1024 ** 3
 
+const RAILS_WARN_ERRORS = 3
+
 const RANK: Record<Status, number> = { none: 0, good: 1, warn: 2, critical: 3 }
 
 const worst = (a: Status, b: Status) => (RANK[a] >= RANK[b] ? a : b)
@@ -138,7 +140,7 @@ const buildNodes = (data: DependencyData | undefined, now: number): DependencyNo
   const recent = data?.serviceNow ?? []
   const requests = total(recent, 'requests')
   const errors = total(recent, 'errors')
-  const railsStatus: Status = !data ? 'none' : errors > 0 ? 'warn' : 'good'
+  const railsStatus: Status = !data ? 'none' : errors >= RAILS_WARN_ERRORS ? 'warn' : 'good'
 
   const canaryRuns = data?.canaryNow ?? []
   const canaryExpected = sum(canaryRuns.map((bucket) => bucket.expected))
