@@ -9,7 +9,7 @@ export function toTimePoint(point: { at: string; value: number }): TimePoint {
   return { time: new Date(point.at).getTime(), value: point.value }
 }
 
-export function findTypicalStep(timePoints: TimePoint[]) {
+export function findTypicalStep(timePoints: { time: number }[]) {
   const steps = []
 
   for (let index = 1; index < timePoints.length; index += 1) {
@@ -41,10 +41,10 @@ export function breakAtGaps(timePoints: TimePoint[]) {
   return withGaps
 }
 
-export function findNearestPoint(timePoints: TimePoint[], time: number) {
+export function findNearestPoint<T extends { time: number }>(timePoints: T[], time: number) {
   const typicalStep = findTypicalStep(timePoints)
 
-  let nearestPoint: TimePoint | null = null
+  let nearestPoint: T | null = null
   let nearestDistance = Infinity
 
   for (const timePoint of timePoints) {

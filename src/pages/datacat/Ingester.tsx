@@ -3,12 +3,11 @@ import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
-import IngesterRateChart from '../../components/datacat/IngesterRateChart'
-import IngesterLagChart from '../../components/datacat/IngesterLagChart'
-import IngesterResourceChart from '../../components/datacat/IngesterResourceChart'
+import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
 import DateRangePicker from '../../components/datacat/DateRangePicker'
 import useTransition from '../../hooks/useTransition.ts'
-import { panelHeight } from '../../components/datacat/ingesterTime'
+import { findNearestPoint } from '../../components/datacat/timeSeries'
+import { HEIGHT, Y_LABEL_GAP } from '../../components/datacat/bucketChart'
 import { toDuration, toRange } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
 import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, DateRange, ResourcePoint } from '../../lib/types.ts'
@@ -96,7 +95,58 @@ interface IngesterData {
 
 type BootRow = IngesterBoot & { id: string }
 
-type Panel = 'rate' | 'lag' | 'resources'
+const RESOURCES_DRAWER_HEIGHT = HEIGHT + 40
+
+function toTime(at: string) {
+  return new Date(at).getTime()
+}
+
+function formatRate(value: number) {
+  return `${value.toFixed(1)}/s`
+}
+
+function formatLag(value: number) {
+  return `${Math.round(value).toLocaleString()} ms`
+}
+
+function formatPercent(value: number) {
+  return `${value.toFixed(1)}%`
+}
+
+function formatFrameMs(value: number | null) {
+  if (value === null) {
+    return '-'
+  }
+
+  return `${value.toFixed(2)} ms`
+}
+
+function toRateLines(rate: IngesterRatePoint[]): ChartLine[] {
+  return [
+    { key: 'events', label: 'events/sec', color: 'var(--dc-latency-p99)', points: rate.map((point) => ({ time: toTime(point.at), value: point.eventsPerSec })) },
+    { key: 'frames', label: 'frames/sec', color: 'var(--dc-latency-p50)', points: rate.map((point) => ({ time: toTime(point.at), value: point.framesPerSec })) },
+  ]
+}
+
+function toLagLines(lag: IngesterLagPoint[]): ChartLine[] {
+  return [{ key: 'lag', label: 'mean lag', color: 'var(--dc-latency-p99)', points: lag.map((point) => ({ time: toTime(point.at), value: point.meanExcessMs })) }]
+}
+
+function toResourceLines(resources: ResourcePoint[]): ChartLine[] {
+  return [
+    { key: 'cpu', label: 'CPU', color: 'var(--dc-latency-p99)', points: resources.map((point) => ({ time: toTime(point.at), value: point.cpu })) },
+    { key: 'memory', label: 'Memory', color: 'var(--dc-latency-p50)', points: resources.map((point) => ({ time: toTime(point.at), value: point.memory })) },
+  ]
+}
+
+function describeRate(point: IngesterRatePoint) {
+  return `${formatFrameMs(point.meanProcessMs)} process · ${formatFrameMs(point.meanIdleMs)} idle · ${point.symbols ?? '-'} symbols`
+}
+
+function describeLag(point: IngesterLagPoint) {
+  return `${point.sampledEvents?.toLocaleString() ?? '-'} events · ${point.symbols ?? '-'} symbols`
+}
+
 type ConnectionRow = IngesterConnection & { id: string }
 
 const toIso = (ms: number) => (Number.isFinite(ms) ? new Date(ms).toISOString() : '')
@@ -145,9 +195,17 @@ function Ingester() {
   const resources = data?.ingesterResources || []
   const transitions = data?.ingesterTransitions || []
 
-  const [hovered, setHovered] = useState<Panel | null>(null)
+  const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [showResources, setShowResources] = useState(false)
-  const watch = (panel: Panel) => ({ onPointerEnter: () => setHovered(panel), onPointerLeave: () => setHovered(null) })
+  const [rateYLabelWidth, setRateYLabelWidth] = useState(0)
+  const [lagYLabelWidth, setLagYLabelWidth] = useState(0)
+  const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
+  const chartLeft = Math.max(rateYLabelWidth, lagYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
+
+  const rateMarks = rate.map((point) => ({ time: toTime(point.at), point }))
+  const lagMarks = lag.map((point) => ({ time: toTime(point.at), point }))
+  const hoveredRate = hoveredTime === null ? null : findNearestPoint(rateMarks, hoveredTime)
+  const hoveredLag = hoveredTime === null ? null : findNearestPoint(lagMarks, hoveredTime)
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
   const connections: ConnectionRow[] = (data?.ingesterConnections || []).map((connection) => ({ ...connection, id: connection.connectionId }))
@@ -209,23 +267,46 @@ function Ingester() {
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-            <p className="ing-panel-label">Throughput</p>
-            {rate.length === 0 ? (
-              <p className="ing-message">No samples in this window</p>
-            ) : (
-              <div {...watch('rate')}>
-                <IngesterRateChart points={rate} from={range.from} to={range.to} axis={lag.length === 0} readout={hovered === 'rate'} />
-              </div>
-            )}
+            <div className="lr-panels">
+              <TimeSeriesChart
+                title="Throughput"
+                lines={toRateLines(rate)}
+                from={range.from}
+                to={range.to}
+                yAxis="auto"
+                formatValue={formatRate}
+                hoveredTime={hoveredTime}
+                setHoveredTime={setHoveredTime}
+                showTimeLabels={lag.length === 0}
+                showHoverTime={rate.length > 0}
+                hoverDetail={hoveredRate ? describeRate(hoveredRate.point) : undefined}
+                chartLeft={chartLeft}
+                height={HEIGHT}
+                setYLabelWidth={setRateYLabelWidth}
+                note={rate.length === 0 ? 'No samples in this window' : undefined}
+              />
+            </div>
 
-            <p className="ing-panel-label">Mean lag (ms)</p>
-            {lag.length === 0 ? (
-              <p className="ing-message">No samples in this window</p>
-            ) : (
-              <div {...watch('lag')}>
-                <IngesterLagChart points={lag} from={range.from} to={range.to} axis readout={hovered === 'lag'} />
-              </div>
-            )}
+            <div className="lr-panels">
+              <TimeSeriesChart
+                title="Mean lag (ms)"
+                lines={toLagLines(lag)}
+                from={range.from}
+                to={range.to}
+                yAxis="auto"
+                formatValue={formatLag}
+                hoveredTime={hoveredTime}
+                setHoveredTime={setHoveredTime}
+                showTimeLabels
+                showHoverTime={rate.length === 0}
+                hoverDetail={hoveredLag ? describeLag(hoveredLag.point) : undefined}
+                zeroLine
+                chartLeft={chartLeft}
+                height={HEIGHT}
+                setYLabelWidth={setLagYLabelWidth}
+                note={lag.length === 0 ? 'No samples in this window' : undefined}
+              />
+            </div>
 
             <div>
               <button type="button" className="ing-panel-toggle" onClick={() => setShowResources(!showResources)} aria-expanded={showResources}>
@@ -235,14 +316,25 @@ function Ingester() {
                 </svg>
               </button>
 
-              <div className={`ing-drawer ${showResources ? 'open' : ''}`} style={{ maxHeight: showResources ? panelHeight(true) : 0 }} inert={!showResources}>
-                {resources.length === 0 ? (
-                  <p className="ing-message">No CloudWatch data in this window</p>
-                ) : (
-                  <div {...watch('resources')}>
-                    <IngesterResourceChart points={resources} from={range.from} to={range.to} axis readout={hovered === 'resources'} />
-                  </div>
-                )}
+              <div className={`ing-drawer ${showResources ? 'open' : ''}`} style={{ maxHeight: showResources ? RESOURCES_DRAWER_HEIGHT : 0 }} inert={!showResources}>
+                <div className="lr-panels">
+                  <TimeSeriesChart
+                    title=""
+                    lines={toResourceLines(resources)}
+                    from={range.from}
+                    to={range.to}
+                    yAxis="percent"
+                    formatValue={formatPercent}
+                    hoveredTime={hoveredTime}
+                    setHoveredTime={setHoveredTime}
+                    showTimeLabels
+                    showHoverTime={false}
+                    chartLeft={chartLeft}
+                    height={HEIGHT}
+                    setYLabelWidth={setResourcesYLabelWidth}
+                    note={resources.length === 0 ? 'No CloudWatch data in this window' : undefined}
+                  />
+                </div>
               </div>
             </div>
           </div>

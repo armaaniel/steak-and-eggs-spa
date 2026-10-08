@@ -77,17 +77,6 @@
 	background-color:var(--dc-status-critical);
 }
 
-.ing-panel {
-	font-family: var(--font-ui);
-}
-
-.ing-panel-label {
-	font-family: var(--font-ui);
-	font-size:12px;
-	color:var(--dc-text-muted);
-	margin:0;
-}
-
 .ing-panel-toggle {
 	display:flex;
 	align-items:center;
@@ -113,24 +102,6 @@
 
 .ing-drawer.open {
 	margin-top:1rem;
-}
-
-.ing-tooltip {
-	display:flex;
-	flex-direction:column;
-	row-gap:2px;
-	padding:0.5rem;
-	border-radius:6px;
-	border:1px solid var(--dc-border);
-	background-color:var(--dc-surface);
-	box-shadow:var(--dc-shadow-card);
-	font-family: var(--font-ui);
-	font-size:12px;
-	color:var(--dc-text);
-}
-
-.ing-tooltip-time {
-	color:var(--dc-text-muted);
 }
 
 .ing-card-title {

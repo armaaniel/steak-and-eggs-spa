@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useMemo, useState } from 'react'
-import ResourceChart, { type ResourceLine } from '../../components/datacat/ResourceChart'
+import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
 import { toTimePoint } from '../../components/datacat/timeSeries'
 import useTransition from '../../hooks/useTransition.ts'
 import { DATACAT_RANGE_MS } from '../../hooks/useDatacatRange'
@@ -56,12 +56,16 @@ function findLineColor(reading: ResourceReading) {
   return 'var(--dc-latency-p99)'
 }
 
-function toResourceLines(health: ResourceHealth | undefined): ResourceLine[] {
+function formatPercent(value: number) {
+  return `${value.toFixed(1)}%`
+}
+
+function toResourceLines(health: ResourceHealth | undefined): ChartLine[] {
   if (health === undefined) {
     return []
   }
 
-  const lines: ResourceLine[] = []
+  const lines: ChartLine[] = []
 
   for (const reading of health.readings) {
     if (reading.points.length > 0) {
@@ -72,7 +76,7 @@ function toResourceLines(health: ResourceHealth | undefined): ResourceLine[] {
   return lines
 }
 
-function findNote(health: ResourceHealth | undefined, lines: ResourceLine[]) {
+function findNote(health: ResourceHealth | undefined, lines: ChartLine[]) {
   if (health === undefined) {
     return 'No CloudWatch data right now.'
   }
@@ -119,11 +123,13 @@ function Resources() {
 
     return (
       <div key={row.id} className="lr-panels">
-        <ResourceChart
+        <TimeSeriesChart
           title={row.title}
           lines={lines}
           from={timeWindow.from}
           to={timeWindow.to}
+          yAxis="percent"
+          formatValue={formatPercent}
           hoveredTime={hoveredTime}
           setHoveredTime={setHoveredTime}
           showTimeLabels={index === RESOURCE_ROWS.length - 1}
