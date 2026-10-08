@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
+import { useCallback, useId, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { area, curveMonotoneX, line, type CurveFactory } from 'd3-shape'
 import { MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
@@ -76,6 +76,7 @@ function findValueRange(lines: ChartLine[]) {
 const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
+  const clipId = useId()
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -319,14 +320,22 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       {note === undefined && (
         <div ref={measureResize} className="dc-chart">
           <svg width={width} height={height} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
+            <defs>
+              <clipPath id={clipId}>
+                <rect x={plotLeft} y={0} width={Math.max(0, plotWidth)} height={height} />
+              </clipPath>
+            </defs>
+
             {yLabelValues.map(renderGridline)}
             {xLabelDates.map(renderXLabel)}
 
             {zeroY !== null && <line x1={plotLeft} x2={plotRight} y1={zeroY} y2={zeroY} stroke="var(--dc-border-strong)" />}
             {cursorX !== null && <line x1={cursorX} x2={cursorX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />}
 
-            {lines.map(renderArea)}
-            {lines.map(renderLine)}
+            <g clipPath={`url(#${clipId})`}>
+              {lines.map(renderArea)}
+              {lines.map(renderLine)}
+            </g>
             {lines.map(renderHoveredDot)}
           </svg>
 
