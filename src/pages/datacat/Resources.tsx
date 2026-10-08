@@ -129,6 +129,7 @@ function Resources() {
           from={timeWindow.from}
           to={timeWindow.to}
           yAxis="percent"
+          curve="straight"
           formatValue={formatPercent}
           hoveredTime={hoveredTime}
           setHoveredTime={setHoveredTime}

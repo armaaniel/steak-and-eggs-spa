@@ -30,8 +30,8 @@ function perSecond(count: number | null, bucketSeconds: number) {
 
 function toFanoutLines(rows: CableCompareRow[], bucketSeconds: number): ChartLine[] {
   return [
-    { key: 'received', label: 'received', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.received, bucketSeconds) })) },
     { key: 'expected', label: 'expected', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.expected, bucketSeconds) })) },
+    { key: 'received', label: 'received', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.received, bucketSeconds) })) },
   ]
 }
 
@@ -192,6 +192,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
               from={from}
               to={to}
               yAxis="percent"
+              curve="straight"
               formatValue={formatPercent}
               hoveredTime={hoveredTime}
               setHoveredTime={setHoveredTime}

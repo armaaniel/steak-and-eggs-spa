@@ -155,6 +155,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
               from={from}
               to={to}
               yAxis="percent"
+              curve="straight"
               formatValue={formatPercent}
               hoveredTime={hoveredTime}
               setHoveredTime={setHoveredTime}

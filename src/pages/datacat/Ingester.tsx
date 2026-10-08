@@ -325,6 +325,7 @@ function Ingester() {
                     from={range.from}
                     to={range.to}
                     yAxis="percent"
+                    curve="straight"
                     formatValue={formatPercent}
                     hoveredTime={hoveredTime}
                     setHoveredTime={setHoveredTime}
