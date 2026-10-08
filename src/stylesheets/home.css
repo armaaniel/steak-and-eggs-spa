@@ -87,10 +87,6 @@
   outline: none
 }
 
-.chart .recharts-line-curve {
-	stroke: var(--chart-line);
-}
-
 @media (max-width:768px) {
 	.home {
 		flex-direction:column;
