@@ -37,6 +37,7 @@ const GLIDE_MS = 400
 const LABEL_STEPS_MS = [10_000, 20_000, 30_000, 60_000]
 const MIN_LABEL_SPACING = 72
 const EDGE_FADE = 24
+const Y_EDGE_FADE = 12
 const MARGIN = { top: 28, right: 5, bottom: 24, left: 5 }
 const Y_LABEL_GAP = 12
 const Y_LABEL_COUNT = 6
@@ -388,9 +389,11 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
 
   function renderYLabel(value: number, index: number) {
     const labelY = yScale(value)
+    const distanceFromEdge = Math.min(labelY - plotTop, plotBottom - labelY)
+    const opacity = Math.min(1, Math.max(0, distanceFromEdge / Y_EDGE_FADE))
 
     return (
-      <g key={value}>
+      <g key={value} opacity={opacity}>
         <line className="live-grid" x1={plotLeft} x2={plotRight} y1={labelY} y2={labelY} />
         <text className="live-label" x={plotRight + Y_LABEL_GAP} y={labelY} dy="0.32em">
           {yLabels[index]}
