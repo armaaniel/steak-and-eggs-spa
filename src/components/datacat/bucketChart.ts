@@ -31,6 +31,7 @@ export interface BarSeries {
   label: string
   color: string
   hoverColor?: string
+  minHeight?: number
 }
 
 export interface XLabel {

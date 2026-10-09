@@ -172,12 +172,17 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     }
 
     const segments = []
-    let segmentBottom = 0
+    let segmentBottomY = yScale(0)
 
     for (const barSeries of series) {
-      const segmentTop = segmentBottom + (bar.segments[barSeries.key] ?? 0)
-      const topY = yScale(segmentTop)
-      const bottomY = yScale(segmentBottom)
+      const value = bar.segments[barSeries.key] ?? 0
+      let segmentHeight = yScale(0) - yScale(value)
+
+      if (value > 0 && barSeries.minHeight !== undefined) {
+        segmentHeight = Math.max(segmentHeight, barSeries.minHeight)
+      }
+
+      const topY = segmentBottomY - segmentHeight
 
       let color = barSeries.color
 
@@ -185,8 +190,8 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
         color = barSeries.hoverColor
       }
 
-      segments.push(<rect key={barSeries.key} x={barX} y={topY} width={barWidth} height={bottomY - topY} fill={color} />)
-      segmentBottom = segmentTop
+      segments.push(<rect key={barSeries.key} x={barX} y={topY} width={barWidth} height={segmentHeight} fill={color} />)
+      segmentBottomY = topY
     }
 
     return (

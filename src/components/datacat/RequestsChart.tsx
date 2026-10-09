@@ -18,7 +18,7 @@ const HOVER_COLOR = 'var(--dc-latency-p99)'
 
 const REQUEST_SERIES: BarSeries[] = [
   { key: 'ok', label: 'ok', color: OK_COLOR, hoverColor: HOVER_COLOR },
-  { key: 'errors', label: 'errors', color: ERROR_COLOR }
+  { key: 'errors', label: 'errors', color: ERROR_COLOR, minHeight: 2 }
 ]
 
 function toRequestBar(chartBucket: ChartBucket): ChartBar {
