@@ -10,10 +10,8 @@ const TraceDetailsPanel = ({ trace }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
-        <p>Endpoint: {trace.endpoint}</p>
-        <p>
-          Controller Method: {trace.controller}#{trace.action}
-        </p>
+        <p>{trace.endpoint}</p>
+        <p>{trace.controller}#{trace.action}</p>
         <p>Status: {trace.status}</p>
         {trace.errorClass && <p>Error Class: {trace.errorClass}</p>}
         {trace.errorLocation && <p>Error Location: {trace.errorLocation}</p>}
