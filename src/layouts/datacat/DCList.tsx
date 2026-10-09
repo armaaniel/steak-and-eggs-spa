@@ -130,12 +130,11 @@ function DCList() {
       return
     }
 
-    const timing = { duration: SLIDE_MS, easing: 'ease-out' }
+    const timing = { duration: 250, easing: 'ease-out' }
     let sliding: Animation
 
     if (slide < 0) {
-      const navbarShownBefore = 1 - Math.abs(slide) / navbarHeight
-      navbar.animate([{ opacity: navbarShownBefore }, { opacity: 1 }], timing)
+      navbar.animate([{ transform: `translateY(${slide}px)` }, { transform: 'translateY(0)' }], timing)
       sliding = page.animate([{ transform: `translateY(${slide}px)` }, { transform: 'translateY(0)' }], timing)
     } else {
       const navbarStartOffset = window.scrollY + slide - navbarHeight
@@ -145,8 +144,8 @@ function DCList() {
 
       const navbarLeaving = navbar.animate(
         [
-          { transform: `translateY(${navbarStartOffset}px)`, opacity: 1 },
-          { transform: `translateY(${navbarEndOffset}px)`, opacity: 0 },
+          { transform: `translateY(${navbarStartOffset}px)` },
+          { transform: `translateY(${navbarEndOffset}px)` },
         ],
         timing,
       )
