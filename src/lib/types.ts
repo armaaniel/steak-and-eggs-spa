@@ -182,10 +182,8 @@ export interface IngesterRatePoint {
 	at:string
 	eventsPerSec:number | null
 	framesPerSec:number | null
-	meanExcessMs:number | null
 	meanProcessMs:number | null
 	meanIdleMs:number | null
-	symbols:number | null
 }
 
 export interface IngesterBoot {

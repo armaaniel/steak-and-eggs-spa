@@ -32,10 +32,8 @@ const GET_INGESTER = gql`
       at
       eventsPerSec
       framesPerSec
-      meanExcessMs
       meanProcessMs
       meanIdleMs
-      symbols
     }
     ingesterTransitions(from: $from, to: $to) {
       id
@@ -144,7 +142,7 @@ function toResourceLines(resources: ResourcePoint[]): ChartLine[] {
 }
 
 function describeRate(point: IngesterRatePoint) {
-  return `${formatFrameMs(point.meanProcessMs)} process · ${formatFrameMs(point.meanIdleMs)} idle · ${point.symbols ?? '-'} symbols`
+  return `${formatFrameMs(point.meanProcessMs)} process · ${formatFrameMs(point.meanIdleMs)} idle`
 }
 
 function describeLag(point: IngesterLagPoint) {
