@@ -4,6 +4,8 @@ interface Props {
   trace: Trace
 }
 
+const SENTRY_EVENT_SEARCH_URL = 'https://armaaniel.sentry.io/issues/?query='
+
 const TraceDetailsPanel = ({ trace }: Props) => {
   return (
     <div className="sidebar-button-container two">
@@ -14,6 +16,13 @@ const TraceDetailsPanel = ({ trace }: Props) => {
         <p>DB Runtime: {trace.dbRuntime.toFixed(0)}ms</p>
         <p>View Runtime: {trace.viewRuntime?.toFixed(0) ?? '0'}ms</p>
         <p>Status: {trace.status}</p>
+        {trace.errorClass && <p>Error Class: {trace.errorClass}</p>}
+        {trace.errorLocation && <p>Error Location: {trace.errorLocation}</p>}
+        {trace.sentryEventId && (
+          <p>
+            Sentry Event Link: <a href={`${SENTRY_EVENT_SEARCH_URL}${trace.sentryEventId}`} target="_blank" rel="noreferrer">{trace.sentryEventId}</a>
+          </p>
+        )}
         <p>Created At: {new Date(trace.createdAt).toLocaleString()}</p>
         <p>
           Controller Method: {trace.controller}#{trace.action}

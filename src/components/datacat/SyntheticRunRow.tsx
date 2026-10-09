@@ -15,6 +15,9 @@ const GET_RUN_TRACES = gql`
       dbRuntime
       viewRuntime
       breakdown
+      errorClass
+      errorLocation
+      sentryEventId
     }
   }
 `

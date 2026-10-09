@@ -29,6 +29,9 @@ const GET_TRACES = gql`
       dbRuntime
       viewRuntime
       breakdown
+      errorClass
+      errorLocation
+      sentryEventId
     }
     serviceTimeseries(range: $range, endpoint: $endpoint, includePartial: true) {
       bucket
@@ -68,6 +71,9 @@ const GET_TRACE = gql`
       dbRuntime
       viewRuntime
       breakdown
+      errorClass
+      errorLocation
+      sentryEventId
     }
   }
 `
@@ -85,6 +91,9 @@ const GET_CAPPED_TRACES = gql`
       dbRuntime
       viewRuntime
       breakdown
+      errorClass
+      errorLocation
+      sentryEventId
     }
   }
 `

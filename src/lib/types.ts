@@ -52,6 +52,9 @@ export interface Trace {
 	viewRuntime:number
 	source?:string
 	breakdown?: Record<string, Breakdown>
+	errorClass?:string | null
+	errorLocation?:string | null
+	sentryEventId?:string | null
 }
 
 export interface Connection {
