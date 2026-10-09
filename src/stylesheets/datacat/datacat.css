@@ -134,7 +134,7 @@
 .dc-row-heading {
 	text-align:left;
 	font-family: var(--font-ui);
-	color:var(--dc-text);
+	color:var(--dc-text-muted);
 	font-weight:400;
 	padding:1rem;
 	border-bottom:1px solid var(--dc-border);
