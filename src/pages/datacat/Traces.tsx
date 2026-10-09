@@ -6,7 +6,7 @@ import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
 import { toBucketLabel } from '../../lib/utils.ts'
 import { bucketFetchPolicy } from '../../components/datacat/bucketChart'
-import type { Column, Trace, OutletContextType, ServiceBucket } from '../../lib/types.ts'
+import type { Trace, OutletContextType, ServiceBucket } from '../../lib/types.ts'
 
 const GET_OVERVIEW_TRACES = gql`
   query getOverviewTraces($range: String, $bucket: ISO8601DateTime, $bucketEnd: ISO8601DateTime, $sort: TraceSort, $direction: SortDirection) {
@@ -18,7 +18,6 @@ const GET_OVERVIEW_TRACES = gql`
       controller
       action
       status
-      source
       dbRuntime
       breakdown
       errorClass
@@ -35,10 +34,6 @@ interface TraceData {
 interface Props {
   bucket: ServiceBucket | null
 }
-
-const sourceColumn: Column<Trace> = { key: 'source', label: 'Source', sortable: false, render: (trace) => trace.source ?? '-' }
-
-const columns = [...traceColumns.slice(0, 2), sourceColumn, ...traceColumns.slice(2)]
 
 function Traces({ bucket }: Props) {
   const { detail, setDetail, range } = useOutletContext<OutletContextType>()
@@ -67,7 +62,7 @@ function Traces({ bucket }: Props) {
     <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
       {bucket && <p className={`ov-traces-title table-fade ${loading ? '' : 'loaded'}`}>Traces from {toBucketLabel(bucket.bucket)}</p>}
 
-      <TraceTable key={bucketKey ?? 'all'} traceData={traces} columns={columns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
+      <TraceTable key={bucketKey ?? 'all'} traceData={traces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
     </div>
   )
 }
