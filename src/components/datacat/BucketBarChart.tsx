@@ -17,9 +17,11 @@ interface Props {
   selectedIndex: number | null
   selectBar: (index: number) => void
   showTimeLabels?: boolean
+  tooltipKeys?: string[]
 }
 
 const Y_LABEL_COUNT = 4
+const TOOLTIP_TRANSFORM = 'translate(-50%, calc(-100% - 10px))'
 const MARGIN_BOTTOM = 6
 
 const FEW_BARS = 13
@@ -63,8 +65,9 @@ function findActiveBar(bars: ChartBar[], hover: Hover | null) {
   return bars[hover.index] ?? null
 }
 
-const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false }: Props) => {
+const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false, tooltipKeys = [] }: Props) => {
   const [width, setWidth] = useState(0)
+  const [pointerY, setPointerY] = useState<number | null>(null)
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -196,6 +199,10 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     const hoveredIndex = bucketAt(event, bars, xScale)
     const hoveringThisChart = hover !== null && hover.chart === chartName
 
+    if (tooltipKeys.length > 0) {
+      setPointerY(event.clientY - event.currentTarget.getBoundingClientRect().top)
+    }
+
     if (hoveredIndex === null) {
       if (hoveringThisChart) {
         setHover(null)
@@ -210,6 +217,8 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
   }
 
   function handlePointerLeave() {
+    setPointerY(null)
+
     if (hover !== null && hover.chart === chartName) {
       setHover(null)
     }
@@ -245,6 +254,32 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     )
   }
 
+  function isTooltipSeries(barSeries: BarSeries) {
+    return tooltipKeys.includes(barSeries.key)
+  }
+
+  function renderTooltipRow(barSeries: BarSeries) {
+    if (activeBar === null) {
+      return null
+    }
+
+    return (
+      <div key={barSeries.key}>
+        <p className="dc-tooltip-name">
+          <span className="dc-swatch" style={{ backgroundColor: barSeries.color }} />
+          {barSeries.label}
+        </p>
+        <strong className="dc-tooltip-value">{findLegendValue(activeBar, barSeries).toLocaleString('en-us')}</strong>
+      </div>
+    )
+  }
+
+  let tooltipX: number | null = null
+
+  if (activeBar !== null && hover !== null && hover.chart === chartName && pointerY !== null && tooltipKeys.length > 0) {
+    tooltipX = xScale(activeBar.start)
+  }
+
   return (
     <>
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
@@ -260,6 +295,12 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
           {xLabels.map(renderXLabel)}
           {bars.map(renderBar)}
         </svg>
+
+        {tooltipX !== null && pointerY !== null && (
+          <div className="dc-tooltip" style={{ left: tooltipX, top: pointerY, transform: TOOLTIP_TRANSFORM }}>
+            {series.filter(isTooltipSeries).map(renderTooltipRow)}
+          </div>
+        )}
       </div>
     </>
   )
