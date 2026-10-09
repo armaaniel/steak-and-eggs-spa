@@ -49,7 +49,6 @@ export interface Trace {
 	action:string
 	status:number
 	dbRuntime:number
-	viewRuntime:number
 	source?:string
 	breakdown?: Record<string, Breakdown>
 	errorClass?:string | null

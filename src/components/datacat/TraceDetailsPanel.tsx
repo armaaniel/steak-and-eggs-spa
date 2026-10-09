@@ -10,11 +10,10 @@ const TraceDetailsPanel = ({ trace }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
-        <p>ID: {trace.id}</p>
         <p>Endpoint: {trace.endpoint}</p>
-        <p>Duration: {trace.duration.toFixed(0)}ms</p>
-        <p>DB Runtime: {trace.dbRuntime.toFixed(0)}ms</p>
-        <p>View Runtime: {trace.viewRuntime?.toFixed(0) ?? '0'}ms</p>
+        <p>
+          Controller Method: {trace.controller}#{trace.action}
+        </p>
         <p>Status: {trace.status}</p>
         {trace.errorClass && <p>Error Class: {trace.errorClass}</p>}
         {trace.errorLocation && <p>Error Location: {trace.errorLocation}</p>}
@@ -23,10 +22,9 @@ const TraceDetailsPanel = ({ trace }: Props) => {
             Sentry Event Link: <a href={`${SENTRY_EVENT_SEARCH_URL}${trace.sentryEventId}`} target="_blank" rel="noreferrer">{trace.sentryEventId}</a>
           </p>
         )}
+        <p>Duration: {trace.duration.toFixed(0)}ms</p>
+        <p>DB Runtime: {trace.dbRuntime.toFixed(0)}ms</p>
         <p>Created At: {new Date(trace.createdAt).toLocaleString()}</p>
-        <p>
-          Controller Method: {trace.controller}#{trace.action}
-        </p>
 
         {trace.breakdown && Object.keys(trace.breakdown).length > 0 && (
           <div className='call-breakdown'>
@@ -43,6 +41,7 @@ const TraceDetailsPanel = ({ trace }: Props) => {
             ))}
           </div>
         )}
+        <p>ID: {trace.id}</p>
       </div>
     </div>
   )

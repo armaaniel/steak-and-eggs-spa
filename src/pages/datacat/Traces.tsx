@@ -20,7 +20,6 @@ const GET_OVERVIEW_TRACES = gql`
       status
       source
       dbRuntime
-      viewRuntime
       breakdown
       errorClass
       errorLocation

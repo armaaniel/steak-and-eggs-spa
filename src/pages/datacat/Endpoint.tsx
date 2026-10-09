@@ -27,7 +27,6 @@ const GET_TRACES = gql`
       action
       status
       dbRuntime
-      viewRuntime
       breakdown
       errorClass
       errorLocation
@@ -69,7 +68,6 @@ const GET_TRACE = gql`
       action
       status
       dbRuntime
-      viewRuntime
       breakdown
       errorClass
       errorLocation
@@ -89,7 +87,6 @@ const GET_CAPPED_TRACES = gql`
       action
       status
       dbRuntime
-      viewRuntime
       breakdown
       errorClass
       errorLocation
