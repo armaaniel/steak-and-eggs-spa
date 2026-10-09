@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useMatch } from 'react-router-dom'
 import ThemeToggle from '../ThemeToggle'
 import { DATACAT_SECTIONS as SECTIONS } from '../../lib/datacatSections.ts'
 import type { DatacatSection } from '../../lib/datacatSections.ts'
@@ -38,6 +38,7 @@ const scrollTo = (event: React.MouseEvent, id: DatacatSection) => {
 
 const Sidebar = ({ onHome }: { onHome: boolean }) => {
   const active = useActiveSection(onHome)
+  const onLoadTests = useMatch('/datacat/load/*') !== null
 
   return (
     <div className="sidebar-button-container">
@@ -61,9 +62,9 @@ const Sidebar = ({ onHome }: { onHome: boolean }) => {
         Ingester
       </NavLink>
 
-      <NavLink to="/datacat/load" className={({ isActive }) => `side-button ${isActive ? 'active' : ''}`}>
+      <Link to="/datacat/load/http" className={`side-button ${onLoadTests ? 'active' : ''}`}>
         Load Tests
-      </NavLink>
+      </Link>
 
       <ThemeToggle className="dc-theme-toggle" />
     </div>
