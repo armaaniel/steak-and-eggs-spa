@@ -24,7 +24,6 @@ const TraceDetailsPanel = ({ trace }: Props) => {
         )}
         <p>Duration: {trace.duration.toFixed(0)}ms</p>
         <p>DB Runtime: {trace.dbRuntime.toFixed(0)}ms</p>
-        <p>Created At: {new Date(trace.createdAt).toLocaleString()}</p>
 
         {trace.breakdown && Object.keys(trace.breakdown).length > 0 && (
           <div className='call-breakdown'>
@@ -40,6 +39,7 @@ const TraceDetailsPanel = ({ trace }: Props) => {
             ))}
           </div>
         )}
+        <p>Created At: {new Date(trace.createdAt).toLocaleString()}</p>
         <p>ID: {trace.id}</p>
       </div>
     </div>
