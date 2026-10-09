@@ -64,6 +64,16 @@ function findSlowestDuration(chartPoints: ChartPoint[]) {
   return slowestDuration
 }
 
+function findNextPowerOfTen(value: number) {
+  let power = 10
+
+  while (power < value) {
+    power = power * 10
+  }
+
+  return power
+}
+
 function findPowersOfTen(maxValue: number) {
   const powersOfTen = []
   let power = 1
@@ -166,7 +176,7 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
   const chartPoints = useMemo(() => points.map(toChartPoint), [points])
   const chartBuckets = useMemo(() => toChartBuckets(buckets), [buckets])
 
-  const yMax = findSlowestDuration(chartPoints) * 1.2
+  const yMax = findNextPowerOfTen(findSlowestDuration(chartPoints))
 
   const yScale = useMemo(() => {
     return scaleLog().domain([1, yMax]).range([chartBottom, chartTop])
