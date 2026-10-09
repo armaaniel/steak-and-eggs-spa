@@ -46,6 +46,10 @@
     transition: opacity 150ms;
 }
 
+.dc-home-right:has(.positions-container:not(.loaded)) #resources .positions-container {
+	opacity:0;
+}
+
 .table-fade {
 	opacity:0;
 }
