@@ -1,6 +1,6 @@
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet, useLocation, useMatch } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../../stylesheets/datacat/datacat.css'
 import '../../stylesheets/datacat/endpoint.css'
 import Sidebar from '../../components/datacat/Sidebar'
@@ -60,6 +60,20 @@ const DetailPanel = ({ detail }: { detail: Detail }) => {
 function DCList() {
   const onHome = useMatch('/datacat') !== null
   const onIngester = useMatch('/datacat/ingester') !== null
+  const { pathname, hash } = useLocation()
+  const lastPathname = useRef(pathname)
+
+  useEffect(() => {
+    if (lastPathname.current === pathname) {
+      return
+    }
+
+    lastPathname.current = pathname
+
+    if (hash === '') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    }
+  }, [pathname, hash])
 
   const [detail, setDetail] = useState<Detail | null>(null)
   const [range, setRange] = useDatacatRange()
