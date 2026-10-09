@@ -2,6 +2,8 @@
 
 .dc-chart {
 	position:relative;
+	user-select:none;
+	-webkit-user-select:none;
 }
 
 .dc-chart svg {
