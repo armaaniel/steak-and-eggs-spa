@@ -381,28 +381,48 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     }
 
     return (
-      <p key={chartLine.key} className="dc-tooltip-name">
-        <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
-        {chartLine.label}
-        <strong>{formatValue(hoveredPoint.value)}</strong>
-      </p>
+      <>
+        <p className="dc-tooltip-name">
+          <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
+          {chartLine.label}
+        </p>
+        <strong className="dc-tooltip-value">{formatValue(hoveredPoint.value)}</strong>
+      </>
     )
   }
+
+  function findLineNearestPointer() {
+    if (pointerY === null) {
+      return null
+    }
+
+    let nearestLine: ChartLine | null = null
+    let nearestDistance = Infinity
+
+    for (const chartLine of lines) {
+      const hoveredPoint = findHoveredPoint(chartLine)
+
+      if (hoveredPoint === null || hoveredPoint.value === null) {
+        continue
+      }
+
+      const distance = Math.abs(yScale(hoveredPoint.value) - pointerY)
+
+      if (distance < nearestDistance) {
+        nearestLine = chartLine
+        nearestDistance = distance
+      }
+    }
+
+    return nearestLine
+  }
+
+  const tooltipLine = findLineNearestPointer()
 
   let cursorX: number | null = null
 
   if (hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
     cursorX = xScale(hoveredTime)
-  }
-
-  let tooltipTime = hoveredTime
-
-  if (lines.length > 0) {
-    const firstHoveredPoint = findHoveredPoint(lines[0])
-
-    if (firstHoveredPoint !== null) {
-      tooltipTime = firstHoveredPoint.time
-    }
   }
 
   let zeroY: number | null = null
@@ -448,10 +468,9 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {lines.map(renderHoveredDot)}
           </svg>
 
-          {tooltip && pinnedTime === null && pointerY !== null && cursorX !== null && tooltipTime !== null && (
+          {tooltip && pinnedTime === null && pointerY !== null && cursorX !== null && tooltipLine !== null && (
             <div className="dc-tooltip" style={{ left: cursorX, top: pointerY, transform: TOOLTIP_STYLE_TRANSFORM }}>
-              <p className="dc-tooltip-time">{formatHoverTime(tooltipTime)}</p>
-              {lines.map(renderTooltipRow)}
+              {renderTooltipRow(tooltipLine)}
             </div>
           )}
         </div>

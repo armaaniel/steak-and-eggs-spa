@@ -80,6 +80,11 @@
 	color:#e8eaee;
 }
 
+.dc-tooltip-value {
+	padding-left:16px;
+	color:#e8eaee;
+}
+
 .dc-tooltip-time {
 	margin-bottom:4px;
 	color:#a3a8b3;
