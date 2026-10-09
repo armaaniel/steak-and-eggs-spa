@@ -448,7 +448,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {lines.map(renderHoveredDot)}
           </svg>
 
-          {tooltip && pointerY !== null && cursorX !== null && tooltipTime !== null && (
+          {tooltip && pinnedTime === null && pointerY !== null && cursorX !== null && tooltipTime !== null && (
             <div className="dc-tooltip" style={{ left: cursorX, top: pointerY, transform: TOOLTIP_STYLE_TRANSFORM }}>
               <p className="dc-tooltip-time">{formatHoverTime(tooltipTime)}</p>
               {lines.map(renderTooltipRow)}
