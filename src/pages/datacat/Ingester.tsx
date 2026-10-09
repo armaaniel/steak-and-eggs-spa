@@ -301,6 +301,7 @@ function Ingester() {
             <div className="lr-panels">
               <TimeSeriesChart
                 title="Mean lag (ms)"
+                tooltip
                 lines={lagLines}
                 from={range.from}
                 to={range.to}
@@ -333,6 +334,7 @@ function Ingester() {
                 <div className="lr-panels">
                   <TimeSeriesChart
                     title=""
+                    tooltip
                     lines={resourceLines}
                     from={range.from}
                     to={range.to}
