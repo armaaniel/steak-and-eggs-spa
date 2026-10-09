@@ -54,7 +54,8 @@
 	--dc-cpu: #59AED9;
 	--dc-memory: #F1B24B;
 	--dc-status-warn: #fab219;
-	--dc-status-critical: #d03b3b;
+	--dc-status-critical: #CC9168;
+	--dc-dependency-critical: #d03b3b;
 
 	--dc-series-1: #2a78d6;
 	--dc-series-2: #eb6834;

@@ -76,7 +76,7 @@
 
 .dep-status.good { fill:var(--dc-status-good); }
 .dep-status.warn { fill:var(--dc-status-warn); }
-.dep-status.critical { fill:var(--dc-status-critical); }
+.dep-status.critical { fill:var(--dc-dependency-critical); }
 
 .dep-legend {
 	display:flex;
@@ -103,7 +103,7 @@
 
 .dep-dot.good { background-color:var(--dc-status-good); }
 .dep-dot.warn { background-color:var(--dc-status-warn); }
-.dep-dot.critical { background-color:var(--dc-status-critical); }
+.dep-dot.critical { background-color:var(--dc-dependency-critical); }
 
 .dep-message {
 	font-family: var(--font-ui);
