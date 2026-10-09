@@ -142,6 +142,10 @@ function toResourceLines(resources: ResourcePoint[]): ChartLine[] {
   ]
 }
 
+function hasTime(seconds: number | null | undefined) {
+  return seconds !== null && seconds !== undefined && seconds > 0
+}
+
 function describeRate(point: IngesterRatePoint) {
   return `${formatFrameMs(point.meanProcessMs)} process · ${formatFrameMs(point.meanIdleMs)} idle`
 }
@@ -255,20 +259,26 @@ function Ingester() {
               <p className="ing-pct-label">streaming, excluding idle</p>
 
               <div className="ing-legend">
-                <span className="ing-legend-item">
-                  <span className="ing-swatch streaming" />
-                  Streaming {toDuration(uptime?.streamingSeconds)}
-                </span>
+                {hasTime(uptime?.streamingSeconds) && (
+                  <span className="ing-legend-item">
+                    <span className="ing-swatch streaming" />
+                    Streaming {toDuration(uptime?.streamingSeconds)}
+                  </span>
+                )}
 
-                <span className="ing-legend-item">
-                  <span className="ing-swatch idle" />
-                  Idle {toDuration(uptime?.idleSeconds)}
-                </span>
+                {hasTime(uptime?.idleSeconds) && (
+                  <span className="ing-legend-item">
+                    <span className="ing-swatch idle" />
+                    Idle {toDuration(uptime?.idleSeconds)}
+                  </span>
+                )}
 
-                <span className="ing-legend-item">
-                  <span className="ing-swatch down" />
-                  Down {toDuration(uptime?.downSeconds)}
-                </span>
+                {hasTime(uptime?.downSeconds) && (
+                  <span className="ing-legend-item">
+                    <span className="ing-swatch down" />
+                    Down {toDuration(uptime?.downSeconds)}
+                  </span>
+                )}
               </div>
             </div>
 
