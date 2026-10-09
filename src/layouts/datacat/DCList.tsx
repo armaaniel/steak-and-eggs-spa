@@ -130,7 +130,7 @@ function DCList() {
       return
     }
 
-    const timing = { duration: 250, easing: 'ease-out' }
+    const timing = { duration: SLIDE_MS, easing: 'ease-out' }
     let sliding: Animation
 
     if (slide < 0) {
