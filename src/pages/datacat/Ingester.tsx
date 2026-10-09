@@ -249,7 +249,7 @@ function Ingester() {
         </div>
       ) : (
         <>
-          <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+          <div className={`positions-container ing-timeline-card ${isLoaded && !loading ? 'loaded' : ''}`}>
             <div className="ing-uptime">
               <p className="ing-pct">{uptime?.pct?.toFixed(2) ?? '0.00'}%</p>
               <p className="ing-pct-label">streaming, excluding idle</p>

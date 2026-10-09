@@ -4,6 +4,10 @@
 	gap:0.5rem;
 }
 
+.positions-container.ing-timeline-card {
+	row-gap:0.5rem;
+}
+
 .ing-uptime {
 	display:flex;
 	flex-wrap:wrap;
