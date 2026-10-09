@@ -5,10 +5,10 @@ import '../../stylesheets/datacat/daterange.css'
 import type { DateRange } from '../../lib/types.ts'
 
 interface Props {
-  preset: number | 'custom'
+  preset: number | 'custom' | 'session'
   range: DateRange
   loaded: boolean
-  onApply: (preset: number | 'custom', range: DateRange) => void
+  onApply: (preset: number | 'custom' | 'session', range: DateRange) => void
 }
 
 interface Draft {
@@ -37,8 +37,9 @@ const DATE_PATTERN = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/
 const TIME_PATTERN = /^(\d{1,2}):(\d{1,2}):(\d{1,2})$/
 
 const MARKET_ZONE = 'America/New_York'
-const MARKET_OPEN_MINUTE = 9 * 60 + 30
-const MARKET_CLOSE_MINUTE = 16 * 60
+const SESSION_START_MINUTE = 9 * 60 + 30
+const SESSION_END_MINUTE = 16 * 60 + 30
+const DAYS_TO_SEARCH = 7
 
 const pad = (value: number) => String(value).padStart(2, '0')
 
@@ -96,6 +97,42 @@ const toMarketInstant = (year: number, month: number, day: number, minute: numbe
   return naive - marketOffset(naive - marketOffset(naive))
 }
 
+const toMarketDate = (ms: number) => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: MARKET_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date(ms))
+
+  const read = (type: string) => Number(parts.find((part) => part.type === type)?.value)
+
+  return { year: read('year'), month: read('month'), day: read('day') }
+}
+
+const findLastSession = (now: number): DateRange => {
+  const today = toMarketDate(now)
+
+  for (let daysBack = 0; daysBack < DAYS_TO_SEARCH; daysBack += 1) {
+    const day = new Date(Date.UTC(today.year, today.month - 1, today.day - daysBack))
+    const weekday = day.getUTCDay()
+
+    if (weekday === 0 || weekday === 6) continue
+
+    const year = day.getUTCFullYear()
+    const month = day.getUTCMonth() + 1
+    const date = day.getUTCDate()
+    const from = toMarketInstant(year, month, date, SESSION_START_MINUTE)
+
+    if (from > now) continue
+
+    const to = Math.min(toMarketInstant(year, month, date, SESSION_END_MINUTE), now)
+    return { from, to }
+  }
+
+  return toRange(24)
+}
+
 const startOfDay = (ms: number) => {
   const at = new Date(ms)
   return new Date(at.getFullYear(), at.getMonth(), at.getDate()).getTime()
@@ -113,8 +150,13 @@ const toDraft = (range: DateRange): Draft => ({
   endTime: toTimeText(range.to),
 })
 
-const toPresetLabel = (preset: number | 'custom', range: DateRange) => {
+const toPresetLabel = (preset: number | 'custom' | 'session', range: DateRange) => {
   if (preset === 'custom') return `${toDateText(range.from)} ${toTimeText(range.from)} → ${toDateText(range.to)} ${toTimeText(range.to)}`
+
+  if (preset === 'session') {
+    const at = new Date(range.from)
+    return `Last session · ${weekdays[at.getDay()]} ${months[at.getMonth()].slice(0, 3)} ${at.getDate()}`
+  }
 
   const match = windows.find((option) => option.hours === preset)
   return match ? `Last ${match.label}` : 'Custom range'
@@ -206,6 +248,11 @@ const DateRangePicker = ({ preset, range, loaded, onApply }: Props) => {
     setOpen(false)
   }
 
+  const applySession = () => {
+    onApply('session', findLastSession(Date.now()))
+    setOpen(false)
+  }
+
   const renderMonth = (built: ReturnType<typeof buildMonth>) => (
     <table className="dc-cal-table">
       <thead>
@@ -268,6 +315,10 @@ const DateRangePicker = ({ preset, range, loaded, onApply }: Props) => {
 
           {mode === 'relative' ? (
             <div className="dc-range-presets">
+              <button type="button" className={`dc-range-preset ${preset === 'session' ? 'selected' : ''}`} onClick={applySession}>
+                Last session
+              </button>
+
               {windows.map((option) => (
                 <button key={option.hours} type="button" className={`dc-range-preset ${preset === option.hours ? 'selected' : ''}`} onClick={() => applyRelative(option.hours)}>
                   Last {option.label}
@@ -309,7 +360,7 @@ const DateRangePicker = ({ preset, range, loaded, onApply }: Props) => {
                     <div className="dc-range-field-head">
                       <label htmlFor="start-time">Start time</label>
 
-                      <button type="button" className="dc-range-market" onClick={() => applyMarketTime('start', MARKET_OPEN_MINUTE)}>
+                      <button type="button" className="dc-range-market" onClick={() => applyMarketTime('start', SESSION_START_MINUTE)}>
                         Market open
                       </button>
                     </div>
@@ -330,7 +381,7 @@ const DateRangePicker = ({ preset, range, loaded, onApply }: Props) => {
                     <div className="dc-range-field-head">
                       <label htmlFor="end-time">End time</label>
 
-                      <button type="button" className="dc-range-market" onClick={() => applyMarketTime('end', MARKET_CLOSE_MINUTE)}>
+                      <button type="button" className="dc-range-market" onClick={() => applyMarketTime('end', SESSION_END_MINUTE)}>
                         Market close
                       </button>
                     </div>

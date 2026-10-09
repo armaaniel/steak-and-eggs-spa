@@ -172,10 +172,10 @@ const connectionColumns: Column<ConnectionRow>[] = [
 function Ingester() {
   const { detail, setDetail } = useOutletContext<OutletContextType>()
 
-  const [preset, setPreset] = useState<number | 'custom'>(24)
+  const [preset, setPreset] = useState<number | 'custom' | 'session'>(24)
   const [range, setRange] = useState<DateRange>(() => toRange(24))
 
-  const applyWindow = (nextPreset: number | 'custom', nextRange: DateRange) => {
+  const applyWindow = (nextPreset: number | 'custom' | 'session', nextRange: DateRange) => {
     setDetail(null)
     setPreset(nextPreset)
     setRange(nextRange)
