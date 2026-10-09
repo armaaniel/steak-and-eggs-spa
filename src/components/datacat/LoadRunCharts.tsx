@@ -43,6 +43,14 @@ function describeLatency(row: LoadCompareRow) {
 const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: Props) => {
   const [showTable, setShowTable] = useState(false)
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
+  const [pinnedTime, setPinnedTime] = useState<number | null>(null)
+  const pinKey = rows.length > 0 ? `${rows[0].bucket}|${rows[rows.length - 1].bucket}` : ''
+  const [pinnedKey, setPinnedKey] = useState(pinKey)
+
+  if (pinKey !== pinnedKey) {
+    setPinnedKey(pinKey)
+    setPinnedTime(null)
+  }
   const [rpsYLabelWidth, setRpsYLabelWidth] = useState(0)
   const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
   const [cpuYLabelWidth, setCpuYLabelWidth] = useState(0)
@@ -54,10 +62,11 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
   const from = toTime(rows[0].bucket)
   const to = toTime(rows[rows.length - 1].bucket)
 
-  let hoveredRow: LoadCompareRow | null = null
+  const detailTime = pinnedTime ?? hoveredTime
+  let detailRow: LoadCompareRow | null = null
 
-  if (hoveredTime !== null) {
-    hoveredRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.bucket), row })), hoveredTime)?.row ?? null
+  if (detailTime !== null) {
+    detailRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.bucket), row })), detailTime)?.row ?? null
   }
 
   const totals = rows.reduce(
@@ -120,9 +129,11 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
             formatValue={formatWhole}
             hoveredTime={hoveredTime}
             setHoveredTime={setHoveredTime}
+            pinnedTime={pinnedTime}
+            setPinnedTime={setPinnedTime}
             showTimeLabels={false}
             showHoverTime
-            hoverDetail={hoveredRow ? describeRps(hoveredRow) : undefined}
+            hoverDetail={detailRow ? describeRps(detailRow) : undefined}
             chartLeft={chartLeft}
             setYLabelWidth={setRpsYLabelWidth}
             height={HEIGHT}
@@ -139,9 +150,11 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
             formatValue={formatMs}
             hoveredTime={hoveredTime}
             setHoveredTime={setHoveredTime}
+            pinnedTime={pinnedTime}
+            setPinnedTime={setPinnedTime}
             showTimeLabels={!hasCpu}
             showHoverTime={false}
-            hoverDetail={hoveredRow ? describeLatency(hoveredRow) : undefined}
+            hoverDetail={detailRow ? describeLatency(detailRow) : undefined}
             chartLeft={chartLeft}
             setYLabelWidth={setLatencyYLabelWidth}
             height={HEIGHT}
@@ -160,9 +173,11 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
               formatValue={formatPercent}
               hoveredTime={hoveredTime}
               setHoveredTime={setHoveredTime}
+              pinnedTime={pinnedTime}
+              setPinnedTime={setPinnedTime}
               showTimeLabels
               showHoverTime={false}
-              hoverDetail={describeCpu(cpu, hoveredTime)}
+              hoverDetail={describeCpu(cpu, detailTime)}
               chartLeft={chartLeft}
               setYLabelWidth={setCpuYLabelWidth}
               height={HEIGHT}

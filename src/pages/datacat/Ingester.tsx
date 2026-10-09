@@ -177,11 +177,13 @@ function Ingester() {
 
   const [preset, setPreset] = useState<number | 'custom' | 'session'>(24)
   const [range, setRange] = useState<DateRange>(() => toRange(24))
+  const [pinnedTime, setPinnedTime] = useState<number | null>(null)
 
   const applyWindow = (nextPreset: number | 'custom' | 'session', nextRange: DateRange) => {
     setDetail(null)
     setPreset(nextPreset)
     setRange(nextRange)
+    setPinnedTime(null)
   }
 
   const recordsPerPage = 10
@@ -211,8 +213,9 @@ function Ingester() {
   const resourceLines = useMemo(() => toResourceLines(resources), [resources])
   const rateMarks = useMemo(() => rate.map((point) => ({ time: toTime(point.at), point })), [rate])
   const lagMarks = useMemo(() => lag.map((point) => ({ time: toTime(point.at), point })), [lag])
-  const hoveredRate = hoveredTime === null ? null : findNearestPoint(rateMarks, hoveredTime)
-  const hoveredLag = hoveredTime === null ? null : findNearestPoint(lagMarks, hoveredTime)
+  const detailTime = pinnedTime ?? hoveredTime
+  const detailRate = detailTime === null ? null : findNearestPoint(rateMarks, detailTime)
+  const detailLag = detailTime === null ? null : findNearestPoint(lagMarks, detailTime)
 
   const boots: BootRow[] = (data?.ingesterBoots || []).map((boot) => ({ ...boot, id: boot.bootId }))
   const connections: ConnectionRow[] = (data?.ingesterConnections || []).map((connection) => ({ ...connection, id: connection.connectionId }))
@@ -270,7 +273,7 @@ function Ingester() {
               </div>
             </div>
 
-            <IngesterTimeline spans={spans} from={range.from} to={range.to} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} />
+            <IngesterTimeline spans={spans} from={range.from} to={range.to} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} pinnedTime={pinnedTime} setPinnedTime={setPinnedTime} />
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
@@ -285,9 +288,11 @@ function Ingester() {
                 formatValue={formatRate}
                 hoveredTime={hoveredTime}
                 setHoveredTime={setHoveredTime}
+                pinnedTime={pinnedTime}
+                setPinnedTime={setPinnedTime}
                 showTimeLabels={lag.length === 0}
                 showHoverTime={rate.length > 0}
-                hoverDetail={hoveredRate ? describeRate(hoveredRate.point) : undefined}
+                hoverDetail={detailRate ? describeRate(detailRate.point) : undefined}
                 chartLeft={chartLeft}
                 height={HEIGHT}
                 setYLabelWidth={setRateYLabelWidth}
@@ -305,9 +310,11 @@ function Ingester() {
                 formatValue={formatLag}
                 hoveredTime={hoveredTime}
                 setHoveredTime={setHoveredTime}
+                pinnedTime={pinnedTime}
+                setPinnedTime={setPinnedTime}
                 showTimeLabels
                 showHoverTime={rate.length === 0}
-                hoverDetail={hoveredLag ? describeLag(hoveredLag.point) : undefined}
+                hoverDetail={detailLag ? describeLag(detailLag.point) : undefined}
                 zeroLine
                 chartLeft={chartLeft}
                 height={HEIGHT}
@@ -336,6 +343,8 @@ function Ingester() {
                     formatValue={formatPercent}
                     hoveredTime={hoveredTime}
                     setHoveredTime={setHoveredTime}
+                    pinnedTime={pinnedTime}
+                    setPinnedTime={setPinnedTime}
                     showTimeLabels
                     showHoverTime={false}
                     chartLeft={chartLeft}

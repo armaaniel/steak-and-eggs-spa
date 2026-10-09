@@ -57,6 +57,14 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
 const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
   const [showTable, setShowTable] = useState(false)
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
+  const [pinnedTime, setPinnedTime] = useState<number | null>(null)
+  const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
+  const [pinnedKey, setPinnedKey] = useState(pinKey)
+
+  if (pinKey !== pinnedKey) {
+    setPinnedKey(pinKey)
+    setPinnedTime(null)
+  }
   const [fanoutYLabelWidth, setFanoutYLabelWidth] = useState(0)
   const [lagYLabelWidth, setLagYLabelWidth] = useState(0)
   const [cpuYLabelWidth, setCpuYLabelWidth] = useState(0)
@@ -84,10 +92,11 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
     axisPanel = 'cpu'
   }
 
-  let hoveredRow: CableCompareRow | null = null
+  const detailTime = pinnedTime ?? hoveredTime
+  let detailRow: CableCompareRow | null = null
 
-  if (hoveredTime !== null) {
-    hoveredRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.at), row })), hoveredTime)?.row ?? null
+  if (detailTime !== null) {
+    detailRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.at), row })), detailTime)?.row ?? null
   }
 
   const totals = rows.reduce(
@@ -156,9 +165,11 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
             formatValue={formatRate}
             hoveredTime={hoveredTime}
             setHoveredTime={setHoveredTime}
+            pinnedTime={pinnedTime}
+            setPinnedTime={setPinnedTime}
             showTimeLabels={axisPanel === 'fanout'}
             showHoverTime
-            hoverDetail={hoveredRow ? describeFanout(hoveredRow, bucketSeconds) : undefined}
+            hoverDetail={detailRow ? describeFanout(detailRow, bucketSeconds) : undefined}
             chartLeft={chartLeft}
             setYLabelWidth={setFanoutYLabelWidth}
             height={HEIGHT}
@@ -176,6 +187,8 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
               formatValue={formatMs}
               hoveredTime={hoveredTime}
               setHoveredTime={setHoveredTime}
+              pinnedTime={pinnedTime}
+              setPinnedTime={setPinnedTime}
               showTimeLabels={axisPanel === 'lag'}
               showHoverTime={false}
               chartLeft={chartLeft}
@@ -197,9 +210,11 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
               formatValue={formatPercent}
               hoveredTime={hoveredTime}
               setHoveredTime={setHoveredTime}
+              pinnedTime={pinnedTime}
+              setPinnedTime={setPinnedTime}
               showTimeLabels={axisPanel === 'cpu'}
               showHoverTime={false}
-              hoverDetail={describeCpu(cpu, hoveredTime)}
+              hoverDetail={describeCpu(cpu, detailTime)}
               chartLeft={chartLeft}
               setYLabelWidth={setCpuYLabelWidth}
               height={HEIGHT}

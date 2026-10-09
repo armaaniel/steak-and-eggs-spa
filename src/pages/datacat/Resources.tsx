@@ -96,6 +96,14 @@ function findNote(health: ResourceHealth | undefined, lines: ChartLine[]) {
 function Resources() {
   const { range } = useOutletContext<OutletContextType>()
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
+  const [pinnedTime, setPinnedTime] = useState<number | null>(null)
+  const pinKey = range
+  const [pinnedKey, setPinnedKey] = useState(pinKey)
+
+  if (pinKey !== pinnedKey) {
+    setPinnedKey(pinKey)
+    setPinnedTime(null)
+  }
   const [isOpen, setIsOpen] = useState(false)
 
   const timeWindow = useMemo(() => {
@@ -134,6 +142,8 @@ function Resources() {
           formatValue={formatPercent}
           hoveredTime={hoveredTime}
           setHoveredTime={setHoveredTime}
+          pinnedTime={pinnedTime}
+          setPinnedTime={setPinnedTime}
           showTimeLabels={index === RESOURCE_ROWS.length - 1}
           showHoverTime={index === 0}
           note={data ? findNote(health, lines) : undefined}

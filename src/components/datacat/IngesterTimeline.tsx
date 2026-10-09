@@ -13,6 +13,8 @@ interface Props {
   chartLeft: number
   hoveredTime: number | null
   setHoveredTime: (time: number | null) => void
+  pinnedTime?: number | null
+  setPinnedTime?: (time: number | null) => void
 }
 
 interface PlacedSpan {
@@ -77,7 +79,7 @@ function findSpanAt(placedSpans: PlacedSpan[], time: number) {
   return null
 }
 
-const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredTime }: Props) => {
+const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerOver, setPointerOver] = useState(false)
 
@@ -140,6 +142,38 @@ const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredT
     setPointerOver(false)
   }
 
+  let pinnedX: number | null = null
+
+  if (pinnedTime !== null && pinnedTime >= from && pinnedTime <= to) {
+    pinnedX = xScale(pinnedTime)
+  }
+
+  function handleClick(event: MouseEvent<SVGSVGElement>) {
+    if (setPinnedTime === undefined) {
+      return
+    }
+
+    if (pinnedTime !== null) {
+      setPinnedTime(null)
+      return
+    }
+
+    const svgBox = event.currentTarget.getBoundingClientRect()
+    const mouseX = event.clientX - svgBox.left
+
+    if (mouseX < chartLeft || mouseX > chartRight) {
+      return
+    }
+
+    setPinnedTime(xScale.invert(mouseX).getTime())
+  }
+
+  let svgCursor: string | undefined = undefined
+
+  if (setPinnedTime !== undefined) {
+    svgCursor = 'pointer'
+  }
+
   let cursorX: number | null = null
 
   if (hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
@@ -154,7 +188,7 @@ const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredT
 
   return (
     <div ref={measureResize} className="ing-timeline">
-      <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} shapeRendering="crispEdges">
+      <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: svgCursor }} shapeRendering="crispEdges">
         <defs>
           <clipPath id="ing-timeline-clip">
             <rect x={chartLeft} y={0} width={plotWidth} height={HEIGHT} rx={CORNER_RADIUS} />
@@ -166,6 +200,7 @@ const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredT
           {placedSpans.map(renderSpan)}
         </g>
 
+        {pinnedX !== null && <line x1={pinnedX} x2={pinnedX} y1={0} y2={HEIGHT} stroke="var(--dc-border-strong)" />}
         {cursorX !== null && <line x1={cursorX} x2={cursorX} y1={0} y2={HEIGHT} stroke="var(--dc-border-strong)" />}
       </svg>
 

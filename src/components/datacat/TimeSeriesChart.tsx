@@ -1,4 +1,4 @@
-import { useCallback, useId, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { area, curveMonotoneX, line, type CurveFactory } from 'd3-shape'
 import { MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
@@ -29,6 +29,8 @@ interface Props {
   formatValue: (value: number) => string
   hoveredTime: number | null
   setHoveredTime: (time: number | null) => void
+  pinnedTime?: number | null
+  setPinnedTime?: (time: number | null) => void
   showTimeLabels: boolean
   showHoverTime: boolean
   hoverDetail?: string
@@ -79,7 +81,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const clipId = useId()
@@ -239,32 +241,50 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     return <path key={drawnLine.chartLine.key} d={drawnLine.path} fill="none" stroke={drawnLine.chartLine.color} strokeWidth={strokeWidth} strokeLinejoin="round" />
   }
 
-  function findHoveredPoint(chartLine: ChartLine) {
-    if (hoveredTime === null) {
+  function findPointAt(chartLine: ChartLine, time: number | null) {
+    if (time === null) {
       return null
     }
 
-    return findNearestPoint(chartLine.points, hoveredTime)
+    return findNearestPoint(chartLine.points, time)
+  }
+
+  function findHoveredPoint(chartLine: ChartLine) {
+    return findPointAt(chartLine, hoveredTime)
+  }
+
+  let legendTime = hoveredTime
+
+  if (pinnedTime !== null) {
+    legendTime = pinnedTime
+  }
+
+  function renderDot(chartLine: ChartLine, time: number | null, keyPrefix: string) {
+    const point = findPointAt(chartLine, time)
+
+    if (point === null || point.value === null) {
+      return null
+    }
+
+    return <circle key={`${keyPrefix}-${chartLine.key}`} cx={xScale(point.time)} cy={yScale(point.value)} r={3.5} fill={chartLine.color} stroke="var(--dc-surface)" strokeWidth={2} />
   }
 
   function renderHoveredDot(chartLine: ChartLine) {
-    const hoveredPoint = findHoveredPoint(chartLine)
+    return renderDot(chartLine, hoveredTime, 'hovered')
+  }
 
-    if (hoveredPoint === null || hoveredPoint.value === null) {
-      return null
-    }
-
-    return <circle key={chartLine.key} cx={xScale(hoveredPoint.time)} cy={yScale(hoveredPoint.value)} r={3.5} fill={chartLine.color} stroke="var(--dc-surface)" strokeWidth={2} />
+  function renderPinnedDot(chartLine: ChartLine) {
+    return renderDot(chartLine, pinnedTime, 'pinned')
   }
 
   function renderLegendEntry(chartLine: ChartLine) {
-    const hoveredPoint = findHoveredPoint(chartLine)
+    const legendPoint = findPointAt(chartLine, legendTime)
 
     return (
       <span key={chartLine.key}>
         <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
         {chartLine.label}
-        {hoveredPoint !== null && hoveredPoint.value !== null && <strong>{formatValue(hoveredPoint.value)}</strong>}
+        {legendPoint !== null && legendPoint.value !== null && <strong>{formatValue(legendPoint.value)}</strong>}
       </span>
     )
   }
@@ -289,6 +309,68 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   function handlePointerLeave() {
     setHoveredTime(null)
     setPointerY(null)
+  }
+
+  let pinnedX: number | null = null
+
+  if (pinnedTime !== null && pinnedTime >= from && pinnedTime <= to) {
+    pinnedX = xScale(pinnedTime)
+  }
+
+  function handleClick(event: MouseEvent<SVGSVGElement>) {
+    if (setPinnedTime === undefined) {
+      return
+    }
+
+    if (pinnedTime !== null) {
+      setPinnedTime(null)
+      return
+    }
+
+    const svgBox = event.currentTarget.getBoundingClientRect()
+    const mouseX = event.clientX - svgBox.left
+
+    if (mouseX < plotLeft || mouseX > plotRight) {
+      return
+    }
+
+    let clickedTime = xScale.invert(mouseX).getTime()
+
+    if (lines.length > 0) {
+      const nearestPoint = findNearestPoint(lines[0].points, clickedTime)
+
+      if (nearestPoint !== null) {
+        clickedTime = nearestPoint.time
+      }
+    }
+
+    setPinnedTime(clickedTime)
+  }
+
+  useEffect(() => {
+    if (pinnedTime === null || setPinnedTime === undefined) {
+      return
+    }
+
+    const unpin = setPinnedTime
+
+    function unpinOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        unpin(null)
+      }
+    }
+
+    window.addEventListener('keydown', unpinOnEscape)
+
+    return function stopListening() {
+      window.removeEventListener('keydown', unpinOnEscape)
+    }
+  }, [pinnedTime, setPinnedTime])
+
+  let svgCursor: string | undefined = undefined
+
+  if (setPinnedTime !== undefined) {
+    svgCursor = 'pointer'
   }
 
   function renderTooltipRow(chartLine: ChartLine) {
@@ -334,7 +416,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">{title}</p>
         <div className="dc-legend">
-          {showHoverTime && hoveredTime !== null && <span className="dc-hover-time">{formatHoverTime(hoveredTime)}</span>}
+          {showHoverTime && legendTime !== null && <span className="dc-hover-time">{formatHoverTime(legendTime)}</span>}
           {lines.map(renderLegendEntry)}
           {hoverDetail !== undefined && <span className="dc-hover-time">{hoverDetail}</span>}
         </div>
@@ -344,7 +426,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
       {note === undefined && (
         <div ref={measureResize} className="dc-chart">
-          <svg width={width} height={height} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
+          <svg width={width} height={height} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: svgCursor }}>
             <defs>
               <clipPath id={clipId}>
                 <rect x={plotLeft} y={0} width={Math.max(0, plotWidth)} height={height} />
@@ -355,12 +437,14 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {xLabelDates.map(renderXLabel)}
 
             {zeroY !== null && <line x1={plotLeft} x2={plotRight} y1={zeroY} y2={zeroY} stroke="var(--dc-border-strong)" />}
+            {pinnedX !== null && <line x1={pinnedX} x2={pinnedX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />}
             {cursorX !== null && <line x1={cursorX} x2={cursorX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />}
 
             <g clipPath={`url(#${clipId})`}>
               {drawnLines.map(renderArea)}
               {drawnLines.map(renderLine)}
             </g>
+            {lines.map(renderPinnedDot)}
             {lines.map(renderHoveredDot)}
           </svg>
 
