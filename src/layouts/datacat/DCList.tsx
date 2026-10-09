@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useMatch } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import '../../stylesheets/datacat/datacat.css'
 import '../../stylesheets/datacat/endpoint.css'
 import Sidebar from '../../components/datacat/Sidebar'
@@ -57,13 +57,43 @@ const DetailPanel = ({ detail }: { detail: Detail }) => {
   }
 }
 
+const SLIDE_MS = 250
+
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function findNavbar() {
+  return document.querySelector<HTMLElement>('.dc-root > .navbar')
+}
+
 function DCList() {
   const onHome = useMatch('/datacat') !== null
   const onIngester = useMatch('/datacat/ingester') !== null
   const { pathname, hash } = useLocation()
   const lastPathname = useRef(pathname)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+  const pageRef = useRef<HTMLDivElement>(null)
+  const lastSidebarTop = useRef<number | null>(null)
 
   useEffect(() => {
+    function rememberSidebarTop() {
+      if (sidebarRef.current !== null) {
+        lastSidebarTop.current = sidebarRef.current.getBoundingClientRect().top
+      }
+    }
+
+    rememberSidebarTop()
+    window.addEventListener('scroll', rememberSidebarTop, { passive: true })
+    window.addEventListener('resize', rememberSidebarTop)
+
+    return function stopRemembering() {
+      window.removeEventListener('scroll', rememberSidebarTop)
+      window.removeEventListener('resize', rememberSidebarTop)
+    }
+  }, [])
+
+  useLayoutEffect(() => {
     if (lastPathname.current === pathname) {
       return
     }
@@ -72,6 +102,65 @@ function DCList() {
 
     if (hash === '') {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    } else {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    }
+
+    const sidebar = sidebarRef.current
+    const page = pageRef.current
+    const sidebarTopBefore = lastSidebarTop.current
+
+    if (sidebar === null || page === null || sidebarTopBefore === null) {
+      return
+    }
+
+    const sidebarTopAfter = sidebar.getBoundingClientRect().top
+    lastSidebarTop.current = sidebarTopAfter
+
+    const navbar = findNavbar()
+
+    if (navbar === null) {
+      return
+    }
+
+    const navbarHeight = navbar.getBoundingClientRect().height
+    const slide = Math.max(-navbarHeight, Math.min(navbarHeight, sidebarTopBefore - sidebarTopAfter))
+
+    if (Math.abs(slide) < 1 || prefersReducedMotion()) {
+      return
+    }
+
+    const timing = { duration: SLIDE_MS, easing: 'ease-out' }
+    let sliding: Animation
+
+    if (slide < 0) {
+      const navbarShownBefore = 1 - Math.abs(slide) / navbarHeight
+      navbar.animate([{ opacity: navbarShownBefore }, { opacity: 1 }], timing)
+      sliding = page.animate([{ transform: `translateY(${slide}px)` }, { transform: 'translateY(0)' }], timing)
+    } else {
+      const navbarStartOffset = window.scrollY + slide - navbarHeight
+      const navbarEndOffset = window.scrollY - navbarHeight
+      navbar.style.position = 'relative'
+      navbar.style.zIndex = '1'
+
+      const navbarLeaving = navbar.animate(
+        [
+          { transform: `translateY(${navbarStartOffset}px)`, opacity: 1 },
+          { transform: `translateY(${navbarEndOffset}px)`, opacity: 0 },
+        ],
+        timing,
+      )
+
+      navbarLeaving.onfinish = function settleNavbar() {
+        navbar.style.position = ''
+        navbar.style.zIndex = ''
+      }
+
+      sliding = sidebar.animate([{ transform: `translateY(${slide}px)` }, { transform: 'translateY(0)' }], timing)
+    }
+
+    sliding.onfinish = function rememberSettledSidebarTop() {
+      lastSidebarTop.current = sidebar.getBoundingClientRect().top
     }
   }, [pathname, hash])
 
@@ -106,8 +195,8 @@ function DCList() {
   return (
     <div className="dc-root">
       <DCNavbar />
-      <div className="dc-home-parent">
-        <div className={`home-left-two ${onHome ? 'sticky' : ''} ${onIngester ? 'narrow' : ''}`}>
+      <div ref={pageRef} className="dc-home-parent">
+        <div ref={sidebarRef} className={`home-left-two ${onHome ? 'sticky' : ''} ${onIngester ? 'narrow' : ''}`}>
           {detail && (
             <div className="dc-side-header-container">
               <h3 className="catlas-text">{detail.kind === 'dependency' ? detail.node.title : 'Details'}</h3>
