@@ -1,16 +1,24 @@
-import { useEffect, useState } from 'react'
-import { Link, NavLink, useMatch } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, useLocation, useMatch } from 'react-router-dom'
 import ThemeToggle from '../ThemeToggle'
 import { DATACAT_SECTIONS as SECTIONS } from '../../lib/datacatSections.ts'
 import type { DatacatSection } from '../../lib/datacatSections.ts'
 
+const isSection = (id: string): id is DatacatSection => SECTIONS.some((section) => section.id === id)
+
 const useActiveSection = (enabled: boolean) => {
   const [active, setActive] = useState<DatacatSection>(SECTIONS[0].id)
+  const pinned = useRef(false)
+  const { hash } = useLocation()
 
   useEffect(() => {
     if (!enabled) return
 
+    pinned.current = false
+
     const update = () => {
+      if (pinned.current) return
+
       const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
       if (atBottom) return setActive(SECTIONS[SECTIONS.length - 1].id)
 
@@ -19,16 +27,39 @@ const useActiveSection = (enabled: boolean) => {
       setActive(passed.length ? passed[passed.length - 1].id : SECTIONS[0].id)
     }
 
+    const unpin = () => {
+      pinned.current = false
+    }
+
     update()
     window.addEventListener('scroll', update, { passive: true })
     window.addEventListener('resize', update)
+    window.addEventListener('wheel', unpin, { passive: true })
+    window.addEventListener('touchstart', unpin, { passive: true })
+    window.addEventListener('keydown', unpin)
     return () => {
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
+      window.removeEventListener('wheel', unpin)
+      window.removeEventListener('touchstart', unpin)
+      window.removeEventListener('keydown', unpin)
     }
   }, [enabled])
 
-  return active
+  const pin = (id: DatacatSection) => {
+    pinned.current = true
+    setActive(id)
+  }
+
+  useEffect(() => {
+    const id = hash.slice(1)
+    if (!enabled || !isSection(id)) return
+
+    pinned.current = true
+    setActive(id)
+  }, [enabled, hash])
+
+  return { active, pin }
 }
 
 const scrollTo = (event: React.MouseEvent, id: DatacatSection) => {
@@ -37,14 +68,17 @@ const scrollTo = (event: React.MouseEvent, id: DatacatSection) => {
 }
 
 const Sidebar = ({ onHome }: { onHome: boolean }) => {
-  const active = useActiveSection(onHome)
+  const { active, pin } = useActiveSection(onHome)
   const onLoadTests = useMatch('/datacat/load/*') !== null
 
   return (
     <div className="sidebar-button-container">
       {SECTIONS.map(({ id, label }) =>
         onHome ? (
-          <a key={id} href={`#${id}`} className={`side-button ${active === id ? 'active' : ''}`} onClick={(event) => scrollTo(event, id)}>
+          <a key={id} href={`#${id}`} className={`side-button ${active === id ? 'active' : ''}`} onClick={(event) => {
+            pin(id)
+            scrollTo(event, id)
+          }}>
             {label}
           </a>
         ) : (
