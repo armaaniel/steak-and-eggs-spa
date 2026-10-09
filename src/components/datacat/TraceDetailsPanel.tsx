@@ -29,6 +29,7 @@ const TraceDetailsPanel = ({ trace }: Props) => {
                 {data.used_db !== undefined && <p>{`used_db: ${data.used_db}`}</p>}
                 {data.used_api !== undefined && <p>{`used_api: ${data.used_api}`}</p>}
                 {data.operation !== undefined && <p>{`operation: ${data.operation}`}</p>}
+                {data.error_class !== undefined && <p>{`error_class: ${data.error_class}`}</p>}
               </div>
             ))}
           </div>
