@@ -6,10 +6,11 @@ import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
 import DateRangePicker from '../../components/datacat/DateRangePicker'
+import { findLastSession } from '../../components/datacat/marketSession'
 import useTransition from '../../hooks/useTransition.ts'
 import { findNearestPoint } from '../../components/datacat/timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from '../../components/datacat/bucketChart'
-import { toDuration, toRange } from '../../lib/utils.ts'
+import { toDuration } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
 import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, DateRange, ResourcePoint } from '../../lib/types.ts'
 
@@ -173,8 +174,8 @@ const connectionColumns: Column<ConnectionRow>[] = [
 function Ingester() {
   const { detail, setDetail } = useOutletContext<OutletContextType>()
 
-  const [preset, setPreset] = useState<number | 'custom' | 'session'>(24)
-  const [range, setRange] = useState<DateRange>(() => toRange(24))
+  const [preset, setPreset] = useState<number | 'custom' | 'session'>('session')
+  const [range, setRange] = useState<DateRange>(() => findLastSession(Date.now()))
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
 
   const applyWindow = (nextPreset: number | 'custom' | 'session', nextRange: DateRange) => {
