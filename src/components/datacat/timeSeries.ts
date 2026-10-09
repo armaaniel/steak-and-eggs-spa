@@ -4,12 +4,19 @@ export interface TimePoint {
 }
 
 const GAP_STEPS = 2
+const typicalSteps = new WeakMap<object, number>()
 
 export function toTimePoint(point: { at: string; value: number }): TimePoint {
   return { time: new Date(point.at).getTime(), value: point.value }
 }
 
 export function findTypicalStep(timePoints: { time: number }[]) {
+  const cachedStep = typicalSteps.get(timePoints)
+
+  if (cachedStep !== undefined) {
+    return cachedStep
+  }
+
   const steps = []
 
   for (let index = 1; index < timePoints.length; index += 1) {
@@ -20,7 +27,10 @@ export function findTypicalStep(timePoints: { time: number }[]) {
     return a - b
   })
 
-  return steps[Math.floor(steps.length / 2)] ?? 0
+  const typicalStep = steps[Math.floor(steps.length / 2)] ?? 0
+  typicalSteps.set(timePoints, typicalStep)
+
+  return typicalStep
 }
 
 export function breakAtGaps(timePoints: TimePoint[]) {

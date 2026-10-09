@@ -1,4 +1,4 @@
-import { useCallback, useId, useLayoutEffect, useState, type MouseEvent } from 'react'
+import { useCallback, useId, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { area, curveMonotoneX, line, type CurveFactory } from 'd3-shape'
 import { MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
@@ -12,6 +12,12 @@ export interface ChartLine {
   color: string
   points: TimePoint[]
   fill?: boolean
+}
+
+interface DrawnLine {
+  chartLine: ChartLine
+  path: string | undefined
+  areaPath: string | undefined
 }
 
 interface Props {
@@ -105,17 +111,26 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   const chartTop = MARGIN_TOP
   const chartBottom = height - marginBottom
 
-  let yScale = scaleLinear().domain([0, Math.max(100, findValueRange(lines)[1])]).range([chartBottom, chartTop])
+  const valueRange = useMemo(() => findValueRange(lines), [lines])
+
+  const yScale = useMemo(() => {
+    if (yAxis === 'auto') {
+      return scaleLinear().domain(valueRange).nice(AUTO_LABEL_COUNT).range([chartBottom, chartTop])
+    }
+
+    return scaleLinear().domain([0, Math.max(100, valueRange[1])]).range([chartBottom, chartTop])
+  }, [yAxis, valueRange, chartBottom, chartTop])
+
   let yLabelValues = PERCENT_LABEL_VALUES
   let formatYLabel = formatPercentLabel
 
   if (yAxis === 'auto') {
-    yScale = scaleLinear().domain(findValueRange(lines)).nice(AUTO_LABEL_COUNT).range([chartBottom, chartTop])
     yLabelValues = yScale.ticks(AUTO_LABEL_COUNT)
     formatYLabel = formatAutoLabel
   }
 
-  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYLabel))
+  const yLabelKey = yLabelValues.map(formatYLabel).join('|')
+  const yLabelWidth = useMemo(() => findWidestYLabel(yLabelKey.split('|')), [yLabelKey])
 
   useLayoutEffect(() => {
     if (setYLabelWidth === undefined) {
@@ -133,35 +148,49 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   const plotRight = width - MARGIN.right
   const plotWidth = plotRight - plotLeft
 
-  const xScale = scaleTime().domain([from, to]).range([plotLeft, plotRight])
-
-  const makePath = line<TimePoint>()
-    .defined(function (timePoint) {
-      return timePoint.value !== null
-    })
-    .x(function (timePoint) {
-      return xScale(timePoint.time)
-    })
-    .y(function (timePoint) {
-      return yScale(timePoint.value ?? 0)
-    })
-    .curve(curve)
-
+  const xScale = useMemo(() => scaleTime().domain([from, to]).range([plotLeft, plotRight]), [from, to, plotLeft, plotRight])
   const [lowestValue, highestValue] = yScale.domain()
-  const baselineY = yScale(Math.min(Math.max(0, lowestValue), highestValue))
 
-  const makeArea = area<TimePoint>()
-    .defined(function (timePoint) {
-      return timePoint.value !== null
+  const drawnLines = useMemo(() => {
+    const makePath = line<TimePoint>()
+      .defined(function (timePoint) {
+        return timePoint.value !== null
+      })
+      .x(function (timePoint) {
+        return xScale(timePoint.time)
+      })
+      .y(function (timePoint) {
+        return yScale(timePoint.value ?? 0)
+      })
+      .curve(curve)
+
+    const [lowest, highest] = yScale.domain()
+    const baselineY = yScale(Math.min(Math.max(0, lowest), highest))
+
+    const makeArea = area<TimePoint>()
+      .defined(function (timePoint) {
+        return timePoint.value !== null
+      })
+      .x(function (timePoint) {
+        return xScale(timePoint.time)
+      })
+      .y0(baselineY)
+      .y1(function (timePoint) {
+        return yScale(timePoint.value ?? 0)
+      })
+      .curve(curve)
+
+    return lines.map(function (chartLine): DrawnLine {
+      const gappedPoints = breakAtGaps(chartLine.points)
+      let areaPath: string | undefined
+
+      if (chartLine.fill) {
+        areaPath = makeArea(gappedPoints) ?? undefined
+      }
+
+      return { chartLine, path: makePath(gappedPoints) ?? undefined, areaPath }
     })
-    .x(function (timePoint) {
-      return xScale(timePoint.time)
-    })
-    .y0(baselineY)
-    .y1(function (timePoint) {
-      return yScale(timePoint.value ?? 0)
-    })
-    .curve(curve)
+  }, [lines, xScale, yScale, curve])
 
   let xLabelDates: Date[] = []
 
@@ -198,20 +227,16 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     )
   }
 
-  function renderArea(chartLine: ChartLine) {
-    if (!chartLine.fill) {
+  function renderArea(drawnLine: DrawnLine) {
+    if (drawnLine.areaPath === undefined) {
       return null
     }
 
-    const areaPath = makeArea(breakAtGaps(chartLine.points)) ?? undefined
-
-    return <path key={`${chartLine.key}-fill`} d={areaPath} fill={chartLine.color} fillOpacity={FILL_OPACITY} stroke="none" />
+    return <path key={`${drawnLine.chartLine.key}-fill`} d={drawnLine.areaPath} fill={drawnLine.chartLine.color} fillOpacity={FILL_OPACITY} stroke="none" />
   }
 
-  function renderLine(chartLine: ChartLine) {
-    const path = makePath(breakAtGaps(chartLine.points)) ?? undefined
-
-    return <path key={chartLine.key} d={path} fill="none" stroke={chartLine.color} strokeWidth={strokeWidth} strokeLinejoin="round" />
+  function renderLine(drawnLine: DrawnLine) {
+    return <path key={drawnLine.chartLine.key} d={drawnLine.path} fill="none" stroke={drawnLine.chartLine.color} strokeWidth={strokeWidth} strokeLinejoin="round" />
   }
 
   function findHoveredPoint(chartLine: ChartLine) {
@@ -333,8 +358,8 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {cursorX !== null && <line x1={cursorX} x2={cursorX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />}
 
             <g clipPath={`url(#${clipId})`}>
-              {lines.map(renderArea)}
-              {lines.map(renderLine)}
+              {drawnLines.map(renderArea)}
+              {drawnLines.map(renderLine)}
             </g>
             {lines.map(renderHoveredDot)}
           </svg>

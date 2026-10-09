@@ -1,4 +1,4 @@
-import { useCallback, useState, type MouseEvent } from 'react'
+import { useCallback, useMemo, useState, type MouseEvent } from 'react'
 import { scaleTime } from 'd3-scale'
 import { MARGIN } from './bucketChart'
 import { formatHoverTime } from './timeSeries'
@@ -103,7 +103,7 @@ const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredT
   const plotWidth = Math.max(0, chartRight - chartLeft)
 
   const xScale = scaleTime().domain([from, to]).range([chartLeft, chartRight])
-  const placedSpans = mergeSpans(spans)
+  const placedSpans = useMemo(() => mergeSpans(spans), [spans])
 
   function renderSpan(placedSpan: PlacedSpan) {
     const spanLeft = xScale(Math.max(placedSpan.start, from))

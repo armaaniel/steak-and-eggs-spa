@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { curveLinear } from 'd3-shape'
 import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
@@ -97,6 +97,9 @@ interface IngesterData {
 type BootRow = IngesterBoot & { id: string }
 
 const RESOURCES_DRAWER_HEIGHT = HEIGHT + 40
+const NO_RATE: IngesterRatePoint[] = []
+const NO_LAG: IngesterLagPoint[] = []
+const NO_RESOURCES: ResourcePoint[] = []
 
 function toTime(at: string) {
   return new Date(at).getTime()
@@ -191,9 +194,9 @@ function Ingester() {
 
   const uptime = data?.ingesterUptime
   const spans = data?.ingesterSpans || []
-  const rate = data?.ingesterRate || []
-  const lag = data?.ingesterLag || []
-  const resources = data?.ingesterResources || []
+  const rate = data?.ingesterRate ?? NO_RATE
+  const lag = data?.ingesterLag ?? NO_LAG
+  const resources = data?.ingesterResources ?? NO_RESOURCES
   const transitions = data?.ingesterTransitions || []
 
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
@@ -203,8 +206,11 @@ function Ingester() {
   const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
   const chartLeft = Math.max(rateYLabelWidth, lagYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
 
-  const rateMarks = rate.map((point) => ({ time: toTime(point.at), point }))
-  const lagMarks = lag.map((point) => ({ time: toTime(point.at), point }))
+  const rateLines = useMemo(() => toRateLines(rate), [rate])
+  const lagLines = useMemo(() => toLagLines(lag), [lag])
+  const resourceLines = useMemo(() => toResourceLines(resources), [resources])
+  const rateMarks = useMemo(() => rate.map((point) => ({ time: toTime(point.at), point })), [rate])
+  const lagMarks = useMemo(() => lag.map((point) => ({ time: toTime(point.at), point })), [lag])
   const hoveredRate = hoveredTime === null ? null : findNearestPoint(rateMarks, hoveredTime)
   const hoveredLag = hoveredTime === null ? null : findNearestPoint(lagMarks, hoveredTime)
 
@@ -272,7 +278,7 @@ function Ingester() {
               <TimeSeriesChart
                 title="Throughput"
                 tooltip
-                lines={toRateLines(rate)}
+                lines={rateLines}
                 from={range.from}
                 to={range.to}
                 yAxis="auto"
@@ -292,7 +298,7 @@ function Ingester() {
             <div className="lr-panels">
               <TimeSeriesChart
                 title="Mean lag (ms)"
-                lines={toLagLines(lag)}
+                lines={lagLines}
                 from={range.from}
                 to={range.to}
                 yAxis="auto"
@@ -322,7 +328,7 @@ function Ingester() {
                 <div className="lr-panels">
                   <TimeSeriesChart
                     title=""
-                    lines={toResourceLines(resources)}
+                    lines={resourceLines}
                     from={range.from}
                     to={range.to}
                     yAxis="percent"
