@@ -58,6 +58,7 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
       selectedIndex={selectedIndex}
       selectBar={selectBar}
       tooltipKeys={['ok']}
+      tooltipKeysWhenAboveZero={['errors']}
     />
   )
 }

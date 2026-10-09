@@ -18,6 +18,7 @@ interface Props {
   selectBar: (index: number) => void
   showTimeLabels?: boolean
   tooltipKeys?: string[]
+  tooltipKeysWhenAboveZero?: string[]
 }
 
 const Y_LABEL_COUNT = 4
@@ -65,7 +66,7 @@ function findActiveBar(bars: ChartBar[], hover: Hover | null) {
   return bars[hover.index] ?? null
 }
 
-const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false, tooltipKeys = [] }: Props) => {
+const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false, tooltipKeys = [], tooltipKeysWhenAboveZero = [] }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
 
@@ -255,7 +256,15 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
   }
 
   function isTooltipSeries(barSeries: BarSeries) {
-    return tooltipKeys.includes(barSeries.key)
+    if (tooltipKeys.includes(barSeries.key)) {
+      return true
+    }
+
+    if (activeBar === null || !tooltipKeysWhenAboveZero.includes(barSeries.key)) {
+      return false
+    }
+
+    return findLegendValue(activeBar, barSeries) > 0
   }
 
   function renderTooltipRow(barSeries: BarSeries) {
