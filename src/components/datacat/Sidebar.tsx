@@ -64,6 +64,7 @@ const useActiveSection = (enabled: boolean) => {
 
 const scrollTo = (event: React.MouseEvent, id: DatacatSection) => {
   event.preventDefault()
+  window.history.replaceState(window.history.state, '', `#${id}`)
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
