@@ -136,8 +136,8 @@ function toLagLines(lag: IngesterLagPoint[]): ChartLine[] {
 
 function toResourceLines(resources: ResourcePoint[]): ChartLine[] {
   return [
-    { key: 'cpu', label: 'CPU', color: 'var(--dc-latency-p99)', points: resources.map((point) => ({ time: toTime(point.at), value: point.cpu })) },
-    { key: 'memory', label: 'Memory', color: 'var(--dc-latency-p50)', points: resources.map((point) => ({ time: toTime(point.at), value: point.memory })) },
+    { key: 'cpu', label: 'CPU', color: 'var(--dc-cpu)', points: resources.map((point) => ({ time: toTime(point.at), value: point.cpu })) },
+    { key: 'memory', label: 'Memory', color: 'var(--dc-memory)', points: resources.map((point) => ({ time: toTime(point.at), value: point.memory })) },
   ]
 }
 

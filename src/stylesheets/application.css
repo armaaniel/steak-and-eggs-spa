@@ -51,6 +51,8 @@
 
 	--dc-status-good: #0ca30c;
 	--dc-healthy: #609135;
+	--dc-cpu: #59AED9;
+	--dc-memory: #F1B24B;
 	--dc-status-warn: #fab219;
 	--dc-status-critical: #d03b3b;
 

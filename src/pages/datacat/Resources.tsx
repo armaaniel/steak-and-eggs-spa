@@ -51,10 +51,10 @@ const RESOURCE_ROWS = [
 
 function findLineColor(reading: ResourceReading) {
   if (reading.key === 'memory') {
-    return '#F1B24B'
+    return 'var(--dc-memory)'
   }
 
-  return '#59AED9'
+  return 'var(--dc-cpu)'
 }
 
 function formatPercent(value: number) {
