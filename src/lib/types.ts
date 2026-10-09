@@ -12,6 +12,7 @@ export interface Breakdown {
 	used_db?:boolean
 	used_api?:boolean
 	operation?:string	
+	range?:string
 }
 
 export interface ChartData {
