@@ -1,6 +1,5 @@
 import type { RunMetricPoint } from '../../lib/types.ts'
 import type { ChartLine } from './TimeSeriesChart'
-import { findNearestPoint } from './timeSeries'
 
 export const SERIES_ONE = 'var(--dc-series-1)'
 export const SERIES_TWO = 'var(--dc-series-2)'
@@ -27,19 +26,27 @@ export function formatPercent(value: number) {
 }
 
 export function toCpuLines(cpu: RunMetricPoint[]): ChartLine[] {
-  return [{ key: 'cpu', label: 'cpu', color: SERIES_ONE, points: cpu.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatPercent }]
+  return [{ key: 'cpu', label: 'cpu', color: 'var(--dc-cpu)', points: cpu.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatPercent }]
 }
 
-export function describeCpu(cpu: RunMetricPoint[], hoveredTime: number | null) {
-  if (hoveredTime === null) {
-    return undefined
+export function toMemoryLines(memory: RunMetricPoint[]): ChartLine[] {
+  return [{ key: 'memory', label: 'memory', color: 'var(--dc-memory)', points: memory.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatPercent }]
+}
+
+function hasAverage(points: RunMetricPoint[]) {
+  return points.some((point) => point.average !== null)
+}
+
+export function toResourceLines(cpu: RunMetricPoint[], memory: RunMetricPoint[]): ChartLine[] {
+  const lines: ChartLine[] = []
+
+  if (hasAverage(cpu)) {
+    lines.push(...toCpuLines(cpu))
   }
 
-  const nearest = findNearestPoint(cpu.map((point) => ({ time: toTime(point.at), point })), hoveredTime)
-
-  if (nearest === null || nearest.point.minimum === null || nearest.point.maximum === null) {
-    return undefined
+  if (hasAverage(memory)) {
+    lines.push(...toMemoryLines(memory))
   }
 
-  return `${nearest.point.minimum.toFixed(1)}–${nearest.point.maximum.toFixed(1)}% range`
+  return lines
 }

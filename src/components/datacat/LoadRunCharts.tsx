@@ -3,7 +3,7 @@ import { curveStepAfter } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeCpu, formatMs, formatPercent, formatWhole, toCpuLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatPercent, formatWhole, toResourceLines, toTime } from './runCharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
@@ -11,6 +11,7 @@ interface Props {
   rows: LoadCompareRow[]
   route: string
   cpu?: RunMetricPoint[]
+  memory?: RunMetricPoint[]
   statsOpen?: boolean
 }
 
@@ -39,7 +40,7 @@ function describeLatency(row: LoadCompareRow) {
   return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
 }
 
-const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
+const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].bucket}|${rows[rows.length - 1].bucket}` : ''
@@ -51,12 +52,13 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
   }
   const [rpsYLabelWidth, setRpsYLabelWidth] = useState(0)
   const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
-  const [cpuYLabelWidth, setCpuYLabelWidth] = useState(0)
+  const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
 
   if (!rows.length) return <p className="lr-message">No samples for this route yet.</p>
 
-  const chartLeft = Math.max(rpsYLabelWidth, latencyYLabelWidth, cpuYLabelWidth) + Y_LABEL_GAP
-  const hasCpu = cpu.some((point) => point.average !== null)
+  const chartLeft = Math.max(rpsYLabelWidth, latencyYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
+  const resourceLines = toResourceLines(cpu, memory)
+  const hasResources = resourceLines.length > 0
   const from = toTime(rows[0].bucket)
   const to = toTime(rows[rows.length - 1].bucket)
 
@@ -114,7 +116,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
         setHoveredTime={setHoveredTime}
         pinnedTime={pinnedTime}
         setPinnedTime={setPinnedTime}
-        showTimeLabels={!hasCpu}
+        showTimeLabels={!hasResources}
         showHoverTime={false}
         hoverDetail={detailRow ? describeLatency(detailRow) : undefined}
         chartLeft={chartLeft}
@@ -127,10 +129,10 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
         tooltipExtraLines={toRpsLines(rows)}
       />
 
-      {hasCpu && (
+      {hasResources && (
         <TimeSeriesChart
-          title="CPU (%)"
-          lines={toCpuLines(cpu)}
+          title="CPU and memory (%)"
+          lines={resourceLines}
           from={from}
           to={to}
           yAxis="percent"
@@ -142,13 +144,13 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
           setPinnedTime={setPinnedTime}
           showTimeLabels
           showHoverTime={false}
-          hoverDetail={describeCpu(cpu, detailTime)}
           chartLeft={chartLeft}
-          setYLabelWidth={setCpuYLabelWidth}
+          setYLabelWidth={setResourcesYLabelWidth}
           height={HEIGHT}
           strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
+          tooltipKeys={['cpu', 'memory']}
         />
       )}
 

@@ -3,17 +3,18 @@ import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeCpu, formatMs, formatPercent, toCpuLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatPercent, toCpuLines, toResourceLines, toTime } from './runCharts'
 import type { CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
   rows: CableCompareRow[]
   cpu?: RunMetricPoint[]
+  memory?: RunMetricPoint[]
   statsOpen?: boolean
 }
 
-type Panel = 'fanout' | 'lag' | 'cpu'
+type Panel = 'fanout' | 'lag' | 'resources'
 
 const DEFAULT_BUCKET_MS = 5000
 
@@ -60,7 +61,7 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
   return `${publishedText} · ${(row.expected - row.received).toLocaleString()} dropped`
 }
 
-const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
+const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
@@ -72,7 +73,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
   }
   const [fanoutYLabelWidth, setFanoutYLabelWidth] = useState(0)
   const [lagYLabelWidth, setLagYLabelWidth] = useState(0)
-  const [cpuYLabelWidth, setCpuYLabelWidth] = useState(0)
+  const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
 
   if (!rows.length) return <p className="lr-message">No samples for this run yet.</p>
 
@@ -81,8 +82,9 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
   const bucketMs = deltas.length ? Math.min(...deltas) : DEFAULT_BUCKET_MS
   const bucketSeconds = bucketMs / 1000
 
-  const chartLeft = Math.max(fanoutYLabelWidth, lagYLabelWidth, cpuYLabelWidth) + Y_LABEL_GAP
-  const hasCpu = cpu.some((point) => point.average !== null)
+  const chartLeft = Math.max(fanoutYLabelWidth, lagYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
+  const resourceLines = toResourceLines(cpu, memory)
+  const hasResources = resourceLines.length > 0
   const hasLag = rows.some((row) => row.p50LagMs !== null || row.p99LagMs !== null)
   const from = times[0]
   const to = times[times.length - 1]
@@ -93,8 +95,8 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
     axisPanel = 'lag'
   }
 
-  if (hasCpu) {
-    axisPanel = 'cpu'
+  if (hasResources) {
+    axisPanel = 'resources'
   }
 
   const detailTime = pinnedTime ?? hoveredTime
@@ -173,10 +175,10 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
         />
       )}
 
-      {hasCpu && (
+      {hasResources && (
         <TimeSeriesChart
-          title="CPU (%)"
-          lines={toCpuLines(cpu)}
+          title="CPU and memory (%)"
+          lines={resourceLines}
           from={from}
           to={to}
           yAxis="percent"
@@ -186,15 +188,15 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
           setHoveredTime={setHoveredTime}
           pinnedTime={pinnedTime}
           setPinnedTime={setPinnedTime}
-          showTimeLabels={axisPanel === 'cpu'}
+          showTimeLabels={axisPanel === 'resources'}
           showHoverTime={false}
-          hoverDetail={describeCpu(cpu, detailTime)}
           chartLeft={chartLeft}
-          setYLabelWidth={setCpuYLabelWidth}
+          setYLabelWidth={setResourcesYLabelWidth}
           height={HEIGHT}
           strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
+          tooltipKeys={['cpu', 'memory']}
         />
       )}
 

@@ -35,7 +35,13 @@ const GET_CABLE_COMPARE = gql`
 
 const GET_RUN_METRICS = gql`
   query getRunMetrics($runId: ID!) {
-    runMetrics(runId: $runId, kind: "cable") {
+    cpu: runMetrics(runId: $runId, kind: "cable", metric: "cpu") {
+      at
+      minimum
+      maximum
+      average
+    }
+    memory: runMetrics(runId: $runId, kind: "cable", metric: "memory") {
       at
       minimum
       maximum
@@ -53,7 +59,8 @@ interface CompareData {
 }
 
 interface MetricsData {
-  runMetrics: RunMetricPoint[]
+  cpu: RunMetricPoint[]
+  memory: RunMetricPoint[]
 }
 
 const CableRun = () => {
@@ -77,7 +84,8 @@ const CableRun = () => {
 
   const isLoaded = useTransition(loading, data || error)
   const rows = data?.cableCompare || []
-  const cpu = metricsData?.runMetrics || []
+  const cpu = metricsData?.cpu || []
+  const memory = metricsData?.memory || []
 
   const label = (run: CableRunSummary) => {
     const started = new Date(run.startedAt).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
@@ -122,7 +130,7 @@ const CableRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <CableRunCharts rows={rows} cpu={cpu} statsOpen={statsOpen} />
+          <CableRunCharts rows={rows} cpu={cpu} memory={memory} statsOpen={statsOpen} />
         )}
       </div>
     </>

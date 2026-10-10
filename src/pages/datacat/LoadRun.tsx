@@ -38,7 +38,13 @@ const GET_LOAD_COMPARE = gql`
 
 const GET_RUN_METRICS = gql`
   query getRunMetrics($runId: ID!) {
-    runMetrics(runId: $runId, kind: "load") {
+    cpu: runMetrics(runId: $runId, kind: "load", metric: "cpu") {
+      at
+      minimum
+      maximum
+      average
+    }
+    memory: runMetrics(runId: $runId, kind: "load", metric: "memory") {
       at
       minimum
       maximum
@@ -52,7 +58,8 @@ interface RunsData {
 }
 
 interface MetricsData {
-  runMetrics: RunMetricPoint[]
+  cpu: RunMetricPoint[]
+  memory: RunMetricPoint[]
 }
 
 interface CompareData {
@@ -90,7 +97,8 @@ const LoadRun = () => {
 
   const isLoaded = useTransition(loading, data || error)
   const rows = data?.loadCompare || []
-  const cpu = metricsData?.runMetrics || []
+  const cpu = metricsData?.cpu || []
+  const memory = metricsData?.memory || []
 
   const label = (run: LoadRunSummary) =>
     `${new Date(run.startedAt).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${run.route} · ${run.samples.toLocaleString()}`
@@ -133,7 +141,7 @@ const LoadRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <LoadRunCharts rows={rows} route={current?.route || ''} cpu={cpu} statsOpen={statsOpen} />
+          <LoadRunCharts rows={rows} route={current?.route || ''} cpu={cpu} memory={memory} statsOpen={statsOpen} />
         )}
       </div>
     </>
