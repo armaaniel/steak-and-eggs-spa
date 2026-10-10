@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type MouseEvent } from 'react'
+import { useCallback, useId, useMemo, useState, type MouseEvent } from 'react'
 import { scaleTime } from 'd3-scale'
 import { MARGIN } from './bucketChart'
 import { formatHoverTime } from './timeSeries'
@@ -82,6 +82,9 @@ function findSpanAt(placedSpans: PlacedSpan[], time: number) {
 const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerOver, setPointerOver] = useState(false)
+
+  // unique per timeline, so a second one on the page never clips to this one's rectangle
+  const clipId = useId()
 
   const measureResize = useCallback((timelineDiv: HTMLDivElement | null) => {
     if (timelineDiv === null) {
@@ -190,12 +193,12 @@ const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredT
     <div ref={measureResize} className="ing-timeline">
       <svg width={width} height={HEIGHT} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: svgCursor }} shapeRendering="crispEdges">
         <defs>
-          <clipPath id="ing-timeline-clip">
+          <clipPath id={clipId}>
             <rect x={chartLeft} y={0} width={plotWidth} height={HEIGHT} rx={CORNER_RADIUS} />
           </clipPath>
         </defs>
 
-        <g clipPath="url(#ing-timeline-clip)">
+        <g clipPath={`url(#${clipId})`}>
           <rect className="ing-span idle" x={chartLeft} y={0} width={plotWidth} height={HEIGHT} />
           {placedSpans.map(renderSpan)}
         </g>
