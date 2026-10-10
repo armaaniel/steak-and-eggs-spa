@@ -38,6 +38,10 @@ const GET_DEPENDENCIES = gql`
         now
         peak
         total
+        points {
+          at
+          value
+        }
       }
     }
   }
@@ -221,7 +225,7 @@ function Dependencies() {
 
   const { loading, error, data } = useQuery<DependencyData>(GET_DEPENDENCIES, {
     variables: timeWindow.variables,
-    fetchPolicy: 'no-cache',
+    fetchPolicy: 'network-only',
   })
 
   const isLoaded = useTransition(loading, data || error)

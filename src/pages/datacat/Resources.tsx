@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import { curveMonotoneX } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
 import { toTimePoint } from '../../components/datacat/timeSeries'
-import useTransition from '../../hooks/useTransition.ts'
 import { DATACAT_RANGE_MS } from '../../hooks/useDatacatRange'
 import type { OutletContextType } from '../../lib/types.ts'
 import '../../stylesheets/datacat/charts.css'
@@ -111,12 +110,10 @@ function Resources() {
     return { from: to - DATACAT_RANGE_MS[range], to }
   }, [range])
 
-  const { loading, error, data } = useQuery<ResourcesData>(GET_RESOURCES, {
+  const { data } = useQuery<ResourcesData>(GET_RESOURCES, {
     variables: { range },
-    skip: !isOpen,
+    fetchPolicy: 'cache-only',
   })
-
-  const isLoaded = useTransition(loading, data || error)
 
   function toggleOpen() {
     setIsOpen(!isOpen)
@@ -161,12 +158,13 @@ function Resources() {
         </svg>
       </button>
 
-      {isOpen && (
-        <div className={`dc-collapse-body table-fade ${isLoaded && !loading ? 'loaded' : ''}`}>
-          {error && <p className="dep-message">Unable to load resource data, please try again</p>}
-          {RESOURCE_ROWS.map(renderRow)}
+      <div className={`dc-collapse-drawer ${isOpen ? 'open' : ''}`} inert={!isOpen}>
+        <div className="dc-collapse-drawer-inner">
+          <div className="dc-collapse-body">
+            {RESOURCE_ROWS.map(renderRow)}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

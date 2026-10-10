@@ -38,6 +38,26 @@
 	row-gap:1rem;
 }
 
+.dc-collapse-drawer {
+	display:grid;
+	grid-template-rows:0fr;
+	margin-top:-1rem;
+	transition:grid-template-rows 300ms ease-out;
+}
+
+.dc-collapse-drawer.open {
+	grid-template-rows:1fr;
+}
+
+.dc-collapse-drawer-inner {
+	min-height:0;
+	overflow:hidden;
+}
+
+.dc-collapse-drawer .dc-collapse-body {
+	padding-top:1rem;
+}
+
 .chart-fade {
 	transition:opacity 150ms;
 }
