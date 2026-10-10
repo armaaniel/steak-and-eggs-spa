@@ -99,3 +99,8 @@
 	background-color:var(--dc-hover);
 	outline:none;
 }
+
+.range-select-option[aria-checked="true"],
+.range-select-option[aria-checked="true"] .range-select-pill {
+	color:var(--dc-latency-p99);
+}
