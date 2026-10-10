@@ -7,7 +7,6 @@ import { RUN_STROKE_WIDTH, SERIES_ONE, describeCpu, formatMs, formatPercent, for
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
-const PRIMARY_COLOR = SERIES_ONE
 const MEMORY_COLOR = '#C3507C'
 
 interface Props {
@@ -19,13 +18,13 @@ interface Props {
 }
 
 function toRpsLines(rows: LoadCompareRow[]): ChartLine[] {
-  return [{ key: 'rps', label: 'rps', color: PRIMARY_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
+  return [{ key: 'rps', label: 'rps', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
 }
 
 function toLatencyLines(rows: LoadCompareRow[]): ChartLine[] {
   return [
     { key: 'client', label: 'client p99', color: MEMORY_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.clientP99 })), fill: true },
-    { key: 'server', label: 'server p99', color: PRIMARY_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.serverP99 })) },
+    { key: 'server', label: 'server p99', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.serverP99 })) },
   ]
 }
 
@@ -168,7 +167,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
           {hasCpu && (
             <TimeSeriesChart
               title="CPU (%)"
-              lines={toCpuLines(cpu, PRIMARY_COLOR)}
+              lines={toCpuLines(cpu)}
               from={from}
               to={to}
               yAxis="percent"
