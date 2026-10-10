@@ -14,7 +14,10 @@
 	outline: 1px solid var(--dc-border-strong);
 }
 
-.range-select-trigger:hover .range-select-pill,
+.range-select-trigger:hover .range-select-pill {
+	border-color:var(--dc-latency-p99);
+}
+
 .range-select.open .range-select-pill {
 	color:var(--dc-text);
 }
@@ -23,7 +26,7 @@
 	display:flex;
 	align-items:center;
 	column-gap:8px;
-	height:28px;
+	height:32px;
 	padding:0;
 	border:none;
 	background:none;
@@ -53,9 +56,11 @@
 
 .range-select-trigger .range-select-pill {
 	width:44px;
-	height:28px;
+	height:32px;
 	padding:0;
-	font-size:14px;
+	border:1.5px solid var(--dc-border);
+	font-size:16px;
+	transition:border-color 150ms;
 }
 
 .range-select-options {
