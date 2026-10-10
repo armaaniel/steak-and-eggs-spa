@@ -30,6 +30,22 @@
 	color:var(--dc-text);
 }
 
+.uptime-drawer {
+	transition:opacity 150ms, display 150ms;
+	transition-behavior:allow-discrete;
+}
+
+.uptime-drawer.closed {
+	opacity:0;
+	display:none;
+}
+
+@starting-style {
+	.uptime-drawer {
+		opacity:0;
+	}
+}
+
 .uptime-runs {
 	display:flex;
 	flex-direction:column;

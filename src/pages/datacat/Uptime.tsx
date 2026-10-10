@@ -53,6 +53,14 @@ interface RunsData {
   syntheticRuns: SyntheticRun[]
 }
 
+function renderPlaceholderRun(_: unknown, index: number) {
+  return (
+    <div key={index} className="uptime-run">
+      <div className="uptime-run-trigger">&nbsp;</div>
+    </div>
+  )
+}
+
 function Uptime() {
   const { detail, setDetail, range } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
@@ -61,6 +69,11 @@ function Uptime() {
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: SyntheticBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
   const selectBucket = (bucket: SyntheticBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
+  const [drawerBucket, setDrawerBucket] = useState<SyntheticBucket | null>(null)
+
+  if (selectedBucket !== null && selectedBucket !== drawerBucket) {
+    setDrawerBucket(selectedBucket)
+  }
 
   const [hover, setHover] = useState<Hover | null>(null)
   const [yLabelWidth, setYLabelWidth] = useState(0)
@@ -75,8 +88,8 @@ function Uptime() {
     error: runsError,
     data: runsData,
   } = useQuery<RunsData>(GET_RUNS, {
-    variables: { bucket: selectedBucket?.bucket, bucketEnd: selectedBucket?.bucketEnd },
-    skip: !selectedBucket,
+    variables: { bucket: drawerBucket?.bucket, bucketEnd: drawerBucket?.bucketEnd },
+    skip: !drawerBucket,
   })
 
   const isLoaded = useTransition(loading, data || error)
@@ -128,21 +141,27 @@ function Uptime() {
 				</div>}
       </div>
 
-      {selectedBucket && (
-        <div className={`positions-container ${runsLoaded && !runsLoading ? 'loaded' : ''}`}>
-          <p className="uptime-runs-title">Runs from {toBucketLabel(selectedBucket.bucket)}</p>
+      {drawerBucket && (
+        <div className={`uptime-drawer ${selectedBucket ? '' : 'closed'}`}>
+          <div className={`positions-container ${runsLoaded && !runsLoading ? 'loaded' : ''}`}>
+            <p className="uptime-runs-title">Runs from {toBucketLabel(drawerBucket.bucket)}</p>
 
-          {runsError ? (
-            <p className="uptime-message">Unable to load runs, please try again</p>
-          ) : runs.length === 0 ? (
-            <p className="uptime-message">No runs in this bucket</p>
-          ) : (
-            <div className="uptime-runs">
-              {runs.map((run) => (
-                <SyntheticRunRow key={run.runId} run={run} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} />
-              ))}
-            </div>
-          )}
+            {runsError ? (
+              <p className="uptime-message">Unable to load runs, please try again</p>
+            ) : runsLoading ? (
+              <div className="uptime-runs" aria-hidden="true">
+                {Array.from({ length: drawerBucket.started }, renderPlaceholderRun)}
+              </div>
+            ) : runs.length === 0 ? (
+              <p className="uptime-message">No runs in this bucket</p>
+            ) : (
+              <div className="uptime-runs">
+                {runs.map((run) => (
+                  <SyntheticRunRow key={run.runId} run={run} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </>
