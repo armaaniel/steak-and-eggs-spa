@@ -144,7 +144,8 @@ const AllDots = ({ dots, baseOpacity }: { dots: Dot[]; baseOpacity: number }) =>
 		fillOpacity={baseOpacity} />
   }
 
-  return <g>{dots.map(renderDot)}</g>
+  // The svg finds the hovered dot itself, so the browser needn't hit-test every circle on each move.
+  return <g pointerEvents="none">{dots.map(renderDot)}</g>
 }
 
 const AllDotsDrawnOnce = memo(AllDots)
