@@ -42,7 +42,6 @@ function describeLatency(row: LoadCompareRow) {
 }
 
 const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
-  const [showTable, setShowTable] = useState(false)
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].bucket}|${rows[rows.length - 1].bucket}` : ''
@@ -82,109 +81,73 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
 
   return (
     <div className="lr-panels">
-      <div className="lr-head">
-        <h3 className="lr-title">{route}</h3>
-        <button type="button" className="lr-toggle" onClick={() => setShowTable(!showTable)}>
-          {showTable ? 'Show charts' : 'Show table'}
-        </button>
-      </div>
+      <h3 className="lr-title">{route}</h3>
 
-      {showTable ? (
-        <div className="lr-table-scroll">
-          <table className="lr-table">
-            <thead>
-              <tr>
-                <th>Bucket</th><th>rps</th><th>Sent</th><th>Traced</th><th>Untraced</th><th>Errors</th>
-                <th>Client p50</th><th>Client p99</th><th>Server p50</th><th>Server p99</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.bucket}>
-                  <td>{new Date(row.bucket).toLocaleTimeString()}</td>
-                  <td>{row.rps.toLocaleString()}</td>
-                  <td>{row.sent.toLocaleString()}</td>
-                  <td>{row.traced.toLocaleString()}</td>
-                  <td>{row.gap.toLocaleString()}</td>
-                  <td>{row.errors.toLocaleString()}</td>
-                  <td>{Math.round(row.clientP50).toLocaleString()}</td>
-                  <td>{Math.round(row.clientP99).toLocaleString()}</td>
-                  <td>{Math.round(row.serverP50).toLocaleString()}</td>
-                  <td>{Math.round(row.serverP99).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <>
-          <TimeSeriesChart
-            title="Throughput (rps)"
-            lines={toRpsLines(rows)}
-            from={from}
-            to={to}
-            yAxis="auto"
-            formatValue={formatWhole}
-            hoveredTime={hoveredTime}
-            setHoveredTime={setHoveredTime}
-            pinnedTime={pinnedTime}
-            setPinnedTime={setPinnedTime}
-            showTimeLabels={false}
-            showHoverTime
-            hoverDetail={detailRow ? describeRps(detailRow) : undefined}
-            chartLeft={chartLeft}
-            setYLabelWidth={setRpsYLabelWidth}
-            height={HEIGHT}
-            strokeWidth={RUN_STROKE_WIDTH}
-            tooltip
-          />
+      <TimeSeriesChart
+        title="Throughput (rps)"
+        lines={toRpsLines(rows)}
+        from={from}
+        to={to}
+        yAxis="auto"
+        formatValue={formatWhole}
+        hoveredTime={hoveredTime}
+        setHoveredTime={setHoveredTime}
+        pinnedTime={pinnedTime}
+        setPinnedTime={setPinnedTime}
+        showTimeLabels={false}
+        showHoverTime
+        hoverDetail={detailRow ? describeRps(detailRow) : undefined}
+        chartLeft={chartLeft}
+        setYLabelWidth={setRpsYLabelWidth}
+        height={HEIGHT}
+        strokeWidth={RUN_STROKE_WIDTH}
+        tooltip
+      />
 
-          <TimeSeriesChart
-            title="p99 latency (ms)"
-            lines={toLatencyLines(rows)}
-            from={from}
-            to={to}
-            yAxis="auto"
-            formatValue={formatMs}
-            hoveredTime={hoveredTime}
-            setHoveredTime={setHoveredTime}
-            pinnedTime={pinnedTime}
-            setPinnedTime={setPinnedTime}
-            showTimeLabels={!hasCpu}
-            showHoverTime={false}
-            hoverDetail={detailRow ? describeLatency(detailRow) : undefined}
-            chartLeft={chartLeft}
-            setYLabelWidth={setLatencyYLabelWidth}
-            height={HEIGHT}
-            strokeWidth={RUN_STROKE_WIDTH}
-            tooltip
-          />
+      <TimeSeriesChart
+        title="p99 latency (ms)"
+        lines={toLatencyLines(rows)}
+        from={from}
+        to={to}
+        yAxis="auto"
+        formatValue={formatMs}
+        hoveredTime={hoveredTime}
+        setHoveredTime={setHoveredTime}
+        pinnedTime={pinnedTime}
+        setPinnedTime={setPinnedTime}
+        showTimeLabels={!hasCpu}
+        showHoverTime={false}
+        hoverDetail={detailRow ? describeLatency(detailRow) : undefined}
+        chartLeft={chartLeft}
+        setYLabelWidth={setLatencyYLabelWidth}
+        height={HEIGHT}
+        strokeWidth={RUN_STROKE_WIDTH}
+        tooltip
+        tooltipAllLines
+      />
 
-          {hasCpu && (
-            <TimeSeriesChart
-              title="CPU (%)"
-              lines={toCpuLines(cpu)}
-              from={from}
-              to={to}
-              yAxis="percent"
-              curve={curveStepAfter}
-              formatValue={formatPercent}
-              hoveredTime={hoveredTime}
-              setHoveredTime={setHoveredTime}
-              pinnedTime={pinnedTime}
-              setPinnedTime={setPinnedTime}
-              showTimeLabels
-              showHoverTime={false}
-              hoverDetail={describeCpu(cpu, detailTime)}
-              chartLeft={chartLeft}
-              setYLabelWidth={setCpuYLabelWidth}
-              height={HEIGHT}
-              strokeWidth={RUN_STROKE_WIDTH}
-              tooltip
-            />
-          )}
-
-        </>
+      {hasCpu && (
+        <TimeSeriesChart
+          title="CPU (%)"
+          lines={toCpuLines(cpu)}
+          from={from}
+          to={to}
+          yAxis="percent"
+          curve={curveStepAfter}
+          formatValue={formatPercent}
+          hoveredTime={hoveredTime}
+          setHoveredTime={setHoveredTime}
+          pinnedTime={pinnedTime}
+          setPinnedTime={setPinnedTime}
+          showTimeLabels
+          showHoverTime={false}
+          hoverDetail={describeCpu(cpu, detailTime)}
+          chartLeft={chartLeft}
+          setYLabelWidth={setCpuYLabelWidth}
+          height={HEIGHT}
+          strokeWidth={RUN_STROKE_WIDTH}
+          tooltip
+        />
       )}
 
       <div className={`lr-stats ${statsOpen ? 'open' : ''}`}>

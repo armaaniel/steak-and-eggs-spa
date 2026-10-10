@@ -40,6 +40,7 @@ interface Props {
   note?: string
   height?: number
   tooltip?: boolean
+  tooltipAllLines?: boolean
   strokeWidth?: number
   curve?: CurveFactory
 }
@@ -81,7 +82,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipAllLines = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const clipId = useId()
@@ -391,6 +392,22 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     )
   }
 
+  function renderTooltipLineRow(chartLine: ChartLine) {
+    const hoveredPoint = findHoveredPoint(chartLine)
+
+    if (hoveredPoint === null || hoveredPoint.value === null) {
+      return null
+    }
+
+    return (
+      <div key={chartLine.key} className="dc-tooltip-row">
+        <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
+        <span className="dc-tooltip-name">{chartLine.label}</span>
+        <strong>{formatValue(hoveredPoint.value)}</strong>
+      </div>
+    )
+  }
+
   function findLineNearestPointer() {
     if (pointerY === null) {
       return null
@@ -470,7 +487,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
           {tooltip && pinnedTime === null && pointerY !== null && cursorX !== null && tooltipLine !== null && (
             <div className="dc-tooltip" style={{ left: cursorX, top: pointerY, transform: TOOLTIP_STYLE_TRANSFORM }}>
-              {renderTooltipRow(tooltipLine)}
+              {tooltipAllLines ? lines.map(renderTooltipLineRow) : renderTooltipRow(tooltipLine)}
             </div>
           )}
         </div>

@@ -18,14 +18,6 @@ export function formatMs(value: number | null | undefined) {
   return `${Math.round(value).toLocaleString()} ms`
 }
 
-export function formatCount(value: number | null | undefined) {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-
-  return value.toLocaleString()
-}
-
 export function formatWhole(value: number) {
   return Math.round(value).toLocaleString()
 }

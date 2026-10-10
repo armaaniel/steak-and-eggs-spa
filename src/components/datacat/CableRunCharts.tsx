@@ -3,7 +3,7 @@ import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeCpu, formatCount, formatMs, formatPercent, toCpuLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeCpu, formatMs, formatPercent, toCpuLines, toTime } from './runCharts'
 import type { CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
@@ -55,7 +55,6 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
 }
 
 const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
-  const [showTable, setShowTable] = useState(false)
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
@@ -119,110 +118,76 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
 
   return (
     <div className="lr-panels">
-      <div className="lr-head">
-        <div>
-          <h3 className="lr-title">PriceChannel broadcast</h3>
-          <p className="lr-subtitle">{bucketSeconds}s buckets</p>
-        </div>
-        <button type="button" className="lr-toggle" onClick={() => setShowTable(!showTable)}>
-          {showTable ? 'Show charts' : 'Show table'}
-        </button>
+      <div>
+        <h3 className="lr-title">PriceChannel broadcast</h3>
+        <p className="lr-subtitle">{bucketSeconds}s buckets</p>
       </div>
 
-      {showTable ? (
-        <div className="lr-table-scroll">
-          <table className="lr-table">
-            <thead>
-              <tr>
-                <th>Bucket</th><th>Published</th><th>Reporting</th><th>Expected</th><th>Received</th><th>Dropped</th>
-                <th>p50 lag</th><th>p99 lag</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.at}>
-                  <td>{new Date(row.at).toLocaleTimeString()}</td>
-                  <td>{formatCount(row.published)}</td>
-                  <td>{formatCount(row.clients)}</td>
-                  <td>{formatCount(row.expected)}</td>
-                  <td>{formatCount(row.received)}</td>
-                  <td>{row.expected === null || row.received === null ? '-' : (row.expected - row.received).toLocaleString()}</td>
-                  <td>{row.p50LagMs === null ? '-' : Math.round(row.p50LagMs).toLocaleString()}</td>
-                  <td>{row.p99LagMs === null ? '-' : Math.round(row.p99LagMs).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <>
-          <TimeSeriesChart
-            title="Fan-out (frames/s)"
-            lines={toFanoutLines(rows, bucketSeconds)}
-            from={from}
-            to={to}
-            yAxis="auto"
-            formatValue={formatRate}
-            hoveredTime={hoveredTime}
-            setHoveredTime={setHoveredTime}
-            pinnedTime={pinnedTime}
-            setPinnedTime={setPinnedTime}
-            showTimeLabels={axisPanel === 'fanout'}
-            showHoverTime
-            hoverDetail={detailRow ? describeFanout(detailRow, bucketSeconds) : undefined}
-            chartLeft={chartLeft}
-            setYLabelWidth={setFanoutYLabelWidth}
-            height={HEIGHT}
-            strokeWidth={RUN_STROKE_WIDTH}
-            tooltip
-          />
+      <TimeSeriesChart
+        title="Fan-out (frames/s)"
+        lines={toFanoutLines(rows, bucketSeconds)}
+        from={from}
+        to={to}
+        yAxis="auto"
+        formatValue={formatRate}
+        hoveredTime={hoveredTime}
+        setHoveredTime={setHoveredTime}
+        pinnedTime={pinnedTime}
+        setPinnedTime={setPinnedTime}
+        showTimeLabels={axisPanel === 'fanout'}
+        showHoverTime
+        hoverDetail={detailRow ? describeFanout(detailRow, bucketSeconds) : undefined}
+        chartLeft={chartLeft}
+        setYLabelWidth={setFanoutYLabelWidth}
+        height={HEIGHT}
+        strokeWidth={RUN_STROKE_WIDTH}
+        tooltip
+      />
 
-          {hasLag && (
-            <TimeSeriesChart
-              title="Delivery lag (ms)"
-              lines={toLagLines(rows)}
-              from={from}
-              to={to}
-              yAxis="auto"
-              formatValue={formatMs}
-              hoveredTime={hoveredTime}
-              setHoveredTime={setHoveredTime}
-              pinnedTime={pinnedTime}
-              setPinnedTime={setPinnedTime}
-              showTimeLabels={axisPanel === 'lag'}
-              showHoverTime={false}
-              chartLeft={chartLeft}
-              setYLabelWidth={setLagYLabelWidth}
-              height={HEIGHT}
-              strokeWidth={RUN_STROKE_WIDTH}
-              tooltip
-            />
-          )}
+      {hasLag && (
+        <TimeSeriesChart
+          title="Delivery lag (ms)"
+          lines={toLagLines(rows)}
+          from={from}
+          to={to}
+          yAxis="auto"
+          formatValue={formatMs}
+          hoveredTime={hoveredTime}
+          setHoveredTime={setHoveredTime}
+          pinnedTime={pinnedTime}
+          setPinnedTime={setPinnedTime}
+          showTimeLabels={axisPanel === 'lag'}
+          showHoverTime={false}
+          chartLeft={chartLeft}
+          setYLabelWidth={setLagYLabelWidth}
+          height={HEIGHT}
+          strokeWidth={RUN_STROKE_WIDTH}
+          tooltip
+        />
+      )}
 
-          {hasCpu && (
-            <TimeSeriesChart
-              title="CPU (%)"
-              lines={toCpuLines(cpu)}
-              from={from}
-              to={to}
-              yAxis="percent"
-              curve={curveLinear}
-              formatValue={formatPercent}
-              hoveredTime={hoveredTime}
-              setHoveredTime={setHoveredTime}
-              pinnedTime={pinnedTime}
-              setPinnedTime={setPinnedTime}
-              showTimeLabels={axisPanel === 'cpu'}
-              showHoverTime={false}
-              hoverDetail={describeCpu(cpu, detailTime)}
-              chartLeft={chartLeft}
-              setYLabelWidth={setCpuYLabelWidth}
-              height={HEIGHT}
-              strokeWidth={RUN_STROKE_WIDTH}
-              tooltip
-            />
-          )}
-        </>
+      {hasCpu && (
+        <TimeSeriesChart
+          title="CPU (%)"
+          lines={toCpuLines(cpu)}
+          from={from}
+          to={to}
+          yAxis="percent"
+          curve={curveLinear}
+          formatValue={formatPercent}
+          hoveredTime={hoveredTime}
+          setHoveredTime={setHoveredTime}
+          pinnedTime={pinnedTime}
+          setPinnedTime={setPinnedTime}
+          showTimeLabels={axisPanel === 'cpu'}
+          showHoverTime={false}
+          hoverDetail={describeCpu(cpu, detailTime)}
+          chartLeft={chartLeft}
+          setYLabelWidth={setCpuYLabelWidth}
+          height={HEIGHT}
+          strokeWidth={RUN_STROKE_WIDTH}
+          tooltip
+        />
       )}
 
       <div className={`lr-stats ${statsOpen ? 'open' : ''}`}>
