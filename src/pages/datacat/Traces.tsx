@@ -2,7 +2,6 @@ import { useOutletContext } from 'react-router-dom'
 import { useState } from 'react'
 import { gql, useQuery, type WatchQueryFetchPolicy } from '@apollo/client'
 import TraceTable from '../../components/datacat/TraceTable'
-import TracesTitle from '../../components/datacat/TracesTitle'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
 import { bucketFetchPolicy } from '../../components/datacat/bucketChart'
@@ -71,8 +70,6 @@ function Traces({ bucket }: Props) {
 
   return (
     <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-      <TracesTitle bucket={bucket} className={`table-fade ${loading ? '' : 'loaded'}`} />
-
       <TraceTable key={bucketKey ?? 'all'} traceData={traces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
     </div>
   )

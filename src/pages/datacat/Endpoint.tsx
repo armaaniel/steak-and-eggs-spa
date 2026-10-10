@@ -2,7 +2,6 @@ import { useOutletContext } from 'react-router-dom'
 import { gql, useApolloClient, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
-import TracesTitle from '../../components/datacat/TracesTitle'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
 import EndpointNav from '../../components/datacat/EndpointNav'
@@ -271,8 +270,6 @@ function Endpoint() {
       </div>
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-        <TracesTitle bucket={selectedBucket} />
-
         <TraceTable key={bucketKey ?? 'all'} traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} dimmed={cappedLoading} sortOnServer={!listIsComplete} onSortChange={setSort} />
       </div>
     </>
