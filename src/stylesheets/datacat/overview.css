@@ -9,3 +9,23 @@
 	font-weight:500;
 	color:var(--dc-text);
 }
+
+.ov-traces-heading {
+	display:grid;
+	grid-template-rows:0fr;
+	margin-bottom:-1rem;
+	transition:grid-template-rows 150ms ease-out;
+}
+
+.ov-traces-heading.open {
+	grid-template-rows:1fr;
+}
+
+.ov-traces-heading-inner {
+	min-height:0;
+	overflow:hidden;
+}
+
+.ov-traces-heading .ov-traces-title {
+	padding-bottom:1rem;
+}

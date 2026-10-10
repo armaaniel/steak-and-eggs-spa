@@ -2,6 +2,7 @@ import { useOutletContext } from 'react-router-dom'
 import { gql, useApolloClient, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
+import TracesTitle from '../../components/datacat/TracesTitle'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
 import EndpointNav from '../../components/datacat/EndpointNav'
@@ -11,7 +12,6 @@ import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
-import { toBucketLabel } from '../../lib/utils.ts'
 import { Y_LABEL_GAP, bucketFetchPolicy, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
 import type { Trace, OutletContextType, ServiceBucket, ScatterPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/overview.css'
@@ -271,7 +271,7 @@ function Endpoint() {
       </div>
 
       <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-        {selectedBucket && <p className="ov-traces-title">Traces from {toBucketLabel(selectedBucket.bucket)}</p>}
+        <TracesTitle bucket={selectedBucket} />
 
         <TraceTable key={bucketKey ?? 'all'} traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} dimmed={cappedLoading} sortOnServer={!listIsComplete} onSortChange={setSort} />
       </div>
