@@ -79,7 +79,7 @@ function Uptime() {
   const [yLabelWidth, setYLabelWidth] = useState(0)
   const chartLeft = yLabelWidth + Y_LABEL_GAP
 
-  const { loading, error, data } = useQuery<BucketsData>(GET_BUCKETS, {
+  const { loading, error, data, previousData } = useQuery<BucketsData>(GET_BUCKETS, {
     variables: { range },
   })
 
@@ -95,10 +95,11 @@ function Uptime() {
   const isLoaded = useTransition(loading, data || error)
   const runsLoaded = useTransition(runsLoading, runsData || runsError)
 
-  const buckets = data?.syntheticBuckets || []
+  const shownData = data ?? previousData
+  const buckets = shownData?.syntheticBuckets || []
   const runs = runsData?.syntheticRuns || []
 
-  const slo = data?.canarySlo
+  const slo = shownData?.canarySlo
   const sli = slo && slo.expected > 0 ? (slo.good / slo.expected) * 100 : null
   const belowTarget = slo !== undefined && sli !== null && sli < slo.target * 100
   const periodSli = slo && slo.periodExpected > 0 ? (slo.periodGood / slo.periodExpected) * 100 : null
@@ -109,8 +110,8 @@ function Uptime() {
   return (
     <>
       {slo && (
-        <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-          <div className="uptime-slo">
+        <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+          <div className={`uptime-slo chart-fade ${loading ? 'dimmed' : ''}`}>
             <div>
               <p className="uptime-slo-label">Last {range}</p>
               <p className={`uptime-slo-value ${belowTarget ? 'critical' : ''}`}>{sli === null ? '-' : `${sli.toFixed(2)}%`}</p>
@@ -132,11 +133,11 @@ function Uptime() {
         </div>
       )}
 
-      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
         {error ? 
 					<p className="uptime-message">Unable to load uptime data, please try again</p> 
 					: 
-				<div className="lr-panels">
+				<div className={`lr-panels chart-fade ${loading ? 'dimmed' : ''}`}>
 					<UptimeChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
 				</div>}
       </div>
