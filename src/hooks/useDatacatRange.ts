@@ -17,6 +17,15 @@ export const DATACAT_RANGE_MS: Record<DatacatRange, number> = {
   '30d': 30 * 24 * HOUR_MS,
 }
 
+export const DATACAT_RANGE_LABELS: Record<DatacatRange, string> = {
+  '1h': 'Past 1 Hour',
+  '12h': 'Past 12 Hours',
+  '24h': 'Past 24 Hours',
+  '7d': 'Past 7 Days',
+  '14d': 'Past 14 Days',
+  '30d': 'Past 30 Days',
+}
+
 const useDatacatRange = () => useStoredRange<DatacatRange>('datacat.range', DATACAT_RANGES, '24h')
 
 export default useDatacatRange

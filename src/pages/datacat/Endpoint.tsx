@@ -6,8 +6,8 @@ import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
 import EndpointNav from '../../components/datacat/EndpointNav'
 import Select from '../../components/datacat/Select'
+import RangeSelect from '../../components/datacat/RangeSelect'
 import useEndpoint from '../../hooks/useEndpoint'
-import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
@@ -257,7 +257,7 @@ function Endpoint() {
         <div className="endpoint-filters">
           <Select id="status-select" label="Status" value={statusFilter} onChange={setStatusFilter} options={statusOptions} loaded={isLoaded} />
           {usedRedis && <Select id="cache-select" label="Served by" value={cacheFilter} onChange={setCacheFilter} options={cacheOptions} loaded={isLoaded} />}
-          <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={isLoaded} />
+          <RangeSelect value={range} onChange={setRange} loaded={isLoaded} />
         </div>
       </div>
 

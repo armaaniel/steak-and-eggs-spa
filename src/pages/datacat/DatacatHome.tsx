@@ -6,8 +6,7 @@ import Dependencies from './Dependencies'
 import Resources from './Resources'
 import Uptime from './Uptime'
 import Routes from './Routes'
-import Select from '../../components/datacat/Select'
-import { DATACAT_RANGE_OPTIONS } from '../../hooks/useDatacatRange'
+import RangeSelect from '../../components/datacat/RangeSelect'
 import { DATACAT_SECTIONS } from '../../lib/datacatSections.ts'
 import type { DatacatSection } from '../../lib/datacatSections.ts'
 import type { OutletContextType } from '../../lib/types.ts'
@@ -55,7 +54,7 @@ function DatacatHome() {
   return (
     <>
       <div className="range-header">
-        <Select id="range-select" label="Range" value={range} onChange={setRange} options={DATACAT_RANGE_OPTIONS} loaded={true} />
+        <RangeSelect value={range} onChange={setRange} loaded={true} />
       </div>
 
       {DATACAT_SECTIONS.map(({ id }) => {
