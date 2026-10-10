@@ -58,7 +58,7 @@
 	--dc-dependency-critical: #d03b3b;
 
 	--dc-series-1: #2a78d6;
-	--dc-series-2: #eb6834;
+	--dc-series-2: #C3507C;
 
 	--dc-latency-p50: #8b78f0;
 	--dc-latency-p99: #4527b8;
@@ -109,7 +109,7 @@
 	--dc-shadow-card: rgba(0, 0, 0, 0.5) 0px 0px 2px 1px;
 	--dc-sort-indicator: rgba(255, 255, 255, 0.7);
 	--dc-series-1: #3987e5;
-	--dc-series-2: #d95926;
+	--dc-series-2: #C3507C;
 	--dc-latency-p50: #6f5ed6;
 	--dc-latency-p99: #bcaeff;
 }

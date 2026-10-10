@@ -40,7 +40,7 @@ interface Props {
   note?: string
   height?: number
   tooltip?: boolean
-  tooltipAllLines?: boolean
+  tooltipKeys?: string[]
   strokeWidth?: number
   curve?: CurveFactory
 }
@@ -82,7 +82,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipAllLines = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const clipId = useId()
@@ -434,7 +434,27 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     return nearestLine
   }
 
-  const tooltipLine = findLineNearestPointer()
+  function hasHoveredValue(chartLine: ChartLine) {
+    const hoveredPoint = findHoveredPoint(chartLine)
+
+    return hoveredPoint !== null && hoveredPoint.value !== null
+  }
+
+  function findTooltipLines() {
+    if (tooltipKeys !== undefined) {
+      return lines.filter((chartLine) => tooltipKeys.includes(chartLine.key) && hasHoveredValue(chartLine))
+    }
+
+    const nearestLine = findLineNearestPointer()
+
+    if (nearestLine === null) {
+      return []
+    }
+
+    return [nearestLine]
+  }
+
+  const tooltipLines = findTooltipLines()
 
   let cursorX: number | null = null
 
@@ -485,9 +505,9 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {lines.map(renderHoveredDot)}
           </svg>
 
-          {tooltip && pinnedTime === null && pointerY !== null && cursorX !== null && tooltipLine !== null && (
+          {tooltip && pinnedTime === null && pointerY !== null && cursorX !== null && tooltipLines.length > 0 && (
             <div className="dc-tooltip" style={{ left: cursorX, top: pointerY, transform: TOOLTIP_STYLE_TRANSFORM }}>
-              {tooltipAllLines ? lines.map(renderTooltipLineRow) : renderTooltipRow(tooltipLine)}
+              {tooltipLines.length === 1 ? renderTooltipRow(tooltipLines[0]) : tooltipLines.map(renderTooltipLineRow)}
             </div>
           )}
         </div>

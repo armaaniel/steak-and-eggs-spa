@@ -118,10 +118,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
 
   return (
     <div className="lr-panels">
-      <div>
-        <h3 className="lr-title">PriceChannel broadcast</h3>
-        <p className="lr-subtitle">{bucketSeconds}s buckets</p>
-      </div>
+      <h3 className="lr-title">PriceChannel broadcast</h3>
 
       <TimeSeriesChart
         title="Fan-out (frames/s)"
@@ -142,6 +139,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
         height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
+        tooltipKeys={['received']}
       />
 
       {hasLag && (
