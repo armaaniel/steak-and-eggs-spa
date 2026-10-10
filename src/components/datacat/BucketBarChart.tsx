@@ -19,6 +19,7 @@ interface Props {
   showTimeLabels?: boolean
   tooltipKeys?: string[]
   tooltipKeysWhenAboveZero?: string[]
+  pinSelected?: boolean
 }
 
 const Y_LABEL_COUNT = 4
@@ -66,7 +67,7 @@ function findActiveBar(bars: ChartBar[], hover: Hover | null) {
   return bars[hover.index] ?? null
 }
 
-const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false, tooltipKeys = [], tooltipKeysWhenAboveZero = [] }: Props) => {
+const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false, tooltipKeys = [], tooltipKeysWhenAboveZero = [], pinSelected = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
 
@@ -242,6 +243,18 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
 
   const activeBar = findActiveBar(bars, hover)
 
+  let pinnedBar: ChartBar | null = null
+
+  if (pinSelected && selectedIndex !== null) {
+    pinnedBar = bars[selectedIndex] ?? null
+  }
+
+  let legendBar = activeBar
+
+  if (pinnedBar !== null) {
+    legendBar = pinnedBar
+  }
+
   function findLegendValue(bar: ChartBar, barSeries: BarSeries) {
     if (bar.legendValues !== undefined) {
       return bar.legendValues[barSeries.key] ?? 0
@@ -255,7 +268,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
       <span key={barSeries.key}>
         <span className="dc-swatch" style={{ backgroundColor: barSeries.color }} />
         {barSeries.label}
-        {activeBar !== null && <strong>{findLegendValue(activeBar, barSeries).toLocaleString('en-us')}</strong>}
+        {legendBar !== null && <strong>{findLegendValue(legendBar, barSeries).toLocaleString('en-us')}</strong>}
       </span>
     )
   }
@@ -290,7 +303,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
 
   let tooltipX: number | null = null
 
-  if (activeBar !== null && hover !== null && hover.chart === chartName && pointerY !== null && tooltipKeys.length > 0) {
+  if (pinnedBar === null && activeBar !== null && hover !== null && hover.chart === chartName && pointerY !== null && tooltipKeys.length > 0) {
     tooltipX = xScale(activeBar.start)
   }
 
@@ -299,7 +312,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">{title}</p>
         <div className="dc-legend">
-          {activeBar !== null && activeBar.hoverText !== undefined && <span className="dc-hover-time">{activeBar.hoverText}</span>}
+          {legendBar !== null && legendBar.hoverText !== undefined && <span className="dc-hover-time">{legendBar.hoverText}</span>}
           {series.map(renderLegendEntry)}
         </div>
       </div>

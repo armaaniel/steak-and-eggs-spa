@@ -58,7 +58,7 @@ function Overview() {
         ) : (
           <>
             <div className="lr-panels">
-              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} />
+              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} selectedBucket={selectedBucket} />
             </div>
             <div className="lr-panels">
               <RequestsChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />

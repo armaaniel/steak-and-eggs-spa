@@ -12,6 +12,7 @@ interface Props {
   setHover: (hover: Hover | null) => void
   chartLeft: number
   setYLabelWidth: (width: number) => void
+  selectedBucket: ServiceBucket | null
 }
 
 type Percentile = 'p99' | 'p50'
@@ -74,7 +75,21 @@ function findActiveChartBucket(chartBuckets: ChartBucket[], hover: Hover | null)
   return chartBuckets[hover.index] ?? null
 }
 
-const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: Props) => {
+function findChartBucket(chartBuckets: ChartBucket[], bucket: ServiceBucket | null) {
+  if (bucket === null) {
+    return null
+  }
+
+  for (const chartBucket of chartBuckets) {
+    if (chartBucket.bucket.bucket === bucket.bucket) {
+      return chartBucket
+    }
+  }
+
+  return null
+}
+
+const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket }: Props) => {
   const [width, setWidth] = useState(0)
   const [isolated, setIsolated] = useState<Percentile | null>(null)
   const [mouseY, setMouseY] = useState(0)
@@ -233,6 +248,8 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
   }
   const activeChartBucket = findActiveChartBucket(chartBuckets, hover)
   const focused = activeChartBucket !== null && hover !== null && hover.chart === 'latency'
+  const pinnedChartBucket = findChartBucket(chartBuckets, selectedBucket)
+  const showHoverDots = focused && pinnedChartBucket === null
 
   let activeX = 0
 
@@ -240,15 +257,27 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
     activeX = xScale(activeChartBucket.start)
   }
 
+  let pinnedX = 0
+
+  if (pinnedChartBucket !== null) {
+    pinnedX = xScale(pinnedChartBucket.start)
+  }
+
+  let legendChartBucket = activeChartBucket
+
+  if (pinnedChartBucket !== null) {
+    legendChartBucket = pinnedChartBucket
+  }
+
   let hoverTime = ''
 
-  if (activeChartBucket !== null) {
-    hoverTime = formatHoverTime(new Date(activeChartBucket.start))
+  if (legendChartBucket !== null) {
+    hoverTime = formatHoverTime(new Date(legendChartBucket.start))
   }
 
   let tooltipLine: Percentile | null = null
 
-  if (focused) {
+  if (showHoverDots) {
     let p99Distance = Infinity
     let p50Distance = Infinity
 
@@ -302,16 +331,16 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
         <p className="lr-panel-label">Latency (ms)</p>
         <div className="dc-legend">
-          {activeChartBucket !== null && <span className="dc-hover-time">{hoverTime}</span>}
+          {legendChartBucket !== null && <span className="dc-hover-time">{hoverTime}</span>}
           <span className={showP99 ? '' : 'off'}>
             <span className="dc-swatch" style={{ backgroundColor: P99_COLOR }} />
             p99
-            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p99)}</strong>}
+            {legendChartBucket !== null && <strong>{formatLegendDuration(legendChartBucket.p99)}</strong>}
           </span>
           <span className={showP50 ? '' : 'off'}>
             <span className="dc-swatch" style={{ backgroundColor: P50_COLOR }} />
             p50
-            {activeChartBucket !== null && <strong>{formatLegendDuration(activeChartBucket.p50)}</strong>}
+            {legendChartBucket !== null && <strong>{formatLegendDuration(legendChartBucket.p50)}</strong>}
           </span>
         </div>
       </div>
@@ -324,13 +353,17 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth }: P
             <line x1={activeX} x2={activeX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />
           )}
 
+          {pinnedChartBucket !== null && (
+            <line x1={pinnedX} x2={pinnedX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />
+          )}
+
           {showP99 && <path d={p99Path} fill="none" stroke={P99_COLOR} strokeWidth={1.5} strokeLinejoin="round" opacity={p99Opacity} />}
 
           {showP50 && <path d={p50Path} fill="none" stroke={P50_COLOR} strokeWidth={1.5} strokeLinejoin="round" opacity={p50Opacity} />}
 
-          {focused && showP99 && activeChartBucket.p99 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p99)} r={3.5} fill={P99_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p99Opacity} />}
+          {showHoverDots && showP99 && activeChartBucket.p99 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p99)} r={3.5} fill={P99_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p99Opacity} />}
 
-          {focused && showP50 && activeChartBucket.p50 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p50)} r={3.5} fill={P50_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p50Opacity} />}
+          {showHoverDots && showP50 && activeChartBucket.p50 !== null && <circle cx={activeX} cy={yScale(activeChartBucket.p50)} r={3.5} fill={P50_COLOR} stroke="var(--dc-surface)" strokeWidth={2} opacity={p50Opacity} />}
 
           {showP99 && <path d={p99Path} fill="none" stroke="transparent" strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pointerEvents="stroke" cursor="pointer" onClick={handleP99Click} />}
 
