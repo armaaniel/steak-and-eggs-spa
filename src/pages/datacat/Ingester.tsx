@@ -322,7 +322,6 @@ function Ingester() {
                 showHoverTime={rate.length > 0}
                 hoverDetail={detailRate ? describeRate(detailRate.point) : undefined}
                 chartLeft={chartLeft}
-                height={HEIGHT}
                 setYLabelWidth={setRateYLabelWidth}
                 note={rate.length === 0 ? 'No samples in this window' : undefined}
               />
@@ -346,7 +345,6 @@ function Ingester() {
                 hoverDetail={detailLag ? describeLag(detailLag.point) : undefined}
                 zeroLine
                 chartLeft={chartLeft}
-                height={HEIGHT}
                 setYLabelWidth={setLagYLabelWidth}
                 note={lag.length === 0 ? 'No samples in this window' : undefined}
               />
@@ -377,7 +375,6 @@ function Ingester() {
                     showTimeLabels
                     showHoverTime={false}
                     chartLeft={chartLeft}
-                    height={HEIGHT}
                     setYLabelWidth={setResourcesYLabelWidth}
                     note={resources.length === 0 ? 'No CloudWatch data in this window' : undefined}
                   />

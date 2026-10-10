@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { curveStepAfter } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
-import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
+import { Y_LABEL_GAP } from './bucketChart'
 import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatPercent, formatWhole, toResourceLines, toTime } from './runCharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -105,7 +105,6 @@ const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, stats
         hoverDetail={detailRow ? describeRps(detailRow) : undefined}
         chartLeft={chartLeft}
         setYLabelWidth={setRpsYLabelWidth}
-        height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
         pinTooltip
@@ -127,7 +126,6 @@ const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, stats
         hoverDetail={detailRow ? describeLatency(detailRow) : undefined}
         chartLeft={chartLeft}
         setYLabelWidth={setLatencyYLabelWidth}
-        height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
         pinTooltip
@@ -152,8 +150,7 @@ const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, stats
           showHoverTime={false}
           chartLeft={chartLeft}
           setYLabelWidth={setResourcesYLabelWidth}
-          height={HEIGHT}
-          strokeWidth={RUN_STROKE_WIDTH}
+            strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
           tooltipKeys={['cpu', 'memory']}

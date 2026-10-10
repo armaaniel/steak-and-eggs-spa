@@ -41,6 +41,8 @@ interface ResourcesData {
   dependencyHealth: ResourceHealth[]
 }
 
+const CHART_HEIGHT = 110
+
 const RESOURCE_ROWS = [
   { id: 'rails', title: 'Rails task' },
   { id: 'ingester', title: 'Ingester task' },
@@ -154,6 +156,7 @@ function Resources() {
           showTimeLabels={index === RESOURCE_ROWS.length - 1}
           showHoverTime={index === 0}
           note={data ? findNote(health, lines) : undefined}
+          height={CHART_HEIGHT}
         />
       </div>
     )

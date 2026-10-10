@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { area, curveMonotoneX, line, type CurveFactory } from 'd3-shape'
-import { MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
 import { breakAtGaps, findNearestPoint, formatHoverTime, type TimePoint } from './timeSeries'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -35,8 +35,8 @@ interface Props {
   formatValue: (value: number) => string
   hoveredTime: number | null
   setHoveredTime: (time: number | null) => void
-  pinnedTime?: number | null
-  setPinnedTime?: (time: number | null) => void
+  pinnedTime: number | null
+  setPinnedTime: (time: number | null) => void
   showTimeLabels: boolean
   showHoverTime: boolean
   hoverDetail?: string
@@ -55,7 +55,6 @@ interface Props {
   curve?: CurveFactory
 }
 
-const DEFAULT_HEIGHT = 110
 const MARGIN_TOP = 8
 const MARGIN_BOTTOM = 6
 const TOOLTIP_STYLE_TRANSFORM = 'translate(-50%, calc(-100% - 10px))'
@@ -104,7 +103,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const [pinnedPointer, setPinnedPointer] = useState<PinnedPointer | null>(null)
@@ -379,10 +378,6 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   }
 
   function handleClick(event: MouseEvent<SVGSVGElement>) {
-    if (setPinnedTime === undefined) {
-      return
-    }
-
     if (pinnedTime !== null) {
       setPinnedTime(null)
       return
@@ -411,15 +406,13 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   }
 
   useEffect(() => {
-    if (pinnedTime === null || setPinnedTime === undefined) {
+    if (pinnedTime === null) {
       return
     }
 
-    const unpin = setPinnedTime
-
     function unpinOnEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        unpin(null)
+        setPinnedTime(null)
       }
     }
 
@@ -429,12 +422,6 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       window.removeEventListener('keydown', unpinOnEscape)
     }
   }, [pinnedTime, setPinnedTime])
-
-  let svgCursor: string | undefined = undefined
-
-  if (setPinnedTime !== undefined) {
-    svgCursor = 'pointer'
-  }
 
   function renderTooltipRow(chartLine: ChartLine) {
     const tooltipPoint = findTooltipPoint(chartLine)
@@ -573,7 +560,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
       {note === undefined && (
         <div ref={measureResize} className="dc-chart">
-          <svg width={width} height={height} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: svgCursor }}>
+          <svg width={width} height={height} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
             <defs>
               <clipPath id={clipId}>
                 <rect x={plotLeft} y={0} width={Math.max(0, plotWidth)} height={height} />

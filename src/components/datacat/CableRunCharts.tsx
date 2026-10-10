@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
-import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
+import { Y_LABEL_GAP } from './bucketChart'
 import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatPercent, toCpuLines, toResourceLines, toTime } from './runCharts'
 import type { CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -156,7 +156,6 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
         hoverDetail={detailRow ? describeFanout(detailRow, bucketSeconds) : undefined}
         chartLeft={chartLeft}
         setYLabelWidth={setFanoutYLabelWidth}
-        height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
         pinTooltip
@@ -179,8 +178,7 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
           showHoverTime={false}
           chartLeft={chartLeft}
           setYLabelWidth={setLagYLabelWidth}
-          height={HEIGHT}
-          strokeWidth={RUN_STROKE_WIDTH}
+            strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
           tooltipExtraLines={lagTooltipLines}
@@ -204,8 +202,7 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
           showHoverTime={false}
           chartLeft={chartLeft}
           setYLabelWidth={setResourcesYLabelWidth}
-          height={HEIGHT}
-          strokeWidth={RUN_STROKE_WIDTH}
+            strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
           tooltipKeys={['cpu', 'memory']}
