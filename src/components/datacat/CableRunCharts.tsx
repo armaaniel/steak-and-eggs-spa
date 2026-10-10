@@ -31,8 +31,8 @@ function perSecond(count: number | null, bucketSeconds: number) {
 
 function toFanoutLines(rows: CableCompareRow[], bucketSeconds: number): ChartLine[] {
   return [
-    { key: 'expected', label: 'expected', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.expected, bucketSeconds) })) },
-    { key: 'received', label: 'received', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.received, bucketSeconds) })) },
+    { key: 'expected', label: 'expected', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.expected, bucketSeconds) })), formatValue: formatRate },
+    { key: 'received', label: 'received', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.at), value: perSecond(row.received, bucketSeconds) })), formatValue: formatRate },
   ]
 }
 
@@ -41,6 +41,12 @@ function toLagLines(rows: CableCompareRow[]): ChartLine[] {
     { key: 'p99', label: 'p99', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.at), value: row.p99LagMs })) },
     { key: 'p50', label: 'p50', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.at), value: row.p50LagMs })) },
   ]
+}
+
+function toLagTooltipLines(rows: CableCompareRow[], bucketSeconds: number, cpu: RunMetricPoint[]): ChartLine[] {
+  const receivedLines = toFanoutLines(rows, bucketSeconds).filter((chartLine) => chartLine.key === 'received')
+
+  return [...receivedLines, ...toCpuLines(cpu)]
 }
 
 function describeFanout(row: CableCompareRow, bucketSeconds: number) {
@@ -161,6 +167,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
           height={HEIGHT}
           strokeWidth={RUN_STROKE_WIDTH}
           tooltip
+          tooltipExtraLines={toLagTooltipLines(rows, bucketSeconds, cpu)}
         />
       )}
 

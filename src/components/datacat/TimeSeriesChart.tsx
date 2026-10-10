@@ -12,6 +12,7 @@ export interface ChartLine {
   color: string
   points: TimePoint[]
   fill?: boolean
+  formatValue?: (value: number) => string
 }
 
 interface DrawnLine {
@@ -41,6 +42,7 @@ interface Props {
   height?: number
   tooltip?: boolean
   tooltipKeys?: string[]
+  tooltipExtraLines?: ChartLine[]
   strokeWidth?: number
   curve?: CurveFactory
 }
@@ -82,7 +84,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const clipId = useId()
@@ -201,6 +203,16 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     xLabelDates = xScale.ticks(Math.max(2, Math.floor(plotWidth / 100)))
   }
 
+  function formatLineValue(chartLine: ChartLine, value: number) {
+    let format = formatValue
+
+    if (chartLine.formatValue !== undefined) {
+      format = chartLine.formatValue
+    }
+
+    return format(value)
+  }
+
   function renderGridline(value: number) {
     const gridlineY = yScale(value)
 
@@ -285,7 +297,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       <span key={chartLine.key}>
         <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
         {chartLine.label}
-        {legendPoint !== null && legendPoint.value !== null && <strong>{formatValue(legendPoint.value)}</strong>}
+        {legendPoint !== null && legendPoint.value !== null && <strong>{formatLineValue(chartLine, legendPoint.value)}</strong>}
       </span>
     )
   }
@@ -387,7 +399,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
           <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
           {chartLine.label}
         </p>
-        <strong className="dc-tooltip-value">{formatValue(hoveredPoint.value)}</strong>
+        <strong className="dc-tooltip-value">{formatLineValue(chartLine, hoveredPoint.value)}</strong>
       </>
     )
   }
@@ -403,7 +415,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       <div key={chartLine.key} className="dc-tooltip-row">
         <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
         <span className="dc-tooltip-name">{chartLine.label}</span>
-        <strong>{formatValue(hoveredPoint.value)}</strong>
+        <strong>{formatLineValue(chartLine, hoveredPoint.value)}</strong>
       </div>
     )
   }
@@ -441,17 +453,30 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   }
 
   function findTooltipLines() {
+    const extraLines = tooltipExtraLines.filter(hasHoveredValue)
+
     if (tooltipKeys !== undefined) {
-      return lines.filter((chartLine) => tooltipKeys.includes(chartLine.key) && hasHoveredValue(chartLine))
+      const candidates = [...lines.filter(hasHoveredValue), ...extraLines]
+      const keyedLines: ChartLine[] = []
+
+      for (const key of tooltipKeys) {
+        for (const chartLine of candidates) {
+          if (chartLine.key === key) {
+            keyedLines.push(chartLine)
+          }
+        }
+      }
+
+      return keyedLines
     }
 
     const nearestLine = findLineNearestPointer()
 
     if (nearestLine === null) {
-      return []
+      return extraLines
     }
 
-    return [nearestLine]
+    return [nearestLine, ...extraLines]
   }
 
   const tooltipLines = findTooltipLines()

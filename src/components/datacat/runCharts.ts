@@ -27,7 +27,7 @@ export function formatPercent(value: number) {
 }
 
 export function toCpuLines(cpu: RunMetricPoint[]): ChartLine[] {
-  return [{ key: 'cpu', label: 'cpu', color: SERIES_ONE, points: cpu.map((point) => ({ time: toTime(point.at), value: point.average })) }]
+  return [{ key: 'cpu', label: 'cpu', color: SERIES_ONE, points: cpu.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatPercent }]
 }
 
 export function describeCpu(cpu: RunMetricPoint[], hoveredTime: number | null) {

@@ -15,7 +15,7 @@ interface Props {
 }
 
 function toRpsLines(rows: LoadCompareRow[]): ChartLine[] {
-  return [{ key: 'rps', label: 'rps', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
+  return [{ key: 'rps', label: 'rps', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true, formatValue: formatWhole }]
 }
 
 function toLatencyLines(rows: LoadCompareRow[]): ChartLine[] {
@@ -121,7 +121,8 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
         height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
-        tooltipKeys={['client', 'server']}
+        tooltipKeys={['rps', 'client', 'server']}
+        tooltipExtraLines={toRpsLines(rows)}
       />
 
       {hasCpu && (
