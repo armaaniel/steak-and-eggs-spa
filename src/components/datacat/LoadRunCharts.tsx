@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { curveLinear } from 'd3-shape'
+import { curveStepAfter } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
@@ -12,7 +12,6 @@ const MEMORY_COLOR = '#C3507C'
 interface Props {
   rows: LoadCompareRow[]
   route: string
-  step?: number
   cpu?: RunMetricPoint[]
   statsOpen?: boolean
 }
@@ -42,7 +41,7 @@ function describeLatency(row: LoadCompareRow) {
   return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
 }
 
-const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: Props) => {
+const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
   const [showTable, setShowTable] = useState(false)
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
@@ -84,10 +83,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
   return (
     <div className="lr-panels">
       <div className="lr-head">
-        <div>
-          <h3 className="lr-title">{route}</h3>
-          <p className="lr-subtitle">{step}s buckets</p>
-        </div>
+        <h3 className="lr-title">{route}</h3>
         <button type="button" className="lr-toggle" onClick={() => setShowTable(!showTable)}>
           {showTable ? 'Show charts' : 'Show table'}
         </button>
@@ -171,7 +167,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
               from={from}
               to={to}
               yAxis="percent"
-              curve={curveLinear}
+              curve={curveStepAfter}
               formatValue={formatPercent}
               hoveredTime={hoveredTime}
               setHoveredTime={setHoveredTime}

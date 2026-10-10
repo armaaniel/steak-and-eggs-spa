@@ -133,7 +133,7 @@ const LoadRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} cpu={cpu} statsOpen={statsOpen} />
+          <LoadRunCharts rows={rows} route={current?.route || ''} cpu={cpu} statsOpen={statsOpen} />
         )}
       </div>
     </>
