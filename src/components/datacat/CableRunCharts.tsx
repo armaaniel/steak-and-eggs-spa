@@ -145,6 +145,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
         height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
+        pinTooltip
         tooltipKeys={['received']}
       />
 
@@ -167,6 +168,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
           height={HEIGHT}
           strokeWidth={RUN_STROKE_WIDTH}
           tooltip
+          pinTooltip
           tooltipExtraLines={toLagTooltipLines(rows, bucketSeconds, cpu)}
         />
       )}
@@ -192,6 +194,7 @@ const CableRunCharts = ({ rows, cpu = [], statsOpen = false }: Props) => {
           height={HEIGHT}
           strokeWidth={RUN_STROKE_WIDTH}
           tooltip
+          pinTooltip
         />
       )}
 
