@@ -1,9 +1,6 @@
-import { toRange } from '../../lib/utils.ts'
-import type { DateRange } from '../../lib/types.ts'
-
 const MARKET_ZONE = 'America/New_York'
-export const SESSION_START_MINUTE = 9 * 60 + 30
-export const SESSION_END_MINUTE = 16 * 60 + 30
+const SESSION_START_MINUTE = 9 * 60 + 30
+const SESSION_END_MINUTE = 16 * 60 + 30
 const DAYS_TO_SEARCH = 7
 
 const marketOffset = (ms: number) => {
@@ -23,7 +20,7 @@ const marketOffset = (ms: number) => {
   return Date.UTC(read('year'), read('month') - 1, read('day'), read('hour') % 24, read('minute'), read('second')) - ms
 }
 
-export const toMarketInstant = (year: number, month: number, day: number, minute: number) => {
+const toMarketInstant = (year: number, month: number, day: number, minute: number) => {
   const naive = Date.UTC(year, month - 1, day, Math.floor(minute / 60), minute % 60, 0)
   return naive - marketOffset(naive - marketOffset(naive))
 }
@@ -41,7 +38,7 @@ const toMarketDate = (ms: number) => {
   return { year: read('year'), month: read('month'), day: read('day') }
 }
 
-export const findLastSession = (now: number): DateRange => {
+export const findLastSession = (now: number) => {
   const today = toMarketDate(now)
 
   for (let daysBack = 0; daysBack < DAYS_TO_SEARCH; daysBack += 1) {
@@ -61,5 +58,5 @@ export const findLastSession = (now: number): DateRange => {
     return { from, to }
   }
 
-  return toRange(24)
+  return { from: now - 24 * 60 * 60 * 1000, to: now }
 }

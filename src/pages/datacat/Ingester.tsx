@@ -5,14 +5,15 @@ import { curveLinear } from 'd3-shape'
 import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
-import DateRangePicker from '../../components/datacat/DateRangePicker'
+import Select from '../../components/datacat/Select'
 import { findLastSession } from '../../components/datacat/marketSession'
+import { DATACAT_RANGE_MS, DATACAT_RANGE_OPTIONS, type DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { findNearestPoint } from '../../components/datacat/timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from '../../components/datacat/bucketChart'
 import { toDuration } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
-import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, DateRange, ResourcePoint } from '../../lib/types.ts'
+import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, ResourcePoint } from '../../lib/types.ts'
 
 const GET_INGESTER = gql`
   query getIngester($from: ISO8601DateTime!, $to: ISO8601DateTime!) {
@@ -175,24 +176,42 @@ const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'endedBy', label: 'Exit', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },
 ]
 
+type IngesterRange = DatacatRange | 'session'
+
+const INGESTER_RANGE_OPTIONS: { value: IngesterRange; label: string }[] = [{ value: 'session', label: 'Session' }, ...DATACAT_RANGE_OPTIONS]
+
 function Ingester() {
-  const { detail, setDetail } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, range, setRange } = useOutletContext<OutletContextType>()
 
-  const [preset, setPreset] = useState<number | 'custom' | 'session'>('session')
-  const [range, setRange] = useState<DateRange>(() => findLastSession(Date.now()))
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
+  const [showSession, setShowSession] = useState(true)
 
-  const applyWindow = (nextPreset: number | 'custom' | 'session', nextRange: DateRange) => {
+  const timeWindow = useMemo(() => {
+    if (showSession) {
+      return findLastSession(Date.now())
+    }
+
+    const to = Date.now()
+    return { from: to - DATACAT_RANGE_MS[range], to }
+  }, [showSession, range])
+
+  const changeRange = (nextRange: IngesterRange) => {
     setDetail(null)
-    setPreset(nextPreset)
-    setRange(nextRange)
     setPinnedTime(null)
+
+    if (nextRange === 'session') {
+      setShowSession(true)
+      return
+    }
+
+    setShowSession(false)
+    setRange(nextRange)
   }
 
   const recordsPerPage = 10
 
   const { loading, error, data } = useQuery<IngesterData>(GET_INGESTER, {
-    variables: { from: toIso(range.from), to: toIso(range.to) },
+    variables: { from: toIso(timeWindow.from), to: toIso(timeWindow.to) },
   })
 
   const isLoaded = useTransition(loading, data || error)
@@ -244,7 +263,7 @@ function Ingester() {
   return (
     <>
       <div className="ing-header">
-        <DateRangePicker preset={preset} range={range} loaded={isLoaded} onApply={applyWindow} />
+        <Select id="range-select" label="Range" value={showSession ? 'session' : range} onChange={changeRange} options={INGESTER_RANGE_OPTIONS} loaded={isLoaded} />
       </div>
 
       {error ? (
@@ -282,7 +301,7 @@ function Ingester() {
               </div>
             </div>
 
-            <IngesterTimeline spans={spans} from={range.from} to={range.to} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} pinnedTime={pinnedTime} setPinnedTime={setPinnedTime} />
+            <IngesterTimeline spans={spans} from={timeWindow.from} to={timeWindow.to} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} pinnedTime={pinnedTime} setPinnedTime={setPinnedTime} />
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
@@ -291,8 +310,8 @@ function Ingester() {
                 title="Throughput"
                 tooltip
                 lines={rateLines}
-                from={range.from}
-                to={range.to}
+                from={timeWindow.from}
+                to={timeWindow.to}
                 yAxis="auto"
                 formatValue={formatRate}
                 hoveredTime={hoveredTime}
@@ -314,8 +333,8 @@ function Ingester() {
                 title="Mean lag (ms)"
                 tooltip
                 lines={lagLines}
-                from={range.from}
-                to={range.to}
+                from={timeWindow.from}
+                to={timeWindow.to}
                 yAxis="auto"
                 formatValue={formatLag}
                 hoveredTime={hoveredTime}
@@ -346,8 +365,8 @@ function Ingester() {
                   <TimeSeriesChart
                     title=""
                     lines={resourceLines}
-                    from={range.from}
-                    to={range.to}
+                    from={timeWindow.from}
+                    to={timeWindow.to}
                     yAxis="percent"
                     curve={curveLinear}
                     formatValue={formatPercent}

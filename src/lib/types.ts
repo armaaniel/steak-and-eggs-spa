@@ -160,11 +160,6 @@ export type Price = null | string | number
 export type Open = null | string
 export type Error = null | string
 
-export interface DateRange {
-	from:number
-	to:number
-}
-
 export interface IngesterUptime {
 	pct:number
 	streamingSeconds:number
