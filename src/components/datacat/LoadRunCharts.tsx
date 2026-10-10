@@ -3,9 +3,12 @@ import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeCpu, formatMs, formatPercent, formatWhole, toCpuLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, describeCpu, formatMs, formatPercent, formatWhole, toCpuLines, toTime } from './runCharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
+
+const PRIMARY_COLOR = SERIES_ONE
+const MEMORY_COLOR = '#C3507C'
 
 interface Props {
   rows: LoadCompareRow[]
@@ -16,13 +19,13 @@ interface Props {
 }
 
 function toRpsLines(rows: LoadCompareRow[]): ChartLine[] {
-  return [{ key: 'rps', label: 'rps', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
+  return [{ key: 'rps', label: 'rps', color: PRIMARY_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true }]
 }
 
 function toLatencyLines(rows: LoadCompareRow[]): ChartLine[] {
   return [
-    { key: 'client', label: 'client p99', color: SERIES_TWO, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.clientP99 })), fill: true },
-    { key: 'server', label: 'server p99', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.serverP99 })) },
+    { key: 'client', label: 'client p99', color: MEMORY_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.clientP99 })), fill: true },
+    { key: 'server', label: 'server p99', color: PRIMARY_COLOR, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.serverP99 })) },
   ]
 }
 
@@ -165,7 +168,7 @@ const LoadRunCharts = ({ rows, route, step = 15, cpu = [], statsOpen = false }: 
           {hasCpu && (
             <TimeSeriesChart
               title="CPU (%)"
-              lines={toCpuLines(cpu)}
+              lines={toCpuLines(cpu, PRIMARY_COLOR)}
               from={from}
               to={to}
               yAxis="percent"
