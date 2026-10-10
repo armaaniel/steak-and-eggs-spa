@@ -197,6 +197,7 @@ const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Prop
           tooltip
           pinTooltip
           tooltipKeys={['cpu', 'memory']}
+          toggleLines
         />
       )}
 

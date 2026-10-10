@@ -151,6 +151,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }
           tooltip
           pinTooltip
           tooltipKeys={['cpu', 'memory']}
+          toggleLines
         />
       )}
 

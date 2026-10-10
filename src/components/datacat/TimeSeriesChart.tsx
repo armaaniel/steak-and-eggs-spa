@@ -49,6 +49,7 @@ interface Props {
   tooltipKeys?: string[]
   tooltipExtraLines?: ChartLine[]
   pinTooltip?: boolean
+  toggleLines?: boolean
   strokeWidth?: number
   curve?: CurveFactory
 }
@@ -68,6 +69,18 @@ function formatPercentLabel(value: number) {
 
 function formatAutoLabel(value: number) {
   return value.toLocaleString('en-us', { maximumFractionDigits: 1 })
+}
+
+function findVisibleLines(lines: ChartLine[], hiddenKeys: string[]) {
+  const visibleLines: ChartLine[] = []
+
+  for (const chartLine of lines) {
+    if (!hiddenKeys.includes(chartLine.key)) {
+      visibleLines.push(chartLine)
+    }
+  }
+
+  return visibleLines
 }
 
 function findValueRange(lines: ChartLine[]) {
@@ -90,10 +103,11 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const [pinnedPointer, setPinnedPointer] = useState<PinnedPointer | null>(null)
+  const [hiddenKeys, setHiddenKeys] = useState<string[]>([])
 
   if (pinnedTime === null && pinnedPointer !== null) {
     setPinnedPointer(null)
@@ -128,7 +142,8 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   const chartTop = MARGIN_TOP
   const chartBottom = height - marginBottom
 
-  const valueRange = useMemo(() => findValueRange(lines), [lines])
+  const visibleLines = useMemo(() => findVisibleLines(lines, hiddenKeys), [lines, hiddenKeys])
+  const valueRange = useMemo(() => findValueRange(visibleLines), [visibleLines])
 
   const yScale = useMemo(() => {
     if (yAxis === 'auto') {
@@ -197,7 +212,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       })
       .curve(curve)
 
-    return lines.map(function (chartLine): DrawnLine {
+    return visibleLines.map(function (chartLine): DrawnLine {
       const gappedPoints = breakAtGaps(chartLine.points)
       let areaPath: string | undefined
 
@@ -207,7 +222,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
       return { chartLine, path: makePath(gappedPoints) ?? undefined, areaPath }
     })
-  }, [lines, xScale, yScale, curve])
+  }, [visibleLines, xScale, yScale, curve])
 
   let xLabelDates: Date[] = []
 
@@ -302,15 +317,35 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     return renderDot(chartLine, pinnedTime, 'pinned')
   }
 
+  function toggleLine(key: string) {
+    if (hiddenKeys.includes(key)) {
+      setHiddenKeys(hiddenKeys.filter((hiddenKey) => hiddenKey !== key))
+      return
+    }
+
+    setHiddenKeys([...hiddenKeys, key])
+  }
+
   function renderLegendEntry(chartLine: ChartLine) {
     const legendPoint = findPointAt(chartLine, legendTime)
+    const hidden = hiddenKeys.includes(chartLine.key)
 
-    return (
-      <span key={chartLine.key}>
+    const contents = (
+      <>
         <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
         {chartLine.label}
-        {legendPoint !== null && legendPoint.value !== null && <strong>{formatLineValue(chartLine, legendPoint.value)}</strong>}
-      </span>
+        {!hidden && legendPoint !== null && legendPoint.value !== null && <strong>{formatLineValue(chartLine, legendPoint.value)}</strong>}
+      </>
+    )
+
+    if (!toggleLines) {
+      return <span key={chartLine.key}>{contents}</span>
+    }
+
+    return (
+      <button key={chartLine.key} type="button" className={hidden ? 'off' : ''} aria-pressed={!hidden} onClick={() => toggleLine(chartLine.key)}>
+        {contents}
+      </button>
     )
   }
 
@@ -442,7 +477,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     let nearestLine: ChartLine | null = null
     let nearestDistance = Infinity
 
-    for (const chartLine of lines) {
+    for (const chartLine of visibleLines) {
       const tooltipPoint = findTooltipPoint(chartLine)
 
       if (tooltipPoint === null || tooltipPoint.value === null) {
@@ -470,7 +505,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     const extraLines = tooltipExtraLines.filter(hasTooltipValue)
 
     if (tooltipKeys !== undefined) {
-      const candidates = [...lines.filter(hasTooltipValue), ...extraLines]
+      const candidates = [...visibleLines.filter(hasTooltipValue), ...extraLines]
       const keyedLines: ChartLine[] = []
 
       for (const key of tooltipKeys) {
@@ -555,8 +590,8 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
               {drawnLines.map(renderArea)}
               {drawnLines.map(renderLine)}
             </g>
-            {lines.map(renderPinnedDot)}
-            {lines.map(renderHoveredDot)}
+            {visibleLines.map(renderPinnedDot)}
+            {visibleLines.map(renderHoveredDot)}
           </svg>
 
           {tooltip && tooltipX !== null && tooltipY !== null && tooltipLines.length > 0 && (

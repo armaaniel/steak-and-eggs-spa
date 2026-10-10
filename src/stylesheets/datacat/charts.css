@@ -152,3 +152,7 @@
 .dc-legend .off {
 	opacity:0.4;
 }
+
+.dc-legend button {
+	cursor:pointer;
+}
