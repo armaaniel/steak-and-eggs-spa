@@ -50,6 +50,7 @@ interface Props {
   tooltipExtraLines?: ChartLine[]
   pinTooltip?: boolean
   toggleLines?: boolean
+  defaultHiddenKeys?: string[]
   strokeWidth?: number
   curve?: CurveFactory
 }
@@ -103,11 +104,11 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const [pinnedPointer, setPinnedPointer] = useState<PinnedPointer | null>(null)
-  const [hiddenKeys, setHiddenKeys] = useState<string[]>([])
+  const [hiddenKeys, setHiddenKeys] = useState(defaultHiddenKeys)
 
   if (pinnedTime === null && pinnedPointer !== null) {
     setPinnedPointer(null)
