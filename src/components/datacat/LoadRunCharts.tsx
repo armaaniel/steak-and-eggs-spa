@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { curveStepAfter } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
@@ -14,6 +14,8 @@ interface Props {
   memory?: RunMetricPoint[]
   statsOpen?: boolean
 }
+
+const NO_POINTS: RunMetricPoint[] = []
 
 function toRpsLines(rows: LoadCompareRow[]): ChartLine[] {
   return [{ key: 'rps', label: 'rps', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true, formatValue: formatWhole }]
@@ -40,7 +42,7 @@ function describeLatency(row: LoadCompareRow) {
   return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
 }
 
-const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }: Props) => {
+const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].bucket}|${rows[rows.length - 1].bucket}` : ''
@@ -54,10 +56,14 @@ const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }
   const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
   const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
 
+  const rpsLines = useMemo(() => toRpsLines(rows), [rows])
+  const latencyLines = useMemo(() => toLatencyLines(rows), [rows])
+  const resourceLines = useMemo(() => toResourceLines(cpu, memory), [cpu, memory])
+  const rowMarks = useMemo(() => rows.map((row) => ({ time: toTime(row.bucket), row })), [rows])
+
   if (!rows.length) return <p className="lr-message">No samples for this route yet.</p>
 
   const chartLeft = Math.max(rpsYLabelWidth, latencyYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
-  const resourceLines = toResourceLines(cpu, memory)
   const hasResources = resourceLines.length > 0
   const from = toTime(rows[0].bucket)
   const to = toTime(rows[rows.length - 1].bucket)
@@ -66,7 +72,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }
   let detailRow: LoadCompareRow | null = null
 
   if (detailTime !== null) {
-    detailRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.bucket), row })), detailTime)?.row ?? null
+    detailRow = findNearestPoint(rowMarks, detailTime)?.row ?? null
   }
 
   const totals = rows.reduce(
@@ -85,7 +91,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }
 
       <TimeSeriesChart
         title="Throughput (rps)"
-        lines={toRpsLines(rows)}
+        lines={rpsLines}
         from={from}
         to={to}
         yAxis="auto"
@@ -107,7 +113,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }
 
       <TimeSeriesChart
         title="p99 latency (ms)"
-        lines={toLatencyLines(rows)}
+        lines={latencyLines}
         from={from}
         to={to}
         yAxis="auto"
@@ -126,7 +132,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], memory = [], statsOpen = false }
         tooltip
         pinTooltip
         tooltipKeys={['rps', 'client', 'server']}
-        tooltipExtraLines={toRpsLines(rows)}
+        tooltipExtraLines={rpsLines}
       />
 
       {hasResources && (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
@@ -17,6 +17,7 @@ interface Props {
 type Panel = 'fanout' | 'lag' | 'resources'
 
 const DEFAULT_BUCKET_MS = 5000
+const NO_POINTS: RunMetricPoint[] = []
 
 function formatRate(value: number) {
   return `${Math.round(value).toLocaleString()}/s`
@@ -61,7 +62,7 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
   return `${publishedText} · ${(row.expected - row.received).toLocaleString()} dropped`
 }
 
-const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Props) => {
+const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
@@ -75,15 +76,23 @@ const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Prop
   const [lagYLabelWidth, setLagYLabelWidth] = useState(0)
   const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
 
+  const times = useMemo(() => rows.map((row) => toTime(row.at)), [rows])
+
+  const bucketSeconds = useMemo(() => {
+    const deltas = times.slice(1).map((time, index) => time - times[index])
+    const bucketMs = deltas.length ? Math.min(...deltas) : DEFAULT_BUCKET_MS
+    return bucketMs / 1000
+  }, [times])
+
+  const fanoutLines = useMemo(() => toFanoutLines(rows, bucketSeconds), [rows, bucketSeconds])
+  const lagLines = useMemo(() => toLagLines(rows), [rows])
+  const lagTooltipLines = useMemo(() => toLagTooltipLines(rows, bucketSeconds, cpu), [rows, bucketSeconds, cpu])
+  const resourceLines = useMemo(() => toResourceLines(cpu, memory), [cpu, memory])
+  const rowMarks = useMemo(() => rows.map((row) => ({ time: toTime(row.at), row })), [rows])
+
   if (!rows.length) return <p className="lr-message">No samples for this run yet.</p>
 
-  const times = rows.map((row) => toTime(row.at))
-  const deltas = times.slice(1).map((time, index) => time - times[index])
-  const bucketMs = deltas.length ? Math.min(...deltas) : DEFAULT_BUCKET_MS
-  const bucketSeconds = bucketMs / 1000
-
   const chartLeft = Math.max(fanoutYLabelWidth, lagYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
-  const resourceLines = toResourceLines(cpu, memory)
   const hasResources = resourceLines.length > 0
   const hasLag = rows.some((row) => row.p50LagMs !== null || row.p99LagMs !== null)
   const from = times[0]
@@ -103,7 +112,7 @@ const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Prop
   let detailRow: CableCompareRow | null = null
 
   if (detailTime !== null) {
-    detailRow = findNearestPoint(rows.map((row) => ({ time: toTime(row.at), row })), detailTime)?.row ?? null
+    detailRow = findNearestPoint(rowMarks, detailTime)?.row ?? null
   }
 
   const totals = rows.reduce(
@@ -130,7 +139,7 @@ const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Prop
 
       <TimeSeriesChart
         title="Fan-out (frames/s)"
-        lines={toFanoutLines(rows, bucketSeconds)}
+        lines={fanoutLines}
         from={from}
         to={to}
         yAxis="auto"
@@ -154,7 +163,7 @@ const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Prop
       {hasLag && (
         <TimeSeriesChart
           title="Delivery lag (ms)"
-          lines={toLagLines(rows)}
+          lines={lagLines}
           from={from}
           to={to}
           yAxis="auto"
@@ -171,7 +180,7 @@ const CableRunCharts = ({ rows, cpu = [], memory = [], statsOpen = false }: Prop
           strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
-          tooltipExtraLines={toLagTooltipLines(rows, bucketSeconds, cpu)}
+          tooltipExtraLines={lagTooltipLines}
         />
       )}
 

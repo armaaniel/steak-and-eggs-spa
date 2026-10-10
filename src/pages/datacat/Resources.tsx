@@ -115,6 +115,16 @@ function Resources() {
     fetchPolicy: 'cache-only',
   })
 
+  const linesById = useMemo(() => {
+    const byId = new Map<string, ChartLine[]>()
+
+    for (const row of RESOURCE_ROWS) {
+      byId.set(row.id, toResourceLines(data?.dependencyHealth.find((health) => health.id === row.id)))
+    }
+
+    return byId
+  }, [data])
+
   function toggleOpen() {
     setIsOpen(!isOpen)
   }
@@ -125,7 +135,7 @@ function Resources() {
     }
 
     const health = data?.dependencyHealth.find(isThisResource)
-    const lines = toResourceLines(health)
+    const lines = linesById.get(row.id) ?? []
 
     return (
       <div key={row.id} className="lr-panels">
