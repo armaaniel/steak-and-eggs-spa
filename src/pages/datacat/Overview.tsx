@@ -42,32 +42,32 @@ function Overview() {
   const [requestsYLabelWidth, setRequestsYLabelWidth] = useState(0)
   const chartLeft = Math.max(latencyYLabelWidth, requestsYLabelWidth) + Y_LABEL_GAP
 
-  const { loading, error, data } = useQuery<OverviewData>(GET_OVERVIEW, {
+  const { loading, error, data, previousData } = useQuery<OverviewData>(GET_OVERVIEW, {
     variables: { range },
   })
 
   const isLoaded = useTransition(loading, data || error)
 
-  const buckets = dropEmptyBucketInProgress(data?.serviceTimeseries || [])
+  const buckets = dropEmptyBucketInProgress((data ?? previousData)?.serviceTimeseries || [])
 
   return (
     <>
-      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
         {error ? (
           <p className="ov-message">Unable to load the overview, please try again</p>
         ) : (
           <>
-            <div className="lr-panels">
+            <div className={`lr-panels chart-fade ${loading ? 'dimmed' : ''}`}>
               <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} selectedBucket={selectedBucket} />
             </div>
-            <div className="lr-panels">
+            <div className={`lr-panels chart-fade ${loading ? 'dimmed' : ''}`}>
               <RequestsChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
             </div>
           </>
         )}
       </div>
 
-      <Traces key={range} bucket={selectedBucket} />
+      <Traces bucket={selectedBucket} />
     </>
   )
 }

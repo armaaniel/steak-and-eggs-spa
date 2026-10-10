@@ -40,11 +40,11 @@ function Traces({ bucket }: Props) {
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
   const [sort, setSort] = useState<TraceSort | null>(null)
-  const [sortBucket, setSortBucket] = useState<string | null>(null)
-  const bucketKey = bucket?.bucket ?? null
+  const tableKey = `${range} ${bucket?.bucket ?? 'all'}`
+  const [sortKey, setSortKey] = useState(tableKey)
 
-  if (bucketKey !== sortBucket) {
-    setSortBucket(bucketKey)
+  if (tableKey !== sortKey) {
+    setSortKey(tableKey)
     setSort(null)
   }
 
@@ -70,7 +70,7 @@ function Traces({ bucket }: Props) {
 
   return (
     <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
-      <TraceTable key={bucketKey ?? 'all'} traceData={traces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
+      <TraceTable key={tableKey} traceData={traces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
     </div>
   )
 }
