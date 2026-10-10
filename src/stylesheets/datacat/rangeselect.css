@@ -59,6 +59,7 @@
 	height:32px;
 	padding:0;
 	border:1.5px solid var(--dc-border);
+	color:var(--dc-text);
 	font-size:16px;
 	transition:border-color 150ms;
 }
