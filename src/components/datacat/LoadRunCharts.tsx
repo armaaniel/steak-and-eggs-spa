@@ -100,6 +100,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
         height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
+        pinTooltip
       />
 
       <TimeSeriesChart
@@ -121,6 +122,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
         height={HEIGHT}
         strokeWidth={RUN_STROKE_WIDTH}
         tooltip
+        pinTooltip
         tooltipKeys={['rps', 'client', 'server']}
         tooltipExtraLines={toRpsLines(rows)}
       />
@@ -146,6 +148,7 @@ const LoadRunCharts = ({ rows, route, cpu = [], statsOpen = false }: Props) => {
           height={HEIGHT}
           strokeWidth={RUN_STROKE_WIDTH}
           tooltip
+          pinTooltip
         />
       )}
 

@@ -15,6 +15,11 @@ export interface ChartLine {
   formatValue?: (value: number) => string
 }
 
+interface PinnedPointer {
+  time: number
+  y: number
+}
+
 interface DrawnLine {
   chartLine: ChartLine
   path: string | undefined
@@ -43,6 +48,7 @@ interface Props {
   tooltip?: boolean
   tooltipKeys?: string[]
   tooltipExtraLines?: ChartLine[]
+  pinTooltip?: boolean
   strokeWidth?: number
   curve?: CurveFactory
 }
@@ -84,9 +90,15 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime = null, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = DEFAULT_HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
+  const [pinnedPointer, setPinnedPointer] = useState<PinnedPointer | null>(null)
+
+  if (pinnedTime === null && pinnedPointer !== null) {
+    setPinnedPointer(null)
+  }
+
   const clipId = useId()
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
@@ -262,8 +274,8 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     return findNearestPoint(chartLine.points, time)
   }
 
-  function findHoveredPoint(chartLine: ChartLine) {
-    return findPointAt(chartLine, hoveredTime)
+  function findTooltipPoint(chartLine: ChartLine) {
+    return findPointAt(chartLine, tooltipTime)
   }
 
   let legendTime = hoveredTime
@@ -347,7 +359,8 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       return
     }
 
-    let clickedTime = xScale.invert(mouseX).getTime()
+    const pointerTime = xScale.invert(mouseX).getTime()
+    let clickedTime = pointerTime
 
     if (lines.length > 0) {
       const nearestPoint = findNearestPoint(lines[0].points, clickedTime)
@@ -357,6 +370,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       }
     }
 
+    setPinnedPointer({ time: pointerTime, y: event.clientY - svgBox.top })
     setPinnedTime(clickedTime)
   }
 
@@ -387,9 +401,9 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   }
 
   function renderTooltipRow(chartLine: ChartLine) {
-    const hoveredPoint = findHoveredPoint(chartLine)
+    const tooltipPoint = findTooltipPoint(chartLine)
 
-    if (hoveredPoint === null || hoveredPoint.value === null) {
+    if (tooltipPoint === null || tooltipPoint.value === null) {
       return null
     }
 
@@ -399,15 +413,15 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
           <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
           {chartLine.label}
         </p>
-        <strong className="dc-tooltip-value">{formatLineValue(chartLine, hoveredPoint.value)}</strong>
+        <strong className="dc-tooltip-value">{formatLineValue(chartLine, tooltipPoint.value)}</strong>
       </>
     )
   }
 
   function renderTooltipLineRow(chartLine: ChartLine) {
-    const hoveredPoint = findHoveredPoint(chartLine)
+    const tooltipPoint = findTooltipPoint(chartLine)
 
-    if (hoveredPoint === null || hoveredPoint.value === null) {
+    if (tooltipPoint === null || tooltipPoint.value === null) {
       return null
     }
 
@@ -415,13 +429,13 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
       <div key={chartLine.key} className="dc-tooltip-row">
         <span className="dc-swatch" style={{ backgroundColor: chartLine.color }} />
         <span className="dc-tooltip-name">{chartLine.label}</span>
-        <strong>{formatLineValue(chartLine, hoveredPoint.value)}</strong>
+        <strong>{formatLineValue(chartLine, tooltipPoint.value)}</strong>
       </div>
     )
   }
 
   function findLineNearestPointer() {
-    if (pointerY === null) {
+    if (tooltipY === null) {
       return null
     }
 
@@ -429,13 +443,13 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     let nearestDistance = Infinity
 
     for (const chartLine of lines) {
-      const hoveredPoint = findHoveredPoint(chartLine)
+      const tooltipPoint = findTooltipPoint(chartLine)
 
-      if (hoveredPoint === null || hoveredPoint.value === null) {
+      if (tooltipPoint === null || tooltipPoint.value === null) {
         continue
       }
 
-      const distance = Math.abs(yScale(hoveredPoint.value) - pointerY)
+      const distance = Math.abs(yScale(tooltipPoint.value) - tooltipY)
 
       if (distance < nearestDistance) {
         nearestLine = chartLine
@@ -446,17 +460,17 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     return nearestLine
   }
 
-  function hasHoveredValue(chartLine: ChartLine) {
-    const hoveredPoint = findHoveredPoint(chartLine)
+  function hasTooltipValue(chartLine: ChartLine) {
+    const tooltipPoint = findTooltipPoint(chartLine)
 
-    return hoveredPoint !== null && hoveredPoint.value !== null
+    return tooltipPoint !== null && tooltipPoint.value !== null
   }
 
   function findTooltipLines() {
-    const extraLines = tooltipExtraLines.filter(hasHoveredValue)
+    const extraLines = tooltipExtraLines.filter(hasTooltipValue)
 
     if (tooltipKeys !== undefined) {
-      const candidates = [...lines.filter(hasHoveredValue), ...extraLines]
+      const candidates = [...lines.filter(hasTooltipValue), ...extraLines]
       const keyedLines: ChartLine[] = []
 
       for (const key of tooltipKeys) {
@@ -479,13 +493,28 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     return [nearestLine, ...extraLines]
   }
 
-  const tooltipLines = findTooltipLines()
-
   let cursorX: number | null = null
 
   if (hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
     cursorX = xScale(hoveredTime)
   }
+
+  let tooltipTime = hoveredTime
+  let tooltipX = cursorX
+  let tooltipY = pointerY
+
+  if (pinnedTime !== null) {
+    tooltipTime = pinnedTime
+    tooltipX = null
+    tooltipY = null
+
+    if (pinTooltip && pinnedPointer !== null) {
+      tooltipX = xScale(pinnedPointer.time)
+      tooltipY = pinnedPointer.y
+    }
+  }
+
+  const tooltipLines = findTooltipLines()
 
   let zeroY: number | null = null
 
@@ -530,8 +559,8 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
             {lines.map(renderHoveredDot)}
           </svg>
 
-          {tooltip && pinnedTime === null && pointerY !== null && cursorX !== null && tooltipLines.length > 0 && (
-            <div className="dc-tooltip" style={{ left: cursorX, top: pointerY, transform: TOOLTIP_STYLE_TRANSFORM }}>
+          {tooltip && tooltipX !== null && tooltipY !== null && tooltipLines.length > 0 && (
+            <div className="dc-tooltip" style={{ left: tooltipX, top: tooltipY, transform: TOOLTIP_STYLE_TRANSFORM }}>
               {tooltipLines.length === 1 ? renderTooltipRow(tooltipLines[0]) : tooltipLines.map(renderTooltipLineRow)}
             </div>
           )}
