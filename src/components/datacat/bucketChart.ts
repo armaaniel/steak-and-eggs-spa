@@ -2,8 +2,6 @@ import type { MouseEvent } from 'react'
 import { scaleTime, type ScaleTime } from 'd3-scale'
 import type { ServiceBucket } from '../../lib/types.ts'
 
-// What LatencyChart and RequestsChart have to agree on to line up bucket for bucket and hover together.
-
 export interface ChartBucket {
   start: number
   end: number
@@ -39,20 +37,16 @@ export interface XLabel {
   text: string
 }
 
-// Which chart the pointer is over and the bucket under it. Pages hold this so a hover on one chart shows on the other.
 export interface Hover {
   chart: 'latency' | 'requests' | 'uptime'
   index: number
 }
 
-// The bottom margin fits the time labels.
 export const HEIGHT = 180
 export const MARGIN = { top: 12, right: 12, bottom: 22 }
 export const PLOT_BOTTOM = HEIGHT - MARGIN.bottom
 export const Y_LABEL_GAP = 2
 
-// Charts call findWidestYLabel on every render, hovers included, so the canvas and font are set up
-// once and each label is measured once. --font-ui is a system font stack, so a width never changes.
 const labelWidths = new Map<string, number>()
 let measuringContext: CanvasRenderingContext2D | null = null
 
@@ -172,7 +166,6 @@ export function findXLabels(chartBuckets: TimeSpan[], xScale: ScaleTime<number, 
   return xLabels
 }
 
-// The bucket under the pointer, or null outside the plot.
 export const bucketAt = (e: MouseEvent<SVGSVGElement>, chartBuckets: TimeSpan[], x: ScaleTime<number, number>) => {
   const left = e.clientX - e.currentTarget.getBoundingClientRect().left
   const [lo, hi] = x.range()

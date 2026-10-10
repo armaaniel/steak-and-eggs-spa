@@ -83,7 +83,6 @@ const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredT
   const [width, setWidth] = useState(0)
   const [pointerOver, setPointerOver] = useState(false)
 
-  // unique per timeline, so a second one on the page never clips to this one's rectangle
   const clipId = useId()
 
   const measureResize = useCallback((timelineDiv: HTMLDivElement | null) => {

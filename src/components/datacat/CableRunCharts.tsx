@@ -78,7 +78,6 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
 
   const times = useMemo(() => rows.map((row) => toTime(row.at)), [rows])
 
-  // Rows sharing a time, or out of order, would make the smallest gap zero or negative and turn every rate into Infinity or a negative.
   const bucketSeconds = useMemo(() => {
     const deltas = times
       .slice(1)
