@@ -85,7 +85,11 @@ export function formatXAxisTime(date: Date) {
 const BUCKET_SETTLE_MS = 60 * 1000
 
 export const bucketFetchPolicy = (bucket: ServiceBucket | null) => {
-  if (bucket !== null && new Date(bucket.bucketEnd).getTime() + BUCKET_SETTLE_MS <= Date.now()) {
+  if (bucket === null) {
+    return 'network-only'
+  }
+
+  if (new Date(bucket.bucketEnd).getTime() + BUCKET_SETTLE_MS <= Date.now()) {
     return 'cache-first'
   }
 

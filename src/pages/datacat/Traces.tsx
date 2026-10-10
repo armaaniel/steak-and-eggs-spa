@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { useState } from 'react'
-import { gql, useQuery } from '@apollo/client'
+import { gql, useQuery, type WatchQueryFetchPolicy } from '@apollo/client'
 import TraceTable from '../../components/datacat/TraceTable'
 import TracesTitle from '../../components/datacat/TracesTitle'
 import useTransition from '../../hooks/useTransition.ts'
@@ -49,10 +49,21 @@ function Traces({ bucket }: Props) {
     setSort(null)
   }
 
+  const [latestRange, setLatestRange] = useState<string | null>(null)
+  let fetchPolicy: WatchQueryFetchPolicy = bucketFetchPolicy(bucket)
+
+  if (bucket === null && latestRange === range) {
+    fetchPolicy = 'cache-first'
+  }
+
   const { loading, error, data, previousData } = useQuery<TraceData>(GET_OVERVIEW_TRACES, {
     variables: { range, bucket: bucket?.bucket, bucketEnd: bucket?.bucketEnd, ...toSortVariables(sort) },
-    fetchPolicy: bucketFetchPolicy(bucket),
+    fetchPolicy,
   })
+
+  if (bucket === null && data !== undefined && latestRange !== range) {
+    setLatestRange(range)
+  }
 
   const recordsPerPage = 10
   const isLoaded = useTransition(loading, data || error)
