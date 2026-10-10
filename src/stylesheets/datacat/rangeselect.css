@@ -1,5 +1,6 @@
 .range-select {
 	position:relative;
+	align-self:center;
 	width:190px;
 	border:0.8px solid var(--dc-border-strong);
 	border-radius:6px;
@@ -26,7 +27,7 @@
 	align-items:center;
 	column-gap:8px;
 	width:100%;
-	height:32px;
+	height:28px;
 	padding:0 10px 0 4px;
 	border:none;
 	background:none;
