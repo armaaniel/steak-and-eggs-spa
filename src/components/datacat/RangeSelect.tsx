@@ -36,12 +36,8 @@ const RangeSelect = ({ value, onChange, loaded }: Props) => {
 
   return (
     <div ref={wrapRef} className={`range-select ${open ? 'open' : ''} ${loaded ? 'loaded' : ''}`}>
-      <button ref={triggerRef} type="button" className="range-select-trigger" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button ref={triggerRef} type="button" className="range-select-trigger" aria-haspopup="menu" aria-expanded={open} aria-label={DATACAT_RANGE_LABELS[value]} title={DATACAT_RANGE_LABELS[value]} onClick={() => setOpen(!open)}>
         <span className="range-select-pill">{value}</span>
-        <span className="range-select-label">{DATACAT_RANGE_LABELS[value]}</span>
-        <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
       </button>
 
       {open && (
