@@ -88,23 +88,26 @@
 }
 
 .uptime-run-details {
-	display:flex;
-	flex-direction:column;
-	row-gap:0.5rem;
-	max-height:0;
-	overflow:hidden;
+	display:grid;
+	grid-template-rows:0fr;
 	padding-left:calc(10px + 0.75rem);
 	font-family: var(--font-ui);
 	font-size:14px;
 	color:var(--dc-text);
-	opacity:0;
-	transition:opacity 150ms, max-height 150ms, padding-bottom 150ms;
+	transition:grid-template-rows 250ms ease-out, padding-bottom 250ms ease-out;
 }
 
 .uptime-run-details.open {
-	max-height:900px;
+	grid-template-rows:1fr;
 	padding-bottom:0.5rem;
-	opacity:1;
+}
+
+.uptime-run-details-inner {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.5rem;
+	min-height:0;
+	overflow:hidden;
 }
 
 .uptime-requests {

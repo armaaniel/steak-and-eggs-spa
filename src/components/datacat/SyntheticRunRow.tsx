@@ -31,22 +31,32 @@ interface Props {
   setSelectedTrace: (trace: Trace) => void
 }
 
+function renderPlaceholderRequest(_: unknown, index: number) {
+  return <div key={index} className="uptime-request" aria-hidden="true">&nbsp;</div>
+}
+
 const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [hasOpened, setHasOpened] = useState(false)
+
+  const toggleOpen = () => {
+    setIsOpen(!isOpen)
+    setHasOpened(true)
+  }
 
 	const status = run.result === 'pass' ? 'good' : run.result === 'fail' ? 'critical' : 'warn'
 	const label  = run.result === 'pass' ? 'Passed' : run.result === 'fail' ? 'Failed' : 'No verdict'
 
-  const { error, data } = useQuery<TracesData>(GET_RUN_TRACES, {
+  const { loading, error, data } = useQuery<TracesData>(GET_RUN_TRACES, {
     variables: { runId: run.runId },
-    skip: !isOpen,
+    skip: !hasOpened,
   })
 
   const traces = data?.syntheticRunTraces || []
 
   return (
     <div className="uptime-run">
-      <button type="button" className="uptime-run-trigger" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen}>
+      <button type="button" className="uptime-run-trigger" onClick={toggleOpen} aria-expanded={isOpen}>
         <span className={`uptime-swatch ${status}`} />
         <span className="uptime-run-status">{label}</span>
         <span className="uptime-run-time">{new Date(run.startedAt).toLocaleTimeString()}</span>
@@ -58,24 +68,28 @@ const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
         </svg>
       </button>
 
-      <div className={`uptime-run-details ${isOpen ? 'open' : ''}`}>
-        <p>Run: {run.runId}</p>
-        <p>Started: {new Date(run.startedAt).toLocaleString()}</p>
+      <div className={`uptime-run-details ${isOpen ? 'open' : ''}`} inert={!isOpen}>
+        <div className="uptime-run-details-inner">
+          <p>Run: {run.runId}</p>
+          <p>Started: {new Date(run.startedAt).toLocaleString()}</p>
 
-        <div className="uptime-requests">
-          {error ? (
-            <p>Unable to load requests, please try again</p>
-          ) : (
-            traces.map((trace) => (
-              <button key={trace.id} type="button" className={`uptime-request ${selectedTrace?.id === trace.id ? 'selected' : ''}`} onClick={() => setSelectedTrace(trace)}>
-                <span className={`uptime-swatch ${trace.status >= 500 ? 'critical' : 'good'}`} />
-                <span className="uptime-request-status">{trace.status}</span>
-                <span className="uptime-request-endpoint">{trace.endpoint}</span>
-                <span className="uptime-run-time">{new Date(trace.createdAt).toLocaleTimeString()}</span>
-                <span>{trace.duration?.toFixed(0)} ms</span>
-              </button>
-            ))
-          )}
+          <div className="uptime-requests">
+            {error ? (
+              <p>Unable to load requests, please try again</p>
+            ) : loading ? (
+              Array.from({ length: run.requestCount }, renderPlaceholderRequest)
+            ) : (
+              traces.map((trace) => (
+                <button key={trace.id} type="button" className={`uptime-request ${selectedTrace?.id === trace.id ? 'selected' : ''}`} onClick={() => setSelectedTrace(trace)}>
+                  <span className={`uptime-swatch ${trace.status >= 500 ? 'critical' : 'good'}`} />
+                  <span className="uptime-request-status">{trace.status}</span>
+                  <span className="uptime-request-endpoint">{trace.endpoint}</span>
+                  <span className="uptime-run-time">{new Date(trace.createdAt).toLocaleTimeString()}</span>
+                  <span>{trace.duration?.toFixed(0)} ms</span>
+                </button>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
