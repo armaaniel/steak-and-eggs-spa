@@ -51,20 +51,50 @@ export const MARGIN = { top: 12, right: 12, bottom: 22 }
 export const PLOT_BOTTOM = HEIGHT - MARGIN.bottom
 export const Y_LABEL_GAP = 2
 
-export function findWidestYLabel(labels: string[]) {
-  const context = document.createElement('canvas').getContext('2d')
+// Charts call findWidestYLabel on every render, hovers included, so the canvas and font are set up
+// once and each label is measured once. --font-ui is a system font stack, so a width never changes.
+const labelWidths = new Map<string, number>()
+let measuringContext: CanvasRenderingContext2D | null = null
+
+function findMeasuringContext() {
+  if (measuringContext !== null) {
+    return measuringContext
+  }
+
+  measuringContext = document.createElement('canvas').getContext('2d')
+
+  if (measuringContext !== null) {
+    const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-ui')
+    measuringContext.font = `11px ${fontFamily}`
+  }
+
+  return measuringContext
+}
+
+function measureLabel(label: string) {
+  const knownWidth = labelWidths.get(label)
+
+  if (knownWidth !== undefined) {
+    return knownWidth
+  }
+
+  const context = findMeasuringContext()
 
   if (context === null) {
     return 0
   }
 
-  const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-ui')
-  context.font = `11px ${fontFamily}`
+  const width = context.measureText(label).width
+  labelWidths.set(label, width)
 
+  return width
+}
+
+export function findWidestYLabel(labels: string[]) {
   let widest = 0
 
   for (const label of labels) {
-    widest = Math.max(widest, context.measureText(label).width)
+    widest = Math.max(widest, measureLabel(label))
   }
 
   return Math.ceil(widest)
