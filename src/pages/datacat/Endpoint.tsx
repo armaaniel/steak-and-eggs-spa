@@ -5,7 +5,6 @@ import TraceTable from '../../components/datacat/TraceTable'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
 import EndpointNav from '../../components/datacat/EndpointNav'
-import Select from '../../components/datacat/Select'
 import SegmentedToggle from '../../components/datacat/SegmentedToggle'
 import RangeSelect from '../../components/datacat/RangeSelect'
 import useEndpoint from '../../hooks/useEndpoint'
@@ -203,7 +202,8 @@ function EndpointView() {
     if (cache === 'UNCACHED') tableTraces = tableTraces.filter(usedDbOrApi)
   }
 
-  const statuses = [...new Set([...traceList, ...tableTraces].map((trace) => trace.status))]
+  const seenStatuses = [...traceList, ...tableTraces].map((trace) => trace.status)
+  const statuses = [...new Set(status === null ? seenStatuses : [...seenStatuses, status])].sort((a, b) => a - b)
   const requestBuckets = useMemo(() => dropEmptyBucketInProgress(charts?.serviceTimeseries || []), [charts])
   const cacheOptions = [
     { value: 'all', label: 'All' },
@@ -218,7 +218,7 @@ function EndpointView() {
         <EndpointNav method={method} path={path} endpoint={endpoint} />
 
         <div className="endpoint-filters">
-          <Select id="status-select" label="Status" value={statusFilter} onChange={setStatusFilter} options={statusOptions} loaded={isLoaded} />
+          <SegmentedToggle label="Status" value={statusFilter} onChange={setStatusFilter} options={statusOptions} loaded={isLoaded} />
           {usedRedis && <SegmentedToggle label="Served by" value={cacheFilter} onChange={setCacheFilter} options={cacheOptions} loaded={isLoaded} />}
           <RangeSelect value={range} onChange={setRange} loaded={isLoaded} />
         </div>
