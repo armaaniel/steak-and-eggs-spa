@@ -12,17 +12,11 @@ import DependencyDetailsPanel from '../../components/datacat/DependencyDetailsPa
 import StatsPanel from '../../components/datacat/StatsPanel'
 import useEndpoint from '../../hooks/useEndpoint'
 import useDatacatRange from '../../hooks/useDatacatRange'
-import useTransition from '../../hooks/useTransition.ts'
-import type { Detail } from '../../lib/types.ts'
+import type { Detail, TraceStats } from '../../lib/types.ts'
 
 const GET_STATS = gql`
   query getStats($endpoint: String!, $range: String) {
     traceStats(endpoint: $endpoint, range: $range) {
-      p99
-      p95
-      p50
-      totalRequests
-      errorRate
       usedRedis
       usedApi
     }
@@ -30,15 +24,10 @@ const GET_STATS = gql`
 `
 
 interface StatsData {
-  traceStats: TraceStats
+  traceStats: CacheFlags
 }
 
-interface TraceStats {
-  p99: number
-  p95: number
-  p50: number
-  totalRequests: number
-  errorRate: number
+interface CacheFlags {
   usedRedis: boolean
   usedApi: boolean
 }
@@ -174,14 +163,14 @@ function DCList() {
   const { method, endpoint } = useEndpoint()
   const isEndpointRoute = Boolean(method)
 
-  const { data, previousData, loading } = useQuery<StatsData>(GET_STATS, {
+  const [endpointStats, setEndpointStats] = useState<TraceStats | null>(null)
+
+  const { data, previousData } = useQuery<StatsData>(GET_STATS, {
     variables: { endpoint, range },
     skip: !isEndpointRoute,
   })
 
-  const stats = data?.traceStats
   const lastStats = (data ?? previousData)?.traceStats
-  const statsLoaded = useTransition(loading, data)
 
   const toggleStats = () => {
     const newValue = !statsOpen
@@ -218,13 +207,13 @@ function DCList() {
                 <StatsPanel
                   isOpen={statsOpen}
                   onToggle={toggleStats}
-                  loaded={statsLoaded && !loading && (stats?.totalRequests ?? 0) > 0}
-                  triggerContent={<>P50: {stats?.p50?.toFixed(0)}ms</>}
+                  loaded={(endpointStats?.totalRequests ?? 0) > 0}
+                  triggerContent={<>P50: {endpointStats?.p50?.toFixed(0)}ms</>}
                 >
-                  <p>P95: {stats?.p95?.toFixed(0)}ms</p>
-                  <p>P99: {stats?.p99?.toFixed(0)}ms</p>
-                  <p>Requests: {stats?.totalRequests?.toFixed(0)}</p>
-                  <p>Error Rate: {stats?.errorRate}%</p>
+                  <p>P95: {endpointStats?.p95?.toFixed(0)}ms</p>
+                  <p>P99: {endpointStats?.p99?.toFixed(0)}ms</p>
+                  <p>Requests: {endpointStats?.totalRequests?.toFixed(0)}</p>
+                  <p>Error Rate: {endpointStats?.errorRate}%</p>
                 </StatsPanel>
               )}
             </>
@@ -232,7 +221,7 @@ function DCList() {
         </div>
 
         <div className="dc-home-right">
-          <Outlet context={{ detail, setDetail, range, setRange, usedRedis: lastStats?.usedRedis ?? false, usedApi: lastStats?.usedApi ?? false }} />
+          <Outlet context={{ detail, setDetail, range, setRange, usedRedis: lastStats?.usedRedis ?? false, usedApi: lastStats?.usedApi ?? false, setEndpointStats }} />
         </div>
       </div>
     </div>

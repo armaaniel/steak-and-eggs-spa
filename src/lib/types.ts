@@ -86,6 +86,14 @@ export type Detail =
 	| {kind:'dependency'; node:DependencyNode}
 	| IngesterDetail
 
+export interface TraceStats {
+	p50: number
+	p95: number
+	p99: number
+	totalRequests: number
+	errorRate: number
+}
+
 export interface OutletContextType {
 	detail: Detail | null
 	setDetail: React.Dispatch<React.SetStateAction<Detail | null>>
@@ -93,6 +101,7 @@ export interface OutletContextType {
 	setRange: (range: DatacatRange) => void
 	usedRedis: boolean
 	usedApi: boolean
+	setEndpointStats: (stats: TraceStats | null) => void
 }
 
 export interface Column<T> {

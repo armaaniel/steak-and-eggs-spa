@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useApolloClient, useQuery } from '@apollo/client'
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
@@ -12,7 +12,7 @@ import type { DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { traceColumns, toSortVariables, type TraceSort } from '../../lib/traceColumns'
 import { Y_LABEL_GAP, bucketFetchPolicy, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
-import type { Trace, OutletContextType, ServiceBucket, ScatterPoint } from '../../lib/types.ts'
+import type { Trace, OutletContextType, ServiceBucket, ScatterPoint, TraceStats } from '../../lib/types.ts'
 import '../../stylesheets/datacat/overview.css'
 
 const GET_TRACES = gql`
@@ -52,6 +52,13 @@ const GET_ENDPOINT_CHARTS = gql`
       p50
       p95
       p99
+    }
+    traceStats(endpoint: $endpoint, range: $range, status: $status, cache: $cache) {
+      p50
+      p95
+      p99
+      totalRequests
+      errorRate
     }
   }
 `
@@ -108,6 +115,7 @@ interface CappedTraceData {
 interface ChartsData {
   traceScatter: ScatterPoint[]
   serviceTimeseries: ServiceBucket[]
+  traceStats: TraceStats
 }
 
 const usedCache = (trace: Trace) => Object.values(trace.breakdown ?? {}).some((call) => call.used_redis === true)
@@ -120,7 +128,7 @@ const inBucket = (trace: Trace, bucket: ServiceBucket) => {
 }
 
 function EndpointView() {
-  const { detail, setDetail, usedRedis, usedApi, range, setRange } = useOutletContext<OutletContextType>()
+  const { detail, setDetail, usedRedis, usedApi, range, setRange, setEndpointStats } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
 
@@ -162,6 +170,13 @@ function EndpointView() {
   })
 
   const charts = chartsData ?? previousChartsData
+  const shownStats = chartsLoading ? null : chartsData?.traceStats ?? null
+
+  useLayoutEffect(() => {
+    setEndpointStats(shownStats)
+
+    return () => setEndpointStats(null)
+  }, [shownStats, setEndpointStats])
 
   if (chartsLoading && hover !== null) {
     setHover(null)
