@@ -307,6 +307,7 @@ function Ingester() {
               <TimeSeriesChart
                 title="Throughput"
                 tooltip
+                drawIn
                 lines={rateLines}
                 from={timeWindow.from}
                 to={timeWindow.to}
@@ -329,6 +330,7 @@ function Ingester() {
               <TimeSeriesChart
                 title="Mean lag (ms)"
                 tooltip
+                drawIn
                 lines={lagLines}
                 from={timeWindow.from}
                 to={timeWindow.to}

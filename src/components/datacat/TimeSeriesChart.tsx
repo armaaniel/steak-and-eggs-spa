@@ -53,6 +53,7 @@ interface Props {
   defaultHiddenKeys?: string[]
   strokeWidth?: number
   curve?: CurveFactory
+  drawIn?: boolean
 }
 
 const MARGIN_TOP = 8
@@ -103,7 +104,7 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX, drawIn = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const [pinnedPointer, setPinnedPointer] = useState<PinnedPointer | null>(null)
@@ -278,7 +279,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   }
 
   function renderLine(drawnLine: DrawnLine) {
-    return <path key={drawnLine.chartLine.key} d={drawnLine.path} fill="none" stroke={drawnLine.chartLine.color} strokeWidth={strokeWidth} strokeLinejoin="round" />
+    return <path key={drawnLine.chartLine.key} className={drawIn ? 'dc-line-draw' : ''} d={drawnLine.path} pathLength={1} fill="none" stroke={drawnLine.chartLine.color} strokeWidth={strokeWidth} strokeLinejoin="round" />
   }
 
   function findPointAt(chartLine: ChartLine, time: number | null) {
