@@ -17,6 +17,14 @@
 	stroke:var(--dc-border);
 }
 
+.scatter-dots {
+	transition:opacity 150ms ease-out;
+}
+
+.scatter-dots.out {
+	opacity:0;
+}
+
 .positions-container.chart-card {
 	row-gap:0;
 }

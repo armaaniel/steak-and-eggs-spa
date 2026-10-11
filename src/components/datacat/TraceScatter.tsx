@@ -1,4 +1,4 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
+import { memo, useCallback, useLayoutEffect, useMemo, useState, type MouseEvent, type TransitionEvent } from 'react'
 import { scaleLinear, scaleLog } from 'd3-scale'
 import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, findXLabels, formatYAxisValue, timeScale, toChartBuckets, type Hover, type XLabel } from './bucketChart'
 import type { ScatterPoint, ServiceBucket } from '../../lib/types.ts'
@@ -13,6 +13,7 @@ interface Props {
   setYLabelWidth: (width: number) => void
   selectedId: string | null
   selectPoint: (point: ScatterPoint) => void
+  loading?: boolean
 }
 
 interface ChartPoint {
@@ -162,9 +163,23 @@ const AllDots = ({ dots, baseOpacity }: { dots: Dot[]; baseOpacity: number }) =>
 
 const AllDotsDrawnOnce = memo(AllDots)
 
-const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selectedId, selectPoint }: Props) => {
+const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selectedId, selectPoint, loading = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [shown, setShown] = useState({ points, buckets })
+  const [dotsHidden, setDotsHidden] = useState(false)
+  const changed = points !== shown.points || buckets !== shown.buckets
+  const fadingOut = loading || changed
+
+  if (changed && !loading && (dotsHidden || shown.points.length === 0)) {
+    setShown({ points, buckets })
+    setDotsHidden(false)
+    setHoveredIndex(null)
+  }
+
+  if (dotsHidden && !fadingOut) {
+    setDotsHidden(false)
+  }
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -186,8 +201,8 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
 
   const chartRight = width - MARGIN.right
 
-  const chartPoints = useMemo(() => points.map(toChartPoint), [points])
-  const chartBuckets = useMemo(() => toChartBuckets(buckets), [buckets])
+  const chartPoints = useMemo(() => shown.points.map(toChartPoint), [shown.points])
+  const chartBuckets = useMemo(() => toChartBuckets(shown.buckets), [shown.buckets])
 
   const yMax = findNiceMax(findSlowestDuration(chartPoints))
 
@@ -308,7 +323,7 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
 
   let hoveredDot: Dot | null = null
 
-  if (hoveredIndex !== null) {
+  if (hoveredIndex !== null && !fadingOut) {
     hoveredDot = dots[hoveredIndex] ?? null
   }
 
@@ -330,6 +345,12 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
     hoverTime = formatBucketTime(new Date(chartBuckets[hover.index].start))
   }
 
+  function handleDotsTransitionEnd(event: TransitionEvent<SVGGElement>) {
+    if (event.target === event.currentTarget && fadingOut) {
+      setDotsHidden(true)
+    }
+  }
+
   let cursor = 'default'
 
   if (hoveredDot !== null) {
@@ -347,11 +368,13 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
           {yLabelValues.map(renderGridline)}
           {xLabels.map(renderXLabel)}
 
-          <AllDotsDrawnOnce dots={dots} baseOpacity={findBaseOpacity(dots.length)} />
+          <g className={`scatter-dots ${fadingOut ? 'out' : ''}`} onTransitionEnd={handleDotsTransitionEnd}>
+            <AllDotsDrawnOnce dots={dots} baseOpacity={findBaseOpacity(dots.length)} />
 
-          {selectedDot !== null && (
-            <circle cx={selectedDot.x} cy={selectedDot.y} r={ACTIVE_DOT_RADIUS} fill={findDotColor(selectedDot.point)} stroke="var(--dc-text)" strokeWidth={1.5} />
-          )}
+            {selectedDot !== null && (
+              <circle cx={selectedDot.x} cy={selectedDot.y} r={ACTIVE_DOT_RADIUS} fill={findDotColor(selectedDot.point)} stroke="var(--dc-text)" strokeWidth={1.5} />
+            )}
+          </g>
 
           {hoveredDot !== null && (
             <circle cx={hoveredDot.x} cy={hoveredDot.y} r={ACTIVE_DOT_RADIUS} fill={findDotColor(hoveredDot.point)} stroke="white" strokeWidth={1} />

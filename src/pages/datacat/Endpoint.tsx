@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useApolloClient, useQuery } from '@apollo/client'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import TraceTable from '../../components/datacat/TraceTable'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
@@ -95,6 +95,7 @@ const GET_CAPPED_TRACES = gql`
 `
 
 const TRACE_LIMIT = 1000
+const NO_POINTS: ScatterPoint[] = []
 
 interface TraceData {
   traceList: Trace[]
@@ -202,7 +203,7 @@ function EndpointView() {
   }
 
   const statuses = [...new Set([...traceList, ...tableTraces].map((trace) => trace.status))]
-  const requestBuckets = dropEmptyBucketInProgress(charts?.serviceTimeseries || [])
+  const requestBuckets = useMemo(() => dropEmptyBucketInProgress(charts?.serviceTimeseries || []), [charts])
   const cacheOptions = [
     { value: 'all', label: 'All' },
     { value: 'CACHED', label: 'Cache' },
@@ -224,7 +225,7 @@ function EndpointView() {
 
       <div className={`positions-container chart-card ${isLoaded && chartsLoaded ? 'loaded' : ''}`}>
         <div className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
-          <TraceScatter points={charts?.traceScatter || []} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
+          <TraceScatter points={charts?.traceScatter ?? NO_POINTS} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} loading={chartsLoading} />
         </div>
 
         <div className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
