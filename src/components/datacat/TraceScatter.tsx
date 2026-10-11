@@ -39,7 +39,7 @@ const MANY_DOTS = 2800
 const FEW_DOTS_OPACITY = 0.6
 const MANY_DOTS_OPACITY = 0.4
 const HOVER_DISTANCE = 8
-const NICE_STEPS = [1, 2.5, 5]
+const NICE_STEPS = [1, 2, 5]
 
 const OK_COLOR = 'var(--dc-latency-p99)'
 const ERROR_COLOR = 'var(--dc-status-critical)'
