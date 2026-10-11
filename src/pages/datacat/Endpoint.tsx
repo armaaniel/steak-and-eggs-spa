@@ -175,6 +175,11 @@ function Endpoint() {
   const [sortBucket, setSortBucket] = useState<string | null>(null)
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: ServiceBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
+
+  // a selection belongs to the range it was made in, so switching ranges drops it instead of restoring it on the way back
+  if (picked !== null && picked.range !== range) {
+    setPicked(null)
+  }
   const bucketKey = selectedBucket?.bucket ?? null
 
   if (bucketKey !== sortBucket) {

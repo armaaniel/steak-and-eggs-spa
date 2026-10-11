@@ -68,6 +68,11 @@ function Uptime() {
 
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: SyntheticBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
+
+  // a selection belongs to the range it was made in, so switching ranges drops it instead of restoring it on the way back
+  if (picked !== null && picked.range !== range) {
+    setPicked(null)
+  }
   const selectBucket = (bucket: SyntheticBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
   const [drawerBucket, setDrawerBucket] = useState<SyntheticBucket | null>(null)
 
