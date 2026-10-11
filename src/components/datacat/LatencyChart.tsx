@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, timeScale, toChartBuckets, type Hover, type ChartBucket, type XLabel } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, formatYAxisValue, timeScale, toChartBuckets, type Hover, type ChartBucket, type XLabel } from './bucketChart'
 import type { ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -28,10 +28,6 @@ const P99_COLOR = 'var(--dc-latency-p99)'
 const P50_COLOR = 'var(--dc-latency-p50)'
 
 const DIMMED_OPACITY = 0.25
-
-function formatYAxisDuration(ms: number) {
-  return ms.toLocaleString('en-us', { maximumFractionDigits: 2 })
-}
 
 function formatLegendDuration(ms: number | null) {
   if (ms === null) {
@@ -137,7 +133,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
   const yScale = scaleLinear().domain([0, yMax]).nice(Y_LABEL_COUNT).range([chartBottom, chartTop])
 
   const yLabelValues = yScale.ticks(Y_LABEL_COUNT)
-  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisDuration))
+  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisValue))
 
   useLayoutEffect(() => {
     setYLabelWidth(yLabelWidth)
@@ -209,7 +205,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
       <g key={ms}>
         <line className="dc-grid" x1={chartLeft} x2={chartRight} y1={gridlineY} y2={gridlineY} />
         <text x={chartLeft - Y_LABEL_GAP} y={gridlineY} dy="0.32em" textAnchor="end">
-          {formatYAxisDuration(ms)}
+          {formatYAxisValue(ms)}
         </text>
       </g>
     )

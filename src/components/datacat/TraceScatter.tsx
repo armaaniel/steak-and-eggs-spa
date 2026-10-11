@@ -1,6 +1,6 @@
 import { memo, useCallback, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleLog } from 'd3-scale'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, findXLabels, timeScale, toChartBuckets, type Hover, type XLabel } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, findXLabels, formatYAxisValue, timeScale, toChartBuckets, type Hover, type XLabel } from './bucketChart'
 import type { ScatterPoint, ServiceBucket } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
@@ -122,10 +122,6 @@ function findBaseOpacity(dotCount: number) {
   return scaleLinear().domain([FEW_DOTS, MANY_DOTS]).range([FEW_DOTS_OPACITY, MANY_DOTS_OPACITY]).clamp(true)(dotCount)
 }
 
-function formatYAxisDuration(ms: number) {
-  return ms.toLocaleString('en-us')
-}
-
 function formatTooltipDuration(ms: number) {
   if (ms < 1) {
     return '<1 ms'
@@ -200,7 +196,7 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
   }, [yMax])
 
   const yLabelValues = findYLabelValues(yMax)
-  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisDuration))
+  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisValue))
 
   useLayoutEffect(() => {
     setYLabelWidth(yLabelWidth)
@@ -245,7 +241,7 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
       <g key={ms}>
         <line className="dc-grid" x1={chartLeft} x2={chartRight} y1={gridlineY} y2={gridlineY} />
         <text x={chartLeft - Y_LABEL_GAP} y={gridlineY} dy="0.32em" textAnchor="end">
-          {formatYAxisDuration(ms)}
+          {formatYAxisValue(ms)}
         </text>
       </g>
     )

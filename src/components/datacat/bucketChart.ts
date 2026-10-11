@@ -94,6 +94,14 @@ export function findWidestYLabel(labels: string[]) {
   return Math.ceil(widest)
 }
 
+export function formatYAxisValue(value: number) {
+  if (value < 1000) {
+    return value.toLocaleString('en-us', { maximumFractionDigits: 2 })
+  }
+
+  return `${(value / 1000).toLocaleString('en-us', { maximumFractionDigits: 1 })}k`
+}
+
 export function formatXAxisTime(date: Date) {
   // Any time other than midnight: "18:00"
   if (date.getHours() !== 0 || date.getMinutes() !== 0) {

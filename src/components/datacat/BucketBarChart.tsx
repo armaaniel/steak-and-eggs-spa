@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
-import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, timeScale, type BarSeries, type ChartBar, type Hover, type XLabel } from './bucketChart'
+import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, formatYAxisValue, timeScale, type BarSeries, type ChartBar, type Hover, type XLabel } from './bucketChart'
 import '../../stylesheets/datacat/loadrun.css'
 import '../../stylesheets/datacat/charts.css'
 
@@ -30,10 +30,6 @@ const FEW_BARS = 13
 const MANY_BARS = 26
 const FEW_BARS_PADDING = 0.77
 const MANY_BARS_PADDING = 0.55
-
-function formatYAxisCount(count: number) {
-  return count.toLocaleString('en-us')
-}
 
 function findBarPadding(barCount: number) {
   return scaleLinear().domain([FEW_BARS, MANY_BARS]).range([FEW_BARS_PADDING, MANY_BARS_PADDING]).clamp(true)(barCount)
@@ -109,7 +105,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
   const yScale = scaleLinear().domain([0, yMax]).nice(Y_LABEL_COUNT).range([chartBottom, chartTop])
 
   const yLabelValues = yScale.ticks(Y_LABEL_COUNT).filter(Number.isInteger)
-  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisCount))
+  const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisValue))
 
   useLayoutEffect(() => {
     setYLabelWidth(yLabelWidth)
@@ -142,7 +138,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
       <g key={count}>
         <line className="dc-grid" x1={chartLeft} x2={chartRight} y1={gridlineY} y2={gridlineY} />
         <text x={chartLeft - Y_LABEL_GAP} y={gridlineY} dy="0.32em" textAnchor="end">
-          {formatYAxisCount(count)}
+          {formatYAxisValue(count)}
         </text>
       </g>
     )
