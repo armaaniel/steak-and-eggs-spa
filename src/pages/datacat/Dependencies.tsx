@@ -93,11 +93,11 @@ const RANK: Record<Status, number> = { none: 0, good: 1, warn: 2, critical: 3 }
 const worst = (a: Status, b: Status) => (RANK[a] >= RANK[b] ? a : b)
 
 const formatReading = ({ unit, now, peak, total }: DependencyReading, range: DatacatRange) => {
-  if (total !== null) return `${Math.round(total).toLocaleString()} in the last ${range}`
+  if (total !== null) return `${Math.round(total).toLocaleString()} (${range})`
   if (now === null) return '-'
   if (unit === 'bytes') return `${(now / GB).toFixed(1)} GB`
-  if (unit === 'percent') return `${now.toFixed(1)}% now, ${(peak ?? now).toFixed(1)}% peak in the last ${range}`
-  return `${Math.round(now)} now, ${Math.round(peak ?? now)} peak in the last ${range}`
+  if (unit === 'percent') return `${now.toFixed(1)}% now · ${(peak ?? now).toFixed(1)}% peak (${range})`
+  return `${Math.round(now)} now · ${Math.round(peak ?? now)} peak (${range})`
 }
 
 const cloudwatch = (health: DependencyHealth | undefined, range: DatacatRange) => {
