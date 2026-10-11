@@ -1,3 +1,5 @@
+import DetailRows from './DetailRows'
+import { toShortTime } from '../../lib/utils.ts'
 import type { ConnectionWithID } from '../../lib/types.ts'
 
 interface Props {
@@ -8,20 +10,22 @@ const CableConnectionDetailsPanel = ({ connection }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
-        <p>Started At: {new Date(connection.startedAt).toLocaleString()}</p>
-        <p>Alive?: {connection.connectionState}</p>
+        <DetailRows
+          rows={[
+            { label: 'Started', value: toShortTime(connection.startedAt) },
+            { label: 'State', value: connection.connectionState === 'true' ? 'open' : 'closed' },
+          ]}
+          inline
+        />
 
         {connection.subscriptions.length > 0 && (
-          <div>
-            <p>Subscriptions:</p>
-            <div className="trace-breakdown">
-              {connection.subscriptions.map((sub, index) => (
-                <div key={index}>
-                  <p>channel: {sub.channel}</p>
-                  <p>symbol: {sub.symbol}</p>
-                </div>
-              ))}
-            </div>
+          <div className="dc-detail-list">
+            <p className="dc-detail-label">Subscriptions</p>
+            {connection.subscriptions.map((sub, index) => (
+              <p key={index}>
+                {sub.channel} · {sub.symbol}
+              </p>
+            ))}
           </div>
         )}
       </div>
