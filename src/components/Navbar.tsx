@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, startTransition } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import Searchbar from './Searchbar'
 import Logo from './Logo'
@@ -25,8 +25,10 @@ function Navbar() {
     localStorage.removeItem('authToken')
     localStorage.removeItem('username')
     resetConsumer()
-    setToken(null)
-    navigate('/')
+    startTransition(() => {
+      setToken(null)
+      navigate('/')
+    })
   }
 
   return (
