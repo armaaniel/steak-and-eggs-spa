@@ -58,7 +58,7 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
                 { label: 'Last seen', value: formatTime(detail.boot.lastSeenAt) },
                 { label: 'Lifetime', value: toDuration(detail.boot.durationSeconds) },
                 { label: 'Reconnects', value: detail.boot.reconnects },
-                { label: 'Exit', value: detail.boot.exitState === 'none' ? 'no sigterm' : detail.boot.exitState },
+                { label: 'Ended', value: detail.boot.exitState === 'none' ? 'no sigterm' : detail.boot.exitState },
               ]}
               inline
             />
@@ -82,7 +82,7 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
                 { label: 'Events', value: Number(detail.connection.events ?? 0).toLocaleString() },
                 { label: 'p99 mean lag', value: detail.connection.p99MeanExcessMs === null ? '-' : `${detail.connection.p99MeanExcessMs.toLocaleString()} ms` },
                 { label: 'State', value: detail.connection.state },
-                { label: 'Exit', value: detail.connection.endedBy },
+                { label: 'Ended', value: detail.connection.endedBy },
               ]}
               inline
             />

@@ -164,7 +164,7 @@ const bootColumns: Column<BootRow>[] = [
   { key: 'durationSeconds', label: 'Lifetime', sortable: false, render: (boot) => toDuration(boot.durationSeconds) },
   { key: 'connections', label: 'Connections', sortable: false, render: (boot) => boot.connections },
   { key: 'reconnects', label: 'Reconnects', sortable: false, render: (boot) => boot.reconnects },
-  { key: 'exitState', label: 'Exit', sortable: false, render: (boot) => (boot.exitState === 'none' ? 'no sigterm' : boot.exitState) },
+  { key: 'exitState', label: 'Ended', sortable: false, render: (boot) => (boot.exitState === 'none' ? 'no sigterm' : boot.exitState) },
 ]
 
 const connectionColumns: Column<ConnectionRow>[] = [
@@ -173,7 +173,7 @@ const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? toShortTime(connection.firstMessageAt) : 'none') },
   { key: 'events', label: 'Events', sortable: false, render: (connection) => Number(connection.events ?? 0).toLocaleString() },
   { key: 'p99MeanExcessMs', label: 'p99 Mean Lag', sortable: false, render: (connection) => (connection.p99MeanExcessMs === null ? '-' : `${connection.p99MeanExcessMs.toLocaleString()} ms`) },
-  { key: 'endedBy', label: 'Exit', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },
+  { key: 'endedBy', label: 'Ended', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${toShortTime(connection.endedAt)}` : connection.endedBy) },
 ]
 
 type IngesterRange = DatacatRange | 'session'
