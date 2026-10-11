@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import useClickOutside from '../../hooks/useClickOutside'
 import '../../stylesheets/datacat/select.css'
 
-interface Option<T> {
+export interface Option<T> {
   value: T
   label: string
+  pill?: string
 }
 
 interface Props<T> {
@@ -13,9 +14,10 @@ interface Props<T> {
   onChange: (value: T) => void
   options: Option<T>[]
   loaded: boolean
+  align?: 'left' | 'right'
 }
 
-const Select = <T extends string | number>({ label, value, onChange, options, loaded }: Props<T>) => {
+const Select = <T extends string | number>({ label, value, onChange, options, loaded, align = 'left' }: Props<T>) => {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -43,16 +45,17 @@ const Select = <T extends string | number>({ label, value, onChange, options, lo
   const selected = options.find((option) => option.value === value)
 
   return (
-    <div ref={wrapRef} className={`dc-select ${open ? 'open' : ''} ${loaded ? 'loaded' : ''}`}>
-      <button ref={triggerRef} type="button" className="dc-select-trigger" aria-haspopup="menu" aria-expanded={open} title={label} onClick={() => setOpen(!open)}>
-        {selected?.label}
+    <div ref={wrapRef} className={`dc-select ${loaded ? 'loaded' : ''}`}>
+      <button ref={triggerRef} type="button" className={`dc-select-trigger ${selected?.pill ? 'pill' : ''}`} aria-haspopup="menu" aria-expanded={open} aria-label={selected?.label} title={selected?.label} onClick={() => setOpen(!open)}>
+        {selected?.pill ?? selected?.label}
       </button>
 
       {open && (
-        <ul className="dc-select-options" role="menu" aria-label={label}>
+        <ul className={`dc-select-options ${align}`} role="menu" aria-label={label}>
           {options.map((option) => (
             <li key={option.value} role="none">
-              <button type="button" className="dc-select-option" role="menuitemradio" aria-checked={option.value === value} onClick={() => handleSelect(option.value)}>
+              <button type="button" className={`dc-select-option ${option.pill ? 'pill' : ''}`} role="menuitemradio" aria-checked={option.value === value} onClick={() => handleSelect(option.value)}>
+                {option.pill && <span className="dc-select-pill">{option.pill}</span>}
                 {option.label}
               </button>
             </li>
