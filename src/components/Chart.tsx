@@ -16,8 +16,8 @@ interface Size {
 }
 
 const MARGIN = { top: 28, right: 5, bottom: 5, left: 5 }
-const LOW_PADDING = 0.95
-const HIGH_PADDING = 1.05
+const RANGE_PADDING = 0.1
+const FLAT_PADDING = 1
 const LINE_WIDTH = 2
 const DOT_RADIUS = 4
 const DOT_RING_WIDTH = 2
@@ -31,7 +31,9 @@ function findValueRange(chartData: ChartData[]) {
     highest = Math.max(highest, point.value)
   }
 
-  return [lowest * LOW_PADDING, highest * HIGH_PADDING]
+  const padding = (highest - lowest) * RANGE_PADDING || FLAT_PADDING
+
+  return [lowest - padding, highest + padding]
 }
 
 function placePoints(chartData: ChartData[], size: Size) {
