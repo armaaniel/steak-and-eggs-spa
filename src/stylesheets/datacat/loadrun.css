@@ -27,11 +27,25 @@
 	column-gap:0.75rem;
 	row-gap:0.5rem;
 	flex-wrap:wrap;
-	margin-bottom:0.75rem;
 }
 
 .lr-header .endpoint-header-container {
 	margin-left:auto;
+}
+
+.lr-header .dc-select-trigger {
+	height:28px;
+	font-size:14px;
+	font-weight:400;
+}
+
+.lr-header .segmented-toggle {
+	height:28px;
+}
+
+.lr-header .segmented-toggle-option {
+	font-size:14px;
+	font-weight:400;
 }
 
 .lr-stats {

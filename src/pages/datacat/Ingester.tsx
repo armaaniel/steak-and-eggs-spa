@@ -260,7 +260,7 @@ function Ingester() {
 
   return (
     <>
-      <div className="ing-header">
+      <div className="range-header">
         <RangeSelect value={range} onChange={changeRange} session={showSession} onSession={() => changeRange('session')} loaded={isLoaded} />
       </div>
 
