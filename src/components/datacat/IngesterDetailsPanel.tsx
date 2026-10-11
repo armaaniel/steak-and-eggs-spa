@@ -1,5 +1,6 @@
+import DetailRows from './DetailRows'
 import { toDuration } from '../../lib/utils.ts'
-import type { IngesterDetail, IngesterTransition } from '../../lib/types.ts'
+import type { IngesterConnection, IngesterDetail, IngesterTransition } from '../../lib/types.ts'
 
 interface Props {
   detail: IngesterDetail
@@ -9,15 +10,34 @@ const toValue = (value: unknown) => (value !== null && typeof value === 'object'
 
 const byTime = (a: { at: string }, b: { at: string }) => new Date(a.at).getTime() - new Date(b.at).getTime()
 
-const TransitionLines = ({ transitions }: { transitions: IngesterTransition[] }) => (
-  <div className="call-breakdown">
-    <p>Transitions:</p>
+const formatTime = (at: string | null) => (at ? new Date(at).toLocaleString() : 'none')
+
+const ConnectionList = ({ connections }: { connections: IngesterConnection[] }) => (
+  <div className="dc-detail-list">
+    <p className="dc-detail-label">Connections</p>
+    {[...connections].sort((a, b) => byTime({ at: a.spawnedAt }, { at: b.spawnedAt })).map((connection) => (
+      <div key={connection.connectionId}>
+        <p className="dc-detail-item">
+          <span>{formatTime(connection.spawnedAt)}</span>
+          <span>{toDuration(connection.durationSeconds)}</span>
+        </p>
+        <p className="dc-detail-muted">exit {connection.endedBy}</p>
+      </div>
+    ))}
+  </div>
+)
+
+const TransitionList = ({ transitions }: { transitions: IngesterTransition[] }) => (
+  <div className="dc-detail-list">
+    <p className="dc-detail-label">Transitions</p>
     {[...transitions].sort(byTime).map((transition) => (
       <div key={transition.id}>
-        {transition.cause ?? '-'}
-        <p>{new Date(transition.at).toLocaleString()}</p>
+        <p className="dc-detail-item">
+          <span>{transition.cause ?? '-'}</span>
+          <span>{formatTime(transition.at)}</span>
+        </p>
         {Object.entries(transition.detail || {}).map(([key, value]) => (
-          <p key={key} className="ing-detail-value">
+          <p key={key} className="dc-detail-muted ing-detail-value">
             {key}: {toValue(value)}
           </p>
         ))}
@@ -32,44 +52,49 @@ const IngesterDetailsPanel = ({ detail }: Props) => {
       <div className="trace-details">
         {detail.kind === 'boot' && (
           <>
-            <p>Boot: {detail.boot.bootId}</p>
-            <p>Started: {new Date(detail.boot.startedAt).toLocaleString()}</p>
-            <p>Last seen: {new Date(detail.boot.lastSeenAt).toLocaleString()}</p>
-            <p>Lifetime: {toDuration(detail.boot.durationSeconds)}</p>
-            <p>Reconnects: {detail.boot.reconnects}</p>
-            <p>Exit: {detail.boot.exitState === 'none' ? 'no sigterm' : detail.boot.exitState}</p>
+            <DetailRows
+              rows={[
+                { label: 'Started', value: formatTime(detail.boot.startedAt) },
+                { label: 'Last seen', value: formatTime(detail.boot.lastSeenAt) },
+                { label: 'Lifetime', value: toDuration(detail.boot.durationSeconds) },
+                { label: 'Reconnects', value: detail.boot.reconnects },
+                { label: 'Exit', value: detail.boot.exitState === 'none' ? 'no sigterm' : detail.boot.exitState },
+              ]}
+              inline
+            />
 
-            {detail.connections.length > 0 && (
-              <div className="call-breakdown">
-                <p>Connections:</p>
-                {[...detail.connections].sort((a, b) => byTime({ at: a.spawnedAt }, { at: b.spawnedAt })).map((connection) => (
-                  <div key={connection.connectionId}>
-                    {new Date(connection.spawnedAt).toLocaleString()}
-                    <p>lifetime {toDuration(connection.durationSeconds)}, exit {connection.endedBy}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+            {detail.connections.length > 0 && <ConnectionList connections={detail.connections} />}
+            {detail.transitions.length > 0 && <TransitionList transitions={detail.transitions} />}
 
-            {detail.transitions.length > 0 && <TransitionLines transitions={detail.transitions} />}
+            <DetailRows rows={[{ label: 'Boot ID', value: detail.boot.bootId }]} />
           </>
         )}
 
         {detail.kind === 'connection' && (
           <>
-            <p>Connection: {detail.connection.connectionId}</p>
-            <p>Boot: {detail.connection.bootId}</p>
-            <p>Started: {new Date(detail.connection.spawnedAt).toLocaleString()}</p>
-            <p>First message: {detail.connection.firstMessageAt ? new Date(detail.connection.firstMessageAt).toLocaleString() : 'none'}</p>
-            <p>Last message: {detail.connection.lastMessageAt ? new Date(detail.connection.lastMessageAt).toLocaleString() : 'none'}</p>
-            <p>Last seen: {new Date(detail.connection.lastSeenAt).toLocaleString()}</p>
-            <p>Lifetime: {toDuration(detail.connection.durationSeconds)}</p>
-            <p>Events: {Number(detail.connection.events ?? 0).toLocaleString()}</p>
-            <p>p99 mean lag: {detail.connection.p99MeanExcessMs === null ? '-' : `${detail.connection.p99MeanExcessMs.toLocaleString()} ms`}</p>
-            <p>State: {detail.connection.state}</p>
-            <p>Exit: {detail.connection.endedBy}</p>
+            <DetailRows
+              rows={[
+                { label: 'Started', value: formatTime(detail.connection.spawnedAt) },
+                { label: 'First message', value: formatTime(detail.connection.firstMessageAt) },
+                { label: 'Last message', value: formatTime(detail.connection.lastMessageAt) },
+                { label: 'Last seen', value: formatTime(detail.connection.lastSeenAt) },
+                { label: 'Lifetime', value: toDuration(detail.connection.durationSeconds) },
+                { label: 'Events', value: Number(detail.connection.events ?? 0).toLocaleString() },
+                { label: 'p99 mean lag', value: detail.connection.p99MeanExcessMs === null ? '-' : `${detail.connection.p99MeanExcessMs.toLocaleString()} ms` },
+                { label: 'State', value: detail.connection.state },
+                { label: 'Exit', value: detail.connection.endedBy },
+              ]}
+              inline
+            />
 
-            {detail.transitions.length > 0 && <TransitionLines transitions={detail.transitions} />}
+            {detail.transitions.length > 0 && <TransitionList transitions={detail.transitions} />}
+
+            <DetailRows
+              rows={[
+                { label: 'Connection ID', value: detail.connection.connectionId },
+                { label: 'Boot ID', value: detail.connection.bootId },
+              ]}
+            />
           </>
         )}
       </div>

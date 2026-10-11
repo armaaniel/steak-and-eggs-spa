@@ -200,44 +200,33 @@
 
 .dc-detail-rows dd {
 	margin:0;
-	font-variant-numeric:tabular-nums;
 	overflow-wrap:anywhere;
 }
 
 .dc-detail-rows.inline div {
-	flex-direction:row;
-	column-gap:0.35rem;
+	display:block;
+}
+
+.dc-detail-rows.inline dt,
+.dc-detail-rows.inline dd {
+	display:inline;
 }
 
 .dc-detail-rows.inline dt {
 	font-size:inherit;
 }
 
-.dc-detail-rows.inline dt::after {
-	content:':';
-}
-
-.dc-detail-calls {
+.dc-detail-list {
 	display:flex;
 	flex-direction:column;
 	row-gap:0.5rem;
 }
 
-.dc-detail-call {
+.dc-detail-item {
 	display:flex;
 	justify-content:space-between;
 	column-gap:0.5rem;
-	font-variant-numeric:tabular-nums;
 	overflow-wrap:anywhere;
-}
-
-.call-breakdown {
-	display:flex;
-	flex-direction:column;
-}
-
-.call-breakdown div + div {
-  margin-top: 16px;
 }
 
 .trace-breakdown {

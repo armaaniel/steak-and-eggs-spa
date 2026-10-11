@@ -19,7 +19,10 @@ const DetailRows = ({ rows, inline = false }: Props) => {
     <dl className={`dc-detail-rows ${inline ? 'inline' : ''}`}>
       {rows.map((row) => (
         <div key={row.label}>
-          <dt>{row.label}</dt>
+          <dt>
+            {row.label}
+            {inline && <>:&nbsp;</>}
+          </dt>
           <dd>{row.value}</dd>
         </div>
       ))}

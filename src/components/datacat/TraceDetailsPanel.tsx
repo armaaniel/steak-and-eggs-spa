@@ -62,11 +62,11 @@ const TraceDetailsPanel = ({ trace }: Props) => {
         <DetailRows rows={errorRows} />
 
         {calls.length > 0 && (
-          <div className="dc-detail-calls">
+          <div className="dc-detail-list">
             <p className="dc-detail-label">Service calls</p>
             {calls.map(([name, call]) => (
               <div key={name}>
-                <p className="dc-detail-call">
+                <p className="dc-detail-item">
                   <span>{name}</span>
                   <span>{formatMs(call.duration, 1)}</span>
                 </p>
