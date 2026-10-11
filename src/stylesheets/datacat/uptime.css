@@ -15,7 +15,7 @@
 }
 
 .uptime-swatch.critical {
-	background-color:var(--dc-status-critical);
+	background-color:var(--dc-series-2);
 }
 
 .uptime-runs-title {
@@ -168,7 +168,7 @@
 }
 
 .uptime-slo-value.critical {
-	color:var(--dc-status-critical);
+	color:var(--dc-series-2);
 }
 
 .uptime-slo-detail {

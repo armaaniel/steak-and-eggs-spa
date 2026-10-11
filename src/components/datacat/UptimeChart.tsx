@@ -15,7 +15,7 @@ interface Props {
 const HEALTHY_COLOR = 'var(--dc-healthy)'
 const HEALTHY_HOVER_COLOR = '#95BA78'
 const INCOMPLETE_COLOR = 'var(--dc-status-warn)'
-const FAILING_COLOR = 'var(--dc-status-critical)'
+const FAILING_COLOR = 'var(--dc-series-2)'
 
 const UPTIME_SERIES: BarSeries[] = [
   { key: 'healthy', label: 'healthy', color: HEALTHY_COLOR, hoverColor: HEALTHY_HOVER_COLOR },
