@@ -1,3 +1,4 @@
+import DetailRows from './DetailRows'
 import type { DependencyNode } from '../../lib/types.ts'
 import '../../stylesheets/datacat/dependencies.css'
 
@@ -9,21 +10,12 @@ const DependencyDetailsPanel = ({ node }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
-        <p className="dep-detail-role">{node.role}</p>
+        <p className="dc-detail-muted">{node.role}</p>
         <p>{node.statusLabel}</p>
 
-        {node.metrics.length > 0 && (
-          <dl className="dep-detail-metrics">
-            {node.metrics.map((metric) => (
-              <div key={metric.label}>
-                <dt>{metric.label}</dt>
-                <dd>{metric.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
+        <DetailRows rows={node.metrics} />
 
-        {node.note && <p className="dep-detail-note">{node.note}</p>}
+        {node.note && <p className="dc-detail-muted">{node.note}</p>}
       </div>
     </div>
   )
