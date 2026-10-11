@@ -21,6 +21,8 @@ const FLAT_PADDING = 1
 const LINE_WIDTH = 2
 const DOT_RADIUS = 4
 const DOT_RING_WIDTH = 2
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MARKET_DATE = /^\d{4}-\d{2}-\d{2}/
 
 function findValueRange(chartData: ChartData[]) {
   let lowest = Infinity
@@ -51,6 +53,25 @@ function placePoints(chartData: ChartData[], size: Size) {
   return chartData.map(function (point, index) {
     return { x: xScale(index) ?? MARGIN.left, y: yScale(point.value) }
   })
+}
+
+function formatHoverDate(date: string) {
+  if (!MARKET_DATE.test(date)) {
+    return date
+  }
+
+  const [day, time] = date.split(' ')
+  const [year, month, dayOfMonth] = day.split('-')
+  const monthDay = `${MONTHS[Number(month) - 1]} ${Number(dayOfMonth)}`
+
+  if (time === undefined) {
+    return `${monthDay}, ${year}`
+  }
+
+  const [hour, minute] = time.split(':')
+  const period = Number(hour) < 12 ? 'AM' : 'PM'
+
+  return `${monthDay}, ${Number(hour) % 12 || 12}:${minute} ${period}`
 }
 
 function findNearestIndex(placedPoints: ScreenPoint[], mouseX: number) {
@@ -176,7 +197,7 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
 
       {hoveredPoint !== null && hoveredSpot !== null && (
         <div ref={labelRef} className="chart-label" style={{ left: labelX }}>
-          {hoveredPoint.date}
+          {formatHoverDate(hoveredPoint.date)}
         </div>
       )}
     </div>
