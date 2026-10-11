@@ -12,6 +12,7 @@ interface Props {
   chartLeft: number
   setYLabelWidth: (width: number) => void
   selectedId: string | null
+  selectedBucket: ServiceBucket | null
   selectPoint: (point: ScatterPoint) => void
   loading?: boolean
 }
@@ -164,7 +165,7 @@ const AllDots = ({ dots, baseOpacity }: { dots: Dot[]; baseOpacity: number }) =>
 
 const AllDotsDrawnOnce = memo(AllDots)
 
-const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selectedId, selectPoint, loading = false }: Props) => {
+const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selectedId, selectedBucket, selectPoint, loading = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [shown, setShown] = useState({ points, buckets })
@@ -352,6 +353,8 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
 
   if (hoveredDot !== null) {
     hoverTime = formatHoverTime(new Date(hoveredDot.point.at))
+  } else if (selectedBucket !== null) {
+    hoverTime = formatBucketTime(new Date(selectedBucket.bucket))
   } else if (hover !== null && chartBuckets[hover.index] !== undefined) {
     hoverTime = formatBucketTime(new Date(chartBuckets[hover.index].start))
   }

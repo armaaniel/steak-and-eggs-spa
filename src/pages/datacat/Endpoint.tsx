@@ -226,7 +226,7 @@ function EndpointView() {
 
       <div className={`positions-container chart-card ${isLoaded && chartsLoaded ? 'loaded' : ''}`}>
         <div className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
-          <TraceScatter points={charts?.traceScatter ?? NO_POINTS} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} loading={chartsLoading} />
+          <TraceScatter points={charts?.traceScatter ?? NO_POINTS} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectedBucket={selectedBucket} selectPoint={openPoint} loading={chartsLoading} />
         </div>
 
         <div className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
