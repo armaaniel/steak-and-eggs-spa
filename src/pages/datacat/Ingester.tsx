@@ -5,9 +5,9 @@ import { curveLinear } from 'd3-shape'
 import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
-import Select from '../../components/datacat/Select'
+import RangeSelect from '../../components/datacat/RangeSelect'
 import { findLastSession } from '../../components/datacat/marketSession'
-import { DATACAT_RANGE_MS, DATACAT_RANGE_OPTIONS, type DatacatRange } from '../../hooks/useDatacatRange'
+import { DATACAT_RANGE_MS, type DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { findNearestPoint } from '../../components/datacat/timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from '../../components/datacat/bucketChart'
@@ -178,8 +178,6 @@ const connectionColumns: Column<ConnectionRow>[] = [
 
 type IngesterRange = DatacatRange | 'session'
 
-const INGESTER_RANGE_OPTIONS: { value: IngesterRange; label: string }[] = [{ value: 'session', label: 'Session' }, ...DATACAT_RANGE_OPTIONS]
-
 function Ingester() {
   const { detail, setDetail, range, setRange } = useOutletContext<OutletContextType>()
 
@@ -263,7 +261,7 @@ function Ingester() {
   return (
     <>
       <div className="ing-header">
-        <Select id="range-select" label="Range" value={showSession ? 'session' : range} onChange={changeRange} options={INGESTER_RANGE_OPTIONS} loaded={isLoaded} />
+        <RangeSelect value={range} onChange={changeRange} session={showSession} onSession={() => changeRange('session')} loaded={isLoaded} />
       </div>
 
       {error ? (

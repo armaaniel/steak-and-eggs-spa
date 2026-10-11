@@ -64,6 +64,11 @@
 	transition:border-color 150ms;
 }
 
+.range-select-trigger .range-select-pill.fit {
+	width:auto;
+	padding:0 6px;
+}
+
 .range-select-options {
 	position:absolute;
 	top:calc(100% + 4px);
