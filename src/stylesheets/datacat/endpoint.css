@@ -132,7 +132,6 @@
 }
 
 #status-select,
-#cache-select,
 #range-select,
 #run-select,
 #step-select {
@@ -150,7 +149,6 @@
 }
 
 #status-select:focus,
-#cache-select:focus,
 #range-select:focus,
 #run-select:focus,
 #step-select:focus {

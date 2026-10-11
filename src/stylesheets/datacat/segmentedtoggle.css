@@ -38,7 +38,7 @@
 	background:none;
 	color:var(--dc-text-muted);
 	font-family:inherit;
-	font-size:14px;
+	font-size:16px;
 	font-weight:500;
 	cursor:pointer;
 }
@@ -57,6 +57,5 @@
 }
 
 .segmented-toggle-option[aria-pressed="true"] {
-	background-color:var(--dc-surface);
-	color:var(--dc-latency-p99);
+	color:var(--dc-text);
 }
