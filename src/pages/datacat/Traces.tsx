@@ -8,8 +8,8 @@ import { bucketFetchPolicy } from '../../components/datacat/bucketChart'
 import type { Trace, OutletContextType, ServiceBucket } from '../../lib/types.ts'
 
 const GET_OVERVIEW_TRACES = gql`
-  query getOverviewTraces($range: String, $bucket: ISO8601DateTime, $bucketEnd: ISO8601DateTime, $sort: TraceSort, $direction: SortDirection) {
-    traceList(range: $range, bucket: $bucket, bucketEnd: $bucketEnd, sort: $sort, direction: $direction) {
+  query getOverviewTraces($range: String, $bucket: ISO8601DateTime, $bucketEnd: ISO8601DateTime, $sort: TraceSort, $direction: SortDirection, $limit: Int) {
+    traceList(range: $range, bucket: $bucket, bucketEnd: $bucketEnd, sort: $sort, direction: $direction, limit: $limit) {
       id
       createdAt
       endpoint
@@ -25,6 +25,8 @@ const GET_OVERVIEW_TRACES = gql`
     }
   }
 `
+
+const TRACE_LIMIT = 250
 
 interface TraceData {
   traceList: Trace[]
@@ -56,7 +58,7 @@ function Traces({ bucket }: Props) {
   }
 
   const { loading, error, data, previousData } = useQuery<TraceData>(GET_OVERVIEW_TRACES, {
-    variables: { range, bucket: bucket?.bucket, bucketEnd: bucket?.bucketEnd, ...toSortVariables(sort) },
+    variables: { range, bucket: bucket?.bucket, bucketEnd: bucket?.bucketEnd, limit: TRACE_LIMIT, ...toSortVariables(sort) },
     fetchPolicy,
   })
 
