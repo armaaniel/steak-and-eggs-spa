@@ -1,4 +1,5 @@
 import DetailRows, { type DetailRow } from './DetailRows'
+import { toShortTime } from '../../lib/utils.ts'
 import type { Breakdown, Trace } from '../../lib/types.ts'
 
 interface Props {
@@ -78,7 +79,7 @@ const TraceDetailsPanel = ({ trace }: Props) => {
 
         <DetailRows
           rows={[
-            { label: 'Created', value: new Date(trace.createdAt).toLocaleString() },
+            { label: 'Created', value: toShortTime(trace.createdAt) },
             { label: 'ID', value: trace.id },
           ]}
           inline
