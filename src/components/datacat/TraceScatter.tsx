@@ -1,4 +1,4 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useState, type MouseEvent, type TransitionEvent } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
 import { scaleLinear, scaleLog } from 'd3-scale'
 import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, findXLabels, formatYAxisValue, timeScale, toChartBuckets, type Hover, type XLabel } from './bucketChart'
 import type { ScatterPoint, ServiceBucket } from '../../lib/types.ts'
@@ -41,6 +41,7 @@ const FEW_DOTS_OPACITY = 0.6
 const MANY_DOTS_OPACITY = 0.4
 const HOVER_DISTANCE = 8
 const NICE_STEPS = [1, 2, 5]
+const FADE_MS = 200
 
 const OK_COLOR = 'var(--dc-latency-p99)'
 const ERROR_COLOR = 'var(--dc-status-critical)'
@@ -180,6 +181,16 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
   if (dotsHidden && !fadingOut) {
     setDotsHidden(false)
   }
+
+  useEffect(() => {
+    if (!fadingOut || dotsHidden) {
+      return
+    }
+
+    const timer = setTimeout(() => setDotsHidden(true), FADE_MS)
+
+    return () => clearTimeout(timer)
+  }, [fadingOut, dotsHidden])
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -345,12 +356,6 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
     hoverTime = formatBucketTime(new Date(chartBuckets[hover.index].start))
   }
 
-  function handleDotsTransitionEnd(event: TransitionEvent<SVGGElement>) {
-    if (event.target === event.currentTarget && fadingOut) {
-      setDotsHidden(true)
-    }
-  }
-
   let cursor = 'default'
 
   if (hoveredDot !== null) {
@@ -368,7 +373,7 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
           {yLabelValues.map(renderGridline)}
           {xLabels.map(renderXLabel)}
 
-          <g className={`scatter-dots ${fadingOut ? 'out' : ''}`} onTransitionEnd={handleDotsTransitionEnd}>
+          <g className={`scatter-dots ${fadingOut ? 'out' : ''}`}>
             <AllDotsDrawnOnce dots={dots} baseOpacity={findBaseOpacity(dots.length)} />
 
             {selectedDot !== null && (
