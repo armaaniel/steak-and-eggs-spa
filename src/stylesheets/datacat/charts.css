@@ -18,7 +18,7 @@
 }
 
 .scatter-dots {
-	transition:opacity 150ms ease-out;
+	transition:opacity 200ms ease-out;
 }
 
 .scatter-dots.out {
