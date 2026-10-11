@@ -39,6 +39,7 @@ const MANY_DOTS = 2800
 const FEW_DOTS_OPACITY = 0.6
 const MANY_DOTS_OPACITY = 0.4
 const HOVER_DISTANCE = 8
+const NICE_STEPS = [1, 2.5, 5]
 
 const OK_COLOR = 'var(--dc-latency-p99)'
 const ERROR_COLOR = 'var(--dc-status-critical)'
@@ -64,14 +65,20 @@ function findSlowestDuration(chartPoints: ChartPoint[]) {
   return slowestDuration
 }
 
-function findNextPowerOfTen(value: number) {
+function findNiceMax(value: number) {
   let power = 10
 
-  while (power < value) {
+  while (power * 10 < value) {
     power = power * 10
   }
 
-  return power
+  for (const step of NICE_STEPS) {
+    if (power * step >= value) {
+      return power * step
+    }
+  }
+
+  return power * 10
 }
 
 function findPowersOfTen(maxValue: number) {
@@ -84,6 +91,16 @@ function findPowersOfTen(maxValue: number) {
   }
 
   return powersOfTen
+}
+
+function findYLabelValues(yMax: number) {
+  const labelValues = findPowersOfTen(yMax)
+
+  if (labelValues[labelValues.length - 1] !== yMax) {
+    labelValues.push(yMax)
+  }
+
+  return labelValues
 }
 
 function findDistance(pointA: Position, pointB: Position) {
@@ -176,13 +193,13 @@ const TraceScatter = ({ points, buckets, hover, chartLeft, setYLabelWidth, selec
   const chartPoints = useMemo(() => points.map(toChartPoint), [points])
   const chartBuckets = useMemo(() => toChartBuckets(buckets), [buckets])
 
-  const yMax = findNextPowerOfTen(findSlowestDuration(chartPoints))
+  const yMax = findNiceMax(findSlowestDuration(chartPoints))
 
   const yScale = useMemo(() => {
     return scaleLog().domain([1, yMax]).range([chartBottom, chartTop])
   }, [yMax])
 
-  const yLabelValues = findPowersOfTen(yMax)
+  const yLabelValues = findYLabelValues(yMax)
   const yLabelWidth = findWidestYLabel(yLabelValues.map(formatYAxisDuration))
 
   useLayoutEffect(() => {
