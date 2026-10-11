@@ -154,15 +154,19 @@
     transform: translateY(1px) rotate(0deg);
 }
 
-.stats-container:not(.loaded) .p50{
+.stats-container:not(.loaded) .stats-trigger{
 	cursor:default;
 }
 
-.p50{
+.stats-trigger{
 	cursor:pointer;
 	display:flex;
 	align-items:center;
 	gap:8px;
+}
+
+.stats-key {
+	color:var(--dc-text-muted);
 }
 
 .stats-dropdown {

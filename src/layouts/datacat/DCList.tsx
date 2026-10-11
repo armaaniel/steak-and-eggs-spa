@@ -208,12 +208,24 @@ function DCList() {
                   isOpen={statsOpen}
                   onToggle={toggleStats}
                   loaded={(endpointStats?.totalRequests ?? 0) > 0}
-                  triggerContent={<>P50: {endpointStats?.p50?.toFixed(0)}ms</>}
+                  triggerContent={
+                    <span>
+                      <span className="stats-key">P99:</span> {endpointStats?.p99?.toFixed(0)}ms
+                    </span>
+                  }
                 >
-                  <p>P95: {endpointStats?.p95?.toFixed(0)}ms</p>
-                  <p>P99: {endpointStats?.p99?.toFixed(0)}ms</p>
-                  <p>Requests: {endpointStats?.totalRequests?.toFixed(0)}</p>
-                  <p>Error Rate: {endpointStats?.errorRate}%</p>
+                  <p>
+                    <span className="stats-key">P50:</span> {endpointStats?.p50?.toFixed(0)}ms
+                  </p>
+                  <p>
+                    <span className="stats-key">P95:</span> {endpointStats?.p95?.toFixed(0)}ms
+                  </p>
+                  <p>
+                    <span className="stats-key">Requests:</span> {endpointStats?.totalRequests?.toFixed(0)}
+                  </p>
+                  <p>
+                    <span className="stats-key">Error Rate:</span> {endpointStats?.errorRate}%
+                  </p>
                 </StatsPanel>
               )}
             </>
