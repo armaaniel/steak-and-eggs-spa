@@ -6,6 +6,7 @@ import RequestsChart from '../../components/datacat/RequestsChart'
 import TraceScatter from '../../components/datacat/TraceScatter'
 import EndpointNav from '../../components/datacat/EndpointNav'
 import Select from '../../components/datacat/Select'
+import SegmentedToggle from '../../components/datacat/SegmentedToggle'
 import RangeSelect from '../../components/datacat/RangeSelect'
 import useEndpoint from '../../hooks/useEndpoint'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
@@ -218,7 +219,7 @@ function EndpointView() {
 
         <div className="endpoint-filters">
           <Select id="status-select" label="Status" value={statusFilter} onChange={setStatusFilter} options={statusOptions} loaded={isLoaded} />
-          {usedRedis && <Select id="cache-select" label="Served by" value={cacheFilter} onChange={setCacheFilter} options={cacheOptions} loaded={isLoaded} />}
+          {usedRedis && <SegmentedToggle label="Served by" value={cacheFilter} onChange={setCacheFilter} options={cacheOptions} loaded={isLoaded} />}
           <RangeSelect value={range} onChange={setRange} loaded={isLoaded} />
         </div>
       </div>
