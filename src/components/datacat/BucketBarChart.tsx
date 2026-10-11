@@ -269,6 +269,10 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     )
   }
 
+  function isLegendSeries(barSeries: BarSeries) {
+    return !barSeries.hideInLegend
+  }
+
   function isTooltipSeries(barSeries: BarSeries) {
     if (tooltipKeys.includes(barSeries.key)) {
       return true
@@ -309,7 +313,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
         <p className="lr-panel-label">{title}</p>
         <div className="dc-legend">
           {legendBar !== null && legendBar.hoverText !== undefined && <span className="dc-hover-time">{legendBar.hoverText}</span>}
-          {series.map(renderLegendEntry)}
+          {series.filter(isLegendSeries).map(renderLegendEntry)}
         </div>
       </div>
       <div ref={measureResize} className="dc-chart">

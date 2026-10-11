@@ -30,6 +30,7 @@ export interface BarSeries {
   color: string
   hoverColor?: string
   minHeight?: number
+  hideInLegend?: boolean
 }
 
 export interface XLabel {
@@ -46,6 +47,7 @@ export const HEIGHT = 180
 export const MARGIN = { top: 12, right: 12, bottom: 22 }
 export const PLOT_BOTTOM = HEIGHT - MARGIN.bottom
 export const Y_LABEL_GAP = 2
+const RESERVED_Y_LABEL = '100'
 
 const labelWidths = new Map<string, number>()
 let measuringContext: CanvasRenderingContext2D | null = null
@@ -85,7 +87,7 @@ function measureLabel(label: string) {
 }
 
 export function findWidestYLabel(labels: string[]) {
-  let widest = 0
+  let widest = measureLabel(RESERVED_Y_LABEL)
 
   for (const label of labels) {
     widest = Math.max(widest, measureLabel(label))

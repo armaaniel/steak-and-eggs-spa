@@ -16,11 +16,13 @@ const HEALTHY_COLOR = 'var(--dc-healthy)'
 const HEALTHY_HOVER_COLOR = '#95BA78'
 const INCOMPLETE_COLOR = 'var(--dc-status-warn)'
 const FAILING_COLOR = 'var(--dc-series-2)'
+const PENDING_COLOR = 'color-mix(in srgb, var(--dc-healthy) 30%, transparent)'
 
 const UPTIME_SERIES: BarSeries[] = [
   { key: 'healthy', label: 'healthy', color: HEALTHY_COLOR, hoverColor: HEALTHY_HOVER_COLOR },
   { key: 'incomplete', label: 'incomplete', color: INCOMPLETE_COLOR },
-  { key: 'failing', label: 'failing', color: FAILING_COLOR }
+  { key: 'failing', label: 'failing', color: FAILING_COLOR },
+  { key: 'pending', label: 'pending', color: PENDING_COLOR, hideInLegend: true }
 ]
 
 function formatHoverTime(date: Date) {
@@ -33,18 +35,38 @@ function formatHoverTime(date: Date) {
   })
 }
 
-function toUptimeBar(bucket: SyntheticBucket): ChartBar {
+function isInProgress(bucket: SyntheticBucket) {
+  return new Date(bucket.bucketEnd).getTime() > Date.now()
+}
+
+function findRunsPerBucket(buckets: SyntheticBucket[]) {
+  for (let index = buckets.length - 1; index >= 0; index--) {
+    if (!isInProgress(buckets[index])) {
+      return buckets[index].expected
+    }
+  }
+
+  return 0
+}
+
+function toUptimeBar(bucket: SyntheticBucket, runsPerBucket: number): ChartBar {
   const start = new Date(bucket.bucket).getTime()
   const end = new Date(bucket.bucketEnd).getTime()
 
-  let segments: Record<string, number> = { healthy: bucket.started }
+  const height = Math.max(bucket.started, bucket.expected)
+
+  let segments: Record<string, number> = { healthy: height }
 
   if (bucket.started < bucket.expected) {
-    segments = { incomplete: bucket.started }
+    segments = { incomplete: height }
   }
 
   if (bucket.failures > 0) {
-    segments = { failing: bucket.started }
+    segments = { failing: height }
+  }
+
+  if (runsPerBucket === 1 && bucket.started === 0 && isInProgress(bucket)) {
+    segments = { pending: 1 }
   }
 
   const missingRuns = Math.max(0, bucket.expected - bucket.started)
@@ -55,7 +77,13 @@ function toUptimeBar(bucket: SyntheticBucket): ChartBar {
 }
 
 const UptimeChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, selectBucket }: Props) => {
-  const bars = buckets.map(toUptimeBar)
+  const runsPerBucket = findRunsPerBucket(buckets)
+
+  function toBar(bucket: SyntheticBucket) {
+    return toUptimeBar(bucket, runsPerBucket)
+  }
+
+  const bars = buckets.map(toBar)
 
   let selectedIndex: number | null = null
 
