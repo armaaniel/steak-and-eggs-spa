@@ -31,7 +31,19 @@ const GET_TRACES = gql`
       errorLocation
       sentryEventId
     }
-    serviceTimeseries(range: $range, endpoint: $endpoint, includePartial: true) {
+  }
+`
+
+const GET_ENDPOINT_CHARTS = gql`
+  query getEndpointCharts($endpoint: String!, $range: String, $status: Int, $cache: TraceCacheFilter) {
+    traceScatter(endpoint: $endpoint, range: $range, status: $status, cache: $cache) {
+      id
+      at
+      status
+      duration
+      count
+    }
+    serviceTimeseries(range: $range, endpoint: $endpoint, includePartial: true, status: $status, cache: $cache) {
       bucket
       bucketEnd
       partial
@@ -40,18 +52,6 @@ const GET_TRACES = gql`
       p50
       p95
       p99
-    }
-  }
-`
-
-const GET_SCATTER = gql`
-  query getTraceScatter($endpoint: String!, $range: String, $status: Int, $cache: TraceCacheFilter) {
-    traceScatter(endpoint: $endpoint, range: $range, status: $status, cache: $cache) {
-      id
-      at
-      status
-      duration
-      count
     }
   }
 `
@@ -94,38 +94,19 @@ const GET_CAPPED_TRACES = gql`
   }
 `
 
-const GET_FILTERED_TIMESERIES = gql`
-  query getFilteredTimeseries($endpoint: String!, $range: String, $status: Int, $cache: TraceCacheFilter) {
-    serviceTimeseries(range: $range, endpoint: $endpoint, includePartial: true, status: $status, cache: $cache) {
-      bucket
-      bucketEnd
-      partial
-      requests
-      errors
-      p50
-      p95
-      p99
-    }
-  }
-`
-
 const TRACE_LIMIT = 1000
 
 interface TraceData {
   traceList: Trace[]
-  serviceTimeseries: ServiceBucket[]
 }
 
 interface CappedTraceData {
   traceList: Trace[]
 }
 
-interface TimeseriesData {
-  serviceTimeseries: ServiceBucket[]
-}
-
-interface ScatterData {
+interface ChartsData {
   traceScatter: ScatterPoint[]
+  serviceTimeseries: ServiceBucket[]
 }
 
 const usedCache = (trace: Trace) => Object.values(trace.breakdown ?? {}).some((call) => call.used_redis === true)
@@ -135,33 +116,6 @@ const usedDbOrApi = (trace: Trace) => Object.values(trace.breakdown ?? {}).some(
 const inBucket = (trace: Trace, bucket: ServiceBucket) => {
   const t = new Date(trace.createdAt).getTime()
   return t >= new Date(bucket.bucket).getTime() && t < new Date(bucket.bucketEnd).getTime()
-}
-
-interface ScatterPanelProps {
-  endpoint: string
-  range: DatacatRange
-  status: number | null
-  cache: string | null
-  buckets: ServiceBucket[]
-  hover: Hover | null
-  chartLeft: number
-  setYLabelWidth: (width: number) => void
-  selectedId: string | null
-  selectPoint: (point: ScatterPoint) => void
-}
-
-const ScatterPanel = ({ endpoint, range, status, cache, buckets, hover, chartLeft, setYLabelWidth, selectedId, selectPoint }: ScatterPanelProps) => {
-  const { loading, data, previousData } = useQuery<ScatterData>(GET_SCATTER, {
-    variables: { endpoint, range, status, cache },
-  })
-
-  const points = (data ?? previousData)?.traceScatter || []
-
-  return (
-    <div className={`lr-panels chart-fade ${loading && previousData ? 'dimmed' : ''}`}>
-      <TraceScatter points={points} buckets={buckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setYLabelWidth} selectedId={selectedId} selectPoint={selectPoint} />
-    </div>
-  )
 }
 
 function Endpoint() {
@@ -202,14 +156,24 @@ function Endpoint() {
 
   const status = statusFilter === 'all' ? null : Number(statusFilter)
   const cache = usedRedis && cacheFilter !== 'all' ? cacheFilter : null
-  const filtering = status !== null || cache !== null
-
-  const { loading: filteredLoading, data: filteredTimeseries } = useQuery<TimeseriesData>(GET_FILTERED_TIMESERIES, {
+  const { loading: chartsLoading, error: chartsError, data: chartsData, previousData: previousChartsData } = useQuery<ChartsData>(GET_ENDPOINT_CHARTS, {
     variables: { endpoint, range, status, cache },
-    skip: !filtering,
   })
 
-  if (filteredLoading && hover !== null) {
+  const chartsScope = `${endpoint} ${range}`
+  const [shownChartsScope, setShownChartsScope] = useState<string | null>(null)
+
+  if (chartsData !== undefined && shownChartsScope !== chartsScope) {
+    setShownChartsScope(chartsScope)
+  }
+
+  let charts: ChartsData | undefined = undefined
+
+  if (shownChartsScope === chartsScope) {
+    charts = chartsData ?? previousChartsData
+  }
+
+  if (chartsLoading && hover !== null) {
     setHover(null)
   }
 
@@ -248,9 +212,8 @@ function Endpoint() {
   }
 
   const statuses = [...new Set([...traceList, ...tableTraces].map((trace) => trace.status))]
-  let buckets = data?.serviceTimeseries || []
-  if (filtering && filteredTimeseries) buckets = filteredTimeseries.serviceTimeseries
-  const requestBuckets = dropEmptyBucketInProgress(buckets)
+  const requestBuckets = dropEmptyBucketInProgress(charts?.serviceTimeseries || [])
+  const chartsReady = charts !== undefined || chartsError !== undefined
   const cacheOptions = [
     { value: 'all', label: 'All' },
     { value: 'CACHED', label: 'Cache' },
@@ -270,10 +233,12 @@ function Endpoint() {
         </div>
       </div>
 
-      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
-        <ScatterPanel key={`${endpoint} ${range}`} endpoint={endpoint} range={range} status={status} cache={cache} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
+      <div className={`positions-container ${isLoaded && !loading && chartsReady ? 'loaded' : ''}`}>
+        <div key={chartsScope} className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
+          <TraceScatter points={charts?.traceScatter || []} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
+        </div>
 
-        <div className={`lr-panels chart-fade ${filteredLoading ? 'dimmed' : ''}`}>
+        <div className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
           <RequestsChart buckets={requestBuckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
         </div>
       </div>
