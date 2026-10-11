@@ -233,7 +233,7 @@ function Endpoint() {
         </div>
       </div>
 
-      <div className={`positions-container ${isLoaded && !loading && chartsReady ? 'loaded' : ''}`}>
+      <div className={`positions-container chart-card ${isLoaded && !loading && chartsReady ? 'loaded' : ''}`}>
         <div key={chartsScope} className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
           <TraceScatter points={charts?.traceScatter || []} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
         </div>

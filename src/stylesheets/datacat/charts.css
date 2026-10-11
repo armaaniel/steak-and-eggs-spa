@@ -17,6 +17,10 @@
 	stroke:var(--dc-border);
 }
 
+.positions-container.chart-card {
+	row-gap:0;
+}
+
 .dc-collapse-trigger {
 	display:flex;
 	align-items:center;

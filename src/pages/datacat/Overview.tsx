@@ -61,7 +61,7 @@ function Overview() {
 
   return (
     <>
-      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+      <div className={`positions-container chart-card ${isLoaded ? 'loaded' : ''}`}>
         {error ? (
           <p className="ov-message">Unable to load the overview, please try again</p>
         ) : (
