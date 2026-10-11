@@ -12,16 +12,18 @@ const byTime = (a: { at: string }, b: { at: string }) => new Date(a.at).getTime(
 
 const formatTime = (at: string | null) => (at ? new Date(at).toLocaleString() : 'none')
 
+const formatShortTime = (at: string) => new Date(at).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' })
+
 const ConnectionList = ({ connections }: { connections: IngesterConnection[] }) => (
   <div className="dc-detail-list">
     <p className="dc-detail-label">Connections</p>
     {[...connections].sort((a, b) => byTime({ at: a.spawnedAt }, { at: b.spawnedAt })).map((connection) => (
       <div key={connection.connectionId}>
         <p className="dc-detail-item">
-          <span>{formatTime(connection.spawnedAt)}</span>
+          <span>{formatShortTime(connection.spawnedAt)}</span>
           <span>{toDuration(connection.durationSeconds)}</span>
         </p>
-        <p className="dc-detail-muted">exit {connection.endedBy}</p>
+        <p className="dc-detail-muted">{connection.endedBy}</p>
       </div>
     ))}
   </div>
@@ -34,7 +36,7 @@ const TransitionList = ({ transitions }: { transitions: IngesterTransition[] }) 
       <div key={transition.id}>
         <p className="dc-detail-item">
           <span>{transition.cause ?? '-'}</span>
-          <span>{formatTime(transition.at)}</span>
+          <span>{formatShortTime(transition.at)}</span>
         </p>
         {Object.entries(transition.detail || {}).map(([key, value]) => (
           <p key={key} className="dc-detail-muted ing-detail-value">
