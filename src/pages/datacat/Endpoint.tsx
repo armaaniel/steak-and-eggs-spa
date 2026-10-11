@@ -210,7 +210,7 @@ function EndpointView() {
     { value: 'CACHED', label: 'Cache' },
     { value: 'UNCACHED', label: usedApi ? 'API' : 'DB' },
   ]
-  const statusOptions = [{ value: 'all', label: 'All' }, ...statuses.map((status) => ({ value: String(status), label: String(status) }))]
+  const statusOptions = [{ value: 'all', label: 'Any' }, ...statuses.map((status) => ({ value: String(status), label: String(status) }))]
 
   return (
     <>
