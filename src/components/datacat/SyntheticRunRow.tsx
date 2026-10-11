@@ -1,5 +1,6 @@
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
+import { toShortTime } from '../../lib/utils.ts'
 import type { SyntheticRun, Trace } from '../../lib/types.ts'
 
 const GET_RUN_TRACES = gql`
@@ -71,7 +72,7 @@ const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
       <div className={`uptime-run-details ${isOpen ? 'open' : ''}`} inert={!isOpen}>
         <div className="uptime-run-details-inner">
           <p>Run: {run.runId}</p>
-          <p>Started: {new Date(run.startedAt).toLocaleString()}</p>
+          <p>Started: {toShortTime(run.startedAt)}</p>
 
           <div className="uptime-requests">
             {error ? (

@@ -2,6 +2,7 @@ import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import TraceTable from '../../components/datacat/TraceTable'
 import useTransition from '../../hooks/useTransition.ts'
+import { toShortTime } from '../../lib/utils.ts'
 import type { OutletContextType, Column, Connection, ConnectionWithID } from '../../lib/types.ts'
 
 const GET_CONNECTIONS = gql`
@@ -33,7 +34,7 @@ function Connections() {
   const isLoaded = useTransition(loading, data || error)
 
   const columns: Column<ConnectionWithID>[] = [
-    { key: 'startedAt', label: 'Started At', sortable: false, render: (connection) => new Date(connection.startedAt).toLocaleString() },
+    { key: 'startedAt', label: 'Started At', sortable: false, render: (connection) => toShortTime(connection.startedAt) },
     { key: 'subscriptions', label: 'Subscriptions', sortable: false, render: (connection) => `${connection.subscriptions?.length}` },
   ]
 
