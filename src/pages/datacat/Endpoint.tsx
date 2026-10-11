@@ -204,6 +204,10 @@ function Endpoint() {
     skip: !filtering,
   })
 
+  if (filteredLoading && hover !== null) {
+    setHover(null)
+  }
+
   const traceList = data?.traceList || []
   const listIsComplete = traceList.length < TRACE_LIMIT
   const askServer = !listIsComplete && (selectedBucket !== null || status !== null || cache !== null || sort !== null)

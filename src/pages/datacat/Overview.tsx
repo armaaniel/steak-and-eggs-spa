@@ -46,6 +46,10 @@ function Overview() {
     variables: { range },
   })
 
+  if (loading && hover !== null) {
+    setHover(null)
+  }
+
   const isLoaded = useTransition(loading, data || error)
 
   const buckets = dropEmptyBucketInProgress((data ?? previousData)?.serviceTimeseries || [])
