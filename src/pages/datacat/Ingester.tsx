@@ -11,7 +11,7 @@ import { DATACAT_RANGE_MS, type DatacatRange } from '../../hooks/useDatacatRange
 import useTransition from '../../hooks/useTransition.ts'
 import { findNearestPoint } from '../../components/datacat/timeSeries'
 import { HEIGHT, Y_LABEL_GAP } from '../../components/datacat/bucketChart'
-import { toDuration } from '../../lib/utils.ts'
+import { toDuration, toShortTime } from '../../lib/utils.ts'
 import '../../stylesheets/datacat/ingester.css'
 import type { Column, IngesterUptime, IngesterSpan, IngesterRatePoint, IngesterLagPoint, IngesterTransition, IngesterBoot, IngesterConnection, OutletContextType, ResourcePoint } from '../../lib/types.ts'
 
@@ -160,7 +160,7 @@ type ConnectionRow = IngesterConnection & { id: string }
 const toIso = (ms: number) => (Number.isFinite(ms) ? new Date(ms).toISOString() : '')
 
 const bootColumns: Column<BootRow>[] = [
-  { key: 'startedAt', label: 'Started', sortable: false, render: (boot) => new Date(boot.startedAt).toLocaleString() },
+  { key: 'startedAt', label: 'Started', sortable: false, render: (boot) => toShortTime(boot.startedAt) },
   { key: 'durationSeconds', label: 'Lifetime', sortable: false, render: (boot) => toDuration(boot.durationSeconds) },
   { key: 'connections', label: 'Connections', sortable: false, render: (boot) => boot.connections },
   { key: 'reconnects', label: 'Reconnects', sortable: false, render: (boot) => boot.reconnects },
@@ -168,9 +168,9 @@ const bootColumns: Column<BootRow>[] = [
 ]
 
 const connectionColumns: Column<ConnectionRow>[] = [
-  { key: 'spawnedAt', label: 'Started', sortable: false, render: (connection) => new Date(connection.spawnedAt).toLocaleString() },
+  { key: 'spawnedAt', label: 'Started', sortable: false, render: (connection) => toShortTime(connection.spawnedAt) },
   { key: 'durationSeconds', label: 'Lifetime', sortable: false, render: (connection) => toDuration(connection.durationSeconds) },
-  { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? new Date(connection.firstMessageAt).toLocaleString() : 'none') },
+  { key: 'firstMessageAt', label: 'First Message', sortable: false, render: (connection) => (connection.firstMessageAt ? toShortTime(connection.firstMessageAt) : 'none') },
   { key: 'events', label: 'Events', sortable: false, render: (connection) => Number(connection.events ?? 0).toLocaleString() },
   { key: 'p99MeanExcessMs', label: 'p99 Mean Lag', sortable: false, render: (connection) => (connection.p99MeanExcessMs === null ? '-' : `${connection.p99MeanExcessMs.toLocaleString()} ms`) },
   { key: 'endedBy', label: 'Exit', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${new Date(connection.endedAt).toLocaleTimeString()}` : connection.endedBy) },

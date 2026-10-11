@@ -10,7 +10,7 @@ const toValue = (value: unknown) => (value !== null && typeof value === 'object'
 
 const byTime = (a: { at: string }, b: { at: string }) => new Date(a.at).getTime() - new Date(b.at).getTime()
 
-const formatTime = (at: string | null) => (at ? new Date(at).toLocaleString() : 'none')
+const formatTime = (at: string | null) => (at ? toShortTime(at) : 'none')
 
 const ConnectionList = ({ connections }: { connections: IngesterConnection[] }) => (
   <div className="dc-detail-list">
