@@ -46,7 +46,7 @@
     transition: opacity 150ms;
 }
 
-.dc-home-right:has(.positions-container:not(.loaded)) #resources .positions-container {
+.dc-home-right:has([data-ready="false"]) [data-ready] {
 	opacity:0;
 }
 

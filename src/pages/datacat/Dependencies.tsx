@@ -235,7 +235,7 @@ function Dependencies() {
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })
 
   return (
-    <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+    <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`} data-ready={isLoaded}>
       {error && <p className="dep-message">Unable to load health data, please try again</p>}
 
       <DependencyMap nodes={nodes} selectedId={selectedId} onSelect={selectNode} />

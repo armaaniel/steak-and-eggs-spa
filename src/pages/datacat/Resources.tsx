@@ -163,7 +163,7 @@ function Resources() {
   }
 
   return (
-    <div className="positions-container loaded">
+    <div className="positions-container loaded" data-ready={true}>
       <button type="button" className="dc-collapse-trigger" onClick={toggleOpen} aria-expanded={isOpen}>
         <span className="lr-panel-label">Resources</span>
         <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`stats-v ${isOpen ? 'open' : ''}`}>

@@ -69,7 +69,7 @@ function Traces({ bucket }: Props) {
   const traces = (data ?? previousData)?.traceList || []
 
   return (
-    <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+    <div className={`positions-container ${isLoaded ? 'loaded' : ''}`} data-ready={isLoaded}>
       <TraceTable key={tableKey} traceData={traces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error} emptyMessage={bucket ? 'No traces in this bucket' : undefined} loaded={!loading || previousData !== undefined} dimmed={loading} sortOnServer onSortChange={setSort} />
     </div>
   )

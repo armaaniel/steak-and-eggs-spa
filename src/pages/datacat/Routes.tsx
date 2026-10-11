@@ -31,7 +31,7 @@ function Routes() {
   const isLoaded = useTransition(loading, data || error)
 
   return (
-    <div className={`dc-overview ${isLoaded && !loading ? 'loaded' : ''}`}>
+    <div className={`dc-overview ${isLoaded && !loading ? 'loaded' : ''}`} data-ready={isLoaded}>
       <TraceOverviewTable traceData={data?.traceSummary || []} recordsPerPage={recordsPerPage} error={error} />
     </div>
   )

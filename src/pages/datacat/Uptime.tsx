@@ -115,7 +115,7 @@ function Uptime() {
   return (
     <>
       {slo && (
-        <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+        <div className={`positions-container ${isLoaded ? 'loaded' : ''}`} data-ready={isLoaded}>
           <div className={`uptime-slo chart-fade ${loading ? 'dimmed' : ''}`}>
             <div>
               <p className="uptime-slo-label">Last {range}</p>
@@ -138,7 +138,7 @@ function Uptime() {
         </div>
       )}
 
-      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`} data-ready={isLoaded}>
         {error ? 
 					<p className="uptime-message">Unable to load uptime data, please try again</p> 
 					: 
