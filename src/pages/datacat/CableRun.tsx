@@ -88,10 +88,9 @@ const CableRun = () => {
   const memory = metricsData?.memory || []
 
   const label = (run: CableRunSummary) => {
-    const started = new Date(run.startedAt).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
     const seconds = Math.round((new Date(run.endedAt).getTime() - new Date(run.startedAt).getTime()) / 1000)
 
-    return `${started} · ${seconds}s · ${run.samples.toLocaleString()}`
+    return `${seconds}s · ${run.samples.toLocaleString()}`
   }
 
   const runOptions = runs.map((run) => ({ value: run.runId, label: label(run) }))
@@ -115,7 +114,7 @@ const CableRun = () => {
   return (
     <>
       <div className="lr-header">
-        <Select id="run-select" label="Run" value={current?.runId || ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
+        <Select label="Run" value={current?.runId || ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
 
         <LoadNav />
 

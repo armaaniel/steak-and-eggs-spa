@@ -1,10 +1,13 @@
+import { useEffect, useRef, useState } from 'react'
+import useClickOutside from '../../hooks/useClickOutside'
+import '../../stylesheets/datacat/select.css'
+
 interface Option<T> {
   value: T
   label: string
 }
 
 interface Props<T> {
-  id: string
   label: string
   value: T
   onChange: (value: T) => void
@@ -12,31 +15,50 @@ interface Props<T> {
   loaded: boolean
 }
 
-const Select = <T extends string | number>({ id, label, value, onChange, options, loaded }: Props<T>) => {
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const picked = options.find((option) => String(option.value) === e.target.value)
-    if (picked) onChange(picked.value)
+const Select = <T extends string | number>({ label, value, onChange, options, loaded }: Props<T>) => {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  useClickOutside(wrapRef, () => setOpen(false), open)
+
+  useEffect(() => {
+    if (!open) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      triggerRef.current?.focus()
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open])
+
+  const handleSelect = (picked: T) => {
+    onChange(picked)
+    setOpen(false)
   }
 
+  const selected = options.find((option) => option.value === value)
+
   return (
-    <div className={`status-div ${loaded ? 'loaded' : ''}`}>
-      <label htmlFor={id} className="status-label">
-        {label}
-      </label>
+    <div ref={wrapRef} className={`dc-select ${open ? 'open' : ''} ${loaded ? 'loaded' : ''}`}>
+      <button ref={triggerRef} type="button" className="dc-select-trigger" aria-haspopup="menu" aria-expanded={open} title={label} onClick={() => setOpen(!open)}>
+        {selected?.label}
+      </button>
 
-      <select id={id} value={value} onChange={handleChange}>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-
-      <div className="select-svg-div">
-        <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
+      {open && (
+        <ul className="dc-select-options" role="menu" aria-label={label}>
+          {options.map((option) => (
+            <li key={option.value} role="none">
+              <button type="button" className="dc-select-option" role="menuitemradio" aria-checked={option.value === value} onClick={() => handleSelect(option.value)}>
+                {option.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

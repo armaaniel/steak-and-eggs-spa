@@ -3,6 +3,7 @@ import { useState } from 'react'
 import LoadRunCharts from '../../components/datacat/LoadRunCharts'
 import LoadNav from '../../components/datacat/LoadNav'
 import Select from '../../components/datacat/Select'
+import SegmentedToggle from '../../components/datacat/SegmentedToggle'
 import useTransition from '../../hooks/useTransition.ts'
 import type { LoadRunSummary, LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -67,10 +68,10 @@ interface CompareData {
 }
 
 const stepOptions = [
-  { value: 5, label: '5s buckets' },
-  { value: 15, label: '15s buckets' },
-  { value: 30, label: '30s buckets' },
-  { value: 60, label: '1m buckets' },
+  { value: 5, label: '5s' },
+  { value: 15, label: '15s' },
+  { value: 30, label: '30s' },
+  { value: 60, label: '1m' },
 ]
 
 const keyOf = (run: LoadRunSummary) => `${run.runId}|${run.route}`
@@ -100,8 +101,7 @@ const LoadRun = () => {
   const cpu = metricsData?.cpu || []
   const memory = metricsData?.memory || []
 
-  const label = (run: LoadRunSummary) =>
-    `${new Date(run.startedAt).toLocaleString('en-us', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${run.route} · ${run.samples.toLocaleString()}`
+  const label = (run: LoadRunSummary) => `${run.route} · ${run.samples.toLocaleString()}`
 
   const runOptions = runs.map((run) => ({ value: keyOf(run), label: label(run) }))
 
@@ -124,9 +124,9 @@ const LoadRun = () => {
   return (
     <>
       <div className="lr-header">
-        <Select id="run-select" label="Run" value={current ? keyOf(current) : ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
+        <Select label="Run" value={current ? keyOf(current) : ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
 
-        <Select id="step-select" label="Bucket" value={step} onChange={setStep} options={stepOptions} loaded={isLoaded} />
+        <SegmentedToggle label="Bucket" value={step} onChange={setStep} options={stepOptions} loaded={isLoaded} />
 
         <LoadNav />
 
