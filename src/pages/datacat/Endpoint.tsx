@@ -234,7 +234,7 @@ function EndpointView() {
         </div>
       </div>
 
-      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded && chartsLoaded ? 'loaded' : ''}`}>
         <TraceTable key={bucketKey ?? 'all'} traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} dimmed={cappedLoading} sortOnServer={!listIsComplete} onSortChange={setSort} />
       </div>
     </>
