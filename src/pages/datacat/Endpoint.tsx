@@ -118,7 +118,7 @@ const inBucket = (trace: Trace, bucket: ServiceBucket) => {
   return t >= new Date(bucket.bucket).getTime() && t < new Date(bucket.bucketEnd).getTime()
 }
 
-function Endpoint() {
+function EndpointView() {
   const { detail, setDetail, usedRedis, usedApi, range, setRange } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
@@ -150,7 +150,7 @@ function Endpoint() {
   const { method, path, endpoint } = useEndpoint()
   const cacheFilter = cachePick?.endpoint === endpoint ? cachePick.value : 'all'
   const setCacheFilter = (value: string) => setCachePick({ endpoint, value })
-  const { loading, error, data } = useQuery<TraceData>(GET_TRACES, {
+  const { loading, error, data, previousData } = useQuery<TraceData>(GET_TRACES, {
     variables: { endpoint, range },
   })
 
@@ -160,24 +160,13 @@ function Endpoint() {
     variables: { endpoint, range, status, cache },
   })
 
-  const chartsScope = `${endpoint} ${range}`
-  const [shownChartsScope, setShownChartsScope] = useState<string | null>(null)
-
-  if (chartsData !== undefined && shownChartsScope !== chartsScope) {
-    setShownChartsScope(chartsScope)
-  }
-
-  let charts: ChartsData | undefined = undefined
-
-  if (shownChartsScope === chartsScope) {
-    charts = chartsData ?? previousChartsData
-  }
+  const charts = chartsData ?? previousChartsData
 
   if (chartsLoading && hover !== null) {
     setHover(null)
   }
 
-  const traceList = data?.traceList || []
+  const traceList = (data ?? previousData)?.traceList || []
   const listIsComplete = traceList.length < TRACE_LIMIT
   const askServer = !listIsComplete && (selectedBucket !== null || status !== null || cache !== null || sort !== null)
 
@@ -200,6 +189,7 @@ function Endpoint() {
 
   const recordsPerPage = 18
   const isLoaded = useTransition(loading, data || error)
+  const chartsLoaded = useTransition(chartsLoading, chartsData || chartsError)
 
   let tableTraces = traceList
   if (askServer) {
@@ -213,7 +203,6 @@ function Endpoint() {
 
   const statuses = [...new Set([...traceList, ...tableTraces].map((trace) => trace.status))]
   const requestBuckets = dropEmptyBucketInProgress(charts?.serviceTimeseries || [])
-  const chartsReady = charts !== undefined || chartsError !== undefined
   const cacheOptions = [
     { value: 'all', label: 'All' },
     { value: 'CACHED', label: 'Cache' },
@@ -233,8 +222,8 @@ function Endpoint() {
         </div>
       </div>
 
-      <div className={`positions-container chart-card ${isLoaded && !loading && chartsReady ? 'loaded' : ''}`}>
-        <div key={chartsScope} className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
+      <div className={`positions-container chart-card ${isLoaded && chartsLoaded ? 'loaded' : ''}`}>
+        <div className={`lr-panels chart-fade ${chartsLoading ? 'dimmed' : ''}`}>
           <TraceScatter points={charts?.traceScatter || []} buckets={requestBuckets} hover={hover} chartLeft={chartLeft} setYLabelWidth={setScatterYLabelWidth} selectedId={selectedTrace?.id ?? null} selectPoint={openPoint} />
         </div>
 
@@ -243,11 +232,17 @@ function Endpoint() {
         </div>
       </div>
 
-      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded ? 'loaded' : ''}`}>
         <TraceTable key={bucketKey ?? 'all'} traceData={tableTraces} columns={traceColumns} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} recordsPerPage={recordsPerPage} error={error || cappedError} dimmed={cappedLoading} sortOnServer={!listIsComplete} onSortChange={setSort} />
       </div>
     </>
   )
+}
+
+function Endpoint() {
+  const { endpoint } = useEndpoint()
+
+  return <EndpointView key={endpoint} />
 }
 
 export default Endpoint
