@@ -16,6 +16,10 @@
 	animation:chart-line-draw 1.5s ease;
 }
 
+.chart-line.faded {
+	opacity:0.3;
+}
+
 @keyframes chart-line-draw {
 	from {
 		stroke-dashoffset:1;

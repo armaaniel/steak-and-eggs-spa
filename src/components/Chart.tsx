@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
+import React, { useCallback, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { scaleLinear, scalePoint } from 'd3-scale'
 import { curveMonotoneX, line } from 'd3-shape'
 import useMorphingPoints, { type ScreenPoint } from '../hooks/useMorphingPoints'
@@ -100,6 +100,7 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
   const labelRef = useRef<HTMLDivElement>(null)
+  const clipId = useId()
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -184,11 +185,24 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
 
   const path = makePath(shownPoints) ?? undefined
 
+  let solidRight = size.width
+
+  if (hoveredSpot !== null) {
+    solidRight = hoveredSpot.x
+  }
+
   return (
     <div ref={measureResize} className="chart-area">
       {size.width > 0 && (
         <svg width={size.width} height={size.height} onPointerDown={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={clearHover}>
-          <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
+          <defs>
+            <clipPath id={clipId}>
+              <rect x={0} y={0} width={solidRight} height={size.height} />
+            </clipPath>
+          </defs>
+
+          <path className="chart-line faded" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
+          <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} clipPath={`url(#${clipId})`} />
 
           {hoveredSpot !== null && <line className="chart-cursor" x1={hoveredSpot.x} x2={hoveredSpot.x} y1={chartTop} y2={chartBottom} />}
           {hoveredSpot !== null && <circle className="chart-dot" cx={hoveredSpot.x} cy={hoveredSpot.y} r={DOT_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
