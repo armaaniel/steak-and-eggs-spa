@@ -519,7 +519,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
   let cursorX: number | null = null
 
-  if (hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
+  if (pinnedTime === null && hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
     cursorX = xScale(hoveredTime)
   }
 
@@ -580,7 +580,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
               {drawnLines.map(renderLine)}
             </g>
             {visibleLines.map(renderPinnedDot)}
-            {visibleLines.map(renderHoveredDot)}
+            {pinnedTime === null && visibleLines.map(renderHoveredDot)}
           </svg>
 
           {tooltip && tooltipX !== null && tooltipY !== null && tooltipLines.length > 0 && (

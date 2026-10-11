@@ -178,7 +178,7 @@ const IngesterTimeline = ({ spans, from, to, chartLeft, hoveredTime, setHoveredT
 
   let cursorX: number | null = null
 
-  if (hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
+  if (pinnedTime === null && hoveredTime !== null && hoveredTime >= from && hoveredTime <= to) {
     cursorX = xScale(hoveredTime)
   }
 

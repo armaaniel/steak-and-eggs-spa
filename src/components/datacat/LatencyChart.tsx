@@ -307,6 +307,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
   }
 
   const showHoverDots = focused && pinnedChartBucket === null && selectedChartBucket === null
+  const showCursorLine = activeChartBucket !== null && pinnedChartBucket === null && selectedChartBucket === null
 
   let activeX = 0
 
@@ -407,7 +408,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
           {yLabelValues.map(renderGridline)}
           {xLabels.map(renderXLabel)}
 
-          {activeChartBucket !== null && (
+          {showCursorLine && (
             <line x1={activeX} x2={activeX} y1={chartTop} y2={chartBottom} stroke="var(--dc-border-strong)" />
           )}
 
