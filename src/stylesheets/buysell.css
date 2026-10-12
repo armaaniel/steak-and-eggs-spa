@@ -3,7 +3,7 @@
 	font-family: var(--font-display);
 	background: none;
 	border: none;
-	padding: 1rem 0.5rem;
+	padding: 1rem 0.5rem 1rem 0rem;
 	cursor: pointer;
 	border-radius: 0.5rem;
 }
@@ -84,7 +84,7 @@
 	outline:none;
 	background:none;
 	font-family: var(--font-display);
-	font-size:32px;
+	font-size:28px;
 	font-variant-numeric:tabular-nums;
 	color:var(--text);
 	caret-color:var(--chart-line);
