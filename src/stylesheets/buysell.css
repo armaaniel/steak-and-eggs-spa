@@ -36,8 +36,8 @@
 	width:400px;
 	display:flex;
 	flex-direction:column;
-	gap:1.75rem;
-	padding:1.5rem;
+	gap:1.25rem;
+	padding:0.75rem 1.5rem 1rem 1.5rem;
 	border: 1px solid var(--border);
   	border-radius: 2rem;
   	background-color:var(--surface);
@@ -52,7 +52,7 @@
 .bs-gap-container {
 	display:flex;
 	flex-direction:column;
-	gap:1.75rem;
+	gap:1.25rem;
 }
 
 .bs-containers {
