@@ -3,7 +3,7 @@
 	font-family: var(--font-display);
 	background: none;
 	border: none;
-	padding: 1rem 0.5rem 1rem 0rem;
+	padding: 1rem 0.5rem;
 	cursor: pointer;
 	border-radius: 0.5rem;
 }
@@ -69,7 +69,8 @@
 
 .bs-button-container {
 	display:flex;
-	column-gap:0.5rem;
+	column-gap:0;
+	margin-left:-0.5rem;
 }
 
 .bs-hero {

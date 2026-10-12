@@ -247,7 +247,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
         <div className="bs-parent-container three">
           <div className="bs-success">
             <p className="bs-success-text">Order Failed</p>
-            <p>Today at {time}</p>
+            <p>{time}</p>
           </div>
 
           <Row label="Order" value={`${isBuy ? 'Buy' : 'Sell'} ${symbol}`} />
