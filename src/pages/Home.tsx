@@ -112,16 +112,18 @@ function Home() {
             <h2 className='portfolio-value'>{toPortfolio(hoveredPoint?.value ?? portfolio?.aum, decimals)}</h2>
           </div>
 
-          <div className="port-change">
-            <span className={`port-change-value ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span>
-            {changeLabel && <span className="port-change-phrase">{RANGE_PHRASES[chartRange]}</span>}
+          <div className="chart-header-row">
+            <div className="port-change">
+              <span className={`port-change-value ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span>
+              {changeLabel && <span className="port-change-phrase">{RANGE_PHRASES[chartRange]}</span>}
+            </div>
+
+            <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
           </div>
 
           <div className="chart">
           	{visibleChart && <Chart chartData={visibleChart} onHover={setHoveredPoint} />}
           </div>
-
-          <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
 
           <div className="position">
             <div>

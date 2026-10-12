@@ -70,6 +70,12 @@
 	}
 }
 
+.chart-axis {
+	font-family: var(--font-body);
+	font-size:12px;
+	fill:var(--text-muted);
+}
+
 .chart-cursor {
 	stroke:var(--border-strong);
 	stroke-width:1;

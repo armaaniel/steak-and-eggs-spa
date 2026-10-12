@@ -167,10 +167,14 @@ function Stocks() {
                 </div>
               </div>
 
-              <div className={`stock-price-container ${price ? 'loaded' : ''}`}>
-                <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price, decimals)}</h2>
-                <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span></div>
-                {changeLabel && <span className="stock-price-phrase">{RANGE_PHRASES[chartRange]}</span>}
+              <div className="chart-header-row">
+                <div className={`stock-price-container ${price ? 'loaded' : ''}`}>
+                  <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price, decimals)}</h2>
+                  <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span></div>
+                  {changeLabel && <span className="stock-price-phrase">{RANGE_PHRASES[chartRange]}</span>}
+                </div>
+
+                <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
               </div>
             </div>
 
@@ -178,8 +182,6 @@ function Stocks() {
               {isLive && <LiveChart key={symbol} symbol={symbol} price={toPriceNumber(price)} onHover={setHoveredPoint} />}
               {!isLive && chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
             </div>
-
-            <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
           </div>
 
           {!isAuthenticated && (

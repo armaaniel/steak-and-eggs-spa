@@ -38,7 +38,7 @@
 }
 
 .chart {
-	height:36vh;
+	height:calc(36vh + 19px);
 }
 
 .portfolio-value {

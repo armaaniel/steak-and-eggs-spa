@@ -15,7 +15,8 @@ interface Size {
   height: number
 }
 
-const MARGIN = { top: 28, right: 5, bottom: 5, left: 5 }
+const MARGIN = { top: 28, right: 5, bottom: 24, left: 5 }
+const X_LABEL_SPACING = 100
 const RANGE_PADDING = 0.1
 const FLAT_PADDING = 1
 const LINE_WIDTH = 2
@@ -70,10 +71,45 @@ function formatHoverDate(date: string) {
     return `${monthDay}, ${year}`
   }
 
+  return `${monthDay}, ${formatClock(time)}`
+}
+
+function formatClock(time: string) {
   const [hour, minute] = time.split(':')
   const period = Number(hour) < 12 ? 'AM' : 'PM'
 
-  return `${monthDay}, ${Number(hour) % 12 || 12}:${minute} ${period}`
+  return `${Number(hour) % 12 || 12}:${minute} ${period}`
+}
+
+function formatXLabel(date: string, firstDate: string, lastDate: string) {
+  if (!MARKET_DATE.test(date)) {
+    return date
+  }
+
+  const [day, time] = date.split(' ')
+  const [year, month, dayOfMonth] = day.split('-')
+  const monthName = MONTHS[Number(month) - 1]
+
+  if (time !== undefined && firstDate.slice(0, 10) === lastDate.slice(0, 10)) {
+    return formatClock(time)
+  }
+
+  if (firstDate.slice(0, 4) !== lastDate.slice(0, 4)) {
+    return `${monthName} ${year}`
+  }
+
+  return `${monthName} ${Number(dayOfMonth)}`
+}
+
+function findXLabelIndexes(pointCount: number, plotWidth: number) {
+  const labelCount = Math.min(pointCount, Math.max(2, Math.floor(plotWidth / X_LABEL_SPACING)))
+  const indexes: number[] = []
+
+  for (let label = 0; label < labelCount; label++) {
+    indexes.push(Math.round((label * (pointCount - 1)) / Math.max(1, labelCount - 1)))
+  }
+
+  return [...new Set(indexes)]
 }
 
 function findNearestIndex(placedPoints: ScreenPoint[], mouseX: number) {
@@ -202,6 +238,29 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
 
   const path = makePath(shownPoints) ?? undefined
   const areaPath = makeAreaPath(shownPoints, chartBottom)
+  const xLabelIndexes = findXLabelIndexes(chartData.length, chartRight - chartLeft)
+
+  function renderXLabel(index: number, position: number) {
+    const spot = placedPoints[index]
+
+    if (spot === undefined) {
+      return null
+    }
+
+    let textAnchor: 'start' | 'middle' | 'end' = 'middle'
+
+    if (position === 0) {
+      textAnchor = 'start'
+    } else if (position === xLabelIndexes.length - 1) {
+      textAnchor = 'end'
+    }
+
+    return (
+      <text key={index} className="chart-axis" x={spot.x} y={chartBottom + 17} textAnchor={textAnchor}>
+        {formatXLabel(chartData[index].date, chartData[0].date, chartData[chartData.length - 1].date)}
+      </text>
+    )
+  }
 
   let solidRight = size.width
 
@@ -247,6 +306,8 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
             <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
             <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
           </g>
+
+          {xLabelIndexes.map(renderXLabel)}
 
           {hoveredSpot !== null && <line className="chart-cursor" x1={hoveredSpot.x} x2={hoveredSpot.x} y1={chartTop} y2={chartBottom} />}
           {hoveredSpot !== null && <circle className="chart-dot" cx={hoveredSpot.x} cy={hoveredSpot.y} r={DOT_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
