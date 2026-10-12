@@ -97,11 +97,6 @@
 
 .bs-hero-unit {
 	color:var(--text-muted);
-	transition:color 150ms;
-}
-
-.bs-hero:focus-within .bs-hero-unit {
-	color:var(--chart-line);
 }
 
 .bs-next-parent {

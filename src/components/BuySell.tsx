@@ -147,7 +147,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
           <div className="bs-gap-container">
             <div className="bs-hero">
               <NumericFormat value={quantity} onValueChange={handleChange} thousandSeparator={true} decimalScale={0} className="bs-hero-input" allowNegative={false} placeholder="0" isAllowed={handleAllowed} inputMode="numeric" aria-label="Shares" />
-              <p className="bs-hero-unit">{Number(quantity) === 1 ? 'share' : 'shares'}</p>
+              <p className="bs-hero-unit">shares</p>
             </div>
 
             <Row label={`Estimated ${isBuy ? 'Cost' : 'Value'}`} value={price === null ? '$0.00 USD' : `$${toCurrency(estimatedCost)} USD`} />
