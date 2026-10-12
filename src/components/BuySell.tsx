@@ -145,16 +145,9 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
           </div>
 
           <div className="bs-gap-container">
-            <Row label="Order Type" value={`Market ${isBuy ? 'Buy' : 'Sell'}`} />
-
-            <div className="bs-containers">
-              <div className="bs-shares-wrapper">
-                <label>Shares</label>
-              </div>
-
-              <div className="shares-input-form">
-                <NumericFormat value={quantity} onValueChange={handleChange} thousandSeparator={true} decimalScale={0} className="shares-input" allowNegative={false} placeholder="0" isAllowed={handleAllowed} />
-              </div>
+            <div className="bs-hero">
+              <NumericFormat value={quantity} onValueChange={handleChange} thousandSeparator={true} decimalScale={0} className="bs-hero-input" allowNegative={false} placeholder="0" isAllowed={handleAllowed} inputMode="numeric" aria-label="Shares" />
+              <p className="bs-hero-unit">{Number(quantity) === 1 ? 'share' : 'shares'}</p>
             </div>
 
             <Row label={`Estimated ${isBuy ? 'Cost' : 'Value'}`} value={price === null ? '$0.00 USD' : `$${toCurrency(estimatedCost)} USD`} />
@@ -229,7 +222,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
         <div className="bs-parent-container">
           <div className="bs-success">
             <p className="bs-success-text">Order Success</p>
-            <p>Today at {time}</p>
+            <p>{time}</p>
           </div>
 
           <Row label="Order" value={`Market ${isBuy ? 'Buy' : 'Sell'} ${orderData.symbol}`} />
