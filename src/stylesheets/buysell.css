@@ -39,7 +39,7 @@
 	gap:1.75rem;
 	padding:1.5rem;
 	border: 1px solid var(--border);
-  	border-radius: 1.5rem;
+  	border-radius: 2rem;
   	background-color:var(--surface);
   	font-family: var(--font-display);
   	color:var(--text);
@@ -61,6 +61,11 @@
 
 .bs-width-wrapper {
 	width:50%;
+}
+
+.bs-containers > .bs-width-wrapper:first-child,
+.bs-shares-wrapper {
+	color:var(--text-muted);
 }
 
 .bs-button-container {
