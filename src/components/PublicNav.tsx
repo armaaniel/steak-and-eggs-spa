@@ -68,6 +68,14 @@ const PublicNav = ({ showSearch = true, demo }: Props) => {
           {dropdownOpen && (
             <div className="profile-dropdown">
               <Link
+                to="/login"
+                className="profile-dropdown-item"
+                onClick={() => setDropdownOpen(false)}
+              >
+                Login
+              </Link>
+              <hr className="profile-dropdown-divider" />
+              <Link
                 to="/about"
                 className="profile-dropdown-item"
                 onClick={() => setDropdownOpen(false)}
