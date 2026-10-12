@@ -78,7 +78,9 @@
 
 .chart-cursor {
 	stroke:#7f858e;
-	stroke-width:1;
+	stroke-width:2;
+	stroke-linecap:round;
+	stroke-dasharray:0 4;
 }
 
 .chart-dot {
