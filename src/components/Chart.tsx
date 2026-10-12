@@ -1,6 +1,6 @@
 import React, { useCallback, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { scaleLinear, scalePoint } from 'd3-scale'
-import { curveMonotoneX, line } from 'd3-shape'
+import { area, curveMonotoneX, line } from 'd3-shape'
 import useMorphingPoints, { type ScreenPoint } from '../hooks/useMorphingPoints'
 import '../stylesheets/chart.css'
 import type { ChartData } from '../lib/types.ts'
@@ -21,6 +21,8 @@ const FLAT_PADDING = 1
 const LINE_WIDTH = 2
 const DOT_RADIUS = 4
 const DOT_RING_WIDTH = 2
+const FILL_DOT_SPACING = 4
+const FILL_DOT_RADIUS = 0.75
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const MARKET_DATE = /^\d{4}-\d{2}-\d{2}/
 
@@ -95,12 +97,27 @@ const makePath = line<ScreenPoint>()
   })
   .curve(curveMonotoneX)
 
+function makeAreaPath(screenPoints: ScreenPoint[], bottom: number) {
+  const makeArea = area<ScreenPoint>()
+    .x(function (screenPoint) {
+      return screenPoint.x
+    })
+    .y0(bottom)
+    .y1(function (screenPoint) {
+      return screenPoint.y
+    })
+    .curve(curveMonotoneX)
+
+  return makeArea(screenPoints) ?? undefined
+}
+
 const Chart = React.memo(({ chartData, onHover }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
   const labelRef = useRef<HTMLDivElement>(null)
   const clipId = useId()
+  const fillId = useId()
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -184,6 +201,7 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
   }
 
   const path = makePath(shownPoints) ?? undefined
+  const areaPath = makeAreaPath(shownPoints, chartBottom)
 
   let solidRight = size.width
 
@@ -199,7 +217,22 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
             <clipPath id={clipId}>
               <rect x={0} y={0} width={solidRight} height={size.height} />
             </clipPath>
+
+            <pattern id={`${fillId}-dots`} width={FILL_DOT_SPACING} height={FILL_DOT_SPACING} patternUnits="userSpaceOnUse">
+              <circle className="chart-fill-dot" cx={FILL_DOT_SPACING / 2} cy={FILL_DOT_SPACING / 2} r={FILL_DOT_RADIUS} />
+            </pattern>
+
+            <linearGradient id={`${fillId}-fade`} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" className="chart-fill-top" />
+              <stop offset="100%" className="chart-fill-bottom" />
+            </linearGradient>
+
+            <mask id={`${fillId}-mask`}>
+              <rect x={0} y={0} width={size.width} height={size.height} fill={`url(#${fillId}-fade)`} />
+            </mask>
           </defs>
+
+          <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
 
           <path className="chart-line faded" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
           <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} clipPath={`url(#${clipId})`} />

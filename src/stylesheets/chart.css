@@ -30,8 +30,38 @@
 	}
 }
 
+.chart-fill {
+	animation:chart-fill-in 1.5s ease;
+}
+
+.chart-fill-dot {
+	fill:var(--chart-line);
+	opacity:0.6;
+}
+
+.chart-fill-top {
+	stop-color:white;
+	stop-opacity:0.6;
+}
+
+.chart-fill-bottom {
+	stop-color:white;
+	stop-opacity:0.1;
+}
+
+@keyframes chart-fill-in {
+	from {
+		opacity:0;
+	}
+
+	to {
+		opacity:1;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
-	.chart-line {
+	.chart-line,
+	.chart-fill {
 		animation:none;
 	}
 }
