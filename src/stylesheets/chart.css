@@ -77,7 +77,7 @@
 }
 
 .chart-cursor {
-	stroke:var(--border-strong);
+	stroke:#7f858e;
 	stroke-width:1;
 }
 
