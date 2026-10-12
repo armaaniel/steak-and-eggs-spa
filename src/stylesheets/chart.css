@@ -16,8 +16,12 @@
 	animation:chart-line-draw 1.5s ease;
 }
 
-.chart-line.faded {
+.chart-faded .chart-line {
 	opacity:0.3;
+}
+
+.chart-faded-fill {
+	opacity:0.4;
 }
 
 @keyframes chart-line-draw {

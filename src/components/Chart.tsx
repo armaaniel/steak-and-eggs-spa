@@ -218,6 +218,10 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
               <rect x={0} y={0} width={solidRight} height={size.height} />
             </clipPath>
 
+            <clipPath id={`${clipId}-after`}>
+              <rect x={solidRight} y={0} width={size.width - solidRight} height={size.height} />
+            </clipPath>
+
             <pattern id={`${fillId}-dots`} width={FILL_DOT_SPACING} height={FILL_DOT_SPACING} patternUnits="userSpaceOnUse">
               <circle className="chart-fill-dot" cx={FILL_DOT_SPACING / 2} cy={FILL_DOT_SPACING / 2} r={FILL_DOT_RADIUS} />
             </pattern>
@@ -232,10 +236,17 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
             </mask>
           </defs>
 
-          <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
+          <g className="chart-faded" clipPath={`url(#${clipId}-after)`}>
+            <g className="chart-faded-fill">
+              <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
+            </g>
+            <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
+          </g>
 
-          <path className="chart-line faded" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
-          <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} clipPath={`url(#${clipId})`} />
+          <g clipPath={`url(#${clipId})`}>
+            <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
+            <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
+          </g>
 
           {hoveredSpot !== null && <line className="chart-cursor" x1={hoveredSpot.x} x2={hoveredSpot.x} y1={chartTop} y2={chartBottom} />}
           {hoveredSpot !== null && <circle className="chart-dot" cx={hoveredSpot.x} cy={hoveredSpot.y} r={DOT_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
