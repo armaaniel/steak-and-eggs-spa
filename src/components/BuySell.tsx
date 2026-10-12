@@ -198,7 +198,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
           </div>
 
           <div className="bs-gap-container">
-            <Row label="Order" value={`Market ${isBuy ? 'Buy' : 'Sell'} ${symbol}`} />
+            <Row label="Order" value={`${isBuy ? 'Buy' : 'Sell'} ${symbol}`} />
 
             <Row label="Shares" value={parseFloat(quantity).toLocaleString()} />
 
@@ -225,7 +225,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
             <p>{time}</p>
           </div>
 
-          <Row label="Order" value={`Market ${isBuy ? 'Buy' : 'Sell'} ${orderData.symbol}`} />
+          <Row label="Order" value={`${isBuy ? 'Buy' : 'Sell'} ${orderData.symbol}`} />
 
           <Row label={isBuy ? 'Cost' : 'Value'} value={`$${toCurrency(orderData.value)} USD`} />
 
@@ -250,7 +250,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
             <p>Today at {time}</p>
           </div>
 
-          <Row label="Order" value={`Market ${isBuy ? 'Buy' : 'Sell'} ${symbol}`} />
+          <Row label="Order" value={`${isBuy ? 'Buy' : 'Sell'} ${symbol}`} />
 
           <Row label="Shares" value={quantity} />
 
