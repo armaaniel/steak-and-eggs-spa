@@ -177,9 +177,9 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
             strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
-          tooltipKeys={['cpu', 'cloudwatch', 'memory']}
+          tooltipKeys={['cpu', 'memory']}
           toggleLines
-          defaultHiddenKeys={['memory', 'cloudwatch']}
+          defaultHiddenKeys={['memory']}
         />
       )}
 

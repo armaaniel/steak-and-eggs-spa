@@ -39,10 +39,6 @@ function toCpuUsedLines(cpuUsed: RunMetricPoint[]): ChartLine[] {
   return [{ key: 'cpu', label: 'cpu', color: SERIES_ONE, points: cpuUsed.map((point) => ({ time: toTime(point.at), value: point.average === null ? null : (point.average / CPU_CAP_MS) * 100 })), formatValue: formatPercent }]
 }
 
-function toCloudwatchCpuLines(cpu: RunMetricPoint[]): ChartLine[] {
-  return [{ key: 'cloudwatch', label: 'cloudwatch cpu', color: SERIES_TWO, points: cpu.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatPercent }]
-}
-
 export function toMemoryLines(memory: RunMetricPoint[]): ChartLine[] {
   return [{ key: 'memory', label: 'memory', color: MEMORY_COLOR, points: memory.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatPercent }]
 }
@@ -56,10 +52,6 @@ export function toResourceLines(cpu: RunMetricPoint[], memory: RunMetricPoint[],
 
   if (hasAverage(cpuUsed)) {
     lines.push(...toCpuUsedLines(cpuUsed))
-
-    if (hasAverage(cpu)) {
-      lines.push(...toCloudwatchCpuLines(cpu))
-    }
   } else if (hasAverage(cpu)) {
     lines.push(...toCpuLines(cpu))
   }
