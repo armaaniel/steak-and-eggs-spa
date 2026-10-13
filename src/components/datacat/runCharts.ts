@@ -7,6 +7,13 @@ const MEMORY_COLOR = 'var(--dc-memory)'
 export const RUN_STROKE_WIDTH = 2
 const CPU_CAP_MS = 250
 
+export const STEP_OPTIONS = [
+  { value: 5, label: '5s' },
+  { value: 15, label: '15s' },
+  { value: 30, label: '30s' },
+  { value: 60, label: '1m' },
+]
+
 export function toTime(at: string) {
   return new Date(at).getTime()
 }

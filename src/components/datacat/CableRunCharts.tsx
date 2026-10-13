@@ -9,6 +9,7 @@ import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
   rows: CableCompareRow[]
+  step: number
   cpu?: RunMetricPoint[]
   memory?: RunMetricPoint[]
   cpuUsed?: RunMetricPoint[]
@@ -20,7 +21,6 @@ interface Props {
 
 type Panel = 'fanout' | 'lag' | 'resources' | 'pressure'
 
-const DEFAULT_BUCKET_MS = 5000
 const NO_POINTS: RunMetricPoint[] = []
 
 function formatRate(value: number) {
@@ -67,7 +67,7 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
   return `${publishedText} · ${(row.expected - row.received).toLocaleString()} dropped`
 }
 
-const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
+const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
@@ -84,20 +84,11 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = N
 
   const times = useMemo(() => rows.map((row) => toTime(row.at)), [rows])
 
-  const bucketSeconds = useMemo(() => {
-    const deltas = times
-      .slice(1)
-      .map((time, index) => time - times[index])
-      .filter((delta) => delta > 0)
-    const bucketMs = deltas.length ? Math.min(...deltas) : DEFAULT_BUCKET_MS
-    return bucketMs / 1000
-  }, [times])
-
-  const fanoutLines = useMemo(() => toFanoutLines(rows, bucketSeconds), [rows, bucketSeconds])
+  const fanoutLines = useMemo(() => toFanoutLines(rows, step), [rows, step])
   const lagLines = useMemo(() => toLagLines(rows), [rows])
   const resourceLines = useMemo(() => toResourceLines(cpu, memory, cpuUsed), [cpu, memory, cpuUsed])
   const pressureLines = useMemo(() => toPressureLines(pressure, gcTime), [pressure, gcTime])
-  const lagTooltipLines = useMemo(() => toLagTooltipLines(rows, bucketSeconds, resourceLines), [rows, bucketSeconds, resourceLines])
+  const lagTooltipLines = useMemo(() => toLagTooltipLines(rows, step, resourceLines), [rows, step, resourceLines])
   const rowMarks = useMemo(() => rows.map((row) => ({ time: toTime(row.at), row })), [rows])
 
   if (!rows.length) return <p className="lr-message">No samples for this run yet.</p>
@@ -165,7 +156,7 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = N
         setPinnedTime={setPinnedTime}
         showTimeLabels={axisPanel === 'fanout'}
         showHoverTime
-        hoverDetail={detailRow ? describeFanout(detailRow, bucketSeconds) : undefined}
+        hoverDetail={detailRow ? describeFanout(detailRow, step) : undefined}
         chartLeft={chartLeft}
         setYLabelWidth={setFanoutYLabelWidth}
         strokeWidth={RUN_STROKE_WIDTH}
@@ -237,7 +228,7 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = N
           setPinnedTime={setPinnedTime}
           showTimeLabels={axisPanel === 'pressure'}
           showHoverTime={false}
-          hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.at), bucketSeconds) : undefined}
+          hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.at), step) : undefined}
           chartLeft={chartLeft}
           setYLabelWidth={setPressureYLabelWidth}
           strokeWidth={RUN_STROKE_WIDTH}

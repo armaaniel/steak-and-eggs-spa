@@ -4,6 +4,7 @@ import LoadRunCharts from '../../components/datacat/LoadRunCharts'
 import LoadNav from '../../components/datacat/LoadNav'
 import Select from '../../components/datacat/Select'
 import SegmentedToggle from '../../components/datacat/SegmentedToggle'
+import { STEP_OPTIONS } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
 import type { LoadRunSummary, LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -95,13 +96,6 @@ interface CompareData {
   loadCompare: LoadCompareRow[]
 }
 
-const stepOptions = [
-  { value: 5, label: '5s' },
-  { value: 15, label: '15s' },
-  { value: 30, label: '30s' },
-  { value: 60, label: '1m' },
-]
-
 const keyOf = (run: LoadRunSummary) => `${run.runId}|${run.route}`
 
 const LoadRun = () => {
@@ -158,7 +152,7 @@ const LoadRun = () => {
       <div className="lr-header">
         <Select label="Run" value={current ? keyOf(current) : ''} onChange={setSelected} options={runOptions} loaded={isLoaded} />
 
-        <SegmentedToggle label="Bucket" value={step} onChange={setStep} options={stepOptions} loaded={isLoaded} />
+        <SegmentedToggle label="Bucket" value={step} onChange={setStep} options={STEP_OPTIONS} loaded={isLoaded} />
 
         <LoadNav />
 
