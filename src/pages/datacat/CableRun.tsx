@@ -47,6 +47,30 @@ const GET_RUN_METRICS = gql`
       maximum
       average
     }
+    cpuUsed: runMetrics(runId: $runId, kind: "cable", metric: "cpu_used", step: 5) {
+      at
+      minimum
+      maximum
+      average
+    }
+    pressure: runMetrics(runId: $runId, kind: "cable", metric: "cpu_pressure", step: 5) {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcTime: runMetrics(runId: $runId, kind: "cable", metric: "gc_time", step: 5) {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcMajor: runMetrics(runId: $runId, kind: "cable", metric: "gc_major") {
+      at
+      minimum
+      maximum
+      average
+    }
   }
 `
 
@@ -61,6 +85,10 @@ interface CompareData {
 interface MetricsData {
   cpu: RunMetricPoint[]
   memory: RunMetricPoint[]
+  cpuUsed: RunMetricPoint[]
+  pressure: RunMetricPoint[]
+  gcTime: RunMetricPoint[]
+  gcMajor: RunMetricPoint[]
 }
 
 const CableRun = () => {
@@ -86,6 +114,10 @@ const CableRun = () => {
   const rows = data?.cableCompare || []
   const cpu = metricsData?.cpu || []
   const memory = metricsData?.memory || []
+  const cpuUsed = metricsData?.cpuUsed || []
+  const pressure = metricsData?.pressure || []
+  const gcTime = metricsData?.gcTime || []
+  const gcMajor = metricsData?.gcMajor || []
 
   const label = (run: CableRunSummary) => {
     const seconds = Math.round((new Date(run.endedAt).getTime() - new Date(run.startedAt).getTime()) / 1000)
@@ -129,7 +161,7 @@ const CableRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <CableRunCharts rows={rows} cpu={cpu} memory={memory} statsOpen={statsOpen} />
+          <CableRunCharts rows={rows} cpu={cpu} memory={memory} cpuUsed={cpuUsed} pressure={pressure} gcTime={gcTime} gcMajor={gcMajor} statsOpen={statsOpen} />
         )}
       </div>
     </>

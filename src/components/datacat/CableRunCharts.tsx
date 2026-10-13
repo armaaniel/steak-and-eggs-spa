@@ -3,7 +3,7 @@ import { curveLinear } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatPercent, toCpuLines, toResourceLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeMajorGcs, formatMs, formatMsPerSecond, formatPercent, toPressureLines, toResourceLines, toTime } from './runCharts'
 import type { CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
@@ -11,10 +11,14 @@ interface Props {
   rows: CableCompareRow[]
   cpu?: RunMetricPoint[]
   memory?: RunMetricPoint[]
+  cpuUsed?: RunMetricPoint[]
+  pressure?: RunMetricPoint[]
+  gcTime?: RunMetricPoint[]
+  gcMajor?: RunMetricPoint[]
   statsOpen?: boolean
 }
 
-type Panel = 'fanout' | 'lag' | 'resources'
+type Panel = 'fanout' | 'lag' | 'resources' | 'pressure'
 
 const DEFAULT_BUCKET_MS = 5000
 const NO_POINTS: RunMetricPoint[] = []
@@ -45,10 +49,11 @@ function toLagLines(rows: CableCompareRow[]): ChartLine[] {
   ]
 }
 
-function toLagTooltipLines(rows: CableCompareRow[], bucketSeconds: number, cpu: RunMetricPoint[]): ChartLine[] {
+function toLagTooltipLines(rows: CableCompareRow[], bucketSeconds: number, resourceLines: ChartLine[]): ChartLine[] {
   const receivedLines = toFanoutLines(rows, bucketSeconds).filter((chartLine) => chartLine.key === 'received')
+  const cpuLines = resourceLines.filter((chartLine) => chartLine.key === 'cpu')
 
-  return [...receivedLines, ...toCpuLines(cpu)]
+  return [...receivedLines, ...cpuLines]
 }
 
 function describeFanout(row: CableCompareRow, bucketSeconds: number) {
@@ -62,7 +67,7 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
   return `${publishedText} · ${(row.expected - row.received).toLocaleString()} dropped`
 }
 
-const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen = false }: Props) => {
+const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
@@ -75,6 +80,7 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
   const [fanoutYLabelWidth, setFanoutYLabelWidth] = useState(0)
   const [lagYLabelWidth, setLagYLabelWidth] = useState(0)
   const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
+  const [pressureYLabelWidth, setPressureYLabelWidth] = useState(0)
 
   const times = useMemo(() => rows.map((row) => toTime(row.at)), [rows])
 
@@ -89,14 +95,16 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
 
   const fanoutLines = useMemo(() => toFanoutLines(rows, bucketSeconds), [rows, bucketSeconds])
   const lagLines = useMemo(() => toLagLines(rows), [rows])
-  const lagTooltipLines = useMemo(() => toLagTooltipLines(rows, bucketSeconds, cpu), [rows, bucketSeconds, cpu])
-  const resourceLines = useMemo(() => toResourceLines(cpu, memory), [cpu, memory])
+  const resourceLines = useMemo(() => toResourceLines(cpu, memory, cpuUsed), [cpu, memory, cpuUsed])
+  const pressureLines = useMemo(() => toPressureLines(pressure, gcTime), [pressure, gcTime])
+  const lagTooltipLines = useMemo(() => toLagTooltipLines(rows, bucketSeconds, resourceLines), [rows, bucketSeconds, resourceLines])
   const rowMarks = useMemo(() => rows.map((row) => ({ time: toTime(row.at), row })), [rows])
 
   if (!rows.length) return <p className="lr-message">No samples for this run yet.</p>
 
-  const chartLeft = Math.max(fanoutYLabelWidth, lagYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
+  const chartLeft = Math.max(fanoutYLabelWidth, lagYLabelWidth, resourcesYLabelWidth, pressureYLabelWidth) + Y_LABEL_GAP
   const hasResources = resourceLines.length > 0
+  const hasPressure = pressureLines.length > 0
   const hasLag = rows.some((row) => row.p50LagMs !== null || row.p99LagMs !== null)
   const from = times[0]
   const to = times[times.length - 1]
@@ -109,6 +117,10 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
 
   if (hasResources) {
     axisPanel = 'resources'
+  }
+
+  if (hasPressure) {
+    axisPanel = 'pressure'
   }
 
   const detailTime = pinnedTime ?? hoveredTime
@@ -208,6 +220,31 @@ const CableRunCharts = ({ rows, cpu = NO_POINTS, memory = NO_POINTS, statsOpen =
           tooltipKeys={['cpu', 'memory']}
           toggleLines
           defaultHiddenKeys={['memory']}
+        />
+      )}
+
+      {hasPressure && (
+        <TimeSeriesChart
+          title="CPU pressure and GC (ms/s)"
+          lines={pressureLines}
+          from={from}
+          to={to}
+          yAxis="auto"
+          formatValue={formatMsPerSecond}
+          hoveredTime={hoveredTime}
+          setHoveredTime={setHoveredTime}
+          pinnedTime={pinnedTime}
+          setPinnedTime={setPinnedTime}
+          showTimeLabels={axisPanel === 'pressure'}
+          showHoverTime={false}
+          hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.at), bucketSeconds) : undefined}
+          chartLeft={chartLeft}
+          setYLabelWidth={setPressureYLabelWidth}
+          strokeWidth={RUN_STROKE_WIDTH}
+          tooltip
+          pinTooltip
+          tooltipKeys={['pressure', 'gc']}
+          toggleLines
         />
       )}
 

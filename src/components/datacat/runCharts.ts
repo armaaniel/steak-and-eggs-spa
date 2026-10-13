@@ -63,6 +63,21 @@ export function toResourceLines(cpu: RunMetricPoint[], memory: RunMetricPoint[],
   return lines
 }
 
+export function describeMajorGcs(gcMajor: RunMetricPoint[], start: number, seconds: number) {
+  const end = start + seconds * 1000
+  let count = 0
+
+  for (const point of gcMajor) {
+    const time = toTime(point.at)
+
+    if (time >= start && time < end) {
+      count += point.average ?? 0
+    }
+  }
+
+  return `${count} major GC${count === 1 ? '' : 's'}`
+}
+
 export function toPressureLines(pressure: RunMetricPoint[], gcTime: RunMetricPoint[]): ChartLine[] {
   if (!hasAverage(pressure)) {
     return []

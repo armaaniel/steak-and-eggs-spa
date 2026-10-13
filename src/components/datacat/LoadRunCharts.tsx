@@ -3,7 +3,7 @@ import { curveStepAfter } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatMsPerSecond, formatPercent, formatWhole, toPressureLines, toResourceLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeMajorGcs, formatMs, formatMsPerSecond, formatPercent, formatWhole, toPressureLines, toResourceLines, toTime } from './runCharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
@@ -45,22 +45,6 @@ function describeRps(row: LoadCompareRow) {
 
 function describeLatency(row: LoadCompareRow) {
   return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
-}
-
-function describeMajorGcs(gcMajor: RunMetricPoint[], row: LoadCompareRow, step: number) {
-  const start = toTime(row.bucket)
-  const end = start + step * 1000
-  let count = 0
-
-  for (const point of gcMajor) {
-    const time = toTime(point.at)
-
-    if (time >= start && time < end) {
-      count += point.average ?? 0
-    }
-  }
-
-  return `${count} major GC${count === 1 ? '' : 's'}`
 }
 
 const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
@@ -197,7 +181,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
           setPinnedTime={setPinnedTime}
           showTimeLabels
           showHoverTime={false}
-          hoverDetail={detailRow ? describeMajorGcs(gcMajor, detailRow, step) : undefined}
+          hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.bucket), step) : undefined}
           chartLeft={chartLeft}
           setYLabelWidth={setPressureYLabelWidth}
           strokeWidth={RUN_STROKE_WIDTH}
