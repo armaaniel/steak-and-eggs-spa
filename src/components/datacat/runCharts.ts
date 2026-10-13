@@ -70,6 +70,6 @@ export function toPressureLines(pressure: RunMetricPoint[], gcTime: RunMetricPoi
 
   return [
     { key: 'pressure', label: 'cpu pressure', color: SERIES_TWO, points: pressure.map((point) => ({ time: toTime(point.at), value: point.average })), fill: true, formatValue: formatMsPerSecond },
-    { key: 'gc', label: 'gc time', color: SERIES_ONE, points: gcTime.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatMsPerSecond },
+    { key: 'gc', label: 'peak gc time', color: SERIES_ONE, points: gcTime.map((point) => ({ time: toTime(point.at), value: point.maximum })), formatValue: formatMsPerSecond },
   ]
 }
