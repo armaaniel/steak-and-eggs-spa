@@ -3,15 +3,20 @@ import { curveStepAfter } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatPercent, formatWhole, toResourceLines, toTime } from './runCharts'
+import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, formatMs, formatMsPerSecond, formatPercent, formatWhole, toPressureLines, toResourceLines, toTime } from './runCharts'
 import type { LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
 
 interface Props {
   rows: LoadCompareRow[]
   route: string
+  step: number
   cpu?: RunMetricPoint[]
   memory?: RunMetricPoint[]
+  cpuUsed?: RunMetricPoint[]
+  pressure?: RunMetricPoint[]
+  gcTime?: RunMetricPoint[]
+  gcMajor?: RunMetricPoint[]
   statsOpen?: boolean
 }
 
@@ -42,7 +47,23 @@ function describeLatency(row: LoadCompareRow) {
   return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
 }
 
-const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, statsOpen = false }: Props) => {
+function describeMajorGcs(gcMajor: RunMetricPoint[], row: LoadCompareRow, step: number) {
+  const start = toTime(row.bucket)
+  const end = start + step * 1000
+  let count = 0
+
+  for (const point of gcMajor) {
+    const time = toTime(point.at)
+
+    if (time >= start && time < end) {
+      count += point.average ?? 0
+    }
+  }
+
+  return `${count} major GC${count === 1 ? '' : 's'}`
+}
+
+const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].bucket}|${rows[rows.length - 1].bucket}` : ''
@@ -55,16 +76,19 @@ const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, stats
   const [rpsYLabelWidth, setRpsYLabelWidth] = useState(0)
   const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
   const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
+  const [pressureYLabelWidth, setPressureYLabelWidth] = useState(0)
 
   const rpsLines = useMemo(() => toRpsLines(rows), [rows])
   const latencyLines = useMemo(() => toLatencyLines(rows), [rows])
-  const resourceLines = useMemo(() => toResourceLines(cpu, memory), [cpu, memory])
+  const resourceLines = useMemo(() => toResourceLines(cpu, memory, cpuUsed), [cpu, memory, cpuUsed])
+  const pressureLines = useMemo(() => toPressureLines(pressure, gcTime), [pressure, gcTime])
   const rowMarks = useMemo(() => rows.map((row) => ({ time: toTime(row.bucket), row })), [rows])
 
   if (!rows.length) return <p className="lr-message">No samples for this route yet.</p>
 
-  const chartLeft = Math.max(rpsYLabelWidth, latencyYLabelWidth, resourcesYLabelWidth) + Y_LABEL_GAP
+  const chartLeft = Math.max(rpsYLabelWidth, latencyYLabelWidth, resourcesYLabelWidth, pressureYLabelWidth) + Y_LABEL_GAP
   const hasResources = resourceLines.length > 0
+  const hasPressure = pressureLines.length > 0
   const from = toTime(rows[0].bucket)
   const to = toTime(rows[rows.length - 1].bucket)
 
@@ -121,7 +145,7 @@ const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, stats
         setHoveredTime={setHoveredTime}
         pinnedTime={pinnedTime}
         setPinnedTime={setPinnedTime}
-        showTimeLabels={!hasResources}
+        showTimeLabels={!hasResources && !hasPressure}
         showHoverTime={false}
         hoverDetail={detailRow ? describeLatency(detailRow) : undefined}
         chartLeft={chartLeft}
@@ -146,16 +170,41 @@ const LoadRunCharts = ({ rows, route, cpu = NO_POINTS, memory = NO_POINTS, stats
           setHoveredTime={setHoveredTime}
           pinnedTime={pinnedTime}
           setPinnedTime={setPinnedTime}
-          showTimeLabels
+          showTimeLabels={!hasPressure}
           showHoverTime={false}
           chartLeft={chartLeft}
           setYLabelWidth={setResourcesYLabelWidth}
             strokeWidth={RUN_STROKE_WIDTH}
           tooltip
           pinTooltip
-          tooltipKeys={['cpu', 'memory']}
+          tooltipKeys={['cpu', 'cloudwatch', 'memory']}
           toggleLines
-          defaultHiddenKeys={['memory']}
+          defaultHiddenKeys={['memory', 'cloudwatch']}
+        />
+      )}
+
+      {hasPressure && (
+        <TimeSeriesChart
+          title="CPU pressure and GC (ms/s)"
+          lines={pressureLines}
+          from={from}
+          to={to}
+          yAxis="auto"
+          formatValue={formatMsPerSecond}
+          hoveredTime={hoveredTime}
+          setHoveredTime={setHoveredTime}
+          pinnedTime={pinnedTime}
+          setPinnedTime={setPinnedTime}
+          showTimeLabels
+          showHoverTime={false}
+          hoverDetail={detailRow ? describeMajorGcs(gcMajor, detailRow, step) : undefined}
+          chartLeft={chartLeft}
+          setYLabelWidth={setPressureYLabelWidth}
+          strokeWidth={RUN_STROKE_WIDTH}
+          tooltip
+          pinTooltip
+          tooltipKeys={['pressure', 'gc']}
+          toggleLines
         />
       )}
 

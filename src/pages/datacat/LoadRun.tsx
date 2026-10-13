@@ -38,7 +38,7 @@ const GET_LOAD_COMPARE = gql`
 `
 
 const GET_RUN_METRICS = gql`
-  query getRunMetrics($runId: ID!) {
+  query getRunMetrics($runId: ID!, $step: Int!) {
     cpu: runMetrics(runId: $runId, kind: "load", metric: "cpu") {
       at
       minimum
@@ -46,6 +46,30 @@ const GET_RUN_METRICS = gql`
       average
     }
     memory: runMetrics(runId: $runId, kind: "load", metric: "memory") {
+      at
+      minimum
+      maximum
+      average
+    }
+    cpuUsed: runMetrics(runId: $runId, kind: "load", metric: "cpu_used", step: $step) {
+      at
+      minimum
+      maximum
+      average
+    }
+    pressure: runMetrics(runId: $runId, kind: "load", metric: "cpu_pressure", step: $step) {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcTime: runMetrics(runId: $runId, kind: "load", metric: "gc_time", step: $step) {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcMajor: runMetrics(runId: $runId, kind: "load", metric: "gc_major") {
       at
       minimum
       maximum
@@ -61,6 +85,10 @@ interface RunsData {
 interface MetricsData {
   cpu: RunMetricPoint[]
   memory: RunMetricPoint[]
+  cpuUsed: RunMetricPoint[]
+  pressure: RunMetricPoint[]
+  gcTime: RunMetricPoint[]
+  gcMajor: RunMetricPoint[]
 }
 
 interface CompareData {
@@ -92,7 +120,7 @@ const LoadRun = () => {
   })
 
   const { data: metricsData } = useQuery<MetricsData>(GET_RUN_METRICS, {
-    variables: { runId: current?.runId },
+    variables: { runId: current?.runId, step },
     skip: !current,
   })
 
@@ -100,6 +128,10 @@ const LoadRun = () => {
   const rows = data?.loadCompare || []
   const cpu = metricsData?.cpu || []
   const memory = metricsData?.memory || []
+  const cpuUsed = metricsData?.cpuUsed || []
+  const pressure = metricsData?.pressure || []
+  const gcTime = metricsData?.gcTime || []
+  const gcMajor = metricsData?.gcMajor || []
 
   const label = (run: LoadRunSummary) => `${run.route} · ${run.samples.toLocaleString()}`
 
@@ -141,7 +173,7 @@ const LoadRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <LoadRunCharts rows={rows} route={current?.route || ''} cpu={cpu} memory={memory} statsOpen={statsOpen} />
+          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} cpu={cpu} memory={memory} cpuUsed={cpuUsed} pressure={pressure} gcTime={gcTime} gcMajor={gcMajor} statsOpen={statsOpen} />
         )}
       </div>
     </>
