@@ -114,6 +114,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
         chartLeft={chartLeft}
         setYLabelWidth={setRpsYLabelWidth}
         strokeWidth={RUN_STROKE_WIDTH}
+        expandable
         tooltip
         pinTooltip
       />
@@ -135,6 +136,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
         chartLeft={chartLeft}
         setYLabelWidth={setLatencyYLabelWidth}
         strokeWidth={RUN_STROKE_WIDTH}
+        expandable
         tooltip
         pinTooltip
         tooltipKeys={['rps', 'client', 'server']}
@@ -159,6 +161,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
           chartLeft={chartLeft}
           setYLabelWidth={setResourcesYLabelWidth}
             strokeWidth={RUN_STROKE_WIDTH}
+          expandable
           tooltip
           pinTooltip
           tooltipKeys={['cpu', 'memory']}
@@ -185,6 +188,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
           chartLeft={chartLeft}
           setYLabelWidth={setPressureYLabelWidth}
           strokeWidth={RUN_STROKE_WIDTH}
+          expandable
           tooltip
           pinTooltip
           tooltipKeys={['pressure', 'gc']}

@@ -160,6 +160,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
         chartLeft={chartLeft}
         setYLabelWidth={setFanoutYLabelWidth}
         strokeWidth={RUN_STROKE_WIDTH}
+        expandable
         tooltip
         pinTooltip
         tooltipKeys={['received']}
@@ -182,6 +183,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
           chartLeft={chartLeft}
           setYLabelWidth={setLagYLabelWidth}
             strokeWidth={RUN_STROKE_WIDTH}
+          expandable
           tooltip
           pinTooltip
           tooltipExtraLines={lagTooltipLines}
@@ -206,6 +208,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
           chartLeft={chartLeft}
           setYLabelWidth={setResourcesYLabelWidth}
             strokeWidth={RUN_STROKE_WIDTH}
+          expandable
           tooltip
           pinTooltip
           tooltipKeys={['cpu', 'memory']}
@@ -232,6 +235,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
           chartLeft={chartLeft}
           setYLabelWidth={setPressureYLabelWidth}
           strokeWidth={RUN_STROKE_WIDTH}
+          expandable
           tooltip
           pinTooltip
           tooltipKeys={['pressure', 'gc']}

@@ -54,13 +54,17 @@ interface Props {
   strokeWidth?: number
   curve?: CurveFactory
   drawIn?: boolean
+  expandable?: boolean
 }
 
 const MARGIN_TOP = 8
 const MARGIN_BOTTOM = 6
 const TOOLTIP_STYLE_TRANSFORM = 'translate(-50%, calc(-100% - 10px))'
 const PERCENT_LABEL_VALUES = [0, 50, 100]
+const EXPANDED_PERCENT_LABEL_VALUES = [0, 25, 50, 75, 100]
 const AUTO_LABEL_COUNT = 4
+const LABEL_SPACING = 40
+const EXPANDED_HEIGHT = 400
 const FILL_OPACITY = 0.1
 const DEFAULT_STROKE_WIDTH = 1.5
 
@@ -104,11 +108,12 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX, drawIn = false }: Props) => {
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX, drawIn = false, expandable = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const [pinnedPointer, setPinnedPointer] = useState<PinnedPointer | null>(null)
   const [hiddenKeys, setHiddenKeys] = useState(defaultHiddenKeys)
+  const [expanded, setExpanded] = useState(false)
 
   if (pinnedTime === null && pinnedPointer !== null) {
     setPinnedPointer(null)
@@ -140,25 +145,36 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
     marginBottom = MARGIN.bottom
   }
 
+  let chartHeight = height
+
+  if (expanded) {
+    chartHeight = EXPANDED_HEIGHT
+  }
+
   const chartTop = MARGIN_TOP
-  const chartBottom = height - marginBottom
+  const chartBottom = chartHeight - marginBottom
+  const labelCount = Math.max(AUTO_LABEL_COUNT, Math.floor((chartBottom - chartTop) / LABEL_SPACING))
 
   const visibleLines = useMemo(() => findVisibleLines(lines, hiddenKeys), [lines, hiddenKeys])
   const valueRange = useMemo(() => findValueRange(visibleLines), [visibleLines])
 
   const yScale = useMemo(() => {
     if (yAxis === 'auto') {
-      return scaleLinear().domain(valueRange).nice(AUTO_LABEL_COUNT).range([chartBottom, chartTop])
+      return scaleLinear().domain(valueRange).nice(labelCount).range([chartBottom, chartTop])
     }
 
     return scaleLinear().domain([0, Math.max(100, valueRange[1])]).range([chartBottom, chartTop])
-  }, [yAxis, valueRange, chartBottom, chartTop])
+  }, [yAxis, valueRange, chartBottom, chartTop, labelCount])
 
   let yLabelValues = PERCENT_LABEL_VALUES
   let formatYLabel = formatPercentLabel
 
+  if (labelCount > AUTO_LABEL_COUNT) {
+    yLabelValues = EXPANDED_PERCENT_LABEL_VALUES
+  }
+
   if (yAxis === 'auto') {
-    yLabelValues = yScale.ticks(AUTO_LABEL_COUNT)
+    yLabelValues = yScale.ticks(labelCount)
     formatYLabel = formatAutoLabel
   }
 
@@ -549,7 +565,16 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   return (
     <>
       <div className="dc-chart-header" style={{ paddingRight: MARGIN.right }}>
-        <p className="lr-panel-label">{title}</p>
+        <div className="dc-chart-title">
+          <p className="lr-panel-label">{title}</p>
+          {expandable && (
+            <button type="button" className="dc-expand" onClick={() => setExpanded(!expanded)} aria-pressed={expanded} aria-label={`${expanded ? 'Shrink' : 'Expand'} ${title}`}>
+              <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`lr-v ${expanded ? 'open' : ''}`}>
+                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
+        </div>
         <div className="dc-legend">
           {showHoverTime && legendTime !== null && <span className="dc-hover-time">{formatHoverTime(legendTime)}</span>}
           {lines.map(renderLegendEntry)}
@@ -561,10 +586,10 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
       {note === undefined && (
         <div ref={measureResize} className="dc-chart">
-          <svg width={width} height={height} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
+          <svg width={width} height={chartHeight} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick} style={{ cursor: 'pointer' }}>
             <defs>
               <clipPath id={clipId}>
-                <rect x={plotLeft} y={0} width={Math.max(0, plotWidth)} height={height} />
+                <rect x={plotLeft} y={0} width={Math.max(0, plotWidth)} height={chartHeight} />
               </clipPath>
             </defs>
 
