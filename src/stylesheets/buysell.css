@@ -33,6 +33,7 @@
 
 .bs-parent-container {
 	position:fixed;
+	margin-top:0.5rem;
 	width:400px;
 	display:flex;
 	flex-direction:column;
@@ -187,6 +188,7 @@
 
 @media (max-width:768px) {
 	.bs-parent-container {
-		position:static
+		position:static;
+		margin-top:0;
 	}
 }
