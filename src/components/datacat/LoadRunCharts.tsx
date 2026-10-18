@@ -14,6 +14,7 @@ interface Props {
   cpu?: RunMetricPoint[]
   memory?: RunMetricPoint[]
   cpuUsed?: RunMetricPoint[]
+  memoryUsed?: RunMetricPoint[]
   pressure?: RunMetricPoint[]
   gcTime?: RunMetricPoint[]
   gcMajor?: RunMetricPoint[]
@@ -47,7 +48,7 @@ function describeLatency(row: LoadCompareRow) {
   return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
 }
 
-const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
+const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, memoryUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].bucket}|${rows[rows.length - 1].bucket}` : ''
@@ -64,7 +65,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
 
   const rpsLines = useMemo(() => toRpsLines(rows), [rows])
   const latencyLines = useMemo(() => toLatencyLines(rows), [rows])
-  const resourceLines = useMemo(() => toResourceLines(cpu, memory, cpuUsed), [cpu, memory, cpuUsed])
+  const resourceLines = useMemo(() => toResourceLines(cpu, memory, cpuUsed, memoryUsed), [cpu, memory, cpuUsed, memoryUsed])
   const pressureLines = useMemo(() => toPressureLines(pressure, gcTime), [pressure, gcTime])
   const rowMarks = useMemo(() => rows.map((row) => ({ time: toTime(row.bucket), row })), [rows])
 
@@ -193,6 +194,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
           pinTooltip
           tooltipKeys={['pressure', 'gc']}
           toggleLines
+          defaultHiddenKeys={['pressure']}
         />
       )}
 

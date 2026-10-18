@@ -55,6 +55,12 @@ const GET_RUN_METRICS = gql`
       maximum
       average
     }
+    memoryUsed: runMetrics(runId: $runId, kind: "cable", metric: "memory_used", step: $step) {
+      at
+      minimum
+      maximum
+      average
+    }
     pressure: runMetrics(runId: $runId, kind: "cable", metric: "cpu_pressure", step: $step) {
       at
       minimum
@@ -88,6 +94,7 @@ interface MetricsData {
   cpu: RunMetricPoint[]
   memory: RunMetricPoint[]
   cpuUsed: RunMetricPoint[]
+  memoryUsed: RunMetricPoint[]
   pressure: RunMetricPoint[]
   gcTime: RunMetricPoint[]
   gcMajor: RunMetricPoint[]
@@ -118,6 +125,7 @@ const CableRun = () => {
   const cpu = metricsData?.cpu || []
   const memory = metricsData?.memory || []
   const cpuUsed = metricsData?.cpuUsed || []
+  const memoryUsed = metricsData?.memoryUsed || []
   const pressure = metricsData?.pressure || []
   const gcTime = metricsData?.gcTime || []
   const gcMajor = metricsData?.gcMajor || []
@@ -166,7 +174,7 @@ const CableRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <CableRunCharts rows={rows} step={step} cpu={cpu} memory={memory} cpuUsed={cpuUsed} pressure={pressure} gcTime={gcTime} gcMajor={gcMajor} statsOpen={statsOpen} />
+          <CableRunCharts rows={rows} step={step} cpu={cpu} memory={memory} cpuUsed={cpuUsed} memoryUsed={memoryUsed} pressure={pressure} gcTime={gcTime} gcMajor={gcMajor} statsOpen={statsOpen} />
         )}
       </div>
     </>

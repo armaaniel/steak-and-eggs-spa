@@ -6,6 +6,7 @@ export const SERIES_TWO = 'var(--dc-series-2)'
 const MEMORY_COLOR = 'var(--dc-memory)'
 export const RUN_STROKE_WIDTH = 2
 const CPU_CAP_MS = 250
+const MEMORY_LIMIT_MB = 512
 
 export const STEP_OPTIONS = [
   { value: 5, label: '5s' },
@@ -50,11 +51,15 @@ export function toMemoryLines(memory: RunMetricPoint[]): ChartLine[] {
   return [{ key: 'memory', label: 'memory', color: MEMORY_COLOR, points: memory.map((point) => ({ time: toTime(point.at), value: point.average })), formatValue: formatPercent }]
 }
 
+function toMemoryUsedLines(memoryUsed: RunMetricPoint[]): ChartLine[] {
+  return [{ key: 'memory', label: 'memory', color: MEMORY_COLOR, points: memoryUsed.map((point) => ({ time: toTime(point.at), value: point.average === null ? null : (point.average / MEMORY_LIMIT_MB) * 100 })), formatValue: formatPercent }]
+}
+
 function hasAverage(points: RunMetricPoint[]) {
   return points.some((point) => point.average !== null)
 }
 
-export function toResourceLines(cpu: RunMetricPoint[], memory: RunMetricPoint[], cpuUsed: RunMetricPoint[] = []): ChartLine[] {
+export function toResourceLines(cpu: RunMetricPoint[], memory: RunMetricPoint[], cpuUsed: RunMetricPoint[] = [], memoryUsed: RunMetricPoint[] = []): ChartLine[] {
   const lines: ChartLine[] = []
 
   if (hasAverage(cpuUsed)) {
@@ -63,7 +68,9 @@ export function toResourceLines(cpu: RunMetricPoint[], memory: RunMetricPoint[],
     lines.push(...toCpuLines(cpu))
   }
 
-  if (hasAverage(memory)) {
+  if (hasAverage(memoryUsed)) {
+    lines.push(...toMemoryUsedLines(memoryUsed))
+  } else if (hasAverage(memory)) {
     lines.push(...toMemoryLines(memory))
   }
 

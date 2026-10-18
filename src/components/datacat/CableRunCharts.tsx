@@ -13,6 +13,7 @@ interface Props {
   cpu?: RunMetricPoint[]
   memory?: RunMetricPoint[]
   cpuUsed?: RunMetricPoint[]
+  memoryUsed?: RunMetricPoint[]
   pressure?: RunMetricPoint[]
   gcTime?: RunMetricPoint[]
   gcMajor?: RunMetricPoint[]
@@ -67,7 +68,7 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
   return `${publishedText} · ${(row.expected - row.received).toLocaleString()} dropped`
 }
 
-const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
+const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, memoryUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
@@ -86,7 +87,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
 
   const fanoutLines = useMemo(() => toFanoutLines(rows, step), [rows, step])
   const lagLines = useMemo(() => toLagLines(rows), [rows])
-  const resourceLines = useMemo(() => toResourceLines(cpu, memory, cpuUsed), [cpu, memory, cpuUsed])
+  const resourceLines = useMemo(() => toResourceLines(cpu, memory, cpuUsed, memoryUsed), [cpu, memory, cpuUsed, memoryUsed])
   const pressureLines = useMemo(() => toPressureLines(pressure, gcTime), [pressure, gcTime])
   const lagTooltipLines = useMemo(() => toLagTooltipLines(rows, step, resourceLines), [rows, step, resourceLines])
   const rowMarks = useMemo(() => rows.map((row) => ({ time: toTime(row.at), row })), [rows])
@@ -214,7 +215,6 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
           pinTooltip
           tooltipKeys={['cpu', 'memory']}
           toggleLines
-          defaultHiddenKeys={['memory']}
         />
       )}
 
@@ -241,6 +241,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
           pinTooltip
           tooltipKeys={['pressure', 'gc']}
           toggleLines
+          defaultHiddenKeys={['pressure']}
         />
       )}
 
