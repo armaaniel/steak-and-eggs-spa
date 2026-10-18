@@ -186,6 +186,26 @@
 	cursor:pointer;
 }
 
+.dc-scale-toggle {
+	display:flex;
+	column-gap:6px;
+	margin-left:6px;
+}
+
+.dc-scale-toggle button {
+	padding:0;
+	border:none;
+	background:none;
+	color:var(--dc-text);
+	font-family:inherit;
+	font-size:12px;
+	cursor:pointer;
+}
+
+.dc-scale-toggle .off {
+	opacity:0.4;
+}
+
 .dc-chart-header .dc-hover-time {
 	font-size:12px;
 	color:var(--dc-text-muted);

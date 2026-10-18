@@ -184,6 +184,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
           setYLabelWidth={setLagYLabelWidth}
             strokeWidth={RUN_STROKE_WIDTH}
           expandable
+          logToggle
           tooltip
           pinTooltip
           tooltipExtraLines={lagTooltipLines}

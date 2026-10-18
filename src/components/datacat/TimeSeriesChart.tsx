@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useState, type MouseEvent } from 'react'
-import { scaleLinear, scaleTime } from 'd3-scale'
+import { scaleLinear, scaleLog, scaleTime, type ScaleContinuousNumeric } from 'd3-scale'
 import { area, curveMonotoneX, line, type CurveFactory } from 'd3-shape'
 import { HEIGHT, MARGIN, Y_LABEL_GAP, findWidestYLabel, formatXAxisTime } from './bucketChart'
 import { breakAtGaps, findNearestPoint, formatHoverTime, type TimePoint } from './timeSeries'
@@ -55,6 +55,7 @@ interface Props {
   curve?: CurveFactory
   drawIn?: boolean
   expandable?: boolean
+  logToggle?: boolean
 }
 
 const MARGIN_TOP = 8
@@ -108,12 +109,37 @@ function findValueRange(lines: ChartLine[]) {
   return [lowest, highest]
 }
 
-const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX, drawIn = false, expandable = false }: Props) => {
+function findPositiveRange(lines: ChartLine[]) {
+  let lowest = Infinity
+  let highest = 0
+
+  for (const chartLine of lines) {
+    for (const timePoint of chartLine.points) {
+      if (timePoint.value !== null && timePoint.value > 0) {
+        lowest = Math.min(lowest, timePoint.value)
+        highest = Math.max(highest, timePoint.value)
+      }
+    }
+  }
+
+  if (highest === 0) {
+    return [1, 10]
+  }
+
+  return [lowest, highest]
+}
+
+function isPowerOfTen(value: number) {
+  return Number.isInteger(Math.log10(value))
+}
+
+const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTime, setHoveredTime, pinnedTime, setPinnedTime, showTimeLabels, showHoverTime, hoverDetail, zeroLine = false, chartLeft, setYLabelWidth, note, height = HEIGHT, tooltip = false, tooltipKeys, tooltipExtraLines = [], pinTooltip = false, toggleLines = false, defaultHiddenKeys = [], strokeWidth = DEFAULT_STROKE_WIDTH, curve = curveMonotoneX, drawIn = false, expandable = false, logToggle = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
   const [pinnedPointer, setPinnedPointer] = useState<PinnedPointer | null>(null)
   const [hiddenKeys, setHiddenKeys] = useState(defaultHiddenKeys)
   const [expanded, setExpanded] = useState(false)
+  const [logScale, setLogScale] = useState(false)
 
   if (pinnedTime === null && pinnedPointer !== null) {
     setPinnedPointer(null)
@@ -156,15 +182,25 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   const labelCount = Math.max(AUTO_LABEL_COUNT, Math.floor((chartBottom - chartTop) / LABEL_SPACING))
 
   const visibleLines = useMemo(() => findVisibleLines(lines, hiddenKeys), [lines, hiddenKeys])
-  const valueRange = useMemo(() => findValueRange(visibleLines), [visibleLines])
+  const valueRange = useMemo(() => {
+    if (logScale) {
+      return findPositiveRange(visibleLines)
+    }
 
-  const yScale = useMemo(() => {
+    return findValueRange(visibleLines)
+  }, [visibleLines, logScale])
+
+  const yScale = useMemo((): ScaleContinuousNumeric<number, number> => {
+    if (logScale) {
+      return scaleLog().domain(valueRange).nice().clamp(true).range([chartBottom, chartTop])
+    }
+
     if (yAxis === 'auto') {
       return scaleLinear().domain(valueRange).nice(labelCount).range([chartBottom, chartTop])
     }
 
     return scaleLinear().domain([0, Math.max(100, valueRange[1])]).range([chartBottom, chartTop])
-  }, [yAxis, valueRange, chartBottom, chartTop, labelCount])
+  }, [logScale, yAxis, valueRange, chartBottom, chartTop, labelCount])
 
   let yLabelValues = PERCENT_LABEL_VALUES
   let formatYLabel = formatPercentLabel
@@ -175,6 +211,11 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
 
   if (yAxis === 'auto') {
     yLabelValues = yScale.ticks(labelCount)
+    formatYLabel = formatAutoLabel
+  }
+
+  if (logScale) {
+    yLabelValues = yScale.ticks().filter(isPowerOfTen)
     formatYLabel = formatAutoLabel
   }
 
@@ -573,6 +614,16 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
                 <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
+          )}
+          {logToggle && (
+            <div className="dc-scale-toggle" role="group" aria-label={`${title} scale`}>
+              <button type="button" className={logScale ? 'off' : ''} aria-pressed={!logScale} onClick={() => setLogScale(false)}>
+                linear
+              </button>
+              <button type="button" className={logScale ? '' : 'off'} aria-pressed={logScale} onClick={() => setLogScale(true)}>
+                log
+              </button>
+            </div>
           )}
         </div>
         <div className="dc-legend">
