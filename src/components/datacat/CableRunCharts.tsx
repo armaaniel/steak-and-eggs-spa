@@ -215,6 +215,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
           pinTooltip
           tooltipKeys={['cpu', 'memory']}
           toggleLines
+          defaultHiddenKeys={['memory']}
         />
       )}
 
