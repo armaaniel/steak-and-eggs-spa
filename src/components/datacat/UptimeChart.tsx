@@ -54,10 +54,11 @@ function toUptimeBar(bucket: SyntheticBucket, runsPerBucket: number): ChartBar {
   const end = new Date(bucket.bucketEnd).getTime()
 
   const height = Math.max(bucket.started, bucket.expected)
+  const unfinishedRuns = Math.max(0, bucket.expected - bucket.completed - bucket.failures)
 
   let segments: Record<string, number> = { healthy: height }
 
-  if (bucket.started < bucket.expected) {
+  if (unfinishedRuns > 0) {
     segments = { incomplete: height }
   }
 
@@ -69,9 +70,8 @@ function toUptimeBar(bucket: SyntheticBucket, runsPerBucket: number): ChartBar {
     segments = { pending: 1 }
   }
 
-  const missingRuns = Math.max(0, bucket.expected - bucket.started)
   const hoverText = formatHoverTime(new Date(start))
-  const legendValues = { healthy: bucket.completed, incomplete: missingRuns, failing: bucket.failures }
+  const legendValues = { healthy: bucket.completed, incomplete: unfinishedRuns, failing: bucket.failures }
 
   return { start, end, segments, hoverText, legendValues }
 }
