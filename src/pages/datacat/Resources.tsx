@@ -47,7 +47,7 @@ const RESOURCE_ROWS = [
   { id: 'rails', title: 'Rails task' },
   { id: 'ingester', title: 'Ingester task' },
   { id: 'postgres', title: 'RDS Postgres' },
-  { id: 'redis', title: 'ElastiCache Redis' },
+  { id: 'redis', title: 'ElastiCache Valkey' },
 ]
 
 function findLineColor(reading: ResourceReading) {
