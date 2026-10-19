@@ -138,9 +138,9 @@ const RAILS_SETUP = [
   { label: 'Task size', value: TASK_SIZE },
   { label: 'Tasks', value: '1 on Fargate' },
   { label: 'Deploys', value: 'Rolling, no downtime' },
-  { label: 'tickers:sync', value: formatDailyTime(4) },
-  { label: 'record', value: formatDailyTime(5) },
-  { label: 'prune_traces', value: formatDailyTime(6) },
+  { label: 'tickers', value: `${formatDailyTime(4)} · adds new listings, flags delistings` },
+  { label: 'record', value: `${formatDailyTime(5)} · snapshots portfolio values` },
+  { label: 'prune_traces', value: `${formatDailyTime(6)} · deletes traces and ingester samples older than 30 days` },
 ]
 
 const REDIS_SETUP = [
