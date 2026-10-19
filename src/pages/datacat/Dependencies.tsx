@@ -163,9 +163,9 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
 
   return [
     makeNode('vercel', 'Vercel', 'Static hosting', 'none', { statusLabel: NOT_MONITORED }),
-    makeNode('browser', 'Browser', 'React SPA', 'none', { statusLabel: NOT_MONITORED }),
+    makeNode('browser', 'Browser', 'Web app', 'none', { statusLabel: NOT_MONITORED }),
     makeNode('mobile', 'React Native', 'Mobile app', 'none', { statusLabel: NOT_MONITORED }),
-    makeNode('canary', 'Canary', 'Synthetic (k6)', canaryStatus, {
+    makeNode('canary', 'Canary', 'Synthetic checks', canaryStatus, {
       metrics: data
         ? [
             { label: 'Runs passed, last 10 min', value: `${canaryPassed} / ${canaryExpected}` },
@@ -175,7 +175,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
       note: 'See Uptime',
     }),
     makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note }),
-    makeNode('rails', 'Rails app', 'ECS Fargate · API + cable', worst(railsStatus, railsTask.status), {
+    makeNode('rails', 'Rails app', 'API + ActionCable', worst(railsStatus, railsTask.status), {
       metrics: data
         ? [
             { label: 'Requests, last 10 min', value: requests.toLocaleString() },
@@ -186,7 +186,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
     }),
     makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', redis.status, { metrics: redis.metrics, note: redis.note }),
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note }),
-    makeNode('polygon', 'Polygon.io', 'Market data provider', polygonStatus, {
+    makeNode('polygon', 'Polygon.io', 'Market data', polygonStatus, {
       metrics: polygonNow
         ? [
             { label: 'Last successful call', value: polygonNow.lastSuccessAt ? ago(polygonNow.lastSuccessAt, now) : 'none in the last day' },
@@ -195,7 +195,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
           ]
         : [],
     }),
-    makeNode('ingester', 'Ingester', 'ECS Fargate · prices', worst(ingesterStatus, ingesterTask.status), {
+    makeNode('ingester', 'Ingester', 'Price stream', worst(ingesterStatus, ingesterTask.status), {
       metrics: data
         ? [
             { label: 'State', value: state ?? '-' },
