@@ -112,6 +112,7 @@ const UptimeChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sele
       selectBar={selectBar}
       showTimeLabels
       tooltipKeys={['healthy']}
+      pinSelected
     />
   )
 }
