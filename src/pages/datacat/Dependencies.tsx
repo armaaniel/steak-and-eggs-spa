@@ -13,6 +13,8 @@ const GET_DEPENDENCIES = gql`
       errors
     }
     canaryNow: syntheticBuckets(range: "10m") {
+      bucketEnd
+      started
       completed
       failures
       expected
@@ -47,9 +49,11 @@ const GET_DEPENDENCIES = gql`
   }
 `
 
+type CanaryBucket = Pick<SyntheticBucket, 'bucketEnd' | 'started' | 'completed' | 'failures' | 'expected'>
+
 interface DependencyData {
   serviceNow: Pick<ServiceBucket, 'requests' | 'errors'>[]
-  canaryNow: Pick<SyntheticBucket, 'completed' | 'failures' | 'expected'>[]
+  canaryNow: CanaryBucket[]
   polygonNow: PolygonCalls
   ingesterSpans: Pick<IngesterSpan, 'at' | 'state' | 'seconds'>[]
   dependencyHealth: DependencyHealth[]
@@ -203,6 +207,11 @@ const ago = (at: string, now: number) => {
 
 const total = (buckets: { requests: number; errors: number }[], key: 'requests' | 'errors') => buckets.reduce((sum, bucket) => sum + bucket[key], 0)
 
+const expectedRuns = (bucket: CanaryBucket, now: number) => {
+  if (new Date(bucket.bucketEnd).getTime() > now) return bucket.completed + bucket.failures
+  return Math.max(bucket.expected, bucket.started)
+}
+
 const sum = (values: number[]) => values.reduce((runningTotal, value) => runningTotal + value, 0)
 
 const buildNodes = (data: DependencyData | undefined, now: number, range: DatacatRange): DependencyNode[] => {
@@ -212,7 +221,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
   const railsStatus: Status = !data ? 'none' : errors >= RAILS_WARN_ERRORS ? 'warn' : 'good'
 
   const canaryRuns = data?.canaryNow ?? []
-  const canaryExpected = sum(canaryRuns.map((bucket) => bucket.expected))
+  const canaryExpected = sum(canaryRuns.map((bucket) => expectedRuns(bucket, now)))
   const canaryPassed = sum(canaryRuns.map((bucket) => bucket.completed))
   const canaryFailed = sum(canaryRuns.map((bucket) => bucket.failures))
   const canaryStatus: Status = !data || canaryExpected === 0 ? 'none' : canaryPassed === 0 ? 'critical' : canaryFailed > 0 || canaryPassed < canaryExpected ? 'warn' : 'good'
