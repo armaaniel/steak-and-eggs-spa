@@ -88,6 +88,76 @@ const GB = 1024 ** 3
 
 const RAILS_WARN_ERRORS = 3
 
+const MONDAY = 1
+const SATURDAY = 6
+
+const windowTime = new Intl.DateTimeFormat('en-us', { hour: 'numeric', minute: '2-digit' })
+const weeklyWindowTime = new Intl.DateTimeFormat('en-us', { weekday: 'short', hour: 'numeric', minute: '2-digit' })
+
+function findUtcTime(utcHour: number, utcWeekday: number | null) {
+  const now = new Date()
+  const time = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), utcHour))
+
+  if (utcWeekday !== null) {
+    const daysAhead = (utcWeekday - time.getUTCDay() + 7) % 7
+    time.setUTCDate(time.getUTCDate() + daysAhead)
+  }
+
+  return time
+}
+
+function formatDailyTime(utcHour: number) {
+  return `Daily ${windowTime.format(findUtcTime(utcHour, null))}`
+}
+
+function formatDailyWindow(utcHour: number) {
+  const start = findUtcTime(utcHour, null)
+
+  return `Daily ${windowTime.formatRange(start, new Date(start.getTime() + HOUR_MS))}`
+}
+
+function formatWeeklyWindow(utcWeekday: number, utcHour: number) {
+  const start = findUtcTime(utcHour, utcWeekday)
+
+  return weeklyWindowTime.formatRange(start, new Date(start.getTime() + HOUR_MS))
+}
+
+const TASK_SIZE = '0.25 vCPU · 512 MB · ARM64'
+
+const ALB_SETUP = [
+  { label: 'Listeners', value: 'HTTPS (TLS 1.3), HTTP redirects to HTTPS' },
+  { label: 'Health check', value: 'GET / every 30 s' },
+  { label: 'Unhealthy after', value: '5 failed checks, about 2.5 min' },
+]
+
+const RAILS_SETUP = [
+  { label: 'Task size', value: TASK_SIZE },
+  { label: 'Tasks', value: '1 on Fargate' },
+  { label: 'tickers:sync', value: formatDailyTime(4) },
+  { label: 'record', value: formatDailyTime(5) },
+  { label: 'prune_traces', value: formatDailyTime(6) },
+]
+
+const REDIS_SETUP = [
+  { label: 'Engine', value: 'Valkey 8.2' },
+  { label: 'Instance', value: 'cache.t4g.micro, 1 node' },
+  { label: 'Maintenance', value: formatWeeklyWindow(SATURDAY, 4) },
+]
+
+const POSTGRES_SETUP = [
+  { label: 'Engine', value: 'Postgres 17' },
+  { label: 'Instance', value: 'db.t4g.micro, burstable' },
+  { label: 'Storage', value: '20 GB gp3' },
+  { label: 'Backups', value: `${formatDailyWindow(3)}, kept 7 days` },
+  { label: 'Maintenance', value: formatWeeklyWindow(MONDAY, 4) },
+]
+
+const INGESTER_SETUP = [
+  { label: 'Task size', value: TASK_SIZE },
+  { label: 'Tasks', value: '1 on Fargate' },
+  { label: 'Deploys', value: 'The old task stops first, so a short gap is expected' },
+]
+
 const RANK: Record<Status, number> = { none: 0, good: 1, warn: 2, critical: 3 }
 
 const worst = (a: Status, b: Status) => (RANK[a] >= RANK[b] ? a : b)
@@ -174,7 +244,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
         : [],
       note: 'See Uptime',
     }),
-    makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note }),
+    makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note, setup: ALB_SETUP }),
     makeNode('rails', 'Rails app', 'API + ActionCable', worst(railsStatus, railsTask.status), {
       metrics: data
         ? [
@@ -183,9 +253,10 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
             ...railsTask.metrics,
           ]
         : [],
+      setup: RAILS_SETUP,
     }),
-    makeNode('redis', 'ElastiCache Redis', 'Cache + live prices', redis.status, { metrics: redis.metrics, note: redis.note }),
-    makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note }),
+    makeNode('redis', 'ElastiCache Redis', 'Cache + live prices', redis.status, { metrics: redis.metrics, note: redis.note, setup: REDIS_SETUP }),
+    makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note, setup: POSTGRES_SETUP }),
     makeNode('polygon', 'Polygon.io', 'Market data', polygonStatus, {
       metrics: polygonNow
         ? [
@@ -202,6 +273,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
             ...ingesterTask.metrics,
           ]
         : [],
+      setup: INGESTER_SETUP,
     }),
   ]
 }

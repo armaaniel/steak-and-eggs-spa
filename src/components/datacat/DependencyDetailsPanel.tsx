@@ -16,6 +16,13 @@ const DependencyDetailsPanel = ({ node }: Props) => {
         <DetailRows rows={node.metrics} />
 
         {node.note && <p className="dc-detail-muted">{node.note}</p>}
+
+        {node.setup !== undefined && (
+          <div className="dc-detail-list">
+            <p className="dc-detail-label">Setup</p>
+            <DetailRows rows={node.setup} inline />
+          </div>
+        )}
       </div>
     </div>
   )
