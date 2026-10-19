@@ -133,6 +133,7 @@ const ALB_SETUP = [
 const RAILS_SETUP = [
   { label: 'Task size', value: TASK_SIZE },
   { label: 'Tasks', value: '1 on Fargate' },
+  { label: 'Deploys', value: 'Rolling, no downtime' },
   { label: 'tickers:sync', value: formatDailyTime(4) },
   { label: 'record', value: formatDailyTime(5) },
   { label: 'prune_traces', value: formatDailyTime(6) },
@@ -155,7 +156,7 @@ const POSTGRES_SETUP = [
 const INGESTER_SETUP = [
   { label: 'Task size', value: TASK_SIZE },
   { label: 'Tasks', value: '1 on Fargate' },
-  { label: 'Deploys', value: 'The old task stops first, so a short gap is expected' },
+  { label: 'Deploys', value: 'Recreate, brief downtime' },
 ]
 
 const RANK: Record<Status, number> = { none: 0, good: 1, warn: 2, critical: 3 }
