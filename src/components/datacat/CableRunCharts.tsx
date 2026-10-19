@@ -59,13 +59,8 @@ function toLagTooltipLines(rows: CableCompareRow[], bucketSeconds: number, resou
 
 function describeFanout(row: CableCompareRow, bucketSeconds: number) {
   const published = perSecond(row.published, bucketSeconds)
-  const publishedText = `${published === null ? '-' : formatRate(published)} published`
 
-  if (row.expected === null || row.received === null) {
-    return publishedText
-  }
-
-  return `${publishedText} · ${(row.expected - row.received).toLocaleString()} dropped`
+  return `${published === null ? '-' : formatRate(published)} published`
 }
 
 const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, memoryUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
