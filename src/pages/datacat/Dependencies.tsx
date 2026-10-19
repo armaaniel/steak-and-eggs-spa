@@ -184,7 +184,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
           ]
         : [],
     }),
-    makeNode('redis', 'ElastiCache Redis', 'Cache + pub/sub', redis.status, { metrics: redis.metrics, note: redis.note }),
+    makeNode('redis', 'ElastiCache Redis', 'Cache + live prices', redis.status, { metrics: redis.metrics, note: redis.note }),
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note }),
     makeNode('polygon', 'Polygon.io', 'Market data', polygonStatus, {
       metrics: polygonNow
