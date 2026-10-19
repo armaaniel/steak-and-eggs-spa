@@ -185,6 +185,12 @@
 	color:var(--dc-text-muted);
 }
 
+.dc-detail-divider {
+	margin:0;
+	border:none;
+	border-top:1px solid var(--dc-border);
+}
+
 .dc-detail-rows {
 	display:flex;
 	flex-direction:column;

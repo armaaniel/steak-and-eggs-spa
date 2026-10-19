@@ -18,10 +18,17 @@ const DependencyDetailsPanel = ({ node }: Props) => {
         {node.note && <p className="dc-detail-muted">{node.note}</p>}
 
         {node.setup !== undefined && (
-          <div className="dc-detail-list">
-            <p className="dc-detail-label">Setup</p>
+          <>
+            <hr className="dc-detail-divider" />
             <DetailRows rows={node.setup} inline />
-          </div>
+          </>
+        )}
+
+        {node.jobs !== undefined && (
+          <>
+            <hr className="dc-detail-divider" />
+            <DetailRows rows={node.jobs} inline />
+          </>
         )}
       </div>
     </div>

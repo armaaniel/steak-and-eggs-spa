@@ -138,6 +138,9 @@ const RAILS_SETUP = [
   { label: 'Task size', value: TASK_SIZE },
   { label: 'Tasks', value: '1 on Fargate' },
   { label: 'Deploys', value: 'Rolling, no downtime' },
+]
+
+const RAILS_JOBS = [
   { label: 'tickers', value: `${formatDailyTime(4)} · adds new listings, flags delistings` },
   { label: 'record', value: `${formatDailyTime(5)} · snapshots portfolio values` },
   { label: 'prune_traces', value: `${formatDailyTime(6)} · deletes traces and ingester samples older than 30 days` },
@@ -264,6 +267,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
           ]
         : [],
       setup: RAILS_SETUP,
+      jobs: RAILS_JOBS,
     }),
     makeNode('redis', 'ElastiCache Valkey', 'Cache + live prices', redis.status, { metrics: redis.metrics, note: redis.note, setup: REDIS_SETUP }),
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note, setup: POSTGRES_SETUP }),

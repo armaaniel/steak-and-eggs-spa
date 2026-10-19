@@ -79,6 +79,7 @@ export interface DependencyNode {
 	metrics:{label:string; value:string}[]
 	note?:string
 	setup?:{label:string; value:string}[]
+	jobs?:{label:string; value:string}[]
 }
 
 export type Detail =
