@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { curveMonotoneX, line } from 'd3-shape'
 import useApi from '../hooks/useApi'
-import { MORPH_MS, blendColumns, easeLikeCss, lineUpColumns, prefersReducedMotion, type ScreenPoint } from '../hooks/useMorphingPoints'
+import { blendColumns, easeLikeCss, lineUpColumns, prefersReducedMotion, type ScreenPoint } from '../hooks/useMorphingPoints'
 import '../stylesheets/chart.css'
 import type { ChartData } from '../lib/types.ts'
 
@@ -52,6 +52,7 @@ const CHART_WINDOW = 60_000
 const CHART_HISTORY = CHART_WINDOW * 2
 const HOLD_GAP_MS = 1500
 const SECOND_MS = 1000
+const MORPH_MS = 300
 const GLIDE_MS = 400
 const FRAMES_PER_SECOND = 30
 const FRAME_TOLERANCE_MS = 4
