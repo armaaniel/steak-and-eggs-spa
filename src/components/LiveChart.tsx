@@ -53,10 +53,13 @@ const CHART_HISTORY = CHART_WINDOW * 2
 const HOLD_GAP_MS = 1500
 const SECOND_MS = 1000
 const MORPH_MS = 400
+const LABEL_SWAP_POINT = 0.5
 const GLIDE_MS = 400
 const FRAMES_PER_SECOND = 30
+const ANIMATING_FRAMES_PER_SECOND = 60
 const FRAME_TOLERANCE_MS = 4
 const DRAW_COOLDOWN_MS = (1000 / FRAMES_PER_SECOND) - FRAME_TOLERANCE_MS
+const ANIMATING_DRAW_COOLDOWN_MS = (1000 / ANIMATING_FRAMES_PER_SECOND) - FRAME_TOLERANCE_MS
 const LABEL_INTERVALS = [10_000, 20_000, 30_000, 60_000]
 const MIN_LABEL_SPACING = 72
 const EDGE_FADE = 20
@@ -308,6 +311,33 @@ function findMorphProgress(morph: Morph, now: number) {
   return Math.min(1, Math.max(0, (now - morph.startedAt) / MORPH_MS))
 }
 
+function findOldLabelOpacity(morphProgress: number) {
+  const fadeOutProgress = Math.min(1, morphProgress / LABEL_SWAP_POINT)
+
+  return 1 - fadeOutProgress
+}
+
+function findNewLabelOpacity(morphProgress: number) {
+  const fadeInProgress = (morphProgress - LABEL_SWAP_POINT) / (1 - LABEL_SWAP_POINT)
+
+  return Math.min(1, Math.max(0, fadeInProgress))
+}
+
+function findAnimationEnd(livePoints: LivePoint[], morph: Morph | null) {
+  let animationEnd = 0
+  const lastLivePoint = livePoints[livePoints.length - 1]
+
+  if (lastLivePoint !== undefined && lastLivePoint.from !== undefined) {
+    animationEnd = lastLivePoint.time + LIVE_DELAY_MS + GLIDE_MS
+  }
+
+  if (morph !== null && morph.startedAt !== null) {
+    animationEnd = Math.max(animationEnd, morph.startedAt + MORPH_MS)
+  }
+
+  return animationEnd
+}
+
 function findBlend(morphProgress: number) {
   if (morphProgress <= 0) {
     return 0
@@ -339,6 +369,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   const [pointerX, setPointerX] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
   const lastPrice = useRef(price)
+  const animatingUntil = useRef(0)
   const labelRef = useRef<HTMLDivElement>(null)
   const clipId = `live-clip-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
 
@@ -380,8 +411,16 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
     let nextFrameRun = 0
     let lastDrawn = 0
 
+    function findDrawCooldown() {
+      if (Date.now() < animatingUntil.current) {
+        return ANIMATING_DRAW_COOLDOWN_MS
+      }
+
+      return DRAW_COOLDOWN_MS
+    }
+
     function rafLoop(timeSincePageLoad: number) {
-      if (timeSincePageLoad - lastDrawn >= DRAW_COOLDOWN_MS) {
+      if (timeSincePageLoad - lastDrawn >= findDrawCooldown()) {
         lastDrawn = timeSincePageLoad
         setNow(Date.now())
       }
@@ -465,6 +504,12 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
     })
   }, [price, startingPrice, seedPoints])
 
+  const animationEnd = findAnimationEnd(livePoints, morph)
+
+  useEffect(() => {
+    animatingUntil.current = animationEnd
+  }, [animationEnd])
+
   const windowEnd = now - LIVE_DELAY_MS
   const windowStart = windowEnd - CHART_WINDOW
 
@@ -495,6 +540,14 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
 
   if (morph !== null) {
     currentOpacity = blend
+  }
+
+  let fromLabelOpacity = 1 - blend
+  let currentLabelOpacity = currentOpacity
+
+  if (fromDrawing !== null && currentDrawing !== null) {
+    fromLabelOpacity = findOldLabelOpacity(morphProgress)
+    currentLabelOpacity = findNewLabelOpacity(morphProgress)
   }
 
   let currentLabelKey = ''
@@ -682,8 +735,8 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
             </clipPath>
           </defs>
 
-          {fromDrawing !== null && renderYLabels(fromDrawing, 1 - blend, 'from')}
-          {currentDrawing !== null && currentOpacity > 0 && renderYLabels(currentDrawing, currentOpacity, 'current')}
+          {fromDrawing !== null && fromLabelOpacity > 0 && renderYLabels(fromDrawing, fromLabelOpacity, 'from')}
+          {currentDrawing !== null && currentLabelOpacity > 0 && renderYLabels(currentDrawing, currentLabelOpacity, 'current')}
           {xLabelTimes.map(renderXLabel)}
 
           <path className="live-line" d={path} clipPath={`url(#${clipId})`} fill="none" strokeWidth={LINE_WIDTH} opacity={lineOpacity} />
