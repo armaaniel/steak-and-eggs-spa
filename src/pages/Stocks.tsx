@@ -128,16 +128,24 @@ function Stocks() {
 	])
 
 	const shownChartLine = useRef<ScreenPoint[]>([])
+	const shownLiveLine = useRef<ScreenPoint[]>([])
 	const [liveStartingLine, setLiveStartingLine] = useState<ScreenPoint[] | null>(null)
+	const [chartStartingLine, setChartStartingLine] = useState<ScreenPoint[] | null>(null)
 
 	const selectRange = (range: ChartRange) => {
 		if (range === 'Live' && chartRange !== 'Live') {
 			setLiveStartingLine(shownChartLine.current)
 		}
 
+		if (range !== 'Live' && chartRange === 'Live') {
+			setChartStartingLine(shownLiveLine.current)
+		}
+
 		setChartRange(range)
 		setHoveredPoint(null)
 	}
+
+	const holdsLiveLine = chartStartingLine !== null && chartStartingLine.length > 0
 
 	let baseline = chartData?.[0]?.value ?? null
 
@@ -194,8 +202,8 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} startingLine={liveStartingLine} />}
-              {!isLive && chartData && <Chart chartData={chartData} onHover={setHoveredPoint} shownLineRef={shownChartLine} />}
+              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} startingLine={liveStartingLine} shownLineRef={shownLiveLine} />}
+              {!isLive && (chartData || holdsLiveLine) && <Chart chartData={chartData} onHover={setHoveredPoint} shownLineRef={shownChartLine} startingLine={chartStartingLine} />}
             </div>
           </div>
 

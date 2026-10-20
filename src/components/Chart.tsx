@@ -6,9 +6,10 @@ import '../stylesheets/chart.css'
 import type { ChartData } from '../lib/types.ts'
 
 interface Props {
-  chartData: ChartData[]
+  chartData: ChartData[] | null
   onHover?: (point: ChartData | null) => void
   shownLineRef?: RefObject<ScreenPoint[]>
+  startingLine?: ScreenPoint[] | null
 }
 
 interface Size {
@@ -148,8 +149,9 @@ function makeAreaPath(screenPoints: ScreenPoint[], bottom: number) {
   return makeArea(screenPoints) ?? undefined
 }
 
-const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
+const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, startingLine = null }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
+  const [continuesLine] = useState(startingLine !== null && startingLine.length > 0)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
   const labelRef = useRef<HTMLDivElement>(null)
@@ -161,9 +163,8 @@ const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
       return
     }
 
-    function handleResize(entries: ResizeObserverEntry[]) {
-      const box = entries[0].contentRect
-      const newSize = { width: Math.floor(box.width), height: Math.floor(box.height) }
+    function updateSize(width: number, height: number) {
+      const newSize = { width: Math.floor(width), height: Math.floor(height) }
 
       setSize(function (oldSize) {
         if (oldSize.width === newSize.width && oldSize.height === newSize.height) {
@@ -174,6 +175,13 @@ const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
       })
     }
 
+    function handleResize(entries: ResizeObserverEntry[]) {
+      const box = entries[0].contentRect
+      updateSize(box.width, box.height)
+    }
+
+    updateSize(chartDiv.clientWidth, chartDiv.clientHeight)
+
     const observer = new ResizeObserver(handleResize)
     observer.observe(chartDiv)
 
@@ -182,8 +190,17 @@ const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
     }
   }, [])
 
+  const waitingForData = loadedData === null
+  const chartData = useMemo(() => loadedData ?? [], [loadedData])
   const placedPoints = useMemo(() => placePoints(chartData, size), [chartData, size])
-  const shownPoints = useMorphingPoints(placedPoints)
+
+  let targetPoints = placedPoints
+
+  if (waitingForData && startingLine !== null) {
+    targetPoints = startingLine
+  }
+
+  const shownPoints = useMorphingPoints(targetPoints)
 
   useEffect(() => {
     if (shownLineRef === undefined) {
@@ -282,6 +299,11 @@ const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
   }
 
   let solidRight = size.width
+  let svgClassName: string | undefined = undefined
+
+  if (continuesLine) {
+    svgClassName = 'chart-continued'
+  }
 
   if (hoveredSpot !== null) {
     solidRight = hoveredSpot.x
@@ -290,7 +312,7 @@ const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
   return (
     <div ref={measureResize} className="chart-area">
       {size.width > 0 && (
-        <svg width={size.width} height={size.height} onPointerDown={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={clearHover}>
+        <svg className={svgClassName} width={size.width} height={size.height} onPointerDown={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={clearHover}>
           <defs>
             <clipPath id={clipId}>
               <rect x={0} y={0} width={solidRight} height={size.height} />
@@ -315,14 +337,16 @@ const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
           </defs>
 
           <g className="chart-faded" clipPath={`url(#${clipId}-after)`}>
-            <g className="chart-faded-fill">
-              <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
-            </g>
+            {!waitingForData && (
+              <g className="chart-faded-fill">
+                <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
+              </g>
+            )}
             <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
           </g>
 
           <g clipPath={`url(#${clipId})`}>
-            <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />
+            {!waitingForData && <path className="chart-fill" d={areaPath} fill={`url(#${fillId}-dots)`} mask={`url(#${fillId}-mask)`} />}
             <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
           </g>
 

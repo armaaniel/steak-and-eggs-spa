@@ -16,6 +16,10 @@
 	animation:chart-line-draw 1.5s ease;
 }
 
+.chart-continued .chart-line {
+	animation:none;
+}
+
 .chart-faded .chart-line {
 	opacity:0.3;
 }

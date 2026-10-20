@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type RefObject } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { curveMonotoneX, line } from 'd3-shape'
 import useApi from '../hooks/useApi'
@@ -11,6 +11,7 @@ interface Props {
   price: number | null
   onHover?: (point: ChartData | null) => void
   startingLine?: ScreenPoint[] | null
+  shownLineRef?: RefObject<ScreenPoint[]>
 }
 
 interface LivePoint {
@@ -333,6 +334,35 @@ function makeStartingMorph(price: number | null, startingLine: ScreenPoint[] | n
   return { fromSeries: { seedPoints: [], livePoints: [], startingPrice: price }, fromLine: null, startedAt: null }
 }
 
+function findPointAtX(before: ScreenPoint, after: ScreenPoint, x: number) {
+  const progress = (x - before.x) / (after.x - before.x)
+
+  return { x, y: before.y + (after.y - before.y) * progress }
+}
+
+function trimToPlot(points: ScreenPoint[], plotLeft: number, plotRight: number) {
+  const trimmedPoints: ScreenPoint[] = []
+
+  for (let index = 0; index < points.length; index++) {
+    const point = points[index]
+    const previousPoint = points[index - 1]
+
+    if (previousPoint !== undefined && previousPoint.x < plotLeft && point.x > plotLeft) {
+      trimmedPoints.push(findPointAtX(previousPoint, point, plotLeft))
+    }
+
+    if (point.x >= plotLeft && point.x <= plotRight) {
+      trimmedPoints.push(point)
+    }
+
+    if (previousPoint !== undefined && previousPoint.x < plotRight && point.x > plotRight) {
+      trimmedPoints.push(findPointAtX(previousPoint, point, plotRight))
+    }
+  }
+
+  return trimmedPoints
+}
+
 function findAnimationEnd(livePoints: LivePoint[], morph: Morph | null) {
   let animationEnd = 0
   const lastLivePoint = livePoints[livePoints.length - 1]
@@ -369,7 +399,7 @@ const makeScreenPath = line<ScreenPoint>()
   })
   .curve(curveMonotoneX)
 
-const LiveChart = ({ symbol, price, onHover, startingLine = null }: Props) => {
+const LiveChart = ({ symbol, price, onHover, startingLine = null, shownLineRef }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [now, setNow] = useState(() => Date.now())
   const [seriesSymbol, setSeriesSymbol] = useState(symbol)
@@ -640,6 +670,24 @@ const LiveChart = ({ symbol, price, onHover, startingLine = null }: Props) => {
   }
 
   const path = makeScreenPath(shownPoints) ?? undefined
+
+  useEffect(() => {
+    if (shownLineRef === undefined) {
+      return
+    }
+
+    shownLineRef.current = trimToPlot(shownPoints, plotLeft, plotRight)
+  })
+
+  useEffect(() => {
+    if (shownLineRef === undefined) {
+      return
+    }
+
+    return function forgetShownLine() {
+      shownLineRef.current = []
+    }
+  }, [shownLineRef])
 
   let headOpacity = lineOpacity
   let xLabelOpacity = 1
