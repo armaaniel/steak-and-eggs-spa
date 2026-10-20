@@ -5,13 +5,13 @@ export interface ScreenPoint {
   y: number
 }
 
-interface Column {
+export interface Column {
   x: number
   startY: number
   targetY: number
 }
 
-const MORPH_MS = 500
+export const MORPH_MS = 500
 const SAME_COLUMN_PX = 0.5
 
 function bezierAt(t: number, firstControl: number, secondControl: number) {
@@ -20,7 +20,7 @@ function bezierAt(t: number, firstControl: number, secondControl: number) {
   return 3 * rest * rest * t * firstControl + 3 * rest * t * t * secondControl + t * t * t
 }
 
-function easeLikeCss(progress: number) {
+export function easeLikeCss(progress: number) {
   let low = 0
   let high = 1
   let t = progress
@@ -38,7 +38,7 @@ function easeLikeCss(progress: number) {
   return bezierAt(t, 0.1, 1)
 }
 
-function prefersReducedMotion() {
+export function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
@@ -88,7 +88,7 @@ function readHeightsAt(points: ScreenPoint[], columnXs: number[]) {
   return heights
 }
 
-function lineUpColumns(startPoints: ScreenPoint[], targetPoints: ScreenPoint[]) {
+export function lineUpColumns(startPoints: ScreenPoint[], targetPoints: ScreenPoint[]) {
   const columnXs = findColumnXs(startPoints, targetPoints)
   const startHeights = readHeightsAt(startPoints, columnXs)
   const targetHeights = readHeightsAt(targetPoints, columnXs)
@@ -98,7 +98,7 @@ function lineUpColumns(startPoints: ScreenPoint[], targetPoints: ScreenPoint[]) 
   })
 }
 
-function blendColumns(columns: Column[], amount: number) {
+export function blendColumns(columns: Column[], amount: number) {
   return columns.map(function (column) {
     return { x: column.x, y: column.startY + (column.targetY - column.startY) * amount }
   })

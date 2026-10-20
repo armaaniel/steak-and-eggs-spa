@@ -4,6 +4,7 @@ import apiFetch from '../lib/apiFetch'
 function useApi<T>(path: string | null, fallback: T) {
 	const [data, setData] = useState<T | null>(null)
 	const [error, setError] = useState<string | null>(null)
+	const [loadedPath, setLoadedPath] = useState<string | null>(null)
 	const latestRequest = useRef(0)
 	
 	const getData = async () => {
@@ -12,6 +13,7 @@ function useApi<T>(path: string | null, fallback: T) {
 		if (!path) {
 			setData(null)
 			setError(null)
+			setLoadedPath(null)
 			return
 		}
 		setError(null)
@@ -25,21 +27,24 @@ function useApi<T>(path: string | null, fallback: T) {
 				const json = await response.json()
 				if (request !== latestRequest.current) return
 				setData(json)
+				setLoadedPath(path)
 			} else {
 				setData(fallback)
+				setLoadedPath(path)
 				setError('Something went wrong')
 			}
 			
 		} catch {
 			if (request !== latestRequest.current) return
 			setData(fallback)
+			setLoadedPath(path)
 			setError('Something went wrong')
 		}
 	}
 	
 	useEffect(() => { getData() }, [path])
 	
-	return {data, error, getData, setData }
+	return {data, error, getData, setData, loadedPath }
 	
 }
 

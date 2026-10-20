@@ -77,12 +77,19 @@ function Stocks() {
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
   const [tickerNotFound, setTickerNotFound] = useState(false)
 
-  const { data: quote } = useApi<Quote>(
-    `/stocks/${symbol}/stockprice`,
+  const quotePath = `/stocks/${symbol}/stockprice`
+  const { data: quote, loadedPath: loadedQuotePath } = useApi<Quote>(
+    quotePath,
     { price: 'N/A', open: 'N/A' }
   )
   const prices = usePriceSubscriptions([symbol])
   const price = prices[symbol] ?? quote?.price ?? null
+
+  let livePrice: Price = prices[symbol] ?? null
+
+  if (livePrice === null && loadedQuotePath === quotePath) {
+    livePrice = quote?.price ?? null
+  }
 
   useEffect(() => {
     if (rawSymbol && rawSymbol !== symbol) {
@@ -179,7 +186,7 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              {isLive && <LiveChart key={symbol} symbol={symbol} price={toPriceNumber(price)} onHover={setHoveredPoint} />}
+              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} />}
               {!isLive && chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
             </div>
           </div>
