@@ -10,6 +10,7 @@ interface Props {
   symbol: string
   price: number | null
   onHover?: (point: ChartData | null) => void
+  startingLine?: ScreenPoint[] | null
 }
 
 interface LivePoint {
@@ -36,7 +37,8 @@ interface Series {
 }
 
 interface Morph {
-  fromSeries: Series
+  fromSeries: Series | null
+  fromLine: ScreenPoint[] | null
   startedAt: number | null
 }
 
@@ -52,7 +54,7 @@ const CHART_WINDOW = 60_000
 const CHART_HISTORY = CHART_WINDOW * 2
 const HOLD_GAP_MS = 1500
 const SECOND_MS = 1000
-const MORPH_MS = 400
+const MORPH_MS = 300
 const LABEL_SWAP_POINT = 0.5
 const GLIDE_MS = 400
 const FRAMES_PER_SECOND = 30
@@ -323,6 +325,14 @@ function findNewLabelOpacity(morphProgress: number) {
   return Math.min(1, Math.max(0, fadeInProgress))
 }
 
+function makeStartingMorph(price: number | null, startingLine: ScreenPoint[] | null): Morph {
+  if (startingLine !== null && startingLine.length > 0) {
+    return { fromSeries: null, fromLine: startingLine, startedAt: null }
+  }
+
+  return { fromSeries: { seedPoints: [], livePoints: [], startingPrice: price }, fromLine: null, startedAt: null }
+}
+
 function findAnimationEnd(livePoints: LivePoint[], morph: Morph | null) {
   let animationEnd = 0
   const lastLivePoint = livePoints[livePoints.length - 1]
@@ -359,13 +369,13 @@ const makeScreenPath = line<ScreenPoint>()
   })
   .curve(curveMonotoneX)
 
-const LiveChart = ({ symbol, price, onHover }: Props) => {
+const LiveChart = ({ symbol, price, onHover, startingLine = null }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [now, setNow] = useState(() => Date.now())
   const [seriesSymbol, setSeriesSymbol] = useState(symbol)
   const [livePoints, setLivePoints] = useState<LivePoint[]>([])
   const [startingPrice, setStartingPrice] = useState(price)
-  const [morph, setMorph] = useState<Morph | null>(() => ({ fromSeries: { seedPoints: [], livePoints: [], startingPrice: price }, startedAt: null }))
+  const [morph, setMorph] = useState<Morph | null>(() => makeStartingMorph(price, startingLine))
   const [pointerX, setPointerX] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
   const lastPrice = useRef(price)
@@ -386,9 +396,8 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
       return
     }
 
-    function handleResize(entries: ResizeObserverEntry[]) {
-      const box = entries[0].contentRect
-      const newSize = { width: Math.floor(box.width), height: Math.floor(box.height) }
+    function updateSize(width: number, height: number) {
+      const newSize = { width: Math.floor(width), height: Math.floor(height) }
 
       setSize(function (oldSize) {
         if (oldSize.width === newSize.width && oldSize.height === newSize.height) {
@@ -398,6 +407,13 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
         return newSize
       })
     }
+
+    function handleResize(entries: ResizeObserverEntry[]) {
+      const box = entries[0].contentRect
+      updateSize(box.width, box.height)
+    }
+
+    updateSize(chartDiv.clientWidth, chartDiv.clientHeight)
 
     const observer = new ResizeObserver(handleResize)
     observer.observe(chartDiv)
@@ -440,13 +456,13 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
       return
     }
 
-    let fromSeries: Series = { seedPoints: seedPoints ?? [], livePoints, startingPrice }
+    let nextMorph: Morph = { fromSeries: { seedPoints: seedPoints ?? [], livePoints, startingPrice }, fromLine: null, startedAt: null }
 
     if (morph !== null && morph.startedAt === null) {
-      fromSeries = morph.fromSeries
+      nextMorph = morph
     }
 
-    setMorph({ fromSeries, startedAt: null })
+    setMorph(nextMorph)
     setSeriesSymbol(symbol)
     setLivePoints([])
     setStartingPrice(price)
@@ -463,7 +479,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
         return oldMorph
       }
 
-      return { fromSeries: oldMorph.fromSeries, startedAt: Date.now() }
+      return { fromSeries: oldMorph.fromSeries, fromLine: oldMorph.fromLine, startedAt: Date.now() }
     })
   }, [seedPoints])
 
@@ -531,9 +547,14 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   const currentDrawing = makeDrawing({ seedPoints: seedPoints ?? [], livePoints, startingPrice }, windowStart, windowEnd)
 
   let fromDrawing: Drawing | null = null
+  let fromLine: ScreenPoint[] | null = null
 
   if (morph !== null && morphProgress < 1) {
-    fromDrawing = makeDrawing(morph.fromSeries, windowStart, windowEnd)
+    fromLine = morph.fromLine
+
+    if (morph.fromSeries !== null) {
+      fromDrawing = makeDrawing(morph.fromSeries, windowStart, windowEnd)
+    }
   }
 
   let currentOpacity = 1
@@ -567,15 +588,19 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   const halfXLabelWidth = useMemo(() => measureWidestLabel([clockFormat.format(0)]) / 2, [])
 
   let yLabelWidth = currentLabelWidth
+  let yLabelGap = Y_LABEL_GAP
 
-  if (fromDrawing !== null && currentDrawing !== null) {
+  if (fromLine !== null) {
+    yLabelWidth = currentLabelWidth * blend
+    yLabelGap = Y_LABEL_GAP * blend
+  } else if (fromDrawing !== null && currentDrawing !== null) {
     yLabelWidth = fromLabelWidth + (currentLabelWidth - fromLabelWidth) * blend
   } else if (fromDrawing !== null) {
     yLabelWidth = fromLabelWidth
   }
 
   const plotLeft = MARGIN.left
-  const plotRight = size.width - MARGIN.right - yLabelWidth - Y_LABEL_GAP
+  const plotRight = size.width - MARGIN.right - yLabelWidth - yLabelGap
   const plotTop = MARGIN.top
   const plotBottom = size.height - MARGIN.bottom
   const plotWidth = Math.max(0, plotRight - plotLeft)
@@ -597,7 +622,13 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   let shownPoints: ScreenPoint[] = []
   let lineOpacity = 1
 
-  if (fromDrawing !== null && currentDrawing !== null) {
+  if (fromLine !== null && currentDrawing !== null) {
+    const columns = lineUpColumns(fromLine, placeOnScreen(currentDrawing))
+    shownPoints = blendColumns(columns, blend)
+  } else if (fromLine !== null) {
+    shownPoints = fromLine
+    lineOpacity = 1 - blend
+  } else if (fromDrawing !== null && currentDrawing !== null) {
     const columns = lineUpColumns(placeOnScreen(fromDrawing), placeOnScreen(currentDrawing))
     shownPoints = blendColumns(columns, blend)
   } else if (fromDrawing !== null) {
@@ -609,6 +640,14 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   }
 
   const path = makeScreenPath(shownPoints) ?? undefined
+
+  let headOpacity = lineOpacity
+  let xLabelOpacity = 1
+
+  if (fromLine !== null) {
+    headOpacity = blend
+    xLabelOpacity = blend
+  }
 
   let headY: number | null = null
   const headPoint = shownPoints[shownPoints.length - 1]
@@ -634,7 +673,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
     const opacity = Math.min(1, Math.max(0, distanceFromEdge / EDGE_FADE))
 
     return (
-      <text key={labelTime} className="live-label" x={labelX} y={plotBottom + 17} textAnchor="middle" opacity={opacity}>
+      <text key={labelTime} className="live-label" x={labelX} y={plotBottom + 17} textAnchor="middle" opacity={opacity * xLabelOpacity}>
         {clockFormat.format(labelTime)}
       </text>
     )
@@ -651,7 +690,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
       return (
         <g key={`${keyPrefix}-${value}`} opacity={edgeOpacity * opacity}>
           <line className="live-grid" x1={plotLeft} x2={plotRight} y1={labelY} y2={labelY} />
-          <text className="live-label" x={plotRight + Y_LABEL_GAP} y={labelY} dy="0.32em">
+          <text className="live-label" x={plotRight + yLabelGap} y={labelY} dy="0.32em">
             {drawing.yLabels[index]}
           </text>
         </g>
@@ -725,7 +764,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
 
   return (
     <div ref={measureResize} className="chart-area">
-      {size.width > 0 && headY !== null && lineOpacity === 1 && <div className="live-pulse" style={{ left: plotRight, top: headY }} />}
+      {size.width > 0 && headY !== null && headOpacity === 1 && <div className="live-pulse" style={{ left: plotRight, top: headY }} />}
 
       {size.width > 0 && (
         <svg width={size.width} height={size.height} onPointerDown={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={clearPointer}>
@@ -743,7 +782,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
 
           {hoveredPoint !== null && <line className="chart-cursor" x1={hoveredX} x2={hoveredX} y1={plotTop} y2={plotBottom} />}
 
-          {headY !== null && <circle className="chart-dot" cx={plotRight} cy={headY} r={HEAD_RADIUS} opacity={lineOpacity} />}
+          {headY !== null && <circle className="chart-dot" cx={plotRight} cy={headY} r={HEAD_RADIUS} opacity={headOpacity} />}
 
           {hoveredPoint !== null && <circle className="chart-dot" cx={hoveredX} cy={hoveredY} r={HEAD_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
         </svg>

@@ -4,7 +4,7 @@ import LiveChart from '../components/LiveChart'
 import ChartRanges from '../components/ChartRanges'
 import useStoredRange from '../hooks/useStoredRange'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PositionTable from '../components/PositionTable'
 import BuySell from '../components/BuySell'
 import NotFoundTwo from '../components/NotFoundTwo'
@@ -12,6 +12,7 @@ import { useDemo } from '../layouts/Public'
 import { toReadable, toCurrency, toChange } from '../lib/utils.ts'
 import apiFetch from '../lib/apiFetch'
 import useApi from '../hooks/useApi'
+import type { ScreenPoint } from '../hooks/useMorphingPoints'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
 import { useAuth } from '../lib/auth'
 import TickerLogo from '../components/TickerLogo'
@@ -126,7 +127,14 @@ function Stocks() {
 	{ date: new Date().toLocaleDateString(), value: 0 }
 	])
 
+	const shownChartLine = useRef<ScreenPoint[]>([])
+	const [liveStartingLine, setLiveStartingLine] = useState<ScreenPoint[] | null>(null)
+
 	const selectRange = (range: ChartRange) => {
+		if (range === 'Live' && chartRange !== 'Live') {
+			setLiveStartingLine(shownChartLine.current)
+		}
+
 		setChartRange(range)
 		setHoveredPoint(null)
 	}
@@ -186,8 +194,8 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} />}
-              {!isLive && chartData && <Chart chartData={chartData} onHover={setHoveredPoint} />}
+              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} startingLine={liveStartingLine} />}
+              {!isLive && chartData && <Chart chartData={chartData} onHover={setHoveredPoint} shownLineRef={shownChartLine} />}
             </div>
           </div>
 

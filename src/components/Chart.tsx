@@ -1,4 +1,4 @@
-import React, { useCallback, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
+import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type RefObject } from 'react'
 import { scaleLinear, scalePoint } from 'd3-scale'
 import { area, curveMonotoneX, line } from 'd3-shape'
 import useMorphingPoints, { type ScreenPoint } from '../hooks/useMorphingPoints'
@@ -8,6 +8,7 @@ import type { ChartData } from '../lib/types.ts'
 interface Props {
   chartData: ChartData[]
   onHover?: (point: ChartData | null) => void
+  shownLineRef?: RefObject<ScreenPoint[]>
 }
 
 interface Size {
@@ -147,7 +148,7 @@ function makeAreaPath(screenPoints: ScreenPoint[], bottom: number) {
   return makeArea(screenPoints) ?? undefined
 }
 
-const Chart = React.memo(({ chartData, onHover }: Props) => {
+const Chart = React.memo(({ chartData, onHover, shownLineRef }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
@@ -183,6 +184,24 @@ const Chart = React.memo(({ chartData, onHover }: Props) => {
 
   const placedPoints = useMemo(() => placePoints(chartData, size), [chartData, size])
   const shownPoints = useMorphingPoints(placedPoints)
+
+  useEffect(() => {
+    if (shownLineRef === undefined) {
+      return
+    }
+
+    shownLineRef.current = shownPoints
+  }, [shownLineRef, shownPoints])
+
+  useEffect(() => {
+    if (shownLineRef === undefined) {
+      return
+    }
+
+    return function forgetShownLine() {
+      shownLineRef.current = []
+    }
+  }, [shownLineRef])
 
   const chartLeft = MARGIN.left
   const chartRight = size.width - MARGIN.right
