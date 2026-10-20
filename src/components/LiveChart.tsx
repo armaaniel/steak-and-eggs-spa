@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { curveMonotoneX, line } from 'd3-shape'
 import useApi from '../hooks/useApi'
+import LiveAxis, { type AxisLabel } from './LiveAxis'
 import { blendColumns, easeLikeCss, lineUpColumns, prefersReducedMotion, type ScreenPoint } from '../hooks/useMorphingPoints'
 import '../stylesheets/chart.css'
 import type { ChartData } from '../lib/types.ts'
@@ -11,7 +12,15 @@ interface Props {
   price: number | null
   onHover?: (point: ChartData | null) => void
   startingLine?: ScreenPoint[] | null
-  shownLineRef?: RefObject<ScreenPoint[]>
+  shownSnapshotRef?: RefObject<LiveSnapshot | null>
+}
+
+export interface LiveSnapshot {
+  line: ScreenPoint[]
+  xLabels: AxisLabel[]
+  yLabels: AxisLabel[]
+  plotLeft: number
+  plotRight: number
 }
 
 interface LivePoint {
@@ -399,7 +408,7 @@ const makeScreenPath = line<ScreenPoint>()
   })
   .curve(curveMonotoneX)
 
-const LiveChart = ({ symbol, price, onHover, startingLine = null, shownLineRef }: Props) => {
+const LiveChart = ({ symbol, price, onHover, startingLine = null, shownSnapshotRef }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [now, setNow] = useState(() => Date.now())
   const [seriesSymbol, setSeriesSymbol] = useState(symbol)
@@ -671,23 +680,6 @@ const LiveChart = ({ symbol, price, onHover, startingLine = null, shownLineRef }
 
   const path = makeScreenPath(shownPoints) ?? undefined
 
-  useEffect(() => {
-    if (shownLineRef === undefined) {
-      return
-    }
-
-    shownLineRef.current = trimToPlot(shownPoints, plotLeft, plotRight)
-  })
-
-  useEffect(() => {
-    if (shownLineRef === undefined) {
-      return
-    }
-
-    return function forgetShownLine() {
-      shownLineRef.current = []
-    }
-  }, [shownLineRef])
 
   let headOpacity = lineOpacity
   let xLabelOpacity = 1
@@ -715,38 +707,56 @@ const LiveChart = ({ symbol, price, onHover, startingLine = null, shownLineRef }
     labelTime += labelInterval
   }
 
-  function renderXLabel(labelTime: number) {
+  function makeXLabel(labelTime: number): AxisLabel {
     const labelX = xScale(labelTime)
     const distanceFromEdge = Math.min(labelX - plotLeft, plotRight - labelX) - halfXLabelWidth
-    const opacity = Math.min(1, Math.max(0, distanceFromEdge / EDGE_FADE))
+    const edgeOpacity = Math.min(1, Math.max(0, distanceFromEdge / EDGE_FADE))
 
-    return (
-      <text key={labelTime} className="live-label" x={labelX} y={plotBottom + 17} textAnchor="middle" opacity={opacity * xLabelOpacity}>
-        {clockFormat.format(labelTime)}
-      </text>
-    )
+    return { key: String(labelTime), text: clockFormat.format(labelTime), x: labelX, y: plotBottom + 17, opacity: edgeOpacity * xLabelOpacity }
   }
 
-  function renderYLabels(drawing: Drawing, opacity: number, keyPrefix: string) {
+  function makeYLabels(drawing: Drawing, opacity: number, keyPrefix: string) {
     const yScale = makeYScale(drawing)
 
-    function renderYLabel(value: number, index: number) {
+    function makeYLabel(value: number, index: number): AxisLabel {
       const labelY = yScale(value)
       const distanceFromEdge = Math.min(labelY - plotTop, plotBottom - labelY)
       const edgeOpacity = Math.min(1, Math.max(0, distanceFromEdge / Y_EDGE_FADE))
 
-      return (
-        <g key={`${keyPrefix}-${value}`} opacity={edgeOpacity * opacity}>
-          <line className="live-grid" x1={plotLeft} x2={plotRight} y1={labelY} y2={labelY} />
-          <text className="live-label" x={plotRight + yLabelGap} y={labelY} dy="0.32em">
-            {drawing.yLabels[index]}
-          </text>
-        </g>
-      )
+      return { key: `${keyPrefix}-${value}`, text: drawing.yLabels[index], x: plotRight + yLabelGap, y: labelY, opacity: edgeOpacity * opacity }
     }
 
-    return drawing.yLabelValues.map(renderYLabel)
+    return drawing.yLabelValues.map(makeYLabel)
   }
+
+  const xLabels = xLabelTimes.map(makeXLabel)
+  let yLabels: AxisLabel[] = []
+
+  if (fromDrawing !== null && fromLabelOpacity > 0) {
+    yLabels = [...yLabels, ...makeYLabels(fromDrawing, fromLabelOpacity, 'from')]
+  }
+
+  if (currentDrawing !== null && currentLabelOpacity > 0) {
+    yLabels = [...yLabels, ...makeYLabels(currentDrawing, currentLabelOpacity, 'current')]
+  }
+
+  useEffect(() => {
+    if (shownSnapshotRef === undefined) {
+      return
+    }
+
+    shownSnapshotRef.current = { line: trimToPlot(shownPoints, plotLeft, plotRight), xLabels, yLabels, plotLeft, plotRight }
+  })
+
+  useEffect(() => {
+    if (shownSnapshotRef === undefined) {
+      return
+    }
+
+    return function forgetSnapshot() {
+      shownSnapshotRef.current = null
+    }
+  }, [shownSnapshotRef])
 
   let hoveredPoint: LinePoint | null = null
   let hoveredY = 0
@@ -822,9 +832,7 @@ const LiveChart = ({ symbol, price, onHover, startingLine = null, shownLineRef }
             </clipPath>
           </defs>
 
-          {fromDrawing !== null && fromLabelOpacity > 0 && renderYLabels(fromDrawing, fromLabelOpacity, 'from')}
-          {currentDrawing !== null && currentLabelOpacity > 0 && renderYLabels(currentDrawing, currentLabelOpacity, 'current')}
-          {xLabelTimes.map(renderXLabel)}
+          <LiveAxis xLabels={xLabels} yLabels={yLabels} plotLeft={plotLeft} plotRight={plotRight} />
 
           <path className="live-line" d={path} clipPath={`url(#${clipId})`} fill="none" strokeWidth={LINE_WIDTH} opacity={lineOpacity} />
 

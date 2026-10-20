@@ -13,6 +13,7 @@ import { toReadable, toCurrency, toChange } from '../lib/utils.ts'
 import apiFetch from '../lib/apiFetch'
 import useApi from '../hooks/useApi'
 import type { ScreenPoint } from '../hooks/useMorphingPoints'
+import type { LiveSnapshot } from '../components/LiveChart'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
 import { useAuth } from '../lib/auth'
 import TickerLogo from '../components/TickerLogo'
@@ -128,9 +129,9 @@ function Stocks() {
 	])
 
 	const shownChartLine = useRef<ScreenPoint[]>([])
-	const shownLiveLine = useRef<ScreenPoint[]>([])
+	const shownLiveSnapshot = useRef<LiveSnapshot | null>(null)
 	const [liveStartingLine, setLiveStartingLine] = useState<ScreenPoint[] | null>(null)
-	const [chartStartingLine, setChartStartingLine] = useState<ScreenPoint[] | null>(null)
+	const [leftLiveSnapshot, setLeftLiveSnapshot] = useState<LiveSnapshot | null>(null)
 
 	const selectRange = (range: ChartRange) => {
 		if (range === 'Live' && chartRange !== 'Live') {
@@ -138,14 +139,14 @@ function Stocks() {
 		}
 
 		if (range !== 'Live' && chartRange === 'Live') {
-			setChartStartingLine(shownLiveLine.current)
+			setLeftLiveSnapshot(shownLiveSnapshot.current)
 		}
 
 		setChartRange(range)
 		setHoveredPoint(null)
 	}
 
-	const holdsLiveLine = chartStartingLine !== null && chartStartingLine.length > 0
+	const holdsLiveLine = leftLiveSnapshot !== null && leftLiveSnapshot.line.length > 0
 
 	let baseline = chartData?.[0]?.value ?? null
 
@@ -202,8 +203,8 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} startingLine={liveStartingLine} shownLineRef={shownLiveLine} />}
-              {!isLive && (chartData || holdsLiveLine) && <Chart chartData={chartData} onHover={setHoveredPoint} shownLineRef={shownChartLine} startingLine={chartStartingLine} />}
+              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} startingLine={liveStartingLine} shownSnapshotRef={shownLiveSnapshot} />}
+              {!isLive && (chartData || holdsLiveLine) && <Chart chartData={chartData} onHover={setHoveredPoint} shownLineRef={shownChartLine} liveSnapshot={leftLiveSnapshot} />}
             </div>
           </div>
 

@@ -20,6 +20,45 @@
 	animation:none;
 }
 
+.chart-held-labels-leaving {
+	animation:chart-labels-out ease forwards;
+}
+
+.chart-labels-arriving {
+	animation:chart-labels-in ease both;
+}
+
+@keyframes chart-labels-out {
+	from {
+		opacity:1;
+	}
+
+	to {
+		opacity:0;
+	}
+}
+
+@keyframes chart-labels-in {
+	from {
+		opacity:0;
+	}
+
+	to {
+		opacity:1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.chart-held-labels-leaving {
+		animation:none;
+		opacity:0;
+	}
+
+	.chart-labels-arriving {
+		animation:none;
+	}
+}
+
 .chart-faded .chart-line {
 	opacity:0.3;
 }

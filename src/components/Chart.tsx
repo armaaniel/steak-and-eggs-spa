@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type RefObject } from 'react'
+import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type AnimationEvent, type PointerEvent, type RefObject } from 'react'
 import { scaleLinear, scalePoint } from 'd3-scale'
 import { area, curveMonotoneX, line } from 'd3-shape'
-import useMorphingPoints, { type ScreenPoint } from '../hooks/useMorphingPoints'
+import useMorphingPoints, { MORPH_MS, type ScreenPoint } from '../hooks/useMorphingPoints'
+import LiveAxis from './LiveAxis'
+import type { LiveSnapshot } from './LiveChart'
 import '../stylesheets/chart.css'
 import type { ChartData } from '../lib/types.ts'
 
@@ -9,7 +11,7 @@ interface Props {
   chartData: ChartData[] | null
   onHover?: (point: ChartData | null) => void
   shownLineRef?: RefObject<ScreenPoint[]>
-  startingLine?: ScreenPoint[] | null
+  liveSnapshot?: LiveSnapshot | null
 }
 
 interface Size {
@@ -149,9 +151,14 @@ function makeAreaPath(screenPoints: ScreenPoint[], bottom: number) {
   return makeArea(screenPoints) ?? undefined
 }
 
-const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, startingLine = null }: Props) => {
+const LABEL_SWAP_MS = MORPH_MS / 2
+
+const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, liveSnapshot = null }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
-  const [continuesLine] = useState(startingLine !== null && startingLine.length > 0)
+  const [heldSnapshot] = useState(liveSnapshot)
+  const [continuesLive] = useState(liveSnapshot !== null && liveSnapshot.line.length > 0)
+  const [heldLabelsGone, setHeldLabelsGone] = useState(false)
+  const [xLabelsSettled, setXLabelsSettled] = useState(false)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
   const labelRef = useRef<HTMLDivElement>(null)
@@ -196,8 +203,8 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, starti
 
   let targetPoints = placedPoints
 
-  if (waitingForData && startingLine !== null) {
-    targetPoints = startingLine
+  if (waitingForData && heldSnapshot !== null) {
+    targetPoints = heldSnapshot.line
   }
 
   const shownPoints = useMorphingPoints(targetPoints)
@@ -301,8 +308,32 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, starti
   let solidRight = size.width
   let svgClassName: string | undefined = undefined
 
-  if (continuesLine) {
+  if (continuesLive) {
     svgClassName = 'chart-continued'
+  }
+
+  let heldLabelsClassName = 'chart-held-labels'
+
+  if (!waitingForData) {
+    heldLabelsClassName = 'chart-held-labels chart-held-labels-leaving'
+  }
+
+  let xLabelsClassName: string | undefined = undefined
+
+  if (continuesLive && !xLabelsSettled) {
+    xLabelsClassName = 'chart-labels-arriving'
+  }
+
+  function forgetHeldLabels(event: AnimationEvent<SVGGElement>) {
+    if (event.target === event.currentTarget) {
+      setHeldLabelsGone(true)
+    }
+  }
+
+  function settleXLabels(event: AnimationEvent<SVGGElement>) {
+    if (event.target === event.currentTarget) {
+      setXLabelsSettled(true)
+    }
   }
 
   if (hoveredSpot !== null) {
@@ -336,6 +367,12 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, starti
             </mask>
           </defs>
 
+          {continuesLive && heldSnapshot !== null && !heldLabelsGone && (
+            <g className={heldLabelsClassName} style={{ animationDuration: `${LABEL_SWAP_MS}ms` }} onAnimationEnd={forgetHeldLabels}>
+              <LiveAxis xLabels={heldSnapshot.xLabels} yLabels={heldSnapshot.yLabels} plotLeft={heldSnapshot.plotLeft} plotRight={heldSnapshot.plotRight} />
+            </g>
+          )}
+
           <g className="chart-faded" clipPath={`url(#${clipId}-after)`}>
             {!waitingForData && (
               <g className="chart-faded-fill">
@@ -350,7 +387,11 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, starti
             <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
           </g>
 
-          {xLabelIndexes.map(renderXLabel)}
+          {!waitingForData && (
+            <g className={xLabelsClassName} style={{ animationDuration: `${LABEL_SWAP_MS}ms`, animationDelay: `${LABEL_SWAP_MS}ms` }} onAnimationEnd={settleXLabels}>
+              {xLabelIndexes.map(renderXLabel)}
+            </g>
+          )}
 
           {hoveredSpot !== null && <line className="chart-cursor" x1={hoveredSpot.x} x2={hoveredSpot.x} y1={chartTop} y2={chartBottom} />}
           {hoveredSpot !== null && <circle className="chart-dot" cx={hoveredSpot.x} cy={hoveredSpot.y} r={DOT_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
