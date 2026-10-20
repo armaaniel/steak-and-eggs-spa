@@ -20,7 +20,7 @@
 	animation:none;
 }
 
-.chart-held-labels-leaving {
+.chart-labels-leaving {
 	animation:chart-labels-out ease forwards;
 }
 
@@ -49,7 +49,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.chart-held-labels-leaving {
+	.chart-labels-leaving {
 		animation:none;
 		opacity:0;
 	}

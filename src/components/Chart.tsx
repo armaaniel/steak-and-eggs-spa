@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type AnimationEvent, type PointerEvent, type RefObject } from 'react'
 import { scaleLinear, scalePoint } from 'd3-scale'
 import { area, curveMonotoneX, line } from 'd3-shape'
-import useMorphingPoints, { MORPH_MS, type ScreenPoint } from '../hooks/useMorphingPoints'
+import useMorphingPoints, { prefersReducedMotion, type ScreenPoint } from '../hooks/useMorphingPoints'
 import LiveAxis from './LiveAxis'
 import type { LiveSnapshot } from './LiveChart'
 import '../stylesheets/chart.css'
@@ -17,6 +17,13 @@ interface Props {
 interface Size {
   width: number
   height: number
+}
+
+interface DateLabel {
+  key: number
+  text: string
+  x: number
+  textAnchor: 'start' | 'middle' | 'end'
 }
 
 const MARGIN = { top: 28, right: 5, bottom: 24, left: 5 }
@@ -116,6 +123,50 @@ function findXLabelIndexes(pointCount: number, plotWidth: number) {
   return [...new Set(indexes)]
 }
 
+function makeDateLabels(chartData: ChartData[], placedPoints: ScreenPoint[], plotWidth: number) {
+  const indexes = findXLabelIndexes(chartData.length, plotWidth)
+  const dateLabels: DateLabel[] = []
+
+  for (let position = 0; position < indexes.length; position++) {
+    const index = indexes[position]
+    const spot = placedPoints[index]
+
+    if (spot === undefined) {
+      continue
+    }
+
+    let textAnchor: DateLabel['textAnchor'] = 'middle'
+
+    if (position === 0) {
+      textAnchor = 'start'
+    } else if (position === indexes.length - 1) {
+      textAnchor = 'end'
+    }
+
+    const text = formatXLabel(chartData[index].date, chartData[0].date, chartData[chartData.length - 1].date)
+    dateLabels.push({ key: index, text, x: spot.x, textAnchor })
+  }
+
+  return dateLabels
+}
+
+function hasSameLabels(oldLabels: DateLabel[], newLabels: DateLabel[]) {
+  if (oldLabels.length !== newLabels.length) {
+    return false
+  }
+
+  for (let index = 0; index < oldLabels.length; index++) {
+    const oldLabel = oldLabels[index]
+    const newLabel = newLabels[index]
+
+    if (oldLabel.text !== newLabel.text || Math.round(oldLabel.x) !== Math.round(newLabel.x)) {
+      return false
+    }
+  }
+
+  return true
+}
+
 function findNearestIndex(placedPoints: ScreenPoint[], mouseX: number) {
   let nearestIndex = 0
 
@@ -151,14 +202,17 @@ function makeAreaPath(screenPoints: ScreenPoint[], bottom: number) {
   return makeArea(screenPoints) ?? undefined
 }
 
-const LABEL_SWAP_MS = MORPH_MS / 2
+const LABEL_SWAP_MS = 120
 
 const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, liveSnapshot = null }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [heldSnapshot] = useState(liveSnapshot)
   const [continuesLive] = useState(liveSnapshot !== null && liveSnapshot.line.length > 0)
   const [heldLabelsGone, setHeldLabelsGone] = useState(false)
-  const [xLabelsSettled, setXLabelsSettled] = useState(false)
+  const [xLabelsArriving, setXLabelsArriving] = useState(continuesLive)
+  const [labelsData, setLabelsData] = useState(loadedData ?? [])
+  const [leavingLabels, setLeavingLabels] = useState<DateLabel[] | null>(null)
+  const [labelSwap, setLabelSwap] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [labelWidth, setLabelWidth] = useState(0)
   const labelRef = useRef<HTMLDivElement>(null)
@@ -281,26 +335,27 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, liveSn
 
   const path = makePath(shownPoints) ?? undefined
   const areaPath = makeAreaPath(shownPoints, chartBottom)
-  const xLabelIndexes = findXLabelIndexes(chartData.length, chartRight - chartLeft)
+  const plotWidth = chartRight - chartLeft
+  const dateLabels = makeDateLabels(chartData, placedPoints, plotWidth)
 
-  function renderXLabel(index: number, position: number) {
-    const spot = placedPoints[index]
+  if (chartData !== labelsData) {
+    const oldLabels = makeDateLabels(labelsData, placePoints(labelsData, size), plotWidth)
+    setLabelsData(chartData)
 
-    if (spot === undefined) {
-      return null
+    if (oldLabels.length > 0 && !hasSameLabels(oldLabels, dateLabels) && !prefersReducedMotion()) {
+      if (leavingLabels === null && !xLabelsArriving) {
+        setLeavingLabels(oldLabels)
+      }
+
+      setLabelSwap(labelSwap + 1)
+      setXLabelsArriving(true)
     }
+  }
 
-    let textAnchor: 'start' | 'middle' | 'end' = 'middle'
-
-    if (position === 0) {
-      textAnchor = 'start'
-    } else if (position === xLabelIndexes.length - 1) {
-      textAnchor = 'end'
-    }
-
+  function renderDateLabel(label: DateLabel) {
     return (
-      <text key={index} className="chart-axis" x={spot.x} y={chartBottom + 17} textAnchor={textAnchor}>
-        {formatXLabel(chartData[index].date, chartData[0].date, chartData[chartData.length - 1].date)}
+      <text key={label.key} className="chart-axis" x={label.x} y={chartBottom + 17} textAnchor={label.textAnchor}>
+        {label.text}
       </text>
     )
   }
@@ -315,12 +370,12 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, liveSn
   let heldLabelsClassName = 'chart-held-labels'
 
   if (!waitingForData) {
-    heldLabelsClassName = 'chart-held-labels chart-held-labels-leaving'
+    heldLabelsClassName = 'chart-held-labels chart-labels-leaving'
   }
 
   let xLabelsClassName: string | undefined = undefined
 
-  if (continuesLive && !xLabelsSettled) {
+  if (xLabelsArriving) {
     xLabelsClassName = 'chart-labels-arriving'
   }
 
@@ -330,9 +385,15 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, liveSn
     }
   }
 
+  function forgetLeavingLabels(event: AnimationEvent<SVGGElement>) {
+    if (event.target === event.currentTarget) {
+      setLeavingLabels(null)
+    }
+  }
+
   function settleXLabels(event: AnimationEvent<SVGGElement>) {
     if (event.target === event.currentTarget) {
-      setXLabelsSettled(true)
+      setXLabelsArriving(false)
     }
   }
 
@@ -387,9 +448,15 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, liveSn
             <path className="chart-line" d={path} pathLength={1} fill="none" strokeWidth={LINE_WIDTH} />
           </g>
 
+          {leavingLabels !== null && (
+            <g className="chart-labels-leaving" style={{ animationDuration: `${LABEL_SWAP_MS}ms` }} onAnimationEnd={forgetLeavingLabels}>
+              {leavingLabels.map(renderDateLabel)}
+            </g>
+          )}
+
           {!waitingForData && (
-            <g className={xLabelsClassName} style={{ animationDuration: `${LABEL_SWAP_MS}ms`, animationDelay: `${LABEL_SWAP_MS}ms` }} onAnimationEnd={settleXLabels}>
-              {xLabelIndexes.map(renderXLabel)}
+            <g key={labelSwap} className={xLabelsClassName} style={{ animationDuration: `${LABEL_SWAP_MS}ms`, animationDelay: `${LABEL_SWAP_MS}ms` }} onAnimationEnd={settleXLabels}>
+              {dateLabels.map(renderDateLabel)}
             </g>
           )}
 
