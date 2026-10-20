@@ -29,23 +29,23 @@ interface Size {
 }
 
 const LIVE_DELAY_MS = 902_000
-const WINDOW_MS = 60_000
-const KEEP_MS = WINDOW_MS * 2
-const HOLD_GAP_MS = 2000
+const CHART_WINDOW = 60_000
+const CHART_HISTORY = CHART_WINDOW * 2
+const HOLD_GAP_MS = 1500
 const SECOND_MS = 1000
 const GLIDE_MS = 400
 const FRAMES_PER_SECOND = 30
 const FRAME_TOLERANCE_MS = 4
-const FRAME_GAP_MS = 1000 / FRAMES_PER_SECOND - FRAME_TOLERANCE_MS
-const LABEL_STEPS_MS = [10_000, 20_000, 30_000, 60_000]
+const DRAW_COOLDOWN_MS = (1000 / FRAMES_PER_SECOND) - FRAME_TOLERANCE_MS
+const LABEL_INTERVALS = [10_000, 20_000, 30_000, 60_000]
 const MIN_LABEL_SPACING = 72
-const EDGE_FADE = 24
+const EDGE_FADE = 20
 const Y_EDGE_FADE = 12
 const MARGIN = { top: 28, right: 5, bottom: 24, left: 5 }
 const Y_LABEL_GAP = 12
-const Y_LABEL_COUNT = 6
-const MIN_SPAN_FRACTION = 0.0005
-const PADDING_FRACTION = 0.1
+const Y_LABEL_COUNT = 5
+const MIN_RANGE_FRACTION = 0.0005
+const PADDING_FRACTION = 0.05
 const LINE_WIDTH = 2
 const HEAD_RADIUS = 4
 const DOT_RING_WIDTH = 2
@@ -83,7 +83,10 @@ function measureWidestLabel(labels: string[]) {
 }
 
 function easeOut(progress: number) {
-  return 1 - Math.pow(1 - progress, 3)
+  const overshoot = 1.55
+  const shifted = progress - 1
+
+  return 1 + (overshoot + 1) * Math.pow(shifted, 3) + overshoot * Math.pow(shifted, 2)
 }
 
 function findShownValue(point: LivePoint, windowEnd: number) {
@@ -96,30 +99,30 @@ function findShownValue(point: LivePoint, windowEnd: number) {
   return point.from + (point.value - point.from) * easeOut(progress)
 }
 
-function findShownPoints(points: LivePoint[], windowStart: number, windowEnd: number, headValue: number, headPrice: number, startingValue: number | null) {
-  const shownPoints: LinePoint[] = []
+function getDrawnPoints(points: LivePoint[], windowStart: number, windowEnd: number, headValue: number, headPrice: number, startingValue: number | null) {
+  const drawnPoints: LinePoint[] = []
   let pointBeforeWindow: LinePoint | null = null
 
   for (const point of points) {
-    const shownPoint = { time: point.time, value: findShownValue(point, windowEnd), price: point.value }
+    const drawnPoint = { time: point.time, value: findShownValue(point, windowEnd), price: point.value }
 
     if (point.time < windowStart) {
-      pointBeforeWindow = shownPoint
+      pointBeforeWindow = drawnPoint
     } else if (point.time <= windowEnd) {
-      shownPoints.push(shownPoint)
+      drawnPoints.push(drawnPoint)
     }
   }
 
   if (pointBeforeWindow !== null) {
-    shownPoints.unshift(pointBeforeWindow)
+    drawnPoints.unshift(pointBeforeWindow)
   } else {
-    const leftEdgeValue = startingValue ?? shownPoints[0]?.value ?? headValue
-    shownPoints.unshift({ time: windowStart - WINDOW_MS, value: leftEdgeValue, price: leftEdgeValue })
+    const leftEdgeValue = startingValue ?? drawnPoints[0]?.value ?? headValue
+    drawnPoints.unshift({ time: windowStart - CHART_WINDOW, value: leftEdgeValue, price: leftEdgeValue })
   }
 
-  shownPoints.push({ time: windowEnd, value: headValue, price: headPrice })
+  drawnPoints.push({ time: windowEnd, value: headValue, price: headPrice })
 
-  return holdUntilNextTrade(shownPoints)
+  return holdUntilNextTrade(drawnPoints)
 }
 
 function holdUntilNextTrade(points: LinePoint[]) {
@@ -138,38 +141,47 @@ function holdUntilNextTrade(points: LinePoint[]) {
   return heldPoints
 }
 
-function findValueAt(linePoints: LinePoint[], time: number) {
-  for (let index = 1; index < linePoints.length; index++) {
-    const before = linePoints[index - 1]
-    const after = linePoints[index]
+function getPriceAtLeftEdge(drawnPoints: LinePoint[], windowStart: number) {
+  let firstVisibleIndex = 1
 
-    if (after.time >= time) {
-      const fraction = Math.max(0, (time - before.time) / (after.time - before.time))
-
-      return before.value + (after.value - before.value) * fraction
-    }
+  while (drawnPoints[firstVisibleIndex].time < windowStart) {
+    firstVisibleIndex += 1
   }
 
-  return linePoints[linePoints.length - 1].value
+  const pointBefore = drawnPoints[firstVisibleIndex - 1]
+  const firstVisiblePoint = drawnPoints[firstVisibleIndex]
+
+  const timeSincePointBefore = windowStart - pointBefore.time
+  const timeBetweenPoints = firstVisiblePoint.time - pointBefore.time
+  const progress = Math.max(0, timeSincePointBefore / timeBetweenPoints)
+
+  const priceChange = firstVisiblePoint.value - pointBefore.value
+
+  return pointBefore.value + priceChange * progress
 }
 
-function findPriceRange(linePoints: LinePoint[], windowStart: number) {
-  let lowest = findValueAt(linePoints, windowStart)
+function findPriceRange(drawnPoints: LinePoint[], windowStart: number) {
+  let lowest = getPriceAtLeftEdge(drawnPoints, windowStart)
   let highest = lowest
 
-  for (const point of linePoints) {
+  for (const point of drawnPoints) {
     if (point.time >= windowStart) {
       lowest = Math.min(lowest, point.value)
       highest = Math.max(highest, point.value)
     }
   }
 
-  const minimumSpan = Math.abs(highest) * MIN_SPAN_FRACTION
+  const minimumRange = Math.abs(highest) * MIN_RANGE_FRACTION
 
-  if (highest - lowest < minimumSpan) {
-    const middle = (highest + lowest) / 2
-    lowest = middle - minimumSpan / 2
-    highest = middle + minimumSpan / 2
+  const currentRange = highest - lowest
+  const rangeIsTooSmall = currentRange < minimumRange
+
+  if (rangeIsTooSmall) {
+    const middlePrice = (highest + lowest) / 2
+    const halfOfMinimum = minimumRange / 2
+
+    lowest = middlePrice - halfOfMinimum
+    highest = middlePrice + halfOfMinimum
   }
 
   const padding = (highest - lowest) * PADDING_FRACTION
@@ -184,7 +196,11 @@ function findDecimals(labelValues: number[]) {
 
   const step = labelValues[1] - labelValues[0]
 
-  return Math.min(6, Math.max(2, Math.ceil(-Math.log10(step))))
+  const decimalsNeeded = Math.ceil(-Math.log10(step))
+  const atLeastTwo = Math.max(2, decimalsNeeded)
+  const atMostSix = Math.min(6, atLeastTwo)
+
+  return atMostSix
 }
 
 function findNearestPoint(linePoints: LinePoint[], windowStart: number, pointerTime: number) {
@@ -203,14 +219,14 @@ function findNearestPoint(linePoints: LinePoint[], windowStart: number, pointerT
   return nearestPoint
 }
 
-function pickLabelStep(plotWidth: number) {
-  for (const labelStep of LABEL_STEPS_MS) {
-    if ((plotWidth * labelStep) / WINDOW_MS >= MIN_LABEL_SPACING) {
-      return labelStep
+function getLabelInterval(plotWidth: number) {
+  for (const labelInterval of LABEL_INTERVALS) {
+    if ((plotWidth * labelInterval) / CHART_WINDOW >= MIN_LABEL_SPACING) {
+      return labelInterval
     }
   }
 
-  return LABEL_STEPS_MS[LABEL_STEPS_MS.length - 1]
+  return LABEL_INTERVALS[LABEL_INTERVALS.length - 1]
 }
 
 const LiveChart = ({ symbol, price, onHover }: Props) => {
@@ -253,22 +269,22 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   }, [])
 
   useEffect(() => {
-    let frameRequest = 0
-    let lastDrawnAt = 0
+    let nextFrameRun = 0
+    let lastDrawn = 0
 
-    function moveForward(frameTime: number) {
-      if (frameTime - lastDrawnAt >= FRAME_GAP_MS) {
-        lastDrawnAt = frameTime
+    function rafLoop(timeSincePageLoad: number) {
+      if (timeSincePageLoad - lastDrawn >= DRAW_COOLDOWN_MS) {
+        lastDrawn = timeSincePageLoad
         setNow(Date.now())
       }
 
-      frameRequest = requestAnimationFrame(moveForward)
+      nextFrameRun = requestAnimationFrame(rafLoop)
     }
 
-    frameRequest = requestAnimationFrame(moveForward)
+    nextFrameRun = requestAnimationFrame(rafLoop)
 
-    return function stopMoving() {
-      cancelAnimationFrame(frameRequest)
+    return function stopRafLoop() {
+      cancelAnimationFrame(nextFrameRun)
     }
   }, [])
 
@@ -302,7 +318,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
       }
 
       const keptPoints = oldPoints.filter(function (point, index) {
-        return point.time >= arrivedAt - KEEP_MS || index === oldPoints.length - 1
+        return point.time >= arrivedAt - CHART_HISTORY || index === oldPoints.length - 1
       })
 
       return [...keptPoints, { time: arrivedAt, value: price, from }]
@@ -319,7 +335,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   }, [seedPoints, livePoints])
 
   const windowEnd = now - LIVE_DELAY_MS
-  const windowStart = windowEnd - WINDOW_MS
+  const windowStart = windowEnd - CHART_WINDOW
 
   let headValue = price
   let headPrice = price
@@ -336,12 +352,12 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
     startingValue = null
   }
 
-  let shownPoints: LinePoint[] = []
+  let drawnPoints: LinePoint[] = []
   let priceRange = [0, 1]
 
   if (headValue !== null && headPrice !== null) {
-    shownPoints = findShownPoints(allPoints, windowStart, windowEnd, headValue, headPrice, startingValue)
-    priceRange = findPriceRange(shownPoints, windowStart)
+    drawnPoints = getDrawnPoints(allPoints, windowStart, windowEnd, headValue, headPrice, startingValue)
+    priceRange = findPriceRange(drawnPoints, windowStart)
   }
 
   const yLabelValues = scaleLinear().domain(priceRange).ticks(Y_LABEL_COUNT)
@@ -374,13 +390,17 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
     })
     .curve(curveMonotoneX)
 
-  const path = makePath(shownPoints) ?? undefined
+  const path = makePath(drawnPoints) ?? undefined
 
-  const labelStep = pickLabelStep(plotWidth)
+  const labelInterval = getLabelInterval(plotWidth)
+  const firstLabelTime = Math.ceil(windowStart / labelInterval) * labelInterval
   const xLabelTimes: number[] = []
 
-  for (let labelTime = Math.ceil(windowStart / labelStep) * labelStep; labelTime <= windowEnd; labelTime += labelStep) {
+  let labelTime = firstLabelTime
+
+  while (labelTime <= windowEnd) {
     xLabelTimes.push(labelTime)
+    labelTime += labelInterval
   }
 
   function renderXLabel(labelTime: number) {
@@ -419,7 +439,7 @@ const LiveChart = ({ symbol, price, onHover }: Props) => {
   let hoveredPoint: LinePoint | null = null
 
   if (pointerX !== null) {
-    hoveredPoint = findNearestPoint(shownPoints, windowStart, xScale.invert(pointerX).getTime())
+    hoveredPoint = findNearestPoint(drawnPoints, windowStart, xScale.invert(pointerX).getTime())
   }
 
   let hoveredLabel: string | null = null
