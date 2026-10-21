@@ -203,7 +203,7 @@ function Stocks() {
             </div>
 
             <div className="chart">
-              {isLive && <LiveChart symbol={symbol} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} startingLine={liveStartingLine} shownSnapshotRef={shownLiveSnapshot} />}
+              {isLive && <LiveChart seriesKey={symbol} seedPath={`/stocks/${symbol}/livedata`} price={toPriceNumber(livePrice)} onHover={setHoveredPoint} startingLine={liveStartingLine} shownSnapshotRef={shownLiveSnapshot} />}
               {!isLive && (chartData || holdsLiveLine) && <Chart chartData={chartData} onHover={setHoveredPoint} shownLineRef={shownChartLine} liveSnapshot={leftLiveSnapshot} />}
             </div>
           </div>

@@ -8,7 +8,8 @@ import '../stylesheets/chart.css'
 import type { ChartData } from '../lib/types.ts'
 
 interface Props {
-  symbol: string
+  seriesKey: string
+  seedPath: string | null
   price: number | null
   onHover?: (point: ChartData | null) => void
   startingLine?: ScreenPoint[] | null
@@ -264,9 +265,7 @@ function getLabelInterval(plotWidth: number) {
   return LABEL_INTERVALS[LABEL_INTERVALS.length - 1]
 }
 
-function findSeedPath(symbol: string) {
-  return `/stocks/${symbol}/livedata`
-}
+const NO_SEED: LivePoint[] = []
 
 function findSeriesPoints(series: Series) {
   const firstLivePoint = series.livePoints[0]
@@ -408,10 +407,11 @@ const makeScreenPath = line<ScreenPoint>()
   })
   .curve(curveMonotoneX)
 
-const LiveChart = ({ symbol, price, onHover, startingLine = null, shownSnapshotRef }: Props) => {
+const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, shownSnapshotRef }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [now, setNow] = useState(() => Date.now())
-  const [seriesSymbol, setSeriesSymbol] = useState(symbol)
+  const [shownSeriesKey, setShownSeriesKey] = useState(seriesKey)
+  const [shownSeedPath, setShownSeedPath] = useState(seedPath)
   const [livePoints, setLivePoints] = useState<LivePoint[]>([])
   const [startingPrice, setStartingPrice] = useState(price)
   const [morph, setMorph] = useState<Morph | null>(() => makeStartingMorph(price, startingLine))
@@ -422,11 +422,13 @@ const LiveChart = ({ symbol, price, onHover, startingLine = null, shownSnapshotR
   const labelRef = useRef<HTMLDivElement>(null)
   const clipId = `live-clip-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
 
-  const { data: loadedSeed, loadedPath: loadedSeedPath } = useApi<LivePoint[]>(findSeedPath(symbol), [])
+  const { data: loadedSeed, loadedPath: loadedSeedPath } = useApi<LivePoint[]>(seedPath, [])
 
   let seedPoints: LivePoint[] | null = null
 
-  if (loadedSeed !== null && loadedSeedPath === findSeedPath(seriesSymbol)) {
+  if (shownSeedPath === null) {
+    seedPoints = NO_SEED
+  } else if (loadedSeed !== null && loadedSeedPath === shownSeedPath) {
     seedPoints = loadedSeed
   }
 
@@ -491,7 +493,7 @@ const LiveChart = ({ symbol, price, onHover, startingLine = null, shownSnapshotR
   }, [])
 
   useEffect(() => {
-    if (symbol === seriesSymbol) {
+    if (seriesKey === shownSeriesKey) {
       return
     }
 
@@ -502,11 +504,12 @@ const LiveChart = ({ symbol, price, onHover, startingLine = null, shownSnapshotR
     }
 
     setMorph(nextMorph)
-    setSeriesSymbol(symbol)
+    setShownSeriesKey(seriesKey)
+    setShownSeedPath(seedPath)
     setLivePoints([])
     setStartingPrice(price)
     lastPrice.current = price
-  }, [symbol, seriesSymbol, seedPoints, livePoints, startingPrice, morph, price])
+  }, [seriesKey, shownSeriesKey, seedPath, seedPoints, livePoints, startingPrice, morph, price])
 
   useEffect(() => {
     if (seedPoints === null) {

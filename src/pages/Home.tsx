@@ -1,21 +1,26 @@
 import '../stylesheets/home.css'
 import Chart from '../components/Chart'
+import LiveChart, { type LiveSnapshot } from '../components/LiveChart'
 import ChartRanges from '../components/ChartRanges'
 import useStoredRange from '../hooks/useStoredRange'
 import PositionsTable from '../components/PositionsTable'
 import FundsButton from '../components/FundsButton'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toPortfolio, toChange } from '../lib/utils.ts'
 import { useThrottledCallback } from 'use-debounce'
-import type { Positions, ChartData } from '../lib/types.ts'
+import type { Positions, ChartData, Prices } from '../lib/types.ts'
+import type { ScreenPoint } from '../hooks/useMorphingPoints'
 import useApi from '../hooks/useApi'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
 
-const CHART_RANGES = ['Max', '1W', '1M', '3M', 'YTD', '1Y'] as const
+const CHART_RANGES = ['Live', 'Max', '1W', '1M', '3M', 'YTD', '1Y'] as const
 type ChartRange = (typeof CHART_RANGES)[number]
 const DEFAULT_RANGE: ChartRange = 'Max'
 
+const LIVE_VALUE_THROTTLE_MS = 250
+
 const RANGE_PHRASES: Record<ChartRange, string> = {
+  'Live': 'Today',
   'Max': 'All time',
   '1W': 'Past week',
   '1M': 'Past month',
@@ -44,6 +49,47 @@ interface Portfolio {
   positions?: Positions[]
 }
 
+function findPortfolioValue(portfolio: Portfolio | null, prices: Prices) {
+  if (portfolio === null) {
+    return null
+  }
+
+  const cash = parseFloat(portfolio.balance)
+
+  if (Number.isNaN(cash)) {
+    return null
+  }
+
+  let stockValue = 0
+
+  for (const position of portfolio.positions ?? []) {
+    const price = prices[position.symbol] ?? position.price
+    stockValue += price * position.shares
+  }
+
+  return stockValue + cash
+}
+
+function findOpeningValue(portfolio: Portfolio | null) {
+  if (portfolio === null) {
+    return null
+  }
+
+  const cash = parseFloat(portfolio.balance)
+
+  if (Number.isNaN(cash)) {
+    return null
+  }
+
+  let openingStockValue = 0
+
+  for (const position of portfolio.positions ?? []) {
+    openingStockValue += position.open * position.shares
+  }
+
+  return openingStockValue + cash
+}
+
 function Home() {
 
 	const { data: portfolio, error, setData: setPortfolio, getData: getPortfolioData } = useApi<Portfolio>(`/portfoliodata`,
@@ -52,7 +98,21 @@ function Home() {
 	const [hoveredPoint, setHoveredPoint] = useState<ChartData | null>(null)
 	const [chartRange, setChartRange] = useStoredRange('portfolio.range', CHART_RANGES, DEFAULT_RANGE)
 
+	const isLive = chartRange === 'Live'
+	const shownChartLine = useRef<ScreenPoint[]>([])
+	const shownLiveSnapshot = useRef<LiveSnapshot | null>(null)
+	const [liveStartingLine, setLiveStartingLine] = useState<ScreenPoint[] | null>(null)
+	const [leftLiveSnapshot, setLeftLiveSnapshot] = useState<LiveSnapshot | null>(null)
+
 	const selectRange = (range: ChartRange) => {
+		if (range === 'Live' && chartRange !== 'Live') {
+			setLiveStartingLine(shownChartLine.current)
+		}
+
+		if (range !== 'Live' && chartRange === 'Live') {
+			setLeftLiveSnapshot(shownLiveSnapshot.current)
+		}
+
 		setChartRange(range)
 		setHoveredPoint(null)
 	}
@@ -75,8 +135,25 @@ function Home() {
 		return sliced.length < 2 ? chartData.slice(-2) : sliced
 	}, [chartData, chartRange])
 
-	const baseline = visibleChart?.[0]?.value ?? null
-	const current = hoveredPoint?.value ?? portfolio?.aum ?? null
+	const [livePortfolioValue, setLivePortfolioValue] = useState<number | null>(null)
+
+	const updateLiveValue = useThrottledCallback(() => {
+		setLivePortfolioValue(findPortfolioValue(portfolio, prices))
+	}, LIVE_VALUE_THROTTLE_MS)
+
+	useEffect(() => {
+		updateLiveValue()
+	}, [portfolio, prices, updateLiveValue])
+
+	let shownValue = portfolio?.aum ?? null
+	let baseline = visibleChart?.[0]?.value ?? null
+
+	if (isLive) {
+		shownValue = livePortfolioValue
+		baseline = findOpeningValue(portfolio)
+	}
+
+	const current = hoveredPoint?.value ?? shownValue
 	const { label: changeLabel, isPositive, decimals } = toChange(current, baseline)
 
   const updatePortfolio = useThrottledCallback(
@@ -109,7 +186,7 @@ function Home() {
         <div className="home-left">
           <div className="port-value">
             <h2 className="portfolio-value">Portfolio Value:&nbsp;</h2>
-            <h2 className='portfolio-value'>{toPortfolio(hoveredPoint?.value ?? portfolio?.aum, decimals)}</h2>
+            <h2 className='portfolio-value'>{toPortfolio(current ?? undefined, decimals)}</h2>
           </div>
 
           <div className="chart-header-row">
@@ -122,7 +199,8 @@ function Home() {
           </div>
 
           <div className="chart">
-          	{visibleChart && <Chart chartData={visibleChart} onHover={setHoveredPoint} />}
+          	{isLive && <LiveChart seriesKey="portfolio" seedPath={null} price={livePortfolioValue} onHover={setHoveredPoint} startingLine={liveStartingLine} shownSnapshotRef={shownLiveSnapshot} />}
+          	{!isLive && visibleChart && <Chart chartData={visibleChart} onHover={setHoveredPoint} shownLineRef={shownChartLine} liveSnapshot={leftLiveSnapshot} />}
           </div>
 
           <div className="position">

@@ -257,7 +257,7 @@ const Chart = React.memo(({ chartData: loadedData, onHover, shownLineRef, liveSn
 
   let targetPoints = placedPoints
 
-  if (waitingForData && heldSnapshot !== null) {
+  if (heldSnapshot !== null && (waitingForData || placedPoints.length === 0)) {
     targetPoints = heldSnapshot.line
   }
 
