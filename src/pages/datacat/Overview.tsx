@@ -5,7 +5,6 @@ import LatencyChart, { type Percentile, type Pin } from '../../components/dataca
 import RequestsChart from '../../components/datacat/RequestsChart'
 import Traces from './Traces'
 import useTransition from '../../hooks/useTransition.ts'
-import type { DatacatRange } from '../../hooks/useDatacatRange'
 import { Y_LABEL_GAP, dropEmptyBucketInProgress, type Hover } from '../../components/datacat/bucketChart'
 import type { ServiceBucket, OutletContextType } from '../../lib/types.ts'
 import '../../stylesheets/datacat/endpoint.css'
@@ -44,19 +43,20 @@ function findPinLine(bucket: ServiceBucket): Percentile | null {
 function Overview() {
   const { range } = useOutletContext<OutletContextType>()
 
-  const [picked, setPicked] = useState<{ range: DatacatRange; bucket: ServiceBucket } | null>(null)
-  const selectedBucket = picked?.range === range ? picked.bucket : null
-
-  // a selection belongs to the range it was made in, so switching ranges drops it instead of restoring it on the way back
-  if (picked !== null && picked.range !== range) {
-    setPicked(null)
-  }
-
+  const [selectedBucket, setSelectedBucket] = useState<ServiceBucket | null>(null)
   const [hover, setHover] = useState<Hover | null>(null)
   const [pin, setPin] = useState<Pin | null>(null)
+  const [selectionRange, setSelectionRange] = useState(range)
+
+  // a selection and its pin belong to the range they were made in, so switching ranges drops both instead of restoring them on the way back
+  if (range !== selectionRange) {
+    setSelectionRange(range)
+    setSelectedBucket(null)
+    setPin(null)
+  }
 
   const closeBucket = () => {
-    setPicked(null)
+    setSelectedBucket(null)
     setPin(null)
   }
 
@@ -69,7 +69,7 @@ function Overview() {
 
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        setPicked(null)
+        setSelectedBucket(null)
         setPin(null)
       }
     }
@@ -87,7 +87,7 @@ function Overview() {
       return
     }
 
-    setPicked({ range, bucket })
+    setSelectedBucket(bucket)
 
     if (pin === null || pin.bucket.bucket !== bucket.bucket) {
       setPin({ bucket, line: findPinLine(bucket), y: null })
