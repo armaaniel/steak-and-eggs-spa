@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type RefObject } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
-import { curveLinear, line } from 'd3-shape'
+import { curveMonotoneX, line } from 'd3-shape'
 import useApi from '../hooks/useApi'
 import LiveAxis, { type AxisLabel } from './LiveAxis'
 import { blendColumns, easeLikeCss, lineUpColumns, prefersReducedMotion, type ScreenPoint } from '../hooks/useMorphingPoints'
@@ -406,7 +406,7 @@ const makeScreenPath = line<ScreenPoint>()
   .y(function (point) {
     return point.y
   })
-  .curve(curveLinear)
+  .curve(curveMonotoneX)
 
 const LiveChart = ({ symbol, price, onHover, startingLine = null, shownSnapshotRef }: Props) => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
