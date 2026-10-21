@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type AnimationEvent, type PointerEvent, type RefObject } from 'react'
 import { scaleLinear, scalePoint } from 'd3-scale'
-import { area, curveMonotoneX, line } from 'd3-shape'
+import { area, curveLinear, line } from 'd3-shape'
 import useMorphingPoints, { prefersReducedMotion, type ScreenPoint } from '../hooks/useMorphingPoints'
 import LiveAxis from './LiveAxis'
 import type { LiveSnapshot } from './LiveChart'
@@ -186,7 +186,7 @@ const makePath = line<ScreenPoint>()
   .y(function (screenPoint) {
     return screenPoint.y
   })
-  .curve(curveMonotoneX)
+  .curve(curveLinear)
 
 function makeAreaPath(screenPoints: ScreenPoint[], bottom: number) {
   const makeArea = area<ScreenPoint>()
@@ -197,7 +197,7 @@ function makeAreaPath(screenPoints: ScreenPoint[], bottom: number) {
     .y1(function (screenPoint) {
       return screenPoint.y
     })
-    .curve(curveMonotoneX)
+    .curve(curveLinear)
 
   return makeArea(screenPoints) ?? undefined
 }
