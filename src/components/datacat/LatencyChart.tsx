@@ -20,6 +20,7 @@ type Percentile = 'p99' | 'p50'
 interface Pin {
   start: number
   line: Percentile | null
+  y: number
 }
 
 const Y_LABEL_COUNT = 4
@@ -266,7 +267,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
     const clickedBucket = chartBuckets[clickedIndex]
     const clickedY = event.clientY - event.currentTarget.getBoundingClientRect().top
 
-    setPin({ start: clickedBucket.start, line: findNearestLine(clickedBucket, clickedY) })
+    setPin({ start: clickedBucket.start, line: findNearestLine(clickedBucket, clickedY), y: clickedY })
   }
 
   function findNearestLine(chartBucket: ChartBucket, pointerY: number): Percentile | null {
@@ -344,44 +345,48 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
   }
 
   let tooltipLine: Percentile | null = null
+  let tooltipChartBucket = activeChartBucket
+  let tooltipX = activeX
+  let tooltipY = mouseY
 
   if (showHoverDots) {
     tooltipLine = findNearestLine(activeChartBucket, mouseY)
   }
 
-  let highlightedLine = tooltipLine
-
   if (pin !== null && pinnedChartBucket !== null) {
-    highlightedLine = pin.line
+    tooltipLine = pin.line
+    tooltipChartBucket = pinnedChartBucket
+    tooltipX = pinnedX
+    tooltipY = pin.y
   }
 
   let p99Opacity = 1
   let p50Opacity = 1
 
-  if (highlightedLine === 'p99') {
+  if (tooltipLine === 'p99') {
     p50Opacity = DIMMED_OPACITY
   }
 
-  if (highlightedLine === 'p50') {
+  if (tooltipLine === 'p50') {
     p99Opacity = DIMMED_OPACITY
   }
 
   let tooltipColor = P99_COLOR
   let tooltipValue: number | null = null
 
-  if (activeChartBucket !== null && tooltipLine === 'p99') {
+  if (tooltipChartBucket !== null && tooltipLine === 'p99') {
     tooltipColor = P99_COLOR
-    tooltipValue = activeChartBucket.p99
+    tooltipValue = tooltipChartBucket.p99
   }
 
-  if (activeChartBucket !== null && tooltipLine === 'p50') {
+  if (tooltipChartBucket !== null && tooltipLine === 'p50') {
     tooltipColor = P50_COLOR
-    tooltipValue = activeChartBucket.p50
+    tooltipValue = tooltipChartBucket.p50
   }
 
   const tooltipStyle = {
-    left: activeX,
-    top: mouseY,
+    left: tooltipX,
+    top: tooltipY,
     transform: 'translate(-50%, calc(-100% - 10px))'
   }
 
