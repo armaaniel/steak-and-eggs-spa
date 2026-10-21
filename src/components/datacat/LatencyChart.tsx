@@ -17,12 +17,12 @@ interface Props {
   setPin: (pin: Pin | null) => void
 }
 
-type Percentile = 'p99' | 'p50'
+export type Percentile = 'p99' | 'p50'
 
 export interface Pin {
   bucket: ServiceBucket
   line: Percentile | null
-  y: number
+  y: number | null
 }
 
 const Y_LABEL_COUNT = 4
@@ -284,6 +284,22 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
     return null
   }
 
+  function findPinnedTooltipY(chartBucket: ChartBucket, shownPin: Pin) {
+    if (shownPin.y !== null) {
+      return shownPin.y
+    }
+
+    if (shownPin.line === 'p99' && chartBucket.p99 !== null) {
+      return yScale(chartBucket.p99)
+    }
+
+    if (shownPin.line === 'p50' && chartBucket.p50 !== null) {
+      return yScale(chartBucket.p50)
+    }
+
+    return mouseY
+  }
+
   const activeChartBucket = findActiveChartBucket(chartBuckets, hover)
   const focused = activeChartBucket !== null && hover !== null && hover.chart === 'latency'
   const selectedChartBucket = findChartBucket(chartBuckets, selectedBucket)
@@ -344,7 +360,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
     tooltipLine = pin.line
     tooltipChartBucket = pinnedChartBucket
     tooltipX = pinnedX
-    tooltipY = pin.y
+    tooltipY = findPinnedTooltipY(pinnedChartBucket, pin)
   }
 
   let p99Opacity = 1

@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
-import LatencyChart, { type Pin } from '../../components/datacat/LatencyChart'
+import LatencyChart, { type Percentile, type Pin } from '../../components/datacat/LatencyChart'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import Traces from './Traces'
 import useTransition from '../../hooks/useTransition.ts'
@@ -29,6 +29,18 @@ interface OverviewData {
   serviceTimeseries: ServiceBucket[]
 }
 
+function findPinLine(bucket: ServiceBucket): Percentile | null {
+  if (bucket.p99 !== null) {
+    return 'p99'
+  }
+
+  if (bucket.p50 !== null) {
+    return 'p50'
+  }
+
+  return null
+}
+
 function Overview() {
   const { range } = useOutletContext<OutletContextType>()
 
@@ -39,10 +51,23 @@ function Overview() {
   if (picked !== null && picked.range !== range) {
     setPicked(null)
   }
-  const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
   const [hover, setHover] = useState<Hover | null>(null)
   const [pin, setPin] = useState<Pin | null>(null)
+
+  const selectBucket = (bucket: ServiceBucket) => {
+    if (selectedBucket?.bucket === bucket.bucket) {
+      setPicked(null)
+      setPin(null)
+      return
+    }
+
+    setPicked({ range, bucket })
+
+    if (pin === null || pin.bucket.bucket !== bucket.bucket) {
+      setPin({ bucket, line: findPinLine(bucket), y: null })
+    }
+  }
 
   const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
   const [requestsYLabelWidth, setRequestsYLabelWidth] = useState(0)
