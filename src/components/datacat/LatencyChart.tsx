@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState, type MouseEvent } from 'react'
+import { useCallback, useLayoutEffect, useState, type MouseEvent } from 'react'
 import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
 import { HEIGHT, MARGIN, Y_LABEL_GAP, bucketAt, findWidestYLabel, findXLabels, formatYAxisValue, timeScale, toChartBuckets, type Hover, type ChartBucket, type XLabel } from './bucketChart'
@@ -131,24 +131,6 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
   useLayoutEffect(() => {
     setYLabelWidth(yLabelWidth)
   }, [yLabelWidth, setYLabelWidth])
-
-  useEffect(() => {
-    if (pin === null) {
-      return
-    }
-
-    function unpinOnEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setPin(null)
-      }
-    }
-
-    window.addEventListener('keydown', unpinOnEscape)
-
-    return function stopListening() {
-      window.removeEventListener('keydown', unpinOnEscape)
-    }
-  }, [pin, setPin])
 
   if (chartBuckets.length === 0) {
     return null

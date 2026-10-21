@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LatencyChart, { type Percentile, type Pin } from '../../components/datacat/LatencyChart'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import Traces from './Traces'
@@ -59,6 +59,27 @@ function Overview() {
     setPicked(null)
     setPin(null)
   }
+
+  const hasSelection = pin !== null || selectedBucket !== null
+
+  useEffect(() => {
+    if (!hasSelection) {
+      return
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setPicked(null)
+        setPin(null)
+      }
+    }
+
+    window.addEventListener('keydown', closeOnEscape)
+
+    return function stopListening() {
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [hasSelection])
 
   const selectBucket = (bucket: ServiceBucket) => {
     if (selectedBucket?.bucket === bucket.bucket) {
