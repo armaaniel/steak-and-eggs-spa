@@ -28,6 +28,8 @@ interface TracesData {
 
 interface Props {
   run: SyntheticRun
+  isOpen: boolean
+  toggleOpen: () => void
   selectedTrace: Trace | null
   setSelectedTrace: (trace: Trace) => void
 }
@@ -36,12 +38,10 @@ function renderPlaceholderRequest(_: unknown, index: number) {
   return <div key={index} className="uptime-request" aria-hidden="true">&nbsp;</div>
 }
 
-const SyntheticRunRow = ({ run, selectedTrace, setSelectedTrace }: Props) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [hasOpened, setHasOpened] = useState(false)
+const SyntheticRunRow = ({ run, isOpen, toggleOpen, selectedTrace, setSelectedTrace }: Props) => {
+  const [hasOpened, setHasOpened] = useState(isOpen)
 
-  const toggleOpen = () => {
-    setIsOpen(!isOpen)
+  if (isOpen && !hasOpened) {
     setHasOpened(true)
   }
 

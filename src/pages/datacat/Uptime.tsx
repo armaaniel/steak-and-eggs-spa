@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import UptimeChart from '../../components/datacat/UptimeChart'
 import SyntheticRunRow from '../../components/datacat/SyntheticRunRow'
 import useTransition from '../../hooks/useTransition.ts'
@@ -75,10 +75,62 @@ function Uptime() {
   }
   const selectBucket = (bucket: SyntheticBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
   const [drawerBucket, setDrawerBucket] = useState<SyntheticBucket | null>(null)
+  const [openRunIds, setOpenRunIds] = useState<SyntheticRun['runId'][]>([])
+  const drawerRef = useRef<HTMLDivElement>(null)
 
   if (selectedBucket !== null && selectedBucket !== drawerBucket) {
     setDrawerBucket(selectedBucket)
+    setOpenRunIds([])
   }
+
+  function toggleRun(runId: SyntheticRun['runId']) {
+    if (openRunIds.includes(runId)) {
+      setOpenRunIds(openRunIds.filter(function (openRunId) {
+        return openRunId !== runId
+      }))
+      return
+    }
+
+    setOpenRunIds([...openRunIds, runId])
+  }
+
+  const bucketOpen = selectedBucket !== null
+
+  useEffect(() => {
+    if (!bucketOpen) {
+      return
+    }
+
+    function releaseDrawerFocus() {
+      const focused = document.activeElement
+      const drawer = drawerRef.current
+
+      if (drawer !== null && focused instanceof HTMLElement && drawer.contains(focused)) {
+        focused.blur()
+      }
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key !== 'Escape') {
+        return
+      }
+
+      releaseDrawerFocus()
+
+      if (openRunIds.length > 0) {
+        setOpenRunIds(openRunIds.slice(0, -1))
+        return
+      }
+
+      setPicked(null)
+    }
+
+    window.addEventListener('keydown', closeOnEscape)
+
+    return function stopListening() {
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [bucketOpen, openRunIds])
 
   const [hover, setHover] = useState<Hover | null>(null)
   const [yLabelWidth, setYLabelWidth] = useState(0)
@@ -148,7 +200,7 @@ function Uptime() {
       </div>
 
       {drawerBucket && (
-        <div className={`uptime-drawer ${selectedBucket ? '' : 'closed'}`}>
+        <div ref={drawerRef} className={`uptime-drawer ${selectedBucket ? '' : 'closed'}`}>
           <div className={`positions-container ${runsLoaded && !runsLoading ? 'loaded' : ''}`}>
             <p className="uptime-runs-title">Runs from {toBucketLabel(drawerBucket.bucket)}</p>
 
@@ -163,7 +215,7 @@ function Uptime() {
             ) : (
               <div className="uptime-runs">
                 {runs.map((run) => (
-                  <SyntheticRunRow key={run.runId} run={run} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} />
+                  <SyntheticRunRow key={run.runId} run={run} isOpen={openRunIds.includes(run.runId)} toggleOpen={() => toggleRun(run.runId)} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} />
                 ))}
               </div>
             )}
