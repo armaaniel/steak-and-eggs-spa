@@ -136,6 +136,11 @@ function Home() {
 	}, [chartData, chartRange])
 
 	const [livePortfolioValue, setLivePortfolioValue] = useState<number | null>(null)
+	const currentPortfolioValue = findPortfolioValue(portfolio, prices)
+
+	if (livePortfolioValue === null && currentPortfolioValue !== null) {
+		setLivePortfolioValue(currentPortfolioValue)
+	}
 
 	const updateLiveValue = useThrottledCallback(() => {
 		setLivePortfolioValue(findPortfolioValue(portfolio, prices))

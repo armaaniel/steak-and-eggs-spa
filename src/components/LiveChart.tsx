@@ -514,6 +514,10 @@ const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, s
       return
     }
 
+    if (shownSeedPath === null && startingPrice === null) {
+      return
+    }
+
     setMorph(function (oldMorph) {
       if (oldMorph === null || oldMorph.startedAt !== null) {
         return oldMorph
@@ -521,7 +525,7 @@ const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, s
 
       return { fromSeries: oldMorph.fromSeries, fromLine: oldMorph.fromLine, startedAt: Date.now() }
     })
-  }, [seedPoints])
+  }, [seedPoints, shownSeedPath, startingPrice])
 
   useEffect(() => {
     if (price === null || price === lastPrice.current) {
@@ -688,6 +692,8 @@ const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, s
   if (fromLine !== null) {
     headOpacity = blend
     xLabelOpacity = blend
+  } else if (morph !== null && fromDrawing === null) {
+    xLabelOpacity = currentOpacity
   }
 
   let headY: number | null = null
