@@ -7,7 +7,7 @@ import PositionsTable from '../components/PositionsTable'
 import FundsButton from '../components/FundsButton'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toPortfolio, toChange } from '../lib/utils.ts'
-import { useThrottledCallback } from 'use-debounce'
+import { useDebouncedCallback, useThrottledCallback } from 'use-debounce'
 import type { Positions, ChartData, Prices } from '../lib/types.ts'
 import type { ScreenPoint } from '../hooks/useMorphingPoints'
 import useApi from '../hooks/useApi'
@@ -17,7 +17,8 @@ const CHART_RANGES = ['Live', 'Max', '1W', '1M', '3M', 'YTD', '1Y'] as const
 type ChartRange = (typeof CHART_RANGES)[number]
 const DEFAULT_RANGE: ChartRange = 'Max'
 
-const LIVE_VALUE_THROTTLE_MS = 250
+const LIVE_VALUE_SETTLE_MS = 100
+const LIVE_VALUE_MAX_WAIT_MS = 1000
 
 const RANGE_PHRASES: Record<ChartRange, string> = {
   'Live': 'Today',
@@ -137,9 +138,9 @@ function Home() {
 
 	const [livePortfolioValue, setLivePortfolioValue] = useState<number | null>(null)
 
-	const updateLiveValue = useThrottledCallback(() => {
+	const updateLiveValue = useDebouncedCallback(() => {
 		setLivePortfolioValue(findPortfolioValue(portfolio, prices))
-	}, LIVE_VALUE_THROTTLE_MS)
+	}, LIVE_VALUE_SETTLE_MS, { maxWait: LIVE_VALUE_MAX_WAIT_MS })
 
 	useEffect(() => {
 		updateLiveValue()
