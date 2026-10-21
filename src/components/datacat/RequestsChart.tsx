@@ -10,6 +10,7 @@ interface Props {
   setYLabelWidth: (width: number) => void
   selectedBucket: ServiceBucket | null
   selectBucket: (bucket: ServiceBucket) => void
+  pinnedBucket?: ServiceBucket | null
 }
 
 const OK_COLOR = '#8E87C2'
@@ -29,7 +30,7 @@ function toRequestBar(chartBucket: ChartBucket): ChartBar {
   }
 }
 
-const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, selectBucket }: Props) => {
+const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, selectBucket, pinnedBucket = null }: Props) => {
   const bars = toChartBuckets(buckets).map(toRequestBar)
 
   let selectedIndex: number | null = null
@@ -37,6 +38,14 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
   if (selectedBucket !== null) {
     selectedIndex = buckets.findIndex(function (bucket) {
       return bucket.bucket === selectedBucket.bucket
+    })
+  }
+
+  let pinnedIndex: number | null = null
+
+  if (pinnedBucket !== null) {
+    pinnedIndex = buckets.findIndex(function (bucket) {
+      return bucket.bucket === pinnedBucket.bucket
     })
   }
 
@@ -56,6 +65,7 @@ const RequestsChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, se
       chartLeft={chartLeft}
       setYLabelWidth={setYLabelWidth}
       selectedIndex={selectedIndex}
+      pinnedIndex={pinnedIndex}
       selectBar={selectBar}
       tooltipKeys={['ok']}
       tooltipKeysWhenAboveZero={['errors']}

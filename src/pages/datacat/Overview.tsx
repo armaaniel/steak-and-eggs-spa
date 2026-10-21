@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
 import { useState } from 'react'
-import LatencyChart from '../../components/datacat/LatencyChart'
+import LatencyChart, { type Pin } from '../../components/datacat/LatencyChart'
 import RequestsChart from '../../components/datacat/RequestsChart'
 import Traces from './Traces'
 import useTransition from '../../hooks/useTransition.ts'
@@ -42,6 +42,7 @@ function Overview() {
   const selectBucket = (bucket: ServiceBucket) => setPicked(selectedBucket?.bucket === bucket.bucket ? null : { range, bucket })
 
   const [hover, setHover] = useState<Hover | null>(null)
+  const [pin, setPin] = useState<Pin | null>(null)
 
   const [latencyYLabelWidth, setLatencyYLabelWidth] = useState(0)
   const [requestsYLabelWidth, setRequestsYLabelWidth] = useState(0)
@@ -59,6 +60,22 @@ function Overview() {
 
   const buckets = dropEmptyBucketInProgress((data ?? previousData)?.serviceTimeseries || [])
 
+  function hasBucket(pinnedBucket: ServiceBucket) {
+    return buckets.some(function (bucket) {
+      return bucket.bucket === pinnedBucket.bucket
+    })
+  }
+
+  if (pin !== null && !hasBucket(pin.bucket)) {
+    setPin(null)
+  }
+
+  let pinnedBucket: ServiceBucket | null = null
+
+  if (pin !== null) {
+    pinnedBucket = pin.bucket
+  }
+
   return (
     <>
       <div className={`positions-container chart-card ${isLoaded ? 'loaded' : ''}`} data-ready={isLoaded}>
@@ -67,10 +84,10 @@ function Overview() {
         ) : (
           <>
             <div className={`lr-panels chart-fade ${loading ? 'dimmed' : ''}`}>
-              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} selectedBucket={selectedBucket} />
+              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} selectedBucket={selectedBucket} pin={pin} setPin={setPin} />
             </div>
             <div className={`lr-panels chart-fade ${loading ? 'dimmed' : ''}`}>
-              <RequestsChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} />
+              <RequestsChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} pinnedBucket={pinnedBucket} />
             </div>
           </>
         )}

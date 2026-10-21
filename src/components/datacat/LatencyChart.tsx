@@ -13,12 +13,14 @@ interface Props {
   chartLeft: number
   setYLabelWidth: (width: number) => void
   selectedBucket: ServiceBucket | null
+  pin: Pin | null
+  setPin: (pin: Pin | null) => void
 }
 
 type Percentile = 'p99' | 'p50'
 
-interface Pin {
-  start: number
+export interface Pin {
+  bucket: ServiceBucket
   line: Percentile | null
   y: number
 }
@@ -85,20 +87,9 @@ function findChartBucket(chartBuckets: ChartBucket[], bucket: ServiceBucket | nu
   return null
 }
 
-function findChartBucketStartingAt(chartBuckets: ChartBucket[], start: number) {
-  for (const chartBucket of chartBuckets) {
-    if (chartBucket.start === start) {
-      return chartBucket
-    }
-  }
-
-  return null
-}
-
-const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket }: Props) => {
+const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, pin, setPin }: Props) => {
   const [width, setWidth] = useState(0)
   const [mouseY, setMouseY] = useState(0)
-  const [pin, setPin] = useState<Pin | null>(null)
 
   const measureResize = useCallback((chartDiv: HTMLDivElement | null) => {
     if (chartDiv === null) {
@@ -156,7 +147,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
     return function stopListening() {
       window.removeEventListener('keydown', unpinOnEscape)
     }
-  }, [pin])
+  }, [pin, setPin])
 
   if (chartBuckets.length === 0) {
     return null
@@ -267,7 +258,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
     const clickedBucket = chartBuckets[clickedIndex]
     const clickedY = event.clientY - event.currentTarget.getBoundingClientRect().top
 
-    setPin({ start: clickedBucket.start, line: findNearestLine(clickedBucket, clickedY), y: clickedY })
+    setPin({ bucket: clickedBucket.bucket, line: findNearestLine(clickedBucket, clickedY), y: clickedY })
   }
 
   function findNearestLine(chartBucket: ChartBucket, pointerY: number): Percentile | null {
@@ -300,11 +291,7 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
   let pinnedChartBucket: ChartBucket | null = null
 
   if (pin !== null) {
-    pinnedChartBucket = findChartBucketStartingAt(chartBuckets, pin.start)
-  }
-
-  if (pin !== null && pinnedChartBucket === null) {
-    setPin(null)
+    pinnedChartBucket = findChartBucket(chartBuckets, pin.bucket)
   }
 
   const showHoverDots = focused && pinnedChartBucket === null && selectedChartBucket === null

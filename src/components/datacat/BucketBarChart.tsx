@@ -15,6 +15,7 @@ interface Props {
   chartLeft: number
   setYLabelWidth: (width: number) => void
   selectedIndex: number | null
+  pinnedIndex?: number | null
   selectBar: (index: number) => void
   showTimeLabels?: boolean
   tooltipKeys?: string[]
@@ -63,7 +64,7 @@ function findActiveBar(bars: ChartBar[], hover: Hover | null) {
   return bars[hover.index] ?? null
 }
 
-const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, selectBar, showTimeLabels = false, tooltipKeys = [], tooltipKeysWhenAboveZero = [], pinSelected = false }: Props) => {
+const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, pinnedIndex = null, selectBar, showTimeLabels = false, tooltipKeys = [], tooltipKeysWhenAboveZero = [], pinSelected = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
 
@@ -158,6 +159,16 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     )
   }
 
+  let highlightedIndex: number | null = null
+
+  if (hover !== null) {
+    highlightedIndex = hover.index
+  }
+
+  if (pinnedIndex !== null) {
+    highlightedIndex = pinnedIndex
+  }
+
   function renderBar(bar: ChartBar, index: number) {
     const barX = xScale(bar.start) - fullBarWidth / 2
     const barWidth = fullBarWidth
@@ -183,7 +194,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
 
       let color = barSeries.color
 
-      if (barSeries.hoverColor !== undefined && hover !== null && hover.index === index) {
+      if (barSeries.hoverColor !== undefined && highlightedIndex === index) {
         color = barSeries.hoverColor
       }
 
@@ -239,13 +250,23 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
 
   const activeBar = findActiveBar(bars, hover)
 
-  let pinnedBar: ChartBar | null = null
+  let selectedBar: ChartBar | null = null
 
   if (pinSelected && selectedIndex !== null) {
-    pinnedBar = bars[selectedIndex] ?? null
+    selectedBar = bars[selectedIndex] ?? null
+  }
+
+  let pinnedBar: ChartBar | null = null
+
+  if (pinnedIndex !== null) {
+    pinnedBar = bars[pinnedIndex] ?? null
   }
 
   let legendBar = activeBar
+
+  if (selectedBar !== null) {
+    legendBar = selectedBar
+  }
 
   if (pinnedBar !== null) {
     legendBar = pinnedBar
@@ -303,7 +324,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
 
   let tooltipX: number | null = null
 
-  if (pinnedBar === null && activeBar !== null && hover !== null && hover.chart === chartName && pointerY !== null && tooltipKeys.length > 0) {
+  if (selectedBar === null && pinnedBar === null && activeBar !== null && hover !== null && hover.chart === chartName && pointerY !== null && tooltipKeys.length > 0) {
     tooltipX = xScale(activeBar.start)
   }
 
