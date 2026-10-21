@@ -17,6 +17,7 @@ interface Props {
   selectedIndex: number | null
   pinnedIndex?: number | null
   selectBar: (index: number) => void
+  onBackgroundClick?: () => void
   showTimeLabels?: boolean
   tooltipKeys?: string[]
   tooltipKeysWhenAboveZero?: string[]
@@ -64,7 +65,7 @@ function findActiveBar(bars: ChartBar[], hover: Hover | null) {
   return bars[hover.index] ?? null
 }
 
-const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, pinnedIndex = null, selectBar, showTimeLabels = false, tooltipKeys = [], tooltipKeysWhenAboveZero = [], pinSelected = false }: Props) => {
+const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, setHover, chartLeft, setYLabelWidth, selectedIndex, pinnedIndex = null, selectBar, onBackgroundClick, showTimeLabels = false, tooltipKeys = [], tooltipKeysWhenAboveZero = [], pinSelected = false }: Props) => {
   const [width, setWidth] = useState(0)
   const [pointerY, setPointerY] = useState<number | null>(null)
 
@@ -203,7 +204,7 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     }
 
     return (
-      <g key={bar.start} opacity={opacity}>
+      <g key={bar.start} opacity={opacity} data-bar-index={index}>
         {segments}
       </g>
     )
@@ -238,7 +239,33 @@ const BucketBarChart = ({ title, emptyMessage, bars, series, chartName, hover, s
     }
   }
 
+  function findClickedBarIndex(event: MouseEvent<SVGSVGElement>) {
+    if (!(event.target instanceof Element)) {
+      return null
+    }
+
+    const barGroup = event.target.closest('[data-bar-index]')
+
+    if (barGroup === null) {
+      return null
+    }
+
+    return Number(barGroup.getAttribute('data-bar-index'))
+  }
+
   function handleClick(event: MouseEvent<SVGSVGElement>) {
+    if (selectedIndex !== null && onBackgroundClick !== undefined) {
+      const clickedBarIndex = findClickedBarIndex(event)
+
+      if (clickedBarIndex === null) {
+        onBackgroundClick()
+        return
+      }
+
+      selectBar(clickedBarIndex)
+      return
+    }
+
     const clickedIndex = bucketAt(event, bars, xScale)
 
     if (clickedIndex === null) {

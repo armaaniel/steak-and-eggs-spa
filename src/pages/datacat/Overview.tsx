@@ -55,10 +55,14 @@ function Overview() {
   const [hover, setHover] = useState<Hover | null>(null)
   const [pin, setPin] = useState<Pin | null>(null)
 
+  const closeBucket = () => {
+    setPicked(null)
+    setPin(null)
+  }
+
   const selectBucket = (bucket: ServiceBucket) => {
     if (selectedBucket?.bucket === bucket.bucket) {
-      setPicked(null)
-      setPin(null)
+      closeBucket()
       return
     }
 
@@ -109,10 +113,10 @@ function Overview() {
         ) : (
           <>
             <div className={`lr-panels chart-fade ${loading ? 'dimmed' : ''}`}>
-              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} selectedBucket={selectedBucket} pin={pin} setPin={setPin} />
+              <LatencyChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setLatencyYLabelWidth} selectedBucket={selectedBucket} pin={pin} setPin={setPin} closeBucket={closeBucket} />
             </div>
             <div className={`lr-panels chart-fade ${loading ? 'dimmed' : ''}`}>
-              <RequestsChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} pinnedBucket={pinnedBucket} />
+              <RequestsChart buckets={buckets} hover={hover} setHover={setHover} chartLeft={chartLeft} setYLabelWidth={setRequestsYLabelWidth} selectedBucket={selectedBucket} selectBucket={selectBucket} pinnedBucket={pinnedBucket} closeBucket={closeBucket} />
             </div>
           </>
         )}

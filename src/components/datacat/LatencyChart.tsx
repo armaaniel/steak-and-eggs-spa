@@ -15,6 +15,7 @@ interface Props {
   selectedBucket: ServiceBucket | null
   pin: Pin | null
   setPin: (pin: Pin | null) => void
+  closeBucket: () => void
 }
 
 export type Percentile = 'p99' | 'p50'
@@ -87,7 +88,7 @@ function findChartBucket(chartBuckets: ChartBucket[], bucket: ServiceBucket | nu
   return null
 }
 
-const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, pin, setPin }: Props) => {
+const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, selectedBucket, pin, setPin, closeBucket }: Props) => {
   const [width, setWidth] = useState(0)
   const [mouseY, setMouseY] = useState(0)
 
@@ -244,6 +245,11 @@ const LatencyChart = ({ buckets, hover, setHover, chartLeft, setYLabelWidth, sel
   }
 
   function handleClick(event: MouseEvent<SVGSVGElement>) {
+    if (selectedBucket !== null) {
+      closeBucket()
+      return
+    }
+
     if (pin !== null) {
       setPin(null)
       return
