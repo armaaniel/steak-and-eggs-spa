@@ -187,6 +187,10 @@ function readHeightsAt(linePoints: ScreenPoint[], columnXs: number[]) {
   return heights
 }
 
+export function readLineHeight(points: ScreenPoint[], x: number) {
+  return readHeightsAt(points, [x])[0]
+}
+
 export function lineUpColumns(startPoints: ScreenPoint[], targetPoints: ScreenPoint[]) {
   const columnXs = findColumnXs(startPoints, targetPoints)
   const startHeights = readHeightsAt(startPoints, columnXs)

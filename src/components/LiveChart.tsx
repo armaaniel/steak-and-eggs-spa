@@ -3,7 +3,7 @@ import { scaleLinear, scaleTime } from 'd3-scale'
 import { curveMonotoneX, line } from 'd3-shape'
 import useApi from '../hooks/useApi'
 import LiveAxis, { type AxisLabel } from './LiveAxis'
-import { blendColumns, easeLikeCss, lineUpColumns, prefersReducedMotion, type ScreenPoint } from '../hooks/useMorphingPoints'
+import { blendColumns, easeLikeCss, lineUpColumns, prefersReducedMotion, readLineHeight, type ScreenPoint } from '../hooks/useMorphingPoints'
 import '../stylesheets/chart.css'
 import type { ChartData } from '../lib/types.ts'
 
@@ -239,20 +239,18 @@ function findDecimals(labelValues: number[]) {
   return atMostSix
 }
 
-function findNearestPoint(linePoints: LinePoint[], windowStart: number, pointerTime: number) {
-  let nearestPoint: LinePoint | null = null
+function findPricePoint(linePoints: LinePoint[], time: number) {
+  let pricePoint: LinePoint | null = linePoints[0] ?? null
 
   for (const point of linePoints) {
-    if (point.time < windowStart) {
-      continue
+    if (point.time > time) {
+      break
     }
 
-    if (nearestPoint === null || Math.abs(point.time - pointerTime) < Math.abs(nearestPoint.time - pointerTime)) {
-      nearestPoint = point
-    }
+    pricePoint = point
   }
 
-  return nearestPoint
+  return pricePoint
 }
 
 function getLabelInterval(plotWidth: number) {
@@ -761,15 +759,14 @@ const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, s
     }
   }, [shownSnapshotRef])
 
-  let hoveredPoint: LinePoint | null = null
+  let hoveredTime: number | null = null
+  let hoveredPricePoint: LinePoint | null = null
   let hoveredY = 0
 
   if (pointerX !== null && morph === null && currentDrawing !== null) {
-    hoveredPoint = findNearestPoint(currentDrawing.drawnPoints, windowStart, xScale.invert(pointerX).getTime())
-
-    if (hoveredPoint !== null) {
-      hoveredY = makeYScale(currentDrawing)(hoveredPoint.value)
-    }
+    hoveredTime = xScale.invert(pointerX).getTime()
+    hoveredPricePoint = findPricePoint(currentDrawing.drawnPoints, hoveredTime)
+    hoveredY = readLineHeight(placeOnScreen(currentDrawing), pointerX)
   }
 
   let hoveredLabel: string | null = null
@@ -777,10 +774,10 @@ const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, s
   let hoveredX = 0
   let labelX = 0
 
-  if (hoveredPoint !== null) {
-    hoveredLabel = clockFormat.format(hoveredPoint.time)
-    hoveredPrice = hoveredPoint.price
-    hoveredX = xScale(hoveredPoint.time)
+  if (hoveredTime !== null && hoveredPricePoint !== null) {
+    hoveredLabel = clockFormat.format(hoveredTime)
+    hoveredPrice = hoveredPricePoint.price
+    hoveredX = xScale(hoveredTime)
 
     const halfLabel = labelWidth / 2
     labelX = Math.min(Math.max(hoveredX, plotLeft + halfLabel), plotRight - halfLabel)
@@ -839,11 +836,11 @@ const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, s
 
           <path className="live-line" d={path} clipPath={`url(#${clipId})`} fill="none" strokeWidth={LINE_WIDTH} opacity={lineOpacity} />
 
-          {hoveredPoint !== null && <line className="chart-cursor" x1={hoveredX} x2={hoveredX} y1={plotTop} y2={plotBottom} />}
+          {hoveredLabel !== null && <line className="chart-cursor" x1={hoveredX} x2={hoveredX} y1={plotTop} y2={plotBottom} />}
 
           {headY !== null && <circle className="chart-dot" cx={plotRight} cy={headY} r={HEAD_RADIUS} opacity={headOpacity} />}
 
-          {hoveredPoint !== null && <circle className="chart-dot" cx={hoveredX} cy={hoveredY} r={HEAD_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
+          {hoveredLabel !== null && <circle className="chart-dot" cx={hoveredX} cy={hoveredY} r={HEAD_RADIUS} strokeWidth={DOT_RING_WIDTH} />}
         </svg>
       )}
 
