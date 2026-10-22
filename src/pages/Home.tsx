@@ -12,12 +12,15 @@ import type { Positions, ChartData, Prices } from '../lib/types.ts'
 import type { ScreenPoint } from '../hooks/useMorphingPoints'
 import useApi from '../hooks/useApi'
 import usePriceSubscriptions from '../hooks/usePriceSubscriptions'
+import useSteppedValue from '../hooks/useSteppedValue'
 
 const CHART_RANGES = ['Live', 'Max', '1W', '1M', '3M', 'YTD', '1Y'] as const
 type ChartRange = (typeof CHART_RANGES)[number]
 const DEFAULT_RANGE: ChartRange = 'Max'
 
-const LIVE_VALUE_INTERVAL_MS = 1000
+const LIVE_VALUE_STEP_FRACTION = 0.00002
+const LIVE_VALUE_MIN_GAP_MS = 400
+const LIVE_VALUE_CATCH_UP_MS = 3000
 
 const RANGE_PHRASES: Record<ChartRange, string> = {
   'Live': 'Today',
@@ -49,14 +52,8 @@ interface Portfolio {
   positions?: Positions[]
 }
 
-function findPortfolioValue(portfolio: Portfolio | null, prices: Prices) {
+function findInvestedValue(portfolio: Portfolio | null, prices: Prices) {
   if (portfolio === null) {
-    return null
-  }
-
-  const cash = parseFloat(portfolio.balance)
-
-  if (Number.isNaN(cash)) {
     return null
   }
 
@@ -67,7 +64,23 @@ function findPortfolioValue(portfolio: Portfolio | null, prices: Prices) {
     stockValue += price * position.shares
   }
 
-  return stockValue + cash
+  return stockValue
+}
+
+function findPortfolioValue(portfolio: Portfolio | null, prices: Prices) {
+  const investedValue = findInvestedValue(portfolio, prices)
+
+  if (portfolio === null || investedValue === null) {
+    return null
+  }
+
+  const cash = parseFloat(portfolio.balance)
+
+  if (Number.isNaN(cash)) {
+    return null
+  }
+
+  return investedValue + cash
 }
 
 function findOpeningValue(portfolio: Portfolio | null) {
@@ -135,20 +148,15 @@ function Home() {
 		return sliced.length < 2 ? chartData.slice(-2) : sliced
 	}, [chartData, chartRange])
 
-	const [livePortfolioValue, setLivePortfolioValue] = useState<number | null>(null)
 	const currentPortfolioValue = findPortfolioValue(portfolio, prices)
+	const investedValue = findInvestedValue(portfolio, prices)
+	let liveValueStep = 0
 
-	if (livePortfolioValue === null && currentPortfolioValue !== null) {
-		setLivePortfolioValue(currentPortfolioValue)
+	if (investedValue !== null) {
+		liveValueStep = investedValue * LIVE_VALUE_STEP_FRACTION
 	}
 
-	const updateLiveValue = useThrottledCallback(() => {
-		setLivePortfolioValue(findPortfolioValue(portfolio, prices))
-	}, LIVE_VALUE_INTERVAL_MS)
-
-	useEffect(() => {
-		updateLiveValue()
-	}, [portfolio, prices, updateLiveValue])
+	const livePortfolioValue = useSteppedValue(currentPortfolioValue, liveValueStep, LIVE_VALUE_MIN_GAP_MS, LIVE_VALUE_CATCH_UP_MS)
 
 	let shownValue = portfolio?.aum ?? null
 	let baseline = visibleChart?.[0]?.value ?? null
