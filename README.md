@@ -38,7 +38,7 @@ Each page answers one question, and the data behind it comes from the [backend](
 
 **Big lists stay small.** An endpoint's trace list is capped at 1,000 rows. When the list is complete, sorting and filtering happen in the browser. When it's capped, clicking a bar or choosing a filter fetches exactly that slice from the server, so the scatter, bars and table always show the same requests.
 
-**Queries live in the page that runs them.** There are no shared fragments or query hooks. Every page's GraphQL is readable where it's used.
+**Queries live next to the component that runs them.** There are no shared fragments or query hooks, so every query sits in the same file as the UI that shows its data.
 
 ### Charts
 
