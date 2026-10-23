@@ -51,6 +51,7 @@ The scales come from `d3-scale` and the curves (`curveMonotoneX`) from `d3-shape
 - New prices glide in over 400 ms. When a stock goes quiet for more than 1.5 s, the line holds flat, because a stock that didn't trade didn't move.
 - The y-range follows the visible window. When it changes, the old labels fade out before the new ones fade in.
 - A `requestAnimationFrame` loop draws at 60 fps while a price is gliding or a morph is running, and drops to 30 fps otherwise.
+- Only the chart re-renders each frame, because the clock is state inside `LiveChart`, not the page. The pulsing dot animates only `transform` and `opacity`, so the browser's compositor runs it off the main thread.
 - On Stocks, it's seeded from `/stocks/:symbol/livedata`, so it doesn't start empty. On Home, it starts flat at the portfolio's current value and builds from there.
 
 **Handoffs.** Switching between Live and a history range morphs from the line already on screen. The outgoing chart hands over its on-screen line and labels, so the next chart never starts blank, even while its data is still loading.
