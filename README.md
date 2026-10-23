@@ -17,6 +17,7 @@ Price ingestion: [steak-and-eggs-ingester](https://github.com/armaaniel/steak-an
 - **A live price chart** that redraws at 60 fps while something is moving and 30 fps when nothing is, so it stays smooth without burning frames.
 - **Charts morph between ranges** without the line sliding sideways or snapping at the end, even when the two ranges have very different point counts.
 - **One WebSocket** carries every live price in the app.
+- **Every piece of state has one owner.** The stock page owns the live price and passes it down, so the header, the chart, your position and the order form always agree.
 
 ---
 
@@ -29,7 +30,7 @@ Each page answers one question, and the data behind it comes from the [backend](
 | Question | Page | What it shows |
 |---|---|---|
 | Is it up? | Uptime | A canary walks a full user journey every 5 minutes, from sign-up to deleting the account. It's tracked against a 99.5% SLO over 30 days, with an error budget, and you can open any run to see its requests. |
-| Is it fast? | Overview, Routes, Endpoint | p50, p95 and p99 latency and requests per time bucket, for the whole API or one route. A scatter shows every request. You can open a single trace to see each Redis, Postgres and Polygon call inside it. |
+| Is it fast? | Overview, Routes, Endpoint | p50, p95 and p99 latency and requests per time bucket, for the whole API or one route. A scatter plots each request. You can open a single trace to see each Redis, Postgres and Polygon call inside it. |
 | Why not, when it isn't? | Dependencies, Resources, Ingester | A map of the load balancer, Rails, Valkey, Postgres, the ingester and Polygon, with live status and how each is set up. CloudWatch CPU and memory per resource. The ingester's state timeline, throughput and lag. |
 | How much can it take? | Load runs (HTTP and WebSocket) | k6's client timings joined to the server's traces by request ID, next to per-second CPU. That join is how I found the ceiling: about 310 requests a second on a quarter of a vCPU. |
 
@@ -61,14 +62,6 @@ Morphs and label swaps respect `prefers-reduced-motion`.
 The app opens one ActionCable connection and adds a subscription per symbol: the current symbol on a stock page, or every holding on Home. Subscriptions are removed on unmount.
 
 On Home's Live range, the portfolio value is recomputed as prices stream in. Holdings' prices land spread across each second, so showing every change makes the number jitter. A fixed throttle looks mechanical instead. `useSteppedValue` shows a change right away once it's at least 0.002% of the invested value, but no more often than every 400 ms. Smaller drift catches up after 3 seconds.
-
-### The Trading App
-
-- A multi-step buy and sell flow with confirmation and an order receipt. Estimated cost updates as you type.
-- P&L and daily change recalculate per position as prices stream in.
-- JWT auth is sent in the `authToken` header. A 401 clears the token and sends you to login.
-- Every fetch has a fallback value, so a failed call renders placeholders instead of breaking the page. Content fades in once its data arrives.
-- Light and dark themes.
 
 ### Where State Lives
 
@@ -116,14 +109,22 @@ The rule: extract code when it removes real repetition or gives shared behavior 
 | `TraceTable`              | traces, an endpoint, connections, the ingester                                       | a column config with render functions; sorting, paging and empty states are built in      |
 | `AuthForm`, `FundsButton` | login and signup, deposit and withdraw                                               | a `mode` prop                                                                             |
 
+### The Trading App
+
+- A multi-step buy and sell flow with confirmation and an order receipt. Estimated cost updates as you type.
+- P&L and daily change recalculate per position as prices stream in.
+- JWT auth is sent in the `authToken` header. A 401 clears the token and sends you to login.
+- Every fetch has a fallback value, so a failed call renders placeholders instead of breaking the page. Content fades in once its data arrives.
+- Light and dark themes.
+
 ## Running Locally
+
+Needs the [Rails API](https://github.com/armaaniel/steak-and-eggs) running.
 
 ```sh
 npm install
-npm run dev
+VITE_API=http://localhost:3000 npm run dev
 ```
-
-`VITE_API` points at the Rails API and defaults to `http://localhost:3000`. `npm run build` type-checks with `tsc -b` before building. `main` deploys to Vercel.
 
 ## Tech Stack
 
