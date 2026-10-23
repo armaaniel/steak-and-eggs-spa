@@ -17,7 +17,7 @@ Price ingestion: [steak-and-eggs-ingester](https://github.com/armaaniel/steak-an
 - **A live price chart** that redraws at 60 fps while something is moving and 30 fps when nothing is, so it stays smooth without burning frames.
 - **Charts morph between ranges** without the line sliding sideways or snapping at the end, even when the two ranges have very different point counts.
 - **One WebSocket** carries every live price in the app.
-- **Every piece of state has one owner.** The stock page owns the live price and passes it down, so the header, the chart, your position and the order form always agree.
+- **The live price has one owner.** The stock page owns the live price and passes it down, so the header, the chart, your position and the order form always agree.
 
 ---
 
