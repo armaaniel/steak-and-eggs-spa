@@ -66,7 +66,7 @@ On Home's Live range, the portfolio value is recomputed as prices stream in. Hol
 
 ### Where State Lives
 
-Every piece of state has one owner. Here's where each kind lives, and why there:
+Here's where each kind of state lives, and why there:
 
 | State | Lives in | Why there |
 |---|---|---|
