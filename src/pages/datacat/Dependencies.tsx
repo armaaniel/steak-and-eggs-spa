@@ -412,8 +412,8 @@ const PLAN_NODES: Record<Exclude<DependencyView, 'live'>, DependencyNode[]> = {
 
 const VIEW_OPTIONS: { value: DependencyView; label: string }[] = [
   { value: 'live', label: 'Live' },
-  { value: 'box', label: 'One box' },
   { value: 'scaled', label: 'Scaled' },
+  { value: 'box', label: 'One box' },
 ]
 
 const LEGEND: Status[] = ['good', 'warn', 'critical']
