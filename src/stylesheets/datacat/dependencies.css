@@ -110,4 +110,32 @@
 	color:var(--dc-text);
 }
 
+.dep-node rect.dep-planned {
+	stroke-dasharray:4 3;
+}
 
+.dep-header {
+	display:flex;
+	justify-content:flex-end;
+}
+
+.dep-header .segmented-toggle {
+	height:28px;
+}
+
+.dep-header .segmented-toggle-option {
+	font-size:14px;
+	font-weight:400;
+}
+
+.dep-swatch {
+	display:inline-block;
+	width:14px;
+	height:10px;
+	border:1px solid var(--dc-text-muted);
+	border-radius:2px;
+}
+
+.dep-swatch.planned {
+	border-style:dashed;
+}

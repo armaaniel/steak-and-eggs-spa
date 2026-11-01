@@ -1,10 +1,11 @@
 import { useOutletContext } from 'react-router-dom'
 import { gql, useQuery } from '@apollo/client'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import DependencyMap from '../../components/datacat/DependencyMap'
+import SegmentedToggle from '../../components/datacat/SegmentedToggle'
 import useTransition from '../../hooks/useTransition.ts'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
-import type { DependencyNode, IngesterSpan, OutletContextType, PolygonCalls, ServiceBucket, SyntheticBucket } from '../../lib/types.ts'
+import type { DependencyNode, DependencyView, IngesterSpan, OutletContextType, PolygonCalls, ServiceBucket, SyntheticBucket } from '../../lib/types.ts'
 
 const GET_DEPENDENCIES = gql`
   query getDependencies($range: String!, $from: ISO8601DateTime!, $to: ISO8601DateTime!) {
@@ -292,10 +293,74 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
   ]
 }
 
+const NO_CHANGE = 'No change'
+
+const SCALED_NODES: DependencyNode[] = [
+  makeNode('vercel', 'Vercel', 'Static hosting', 'none', { statusLabel: NO_CHANGE }),
+  makeNode('browser', 'Browser', 'Web app', 'none', { statusLabel: NO_CHANGE }),
+  makeNode('mobile', 'React Native', 'Mobile app', 'none', { statusLabel: NO_CHANGE }),
+  makeNode('canary', 'Canary', 'Synthetic checks', 'none', { statusLabel: NO_CHANGE }),
+  makeNode('alb', 'ALB', 'Routes by path', 'none', {
+    statusLabel: 'One new routing rule',
+    metrics: [
+      { label: 'Change', value: '/cable goes to the ActionCable service, every other path to the API' },
+      { label: 'Clients', value: 'Same host and paths, so the web and mobile apps stay as they are' },
+      { label: 'Draining', value: 'API deploys finish in seconds, since only cable targets hold WebSockets for up to 300 s' },
+    ],
+  }),
+  makeNode('api', 'Rails API ×2', 'HTTP requests', 'none', {
+    statusLabel: 'Second task planned',
+    metrics: [
+      { label: 'Change', value: 'desired_count = 2, one task in each zone' },
+      { label: 'Code changes', value: 'None. Auth is a JWT, and the cache and pub/sub already live in Valkey' },
+      { label: 'Next limit', value: 'Postgres connections, since each task can open up to 10' },
+    ],
+    jobs: RAILS_JOBS,
+  }),
+  makeNode('cable', 'ActionCable ×2', 'WebSockets', 'none', {
+    statusLabel: 'Not built yet',
+    metrics: [
+      { label: 'Change', value: 'Its own ECS service, running the same image behind its own target group' },
+      { label: 'Why', value: 'On Oct 17 a cable load test overloaded the one Rails task: a signup took 79 s, the health check failed, and ECS replaced the task' },
+      { label: 'Scales on', value: 'Connections and frames per second. One task topped out around 3,500–4,000 frames/s' },
+    ],
+  }),
+  makeNode('redis', 'ElastiCache Valkey', 'Primary + replica', 'none', {
+    statusLabel: 'Replica planned',
+    metrics: [
+      { label: 'Change', value: 'A replica in the other zone, with automatic failover' },
+      { label: 'At scale', value: 'The ingester publishes each price once, and Valkey sends it to every cable task' },
+      { label: 'Cost', value: 'About $30/month, together with the Postgres standby' },
+    ],
+  }),
+  makeNode('postgres', 'RDS Postgres', 'Primary + standby', 'none', {
+    statusLabel: 'Standby planned',
+    metrics: [
+      { label: 'Change', value: "Multi-AZ, with a standby in the other zone that takes over if the primary's zone fails" },
+      { label: 'Next limit', value: "Connections. AWS's formula caps a db.t4g.micro at roughly 100, and today's peak is 5–6" },
+      { label: 'Cost', value: 'About $30/month, together with the Valkey replica' },
+    ],
+  }),
+  makeNode('polygon', 'Polygon.io', 'Market data', 'none', { statusLabel: NO_CHANGE }),
+  makeNode('ingester', 'Ingester ×1', "Can't scale out", 'none', {
+    statusLabel: 'Stays at one task',
+    metrics: [
+      { label: 'Why', value: 'Polygon allows one WebSocket per API key, so a second copy would be rejected' },
+      { label: 'Deploys', value: 'Stop-first, so each deploy loses 63–80 s of prices' },
+    ],
+  }),
+]
+
+const VIEW_OPTIONS: { value: DependencyView; label: string }[] = [
+  { value: 'live', label: 'Live' },
+  { value: 'scaled', label: 'Scaled' },
+]
+
 const LEGEND: Status[] = ['good', 'warn', 'critical']
 
 function Dependencies() {
   const { detail, setDetail, range } = useOutletContext<OutletContextType>()
+  const [view, setView] = useState<DependencyView>('live')
 
   const timeWindow = useMemo(() => {
     const at = Date.now()
@@ -316,23 +381,49 @@ function Dependencies() {
 
   const isLoaded = useTransition(loading, data || error)
 
-  const nodes = buildNodes(data, timeWindow.at, range)
+  const nodesFor = (next: DependencyView) => (next === 'live' ? buildNodes(data, timeWindow.at, range) : SCALED_NODES)
+  const nodes = nodesFor(view)
   const selectedId = detail?.kind === 'dependency' ? detail.node.id : null
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })
 
+  const changeView = (next: DependencyView) => {
+    setView(next)
+    if (detail?.kind !== 'dependency') return
+
+    const match = nodesFor(next).find((node) => node.id === detail.node.id)
+    setDetail(match ? { kind: 'dependency', node: match } : null)
+  }
+
   return (
     <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`} data-ready={isLoaded}>
-      {error && <p className="dep-message">Unable to load health data, please try again</p>}
+      <div className="dep-header">
+        <SegmentedToggle label="View" value={view} onChange={changeView} options={VIEW_OPTIONS} loaded={isLoaded} />
+      </div>
 
-      <DependencyMap nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
+      {error && view === 'live' && <p className="dep-message">Unable to load health data, please try again</p>}
+
+      <DependencyMap view={view} nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
 
       <div className="dep-legend">
-        {LEGEND.map((status) => (
-          <span key={status} className="dep-legend-item">
-            <span className={`dep-dot ${status}`} />
-            {STATUS_LABELS[status]}
-          </span>
-        ))}
+        {view === 'live' ? (
+          LEGEND.map((status) => (
+            <span key={status} className="dep-legend-item">
+              <span className={`dep-dot ${status}`} />
+              {STATUS_LABELS[status]}
+            </span>
+          ))
+        ) : (
+          <>
+            <span className="dep-legend-item">
+              <span className="dep-swatch" />
+              Running today
+            </span>
+            <span className="dep-legend-item">
+              <span className="dep-swatch planned" />
+              Not built yet
+            </span>
+          </>
+        )}
       </div>
     </div>
   )

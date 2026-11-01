@@ -1,7 +1,8 @@
-import type { DependencyNode } from '../../lib/types.ts'
+import type { DependencyNode, DependencyView } from '../../lib/types.ts'
 import '../../stylesheets/datacat/dependencies.css'
 
 interface Props {
+  view: DependencyView
   nodes: DependencyNode[]
   selectedId: string | null
   onSelect: (node: DependencyNode) => void
@@ -12,55 +13,109 @@ interface Box {
   y: number
   w: number
   tone: string
+  stacked?: boolean
+  planned?: boolean
 }
 
 interface EdgeLabel {
   x: number
   y: number
   text: string
-  anchor?: 'start' | 'middle'
+  anchor?: 'start' | 'middle' | 'end'
+}
+
+interface Layout {
+  boxes: Record<string, Box>
+  edges: string[]
+  edgeLabels: EdgeLabel[]
 }
 
 const BOX_HEIGHT = 56
+const STACK_OFFSET = 6
 
-const LAYOUT: Record<string, Box> = {
-  vercel:   { x: 30,  y: 76,  w: 130, tone: 'purple' },
-  browser:  { x: 30,  y: 164, w: 130, tone: 'grey' },
-  mobile:   { x: 30,  y: 244, w: 130, tone: 'grey' },
-  canary:   { x: 30,  y: 324, w: 130, tone: 'grey' },
-  alb:      { x: 310, y: 164, w: 160, tone: 'blue' },
-  redis:    { x: 510, y: 70,  w: 180, tone: 'amber' },
-  rails:    { x: 510, y: 164, w: 180, tone: 'teal' },
-  postgres: { x: 510, y: 258, w: 180, tone: 'blue' },
-  polygon:  { x: 750, y: 70,  w: 180, tone: 'pink' },
-  ingester: { x: 750, y: 258, w: 180, tone: 'coral' },
+const LAYOUTS: Record<DependencyView, Layout> = {
+  live: {
+    boxes: {
+      vercel:   { x: 30,  y: 76,  w: 130, tone: 'purple' },
+      browser:  { x: 30,  y: 164, w: 130, tone: 'grey' },
+      mobile:   { x: 30,  y: 244, w: 130, tone: 'grey' },
+      canary:   { x: 30,  y: 324, w: 130, tone: 'grey' },
+      alb:      { x: 310, y: 164, w: 160, tone: 'blue' },
+      redis:    { x: 510, y: 70,  w: 180, tone: 'amber' },
+      rails:    { x: 510, y: 164, w: 180, tone: 'teal' },
+      postgres: { x: 510, y: 258, w: 180, tone: 'blue' },
+      polygon:  { x: 750, y: 70,  w: 180, tone: 'pink' },
+      ingester: { x: 750, y: 258, w: 180, tone: 'coral' },
+    },
+    edges: [
+      'M95 132V162',
+      'M160 192H308',
+      'M160 272H292V192H308',
+      'M160 352H292V192H308',
+      'M470 192H508',
+      'M600 164V128',
+      'M600 220V256',
+      'M772 258L672 128',
+      'M750 286H692',
+      'M690 180H730V98H748',
+      'M840 126V256',
+    ],
+    edgeLabels: [
+      { x: 226, y: 266, text: 'HTTPS + WSS' },
+      { x: 489, y: 185, text: 'HTTP' },
+      { x: 489, y: 207, text: 'WS' },
+      { x: 781, y: 226, text: 'SET + PUB' },
+      { x: 721, y: 279, text: 'Ticker list' },
+      { x: 745, y: 152, text: 'GET' },
+      { x: 849, y: 195, text: 'WebSocket', anchor: 'start' },
+    ],
+  },
+  scaled: {
+    boxes: {
+      vercel:   { x: 30,  y: 76,  w: 130, tone: 'purple' },
+      browser:  { x: 30,  y: 164, w: 130, tone: 'grey' },
+      mobile:   { x: 30,  y: 244, w: 130, tone: 'grey' },
+      canary:   { x: 30,  y: 324, w: 130, tone: 'grey' },
+      alb:      { x: 200, y: 164, w: 105, tone: 'blue' },
+      api:      { x: 370, y: 100, w: 150, tone: 'teal', stacked: true },
+      cable:    { x: 370, y: 236, w: 150, tone: 'teal', stacked: true, planned: true },
+      postgres: { x: 590, y: 100, w: 156, tone: 'blue', stacked: true },
+      redis:    { x: 590, y: 236, w: 156, tone: 'amber', stacked: true },
+      polygon:  { x: 840, y: 42,  w: 110, tone: 'pink' },
+      ingester: { x: 840, y: 168, w: 110, tone: 'coral' },
+    },
+    edges: [
+      'M95 132V162',
+      'M160 192H198',
+      'M160 272H180V192H198',
+      'M160 352H180V192H198',
+      'M305 192H330V128H368',
+      'M305 192H330V264H368',
+      'M526 128H588',
+      'M500 158L620 228',
+      'M526 264H588',
+      'M451 94V70H838',
+      'M895 98V166',
+      'M840 196H800V128H754',
+      'M840 196H800V264H754',
+    ],
+    edgeLabels: [
+      { x: 186, y: 266, text: 'HTTPS + WSS', anchor: 'start' },
+      { x: 366, y: 121, text: 'HTTP', anchor: 'end' },
+      { x: 366, y: 279, text: 'WS /cable', anchor: 'end' },
+      { x: 570, y: 186, text: 'Cache', anchor: 'start' },
+      { x: 557, y: 257, text: 'SUB' },
+      { x: 790, y: 63, text: 'GET' },
+      { x: 886, y: 136, text: 'WebSocket', anchor: 'end' },
+      { x: 758, y: 121, text: 'Ticker list', anchor: 'start' },
+      { x: 758, y: 279, text: 'SET + PUB', anchor: 'start' },
+    ],
+  },
 }
 
-const EDGES = [
-  'M95 132V162',
-  'M160 192H308',
-  'M160 272H292V192H308',
-  'M160 352H292V192H308',
-  'M470 192H508',
-  'M600 164V128',
-  'M600 220V256',
-  'M772 258L672 128',
-  'M750 286H692',
-  'M690 180H730V98H748',
-  'M840 126V256',
-]
+const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
+  const { boxes, edges, edgeLabels } = LAYOUTS[view]
 
-const EDGE_LABELS: EdgeLabel[] = [
-  { x: 226, y: 266, text: 'HTTPS + WSS' },
-  { x: 489, y: 185, text: 'HTTP' },
-  { x: 489, y: 207, text: 'WS' },
-  { x: 781, y: 226, text: 'SET + PUB' },
-  { x: 721, y: 279, text: 'Ticker list' },
-  { x: 745, y: 152, text: 'GET' },
-  { x: 849, y: 195, text: 'WebSocket', anchor: 'start' },
-]
-
-const DependencyMap = ({ nodes, selectedId, onSelect }: Props) => {
   return (
     <svg className="dep-map" viewBox="0 30 960 360" role="group" aria-label="Steak & Eggs architecture">
       <defs>
@@ -71,18 +126,18 @@ const DependencyMap = ({ nodes, selectedId, onSelect }: Props) => {
 
       <text x="600" y="48" textAnchor="middle" className="dep-region">AWS VPC (us-west-1)</text>
 
-      {EDGES.map((d) => (
+      {edges.map((d) => (
         <path key={d} d={d} className="dep-edge" markerEnd="url(#dep-arrow)" />
       ))}
 
-      {EDGE_LABELS.map((label) => (
+      {edgeLabels.map((label) => (
         <text key={label.text} x={label.x} y={label.y} textAnchor={label.anchor ?? 'middle'} className="dep-edge-label">
           {label.text}
         </text>
       ))}
 
       {nodes.map((node) => {
-        const box = LAYOUT[node.id]
+        const box = boxes[node.id]
         const center = box.x + box.w / 2
         const select = () => onSelect(node)
 
@@ -101,7 +156,8 @@ const DependencyMap = ({ nodes, selectedId, onSelect }: Props) => {
               }
             }}
           >
-            <rect x={box.x} y={box.y} width={box.w} height={BOX_HEIGHT} rx="8" />
+            {box.stacked && <rect x={box.x + STACK_OFFSET} y={box.y - STACK_OFFSET} width={box.w} height={BOX_HEIGHT} rx="8" className="dep-planned" />}
+            <rect x={box.x} y={box.y} width={box.w} height={BOX_HEIGHT} rx="8" className={box.planned ? 'dep-planned' : undefined} />
             <text x={center} y={box.y + 21} textAnchor="middle" dominantBaseline="central" className="dep-title">
               {node.title}
             </text>
