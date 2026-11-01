@@ -130,3 +130,5 @@
 	row-gap:0.5rem;
 	padding:1rem 0.5rem 1rem 1rem;
 }
+
+.dep-node.frame { --node-fill:var(--dc-surface-2); --node-stroke:var(--dc-border-strong); --node-title:var(--dc-text); --node-role:var(--dc-text-muted); }
