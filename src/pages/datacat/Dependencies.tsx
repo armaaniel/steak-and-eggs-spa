@@ -135,7 +135,7 @@ const ALB_SETUP = [
   { label: 'Port 443', value: 'HTTPS · default action forwards to Rails on port 3000' },
   { label: 'Port 80', value: 'HTTP · 301 redirect to 443' },
   { label: 'Health check', value: 'GET / every 30 s' },
-  { label: 'Unhealthy after', value: '5 failed checks, about 2.5 min' },
+  { label: 'Unhealthy after', value: '5 failed checks' },
 ]
 
 const ALB_DOMAIN = { label: 'Domain', value: 'www.steakneggs.art · CNAME to the ALB · TLS certificate' }
@@ -161,13 +161,12 @@ const JOBS_SETUP = [
 ]
 
 const REDIS_SETUP = [
-  { label: 'Engine', value: 'Valkey 8.2' },
-  { label: 'Instance', value: 'cache.t4g.micro, 1 node' },
+  { label: 'Instance', value: 'cache.t4g.micro' },
+  { label: 'Nodes', value: '1' },
   { label: 'Maintenance', value: formatWeeklyWindow(SATURDAY, 4) },
 ]
 
 const POSTGRES_SETUP = [
-  { label: 'Engine', value: 'Postgres 17' },
   { label: 'Instance', value: 'db.t4g.micro, burstable' },
   { label: 'Storage', value: '20 GB gp3' },
   { label: 'Backups', value: `${formatDailyWindow(3)}, kept 7 days` },
