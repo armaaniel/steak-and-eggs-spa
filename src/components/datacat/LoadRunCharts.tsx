@@ -98,7 +98,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
 
   return (
     <div className="lr-panels">
-      <h3 className="lr-title">{route}</h3>
+      <h3 className="lr-title">GET /{route}</h3>
 
       <TimeSeriesChart
         title="Throughput (rps)"
