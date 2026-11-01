@@ -141,3 +141,8 @@
 .dep-swatch.planned {
 	border-style:dashed;
 }
+
+.positions-container.dep-card {
+	row-gap:0.5rem;
+	padding:1rem 0.5rem 1rem 1rem;
+}

@@ -395,7 +395,7 @@ function Dependencies() {
   }
 
   return (
-    <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`} data-ready={isLoaded}>
+    <div className={`positions-container dep-card ${isLoaded && !loading ? 'loaded' : ''}`} data-ready={isLoaded}>
       {error && view === 'live' && <p className="dep-message">Unable to load health data, please try again</p>}
 
       <DependencyMap view={view} nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
