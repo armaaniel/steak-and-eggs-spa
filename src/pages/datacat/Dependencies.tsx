@@ -410,16 +410,10 @@ function Dependencies() {
               </span>
             ))
           ) : (
-            <>
-              <span className="dep-legend-item">
-                <span className="dep-swatch" />
-                Running today
-              </span>
-              <span className="dep-legend-item">
-                <span className="dep-swatch planned" />
-                Not built yet
-              </span>
-            </>
+            <span className="dep-legend-item">
+              <span className="dep-swatch" />
+              Failover copy in the other zone, not built yet
+            </span>
           )}
         </div>
 

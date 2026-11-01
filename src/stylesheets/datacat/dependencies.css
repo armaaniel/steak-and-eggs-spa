@@ -134,12 +134,8 @@
 	display:inline-block;
 	width:14px;
 	height:10px;
-	border:1px solid var(--dc-text-muted);
+	border:1px dashed var(--dc-text-muted);
 	border-radius:2px;
-}
-
-.dep-swatch.planned {
-	border-style:dashed;
 }
 
 .positions-container.dep-card {
