@@ -38,8 +38,9 @@ const toMarketDate = (ms: number) => {
   return { year: read('year'), month: read('month'), day: read('day') }
 }
 
-export const findLastSession = (now: number) => {
+export const findSession = (now: number, sessionsBack: number) => {
   const today = toMarketDate(now)
+  let sessionsSkipped = 0
 
   for (let daysBack = 0; daysBack < DAYS_TO_SEARCH; daysBack += 1) {
     const day = new Date(Date.UTC(today.year, today.month - 1, today.day - daysBack))
@@ -53,6 +54,11 @@ export const findLastSession = (now: number) => {
     const from = toMarketInstant(year, month, date, SESSION_START_MINUTE)
 
     if (from > now) continue
+
+    if (sessionsSkipped < sessionsBack) {
+      sessionsSkipped += 1
+      continue
+    }
 
     const to = Math.min(toMarketInstant(year, month, date, SESSION_END_MINUTE), now)
     return { from, to }

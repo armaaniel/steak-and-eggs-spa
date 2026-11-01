@@ -6,7 +6,7 @@ import TraceTable from '../../components/datacat/TraceTable'
 import IngesterTimeline from '../../components/datacat/IngesterTimeline'
 import TimeSeriesChart, { type ChartLine } from '../../components/datacat/TimeSeriesChart'
 import RangeSelect from '../../components/datacat/RangeSelect'
-import { findLastSession } from '../../components/datacat/marketSession'
+import { findSession } from '../../components/datacat/marketSession'
 import { DATACAT_RANGE_MS, type DatacatRange } from '../../hooks/useDatacatRange'
 import useTransition from '../../hooks/useTransition.ts'
 import { findNearestPoint } from '../../components/datacat/timeSeries'
@@ -176,34 +176,34 @@ const connectionColumns: Column<ConnectionRow>[] = [
   { key: 'endedBy', label: 'Ended', sortable: false, render: (connection) => (connection.endedAt ? `${connection.endedBy} · ${toShortTime(connection.endedAt)}` : connection.endedBy) },
 ]
 
-type IngesterRange = DatacatRange | 'session'
+const INGESTER_RANGES: DatacatRange[] = ['1h', '12h', '24h', '7d', '14d']
 
 function Ingester() {
   const { detail, setDetail, range, setRange } = useOutletContext<OutletContextType>()
 
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
-  const [showSession, setShowSession] = useState(true)
+  const [sessionsBack, setSessionsBack] = useState<number | null>(0)
 
   const timeWindow = useMemo(() => {
-    if (showSession) {
-      return findLastSession(Date.now())
+    if (sessionsBack !== null) {
+      return findSession(Date.now(), sessionsBack)
     }
 
     const to = Date.now()
     return { from: to - DATACAT_RANGE_MS[range], to }
-  }, [showSession, range])
+  }, [sessionsBack, range])
 
-  const changeRange = (nextRange: IngesterRange) => {
+  const changeRange = (nextRange: DatacatRange) => {
     setDetail(null)
     setPinnedTime(null)
-
-    if (nextRange === 'session') {
-      setShowSession(true)
-      return
-    }
-
-    setShowSession(false)
+    setSessionsBack(null)
     setRange(nextRange)
+  }
+
+  const changeSession = (nextSessionsBack: number) => {
+    setDetail(null)
+    setPinnedTime(null)
+    setSessionsBack(nextSessionsBack)
   }
 
   const recordsPerPage = 10
@@ -261,7 +261,7 @@ function Ingester() {
   return (
     <>
       <div className="range-header">
-        <RangeSelect value={range} onChange={changeRange} session={showSession} onSession={() => changeRange('session')} loaded={isLoaded} />
+        <RangeSelect value={range} onChange={changeRange} ranges={INGESTER_RANGES} sessionsBack={sessionsBack} onSession={changeSession} loaded={isLoaded} />
       </div>
 
       {error ? (
