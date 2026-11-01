@@ -155,6 +155,38 @@ function DCList() {
   const [detail, setDetail] = useState<Detail | null>(null)
   const [range, setRange] = useDatacatRange()
 
+  const hasDetail = detail !== null
+
+  useEffect(() => {
+    if (!hasDetail) {
+      return
+    }
+
+    function releaseFocus() {
+      const focused = document.activeElement
+
+      if (focused instanceof HTMLElement || focused instanceof SVGElement) {
+        focused.blur()
+      }
+    }
+
+    function closeDetailsOnEscape(event: KeyboardEvent) {
+      if (event.key !== 'Escape') {
+        return
+      }
+
+      event.stopPropagation()
+      releaseFocus()
+      setDetail(null)
+    }
+
+    window.addEventListener('keydown', closeDetailsOnEscape, true)
+
+    return function stopListening() {
+      window.removeEventListener('keydown', closeDetailsOnEscape, true)
+    }
+  }, [hasDetail])
+
   const [statsOpen, setStatsOpen] = useState(() => {
     const saved = localStorage.getItem('statsOpen')
     return saved === null ? true : saved === 'true'
