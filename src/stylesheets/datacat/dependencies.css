@@ -121,6 +121,16 @@
 	height:28px;
 }
 
+.dep-footer .segmented-toggle.loaded {
+	opacity:0;
+}
+
+.dep-footer .segmented-toggle.loaded:hover,
+.dep-footer .segmented-toggle.loaded:has([aria-expanded="true"]),
+.dep-footer .segmented-toggle.loaded:has(:focus-visible) {
+	opacity:1;
+}
+
 .dep-footer .segmented-toggle-option {
 	padding:0 6px;
 	font-size:14px;
