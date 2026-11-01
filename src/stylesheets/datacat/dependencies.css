@@ -122,6 +122,7 @@
 }
 
 .dep-footer .segmented-toggle-option {
+	padding:0 6px;
 	font-size:14px;
 	font-weight:400;
 }
