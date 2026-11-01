@@ -40,6 +40,7 @@ const GET_DEPENDENCIES = gql`
         unit
         now
         peak
+        low
         total
         points {
           at
@@ -66,6 +67,7 @@ interface DependencyReading {
   unit: 'percent' | 'count' | 'bytes'
   now: number | null
   peak: number | null
+  low: number | null
   total: number | null
 }
 
@@ -132,12 +134,13 @@ const TASK_SIZE = '0.25 vCPU · 512 MB · ARM64'
 const ALB_SETUP = [
   { label: 'Port 443', value: 'HTTPS · default action forwards to Rails on port 3000' },
   { label: 'Port 80', value: 'HTTP · 301 redirect to 443' },
-  { label: 'TLS', value: '1.3 or 1.2, ACM certificate' },
   { label: 'Health check', value: 'GET / every 30 s' },
   { label: 'Unhealthy after', value: '5 failed checks, about 2.5 min' },
 ]
 
-const ALB_TARGET_GROUP = { label: 'Target group', value: 'Tasks in the steakneggs ECS service, on port 3000' }
+const ALB_DOMAIN = { label: 'Domain', value: 'www.steakneggs.art · CNAME to the ALB · TLS certificate' }
+
+const ALB_TARGET_GROUP = { label: 'Target group', value: 'Tasks in the steakneggs ECS service on port 3000' }
 
 const RAILS_SETUP = [
   { label: 'Task size', value: TASK_SIZE },
@@ -181,11 +184,12 @@ const RANK: Record<Status, number> = { none: 0, good: 1, warn: 2, critical: 3 }
 
 const worst = (a: Status, b: Status) => (RANK[a] >= RANK[b] ? a : b)
 
-const formatReading = ({ unit, now, peak, total }: DependencyReading, range: DatacatRange) => {
+const formatReading = ({ unit, now, peak, low, total }: DependencyReading, range: DatacatRange) => {
   if (total !== null) return `${Math.round(total).toLocaleString()} (${range})`
   if (now === null) return '-'
   if (unit === 'bytes') return `${(now / GB).toFixed(1)} GB`
   if (unit === 'percent') return `${now.toFixed(1)}% now · ${(peak ?? now).toFixed(1)}% peak (${range})`
+  if (low !== null) return `${Math.round(now)} now · ${Math.round(low)} low (${range})`
   return `${Math.round(now)} now · ${Math.round(peak ?? now)} peak (${range})`
 }
 
@@ -268,7 +272,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
         : [],
       note: 'See Uptime',
     }),
-    makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: [ALB_TARGET_GROUP, ...alb.metrics], note: alb.note, setup: ALB_SETUP }),
+    makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: [ALB_DOMAIN, ALB_TARGET_GROUP, ...alb.metrics], note: alb.note, setup: ALB_SETUP }),
     makeNode('rails', 'Rails app', 'API + ActionCable', worst(railsStatus, railsTask.status), {
       metrics: data
         ? [
