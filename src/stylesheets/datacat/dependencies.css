@@ -50,6 +50,17 @@
 	stroke-width:2.5;
 }
 
+.dep-node.reveal {
+	opacity:0;
+	transition:opacity 150ms;
+}
+
+.dep-node.reveal:hover,
+.dep-node.reveal:focus-visible,
+.dep-node.reveal.selected {
+	opacity:1;
+}
+
 .dep-title {
 	font-size:14px;
 	font-weight:500;

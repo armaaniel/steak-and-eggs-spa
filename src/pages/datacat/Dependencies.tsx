@@ -147,6 +147,12 @@ const RAILS_JOBS = [
   { label: 'prune_traces', value: `${formatDailyTime(6)} · deletes traces and ingester samples older than 30 days` },
 ]
 
+const JOBS_SETUP = [
+  { label: 'Trigger', value: 'EventBridge Scheduler' },
+  { label: 'Runs as', value: 'A new Fargate task per job, Rails image' },
+  { label: 'Task size', value: TASK_SIZE },
+]
+
 const REDIS_SETUP = [
   { label: 'Engine', value: 'Valkey 8.2' },
   { label: 'Instance', value: 'cache.t4g.micro, 1 node' },
@@ -268,8 +274,8 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
           ]
         : [],
       setup: RAILS_SETUP,
-      jobs: RAILS_JOBS,
     }),
+    makeNode('jobs', 'Scheduled tasks', '3 daily rake tasks', 'none', { statusLabel: NOT_MONITORED, setup: JOBS_SETUP, jobs: RAILS_JOBS }),
     makeNode('redis', 'ElastiCache Valkey', 'Cache + live prices', redis.status, { metrics: redis.metrics, note: redis.note, setup: REDIS_SETUP }),
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note, setup: POSTGRES_SETUP }),
     makeNode('polygon', 'Polygon.io', 'Market data', polygonStatus, {

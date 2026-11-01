@@ -16,6 +16,8 @@ interface Box {
   tone: string
   stacked?: boolean
   copies?: string[]
+  edge?: string
+  reveal?: boolean
 }
 
 interface EdgeLabel {
@@ -43,6 +45,7 @@ const LAYOUTS: Record<DependencyView, Layout> = {
       mobile:   { x: 30,  y: 244, w: 130, tone: 'grey' },
       canary:   { x: 30,  y: 324, w: 130, tone: 'grey' },
       alb:      { x: 310, y: 164, w: 160, tone: 'blue' },
+      jobs:     { x: 310, y: 258, w: 160, tone: 'teal', stacked: true, edge: 'M476 286H508', reveal: true },
       redis:    { x: 510, y: 70,  w: 180, tone: 'amber' },
       rails:    { x: 510, y: 164, w: 180, tone: 'teal' },
       postgres: { x: 510, y: 258, w: 180, tone: 'blue' },
@@ -150,7 +153,7 @@ const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
         return (
           <g
             key={node.id}
-            className={`dep-node ${box.tone} ${node.id === selectedId ? 'selected' : ''}`}
+            className={`dep-node ${box.tone} ${box.reveal ? 'reveal' : ''} ${node.id === selectedId ? 'selected' : ''}`}
             role="button"
             tabIndex={0}
             aria-label={`${node.title}: ${node.statusLabel}`}
@@ -162,6 +165,7 @@ const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
               }
             }}
           >
+            {box.edge && <path d={box.edge} className="dep-edge" markerEnd="url(#dep-arrow)" />}
             {box.stacked && <rect x={box.x + STACK_OFFSET} y={box.y - STACK_OFFSET} width={box.w} height={BOX_HEIGHT} rx="8" />}
             {cardsFor(box, node.role).map((card) => {
               const center = card.x + card.w / 2
