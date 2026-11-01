@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type RefObject } from 'react'
+import { memo, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type RefObject } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { curveMonotoneX, line } from 'd3-shape'
 import useApi from '../hooks/useApi'
@@ -859,4 +859,4 @@ const LiveChart = ({ seriesKey, seedPath, price, onHover, startingLine = null, s
   )
 }
 
-export default LiveChart
+export default memo(LiveChart)
