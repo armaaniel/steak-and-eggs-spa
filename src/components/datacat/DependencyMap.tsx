@@ -105,7 +105,6 @@ const LAYOUTS: Record<DependencyView, Layout> = {
       { x: 186, y: 266, text: 'HTTPS + WSS', anchor: 'start' },
       { x: 366, y: 121, text: 'HTTP', anchor: 'end' },
       { x: 366, y: 279, text: 'WS /cable', anchor: 'end' },
-      { x: 592, y: 186, text: 'Cache', anchor: 'start' },
       { x: 583, y: 257, text: 'SUB' },
       { x: 790, y: 63, text: 'GET' },
       { x: 886, y: 136, text: 'WebSocket', anchor: 'end' },
