@@ -342,7 +342,7 @@ const SCALED_NODES: DependencyNode[] = [
     ],
   }),
   makeNode('polygon', 'Polygon.io', 'Market data', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('ingester', 'Ingester ×1', "Can't scale out", 'none', {
+  makeNode('ingester', 'Ingester', 'No scaling', 'none', {
     statusLabel: 'Stays at one task',
     metrics: [
       { label: 'Why', value: 'Polygon allows one WebSocket per API key, so a second copy would be rejected' },
