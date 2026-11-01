@@ -14,7 +14,6 @@ interface Box {
   y: number
   w: number
   tone: string
-  h?: number
   stacked?: boolean
   copies?: string[]
 }
@@ -27,7 +26,6 @@ interface EdgeLabel {
 }
 
 interface Layout {
-  region?: { x: number; y: number }
   boxes: Record<string, Box>
   edges: string[]
   edgeLabels: EdgeLabel[]
@@ -39,7 +37,6 @@ const COPY_GAP = 6
 
 const LAYOUTS: Record<DependencyView, Layout> = {
   live: {
-    region: { x: 600, y: 48 },
     boxes: {
       vercel:   { x: 30,  y: 76,  w: 130, tone: 'purple' },
       browser:  { x: 30,  y: 164, w: 130, tone: 'grey' },
@@ -76,7 +73,6 @@ const LAYOUTS: Record<DependencyView, Layout> = {
     ],
   },
   scaled: {
-    region: { x: 600, y: 48 },
     boxes: {
       vercel:   { x: 30,  y: 76,  w: 130, tone: 'purple' },
       browser:  { x: 30,  y: 164, w: 130, tone: 'grey' },
@@ -115,43 +111,6 @@ const LAYOUTS: Record<DependencyView, Layout> = {
       { x: 801, y: 279, text: 'SET + PUB' },
     ],
   },
-  box: {
-    boxes: {
-      vercel:   { x: 30,  y: 76,  w: 130, tone: 'purple' },
-      browser:  { x: 30,  y: 164, w: 130, tone: 'grey' },
-      mobile:   { x: 30,  y: 244, w: 130, tone: 'grey' },
-      canary:   { x: 30,  y: 324, w: 130, tone: 'grey' },
-      ec2:      { x: 195, y: 124, w: 725, h: 120, tone: 'frame' },
-      proxy:    { x: 215, y: 164, w: 115, tone: 'blue' },
-      rails:    { x: 380, y: 164, w: 150, tone: 'teal' },
-      redis:    { x: 575, y: 164, w: 130, tone: 'amber' },
-      ingester: { x: 770, y: 164, w: 130, tone: 'coral' },
-      polygon:  { x: 575, y: 50,  w: 130, tone: 'pink' },
-      postgres: { x: 575, y: 300, w: 130, tone: 'blue' },
-    },
-    edges: [
-      'M95 132V162',
-      'M160 192H213',
-      'M160 272H180V192H213',
-      'M160 352H180V192H213',
-      'M330 192H378',
-      'M530 192H573',
-      'M770 192H707',
-      'M455 164V78H573',
-      'M707 78H835V162',
-      'M455 220V328H573',
-      'M835 220V328H707',
-    ],
-    edgeLabels: [
-      { x: 186, y: 266, text: 'HTTPS + WSS', anchor: 'start' },
-      { x: 354, y: 185, text: 'HTTP' },
-      { x: 354, y: 207, text: 'WS' },
-      { x: 737, y: 185, text: 'SET + PUB' },
-      { x: 447, y: 110, text: 'GET', anchor: 'end' },
-      { x: 843, y: 110, text: 'WebSocket', anchor: 'start' },
-      { x: 843, y: 290, text: 'Ticker list', anchor: 'start' },
-    ],
-  },
 }
 
 const cardsFor = (box: Box, role: string) => {
@@ -162,40 +121,47 @@ const cardsFor = (box: Box, role: string) => {
 }
 
 const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
-  const { region, boxes, edges, edgeLabels } = LAYOUTS[view]
-  const isFrame = (node: DependencyNode) => boxes[node.id].h !== undefined
+  const { boxes, edges, edgeLabels } = LAYOUTS[view]
 
-  const renderNode = (node: DependencyNode) => {
-    const box = boxes[node.id]
-    const select = () => onSelect(node)
+  return (
+    <svg className="dep-map" viewBox="0 30 960 360" role="group" aria-label="Steak & Eggs architecture">
+      <defs>
+        <marker id="dep-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="m2 1 6 4-6 4" className="dep-arrowhead" />
+        </marker>
+      </defs>
 
-    return (
-      <g
-        key={node.id}
-        className={`dep-node ${box.tone} ${node.id === selectedId ? 'selected' : ''}`}
-        role="button"
-        tabIndex={0}
-        aria-label={`${node.title}: ${node.statusLabel}`}
-        onClick={select}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            select()
-          }
-        }}
-      >
-        {box.h !== undefined ? (
-          <>
-            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx="12" />
-            <text x={box.x + 14} y={box.y + 20} dominantBaseline="central">
-              <tspan className="dep-title">{node.title}</tspan>
-              <tspan dx="8" className="dep-role">
-                {node.role}
-              </tspan>
-            </text>
-          </>
-        ) : (
-          <>
+      <text x="600" y="48" textAnchor="middle" className="dep-region">AWS VPC (us-west-1)</text>
+
+      {edges.map((d) => (
+        <path key={d} d={d} className="dep-edge" markerEnd="url(#dep-arrow)" />
+      ))}
+
+      {edgeLabels.map((label) => (
+        <text key={label.text} x={label.x} y={label.y} textAnchor={label.anchor ?? 'middle'} className="dep-edge-label">
+          {label.text}
+        </text>
+      ))}
+
+      {nodes.map((node) => {
+        const box = boxes[node.id]
+        const select = () => onSelect(node)
+
+        return (
+          <g
+            key={node.id}
+            className={`dep-node ${box.tone} ${node.id === selectedId ? 'selected' : ''}`}
+            role="button"
+            tabIndex={0}
+            aria-label={`${node.title}: ${node.statusLabel}`}
+            onClick={select}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                select()
+              }
+            }}
+          >
             {box.stacked && <rect x={box.x + STACK_OFFSET} y={box.y - STACK_OFFSET} width={box.w} height={BOX_HEIGHT} rx="8" />}
             {cardsFor(box, node.role).map((card) => {
               const center = card.x + card.w / 2
@@ -213,39 +179,9 @@ const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
               )
             })}
             {node.status !== 'none' && <circle cx={box.x + box.w - 12} cy={box.y + 12} r="4" className={`dep-status ${node.status}`} />}
-          </>
-        )}
-      </g>
-    )
-  }
-
-  return (
-    <svg className="dep-map" viewBox="0 30 960 360" role="group" aria-label="Steak & Eggs architecture">
-      <defs>
-        <marker id="dep-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="m2 1 6 4-6 4" className="dep-arrowhead" />
-        </marker>
-      </defs>
-
-      {region && (
-        <text x={region.x} y={region.y} textAnchor="middle" className="dep-region">
-          AWS VPC (us-west-1)
-        </text>
-      )}
-
-      {nodes.filter(isFrame).map(renderNode)}
-
-      {edges.map((d) => (
-        <path key={d} d={d} className="dep-edge" markerEnd="url(#dep-arrow)" />
-      ))}
-
-      {edgeLabels.map((label) => (
-        <text key={label.text} x={label.x} y={label.y} textAnchor={label.anchor ?? 'middle'} className="dep-edge-label">
-          {label.text}
-        </text>
-      ))}
-
-      {nodes.filter((node) => !isFrame(node)).map(renderNode)}
+          </g>
+        )
+      })}
     </svg>
   )
 }

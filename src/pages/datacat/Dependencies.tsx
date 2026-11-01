@@ -351,69 +351,9 @@ const SCALED_NODES: DependencyNode[] = [
   }),
 ]
 
-const BOX_NODES: DependencyNode[] = [
-  makeNode('vercel', 'Vercel', 'Static hosting', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('browser', 'Browser', 'Web app', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('mobile', 'React Native', 'Mobile app', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('canary', 'Canary', 'Synthetic checks', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('ec2', 'EC2', 't4g.small · us-west-1a', 'none', {
-    statusLabel: 'Alternative, not built',
-    metrics: [
-      { label: 'Cost', value: 'About $40–55/month, against about $83 for the Fargate setup' },
-      { label: 'Shared fate', value: 'Rails, the ingester and Valkey share one machine in one zone, so if it fails, the API, live prices and the cache go down together' },
-      { label: 'CPU', value: '2 vCPUs in bursts, 0.4 sustained. The two Fargate tasks have 0.5 between them' },
-      { label: 'Upkeep', value: 'OS updates and disk space become yours. AWS can restart the instance on new hardware if its host fails' },
-    ],
-  }),
-  makeNode('proxy', 'kamal-proxy', 'TLS + deploys', 'none', {
-    statusLabel: 'Replaces the ALB',
-    metrics: [
-      { label: 'TLS', value: "Gets and renews its own Let's Encrypt certificate on ports 80 and 443" },
-      { label: 'Deploys', value: 'Starts the new Rails container, waits for its health check, then moves traffic over from the old one' },
-      { label: 'Monitoring', value: "DataCat's ALB and ECS panels go blank, since nothing publishes those CloudWatch metrics anymore" },
-    ],
-  }),
-  makeNode('rails', 'Rails app', 'API + ActionCable', 'none', {
-    statusLabel: 'Same image, run by Kamal',
-    metrics: [
-      { label: 'Change', value: 'The same image runs as a Docker container on the box instead of an ECS task' },
-      { label: 'Nightly jobs', value: 'Run from cron on the box instead of EventBridge Scheduler' },
-      { label: 'Scaling out', value: 'Needs a load balancer back and Valkey moved off the box, which is most of the way back to Fargate' },
-    ],
-    jobs: RAILS_JOBS,
-  }),
-  makeNode('redis', 'Valkey', 'Cache + live prices', 'none', {
-    statusLabel: 'Moves onto the box',
-    metrics: [
-      { label: 'Change', value: 'A Kamal accessory container instead of ElastiCache' },
-      { label: 'Connection', value: "Traffic never leaves the box, so TLS goes, and the ingester's hard-coded ssl: true changes with it" },
-      { label: 'Monitoring', value: "DataCat's Valkey panel reads ElastiCache metrics, so it goes blank" },
-    ],
-  }),
-  makeNode('ingester', 'Ingester', 'Price stream', 'none', {
-    statusLabel: 'Moves onto the box',
-    metrics: [
-      { label: 'Deploys', value: 'Kamal boots new app containers before stopping the old ones, which would open a second Polygon socket. As an accessory it restarts stop-first' },
-    ],
-  }),
-  makeNode('postgres', 'RDS Postgres', 'Stays managed', 'none', {
-    statusLabel: NO_CHANGE,
-    metrics: [
-      { label: 'Why it stays off the box', value: "Backups and restores stay AWS's job, and the data outlives the box" },
-    ],
-  }),
-  makeNode('polygon', 'Polygon.io', 'Market data', 'none', { statusLabel: NO_CHANGE }),
-]
-
-const PLAN_NODES: Record<Exclude<DependencyView, 'live'>, DependencyNode[]> = {
-  scaled: SCALED_NODES,
-  box: BOX_NODES,
-}
-
 const VIEW_OPTIONS: { value: DependencyView; label: string }[] = [
   { value: 'live', label: 'Live' },
   { value: 'scaled', label: 'Scaled' },
-  { value: 'box', label: 'One box' },
 ]
 
 const LEGEND: Status[] = ['good', 'warn', 'critical']
@@ -441,7 +381,7 @@ function Dependencies() {
 
   const isLoaded = useTransition(loading, data || error)
 
-  const nodesFor = (next: DependencyView) => (next === 'live' ? buildNodes(data, timeWindow.at, range) : PLAN_NODES[next])
+  const nodesFor = (next: DependencyView) => (next === 'live' ? buildNodes(data, timeWindow.at, range) : SCALED_NODES)
   const nodes = nodesFor(view)
   const selectedId = detail?.kind === 'dependency' ? detail.node.id : null
   const selectNode = (node: DependencyNode) => setDetail({ kind: 'dependency', node })

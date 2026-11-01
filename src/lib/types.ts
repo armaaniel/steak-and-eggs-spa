@@ -82,7 +82,7 @@ export interface DependencyNode {
 	jobs?:{label:string; value:string}[]
 }
 
-export type DependencyView = 'live' | 'scaled' | 'box'
+export type DependencyView = 'live' | 'scaled'
 
 export type Detail =
 	| {kind:'trace'; trace:Trace}
