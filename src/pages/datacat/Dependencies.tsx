@@ -396,34 +396,34 @@ function Dependencies() {
 
   return (
     <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`} data-ready={isLoaded}>
-      <div className="dep-header">
-        <SegmentedToggle label="View" value={view} onChange={changeView} options={VIEW_OPTIONS} loaded={isLoaded} />
-      </div>
-
       {error && view === 'live' && <p className="dep-message">Unable to load health data, please try again</p>}
 
       <DependencyMap view={view} nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
 
-      <div className="dep-legend">
-        {view === 'live' ? (
-          LEGEND.map((status) => (
-            <span key={status} className="dep-legend-item">
-              <span className={`dep-dot ${status}`} />
-              {STATUS_LABELS[status]}
-            </span>
-          ))
-        ) : (
-          <>
-            <span className="dep-legend-item">
-              <span className="dep-swatch" />
-              Running today
-            </span>
-            <span className="dep-legend-item">
-              <span className="dep-swatch planned" />
-              Not built yet
-            </span>
-          </>
-        )}
+      <div className="dep-footer">
+        <div className="dep-legend">
+          {view === 'live' ? (
+            LEGEND.map((status) => (
+              <span key={status} className="dep-legend-item">
+                <span className={`dep-dot ${status}`} />
+                {STATUS_LABELS[status]}
+              </span>
+            ))
+          ) : (
+            <>
+              <span className="dep-legend-item">
+                <span className="dep-swatch" />
+                Running today
+              </span>
+              <span className="dep-legend-item">
+                <span className="dep-swatch planned" />
+                Not built yet
+              </span>
+            </>
+          )}
+        </div>
+
+        <SegmentedToggle label="View" value={view} onChange={changeView} options={VIEW_OPTIONS} loaded={isLoaded} />
       </div>
     </div>
   )
