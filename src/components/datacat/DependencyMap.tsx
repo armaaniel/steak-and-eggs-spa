@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import type { DependencyNode, DependencyView } from '../../lib/types.ts'
 import '../../stylesheets/datacat/dependencies.css'
 
@@ -14,7 +15,7 @@ interface Box {
   w: number
   tone: string
   stacked?: boolean
-  planned?: boolean
+  copies?: string[]
 }
 
 interface EdgeLabel {
@@ -32,6 +33,7 @@ interface Layout {
 
 const BOX_HEIGHT = 56
 const STACK_OFFSET = 6
+const COPY_GAP = 6
 
 const LAYOUTS: Record<DependencyView, Layout> = {
   live: {
@@ -77,10 +79,10 @@ const LAYOUTS: Record<DependencyView, Layout> = {
       mobile:   { x: 30,  y: 244, w: 130, tone: 'grey' },
       canary:   { x: 30,  y: 324, w: 130, tone: 'grey' },
       alb:      { x: 200, y: 164, w: 105, tone: 'blue' },
-      api:      { x: 370, y: 100, w: 150, tone: 'teal', stacked: true },
-      cable:    { x: 370, y: 236, w: 150, tone: 'teal', stacked: true, planned: true },
-      postgres: { x: 590, y: 100, w: 156, tone: 'blue', stacked: true },
-      redis:    { x: 590, y: 236, w: 156, tone: 'amber', stacked: true },
+      api:      { x: 370, y: 100, w: 198, tone: 'teal', copies: ['us-west-1a', 'us-west-1c'] },
+      cable:    { x: 370, y: 236, w: 198, tone: 'teal', copies: ['us-west-1a', 'us-west-1c'] },
+      postgres: { x: 600, y: 100, w: 156, tone: 'blue', stacked: true },
+      redis:    { x: 600, y: 236, w: 156, tone: 'amber', stacked: true },
       polygon:  { x: 840, y: 42,  w: 110, tone: 'pink' },
       ingester: { x: 840, y: 168, w: 110, tone: 'coral' },
     },
@@ -91,26 +93,33 @@ const LAYOUTS: Record<DependencyView, Layout> = {
       'M160 352H180V192H198',
       'M305 192H330V128H368',
       'M305 192H330V264H368',
-      'M526 128H588',
-      'M500 158L620 228',
-      'M526 264H588',
-      'M451 94V70H838',
+      'M568 128H598',
+      'M540 158L636 228',
+      'M568 264H598',
+      'M520 98V70H838',
       'M895 98V166',
-      'M840 196H800V128H754',
-      'M840 196H800V264H754',
+      'M840 196H805V128H764',
+      'M840 196H805V264H764',
     ],
     edgeLabels: [
       { x: 186, y: 266, text: 'HTTPS + WSS', anchor: 'start' },
       { x: 366, y: 121, text: 'HTTP', anchor: 'end' },
       { x: 366, y: 279, text: 'WS /cable', anchor: 'end' },
-      { x: 570, y: 186, text: 'Cache', anchor: 'start' },
-      { x: 557, y: 257, text: 'SUB' },
+      { x: 592, y: 186, text: 'Cache', anchor: 'start' },
+      { x: 583, y: 257, text: 'SUB' },
       { x: 790, y: 63, text: 'GET' },
       { x: 886, y: 136, text: 'WebSocket', anchor: 'end' },
-      { x: 758, y: 121, text: 'Ticker list', anchor: 'start' },
-      { x: 758, y: 279, text: 'SET + PUB', anchor: 'start' },
+      { x: 768, y: 121, text: 'Ticker list', anchor: 'start' },
+      { x: 768, y: 279, text: 'SET + PUB', anchor: 'start' },
     ],
   },
+}
+
+const cardsFor = (box: Box, role: string) => {
+  if (!box.copies) return [{ x: box.x, w: box.w, role }]
+
+  const w = (box.w - COPY_GAP * (box.copies.length - 1)) / box.copies.length
+  return box.copies.map((copy, index) => ({ x: box.x + index * (w + COPY_GAP), w, role: copy }))
 }
 
 const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
@@ -138,7 +147,6 @@ const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
 
       {nodes.map((node) => {
         const box = boxes[node.id]
-        const center = box.x + box.w / 2
         const select = () => onSelect(node)
 
         return (
@@ -157,13 +165,21 @@ const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
             }}
           >
             {box.stacked && <rect x={box.x + STACK_OFFSET} y={box.y - STACK_OFFSET} width={box.w} height={BOX_HEIGHT} rx="8" className="dep-planned" />}
-            <rect x={box.x} y={box.y} width={box.w} height={BOX_HEIGHT} rx="8" className={box.planned ? 'dep-planned' : undefined} />
-            <text x={center} y={box.y + 21} textAnchor="middle" dominantBaseline="central" className="dep-title">
-              {node.title}
-            </text>
-            <text x={center} y={box.y + 39} textAnchor="middle" dominantBaseline="central" className="dep-role">
-              {node.role}
-            </text>
+            {cardsFor(box, node.role).map((card) => {
+              const center = card.x + card.w / 2
+
+              return (
+                <Fragment key={card.x}>
+                  <rect x={card.x} y={box.y} width={card.w} height={BOX_HEIGHT} rx="8" />
+                  <text x={center} y={box.y + 21} textAnchor="middle" dominantBaseline="central" className="dep-title">
+                    {node.title}
+                  </text>
+                  <text x={center} y={box.y + 39} textAnchor="middle" dominantBaseline="central" className="dep-role">
+                    {card.role}
+                  </text>
+                </Fragment>
+              )
+            })}
             {node.status !== 'none' && <circle cx={box.x + box.w - 12} cy={box.y + 12} r="4" className={`dep-status ${node.status}`} />}
           </g>
         )

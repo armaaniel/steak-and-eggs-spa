@@ -308,7 +308,7 @@ const SCALED_NODES: DependencyNode[] = [
       { label: 'Draining', value: 'API deploys finish in seconds, since only cable targets hold WebSockets for up to 300 s' },
     ],
   }),
-  makeNode('api', 'Rails API ×2', 'HTTP requests', 'none', {
+  makeNode('api', 'Rails API', 'HTTP requests', 'none', {
     statusLabel: 'Second task planned',
     metrics: [
       { label: 'Change', value: 'desired_count = 2, one task in each zone' },
@@ -317,7 +317,7 @@ const SCALED_NODES: DependencyNode[] = [
     ],
     jobs: RAILS_JOBS,
   }),
-  makeNode('cable', 'ActionCable ×2', 'WebSockets', 'none', {
+  makeNode('cable', 'ActionCable', 'WebSockets', 'none', {
     statusLabel: 'Not built yet',
     metrics: [
       { label: 'Change', value: 'Its own ECS service, running the same image behind its own target group' },
