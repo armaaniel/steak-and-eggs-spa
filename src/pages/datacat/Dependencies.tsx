@@ -155,8 +155,8 @@ const RAILS_JOBS = [
 ]
 
 const JOBS_SETUP = [
-  { label: 'Trigger', value: 'EventBridge Scheduler' },
-  { label: 'Runs as', value: 'A new Fargate task per job, Rails image' },
+  { label: 'Started by', value: 'EventBridge Scheduler' },
+  { label: 'Starts', value: 'A new container from the latest Rails image, running rake instead of Puma' },
   { label: 'Task size', value: TASK_SIZE },
 ]
 
