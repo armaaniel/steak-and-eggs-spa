@@ -130,7 +130,9 @@ function formatWeeklyWindow(utcWeekday: number, utcHour: number) {
 const TASK_SIZE = '0.25 vCPU · 512 MB · ARM64'
 
 const ALB_SETUP = [
-  { label: 'Listeners', value: 'HTTPS (TLS 1.3), HTTP redirects to HTTPS' },
+  { label: 'Port 443', value: 'HTTPS · default action forwards to Rails on port 3000' },
+  { label: 'Port 80', value: 'HTTP · 301 redirect to 443' },
+  { label: 'TLS', value: '1.3 or 1.2, ACM certificate' },
   { label: 'Health check', value: 'GET / every 30 s' },
   { label: 'Unhealthy after', value: '5 failed checks, about 2.5 min' },
 ]
@@ -275,7 +277,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
         : [],
       setup: RAILS_SETUP,
     }),
-    makeNode('jobs', 'Scheduled tasks', '3 daily rake tasks', 'none', { statusLabel: NOT_MONITORED, setup: JOBS_SETUP, jobs: RAILS_JOBS }),
+    makeNode('jobs', 'Scheduled tasks', '3 daily rake tasks', 'none', { statusLabel: '', setup: JOBS_SETUP, jobs: RAILS_JOBS }),
     makeNode('redis', 'ElastiCache Valkey', 'Cache + live prices', redis.status, { metrics: redis.metrics, note: redis.note, setup: REDIS_SETUP }),
     makeNode('postgres', 'RDS Postgres', 'Persistent storage', postgres.status, { metrics: postgres.metrics, note: postgres.note, setup: POSTGRES_SETUP }),
     makeNode('polygon', 'Polygon.io', 'Market data', polygonStatus, {

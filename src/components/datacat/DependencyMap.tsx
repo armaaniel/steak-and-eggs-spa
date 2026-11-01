@@ -156,7 +156,7 @@ const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
             className={`dep-node ${box.tone} ${box.reveal ? 'reveal' : ''} ${node.id === selectedId ? 'selected' : ''}`}
             role="button"
             tabIndex={0}
-            aria-label={`${node.title}: ${node.statusLabel}`}
+            aria-label={node.statusLabel ? `${node.title}: ${node.statusLabel}` : node.title}
             onClick={select}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {

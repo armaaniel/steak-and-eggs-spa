@@ -11,7 +11,7 @@ const DependencyDetailsPanel = ({ node }: Props) => {
     <div className="sidebar-button-container two">
       <div className="trace-details">
         <p className="dc-detail-muted">{node.role}</p>
-        <p>{node.statusLabel}</p>
+        {node.statusLabel && <p>{node.statusLabel}</p>}
 
         <DetailRows rows={node.metrics} />
 
