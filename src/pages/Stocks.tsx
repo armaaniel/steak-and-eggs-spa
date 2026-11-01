@@ -63,6 +63,10 @@ function toPriceNumber(value: Price | Open | undefined) {
   return number
 }
 
+function chartDataPath(symbol: string, range: ChartRange) {
+  return `/stocks/${symbol}/chartdata?range=${range}`
+}
+
 function Stocks() {
   const { symbol: rawSymbol } = useParams()
   const symbol = (rawSymbol ?? DEFAULT_SYMBOL).toUpperCase()
@@ -123,7 +127,7 @@ function Stocks() {
 	
 	const isLive = chartRange === 'Live'
 
-	const { data: chartData } = useApi<ChartData[]>(isLive ? null : `/stocks/${symbol}/chartdata?range=${chartRange}`, [
+	const { data: chartData, loadedPath: loadedChartPath } = useApi<ChartData[]>(isLive ? null : chartDataPath(symbol, chartRange), [
 	{ date: new Date().toLocaleDateString(), value: 0 },
 	{ date: new Date().toLocaleDateString(), value: 0 }
 	])
@@ -148,9 +152,18 @@ function Stocks() {
 
 	const holdsLiveLine = leftLiveSnapshot !== null && leftLiveSnapshot.line.length > 0
 
-	let baseline = chartData?.[0]?.value ?? null
+	const loadedChartRange = CHART_RANGES.find((range) => loadedChartPath === chartDataPath(symbol, range)) ?? null
+	const holdsLiveHeader = !isLive && loadedChartRange === null && leftLiveSnapshot !== null
 
-	if (isLive) {
+	let headerRange: ChartRange = loadedChartRange ?? chartRange
+	let baseline: number | null = null
+
+	if (loadedChartRange !== null) {
+		baseline = chartData?.[0]?.value ?? null
+	}
+
+	if (isLive || holdsLiveHeader) {
+		headerRange = 'Live'
 		baseline = toPriceNumber(quote?.open)
 	}
 	const current = hoveredPoint?.value ?? price
@@ -195,7 +208,7 @@ function Stocks() {
                 <div className={`stock-price-container ${price ? 'loaded' : ''}`}>
                   <h2 className="stock-price-header">${toCurrency(hoveredPoint?.value ?? price, decimals)}</h2>
                   <div><span className={`stock-price-currency ${isPositive ? 'positive' : 'negative'}`}>{changeLabel}</span></div>
-                  {changeLabel && <span className="stock-price-phrase">{RANGE_PHRASES[chartRange]}</span>}
+                  {changeLabel && <span className="stock-price-phrase">{RANGE_PHRASES[headerRange]}</span>}
                 </div>
 
                 <ChartRanges ranges={CHART_RANGES} selected={chartRange} onSelect={selectRange} />
