@@ -114,16 +114,18 @@
 	stroke-dasharray:4 3;
 }
 
-.dep-header {
+.dep-footer {
 	display:flex;
-	justify-content:flex-end;
+	align-items:center;
+	justify-content:space-between;
+	column-gap:1rem;
 }
 
-.dep-header .segmented-toggle {
+.dep-footer .segmented-toggle {
 	height:28px;
 }
 
-.dep-header .segmented-toggle-option {
+.dep-footer .segmented-toggle-option {
 	font-size:14px;
 	font-weight:400;
 }

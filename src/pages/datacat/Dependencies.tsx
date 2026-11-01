@@ -308,7 +308,7 @@ const SCALED_NODES: DependencyNode[] = [
       { label: 'Draining', value: 'API deploys finish in seconds, since only cable targets hold WebSockets for up to 300 s' },
     ],
   }),
-  makeNode('api', 'Rails API ×2', 'HTTP requests', 'none', {
+  makeNode('api', 'Rails API', 'HTTP requests', 'none', {
     statusLabel: 'Second task planned',
     metrics: [
       { label: 'Change', value: 'desired_count = 2, one task in each zone' },
@@ -317,7 +317,7 @@ const SCALED_NODES: DependencyNode[] = [
     ],
     jobs: RAILS_JOBS,
   }),
-  makeNode('cable', 'ActionCable ×2', 'WebSockets', 'none', {
+  makeNode('cable', 'ActionCable', 'WebSockets', 'none', {
     statusLabel: 'Not built yet',
     metrics: [
       { label: 'Change', value: 'Its own ECS service, running the same image behind its own target group' },
@@ -396,34 +396,34 @@ function Dependencies() {
 
   return (
     <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`} data-ready={isLoaded}>
-      <div className="dep-header">
-        <SegmentedToggle label="View" value={view} onChange={changeView} options={VIEW_OPTIONS} loaded={isLoaded} />
-      </div>
-
       {error && view === 'live' && <p className="dep-message">Unable to load health data, please try again</p>}
 
       <DependencyMap view={view} nodes={nodes} selectedId={selectedId} onSelect={selectNode} />
 
-      <div className="dep-legend">
-        {view === 'live' ? (
-          LEGEND.map((status) => (
-            <span key={status} className="dep-legend-item">
-              <span className={`dep-dot ${status}`} />
-              {STATUS_LABELS[status]}
-            </span>
-          ))
-        ) : (
-          <>
-            <span className="dep-legend-item">
-              <span className="dep-swatch" />
-              Running today
-            </span>
-            <span className="dep-legend-item">
-              <span className="dep-swatch planned" />
-              Not built yet
-            </span>
-          </>
-        )}
+      <div className="dep-footer">
+        <div className="dep-legend">
+          {view === 'live' ? (
+            LEGEND.map((status) => (
+              <span key={status} className="dep-legend-item">
+                <span className={`dep-dot ${status}`} />
+                {STATUS_LABELS[status]}
+              </span>
+            ))
+          ) : (
+            <>
+              <span className="dep-legend-item">
+                <span className="dep-swatch" />
+                Running today
+              </span>
+              <span className="dep-legend-item">
+                <span className="dep-swatch planned" />
+                Not built yet
+              </span>
+            </>
+          )}
+        </div>
+
+        <SegmentedToggle label="View" value={view} onChange={changeView} options={VIEW_OPTIONS} loaded={isLoaded} />
       </div>
     </div>
   )
