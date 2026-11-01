@@ -102,7 +102,7 @@ const LAYOUTS: Record<DependencyView, Layout> = {
       'M568 264H598',
       'M520 98V70H895V98',
       'M895 156V234',
-      'M846 234L766 154',
+      'M846 234L761 149',
       'M840 264H764',
     ],
     edgeLabels: [
@@ -112,7 +112,6 @@ const LAYOUTS: Record<DependencyView, Layout> = {
       { x: 583, y: 257, text: 'SUB' },
       { x: 790, y: 63, text: 'GET' },
       { x: 887, y: 200, text: 'WebSocket', anchor: 'end' },
-      { x: 779, y: 175, text: 'Ticker list', anchor: 'end' },
       { x: 801, y: 279, text: 'SET + PUB' },
     ],
   },
