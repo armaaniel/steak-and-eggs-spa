@@ -137,6 +137,8 @@ const ALB_SETUP = [
   { label: 'Unhealthy after', value: '5 failed checks, about 2.5 min' },
 ]
 
+const ALB_TARGET_GROUP = { label: 'Target group', value: 'Tasks in the steakneggs ECS service, on port 3000' }
+
 const RAILS_SETUP = [
   { label: 'Task size', value: TASK_SIZE },
   { label: 'Tasks', value: '1 on Fargate' },
@@ -266,7 +268,7 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
         : [],
       note: 'See Uptime',
     }),
-    makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: alb.metrics, note: alb.note, setup: ALB_SETUP }),
+    makeNode('alb', 'ALB', 'TLS termination', alb.status, { metrics: [ALB_TARGET_GROUP, ...alb.metrics], note: alb.note, setup: ALB_SETUP }),
     makeNode('rails', 'Rails app', 'API + ActionCable', worst(railsStatus, railsTask.status), {
       metrics: data
         ? [
