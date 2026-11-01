@@ -1,10 +1,12 @@
 import type { RunMetricPoint } from '../../lib/types.ts'
 import type { ChartLine } from './TimeSeriesChart'
+import { HEIGHT } from './bucketChart'
 
 export const SERIES_ONE = 'var(--dc-series-1)'
 export const SERIES_TWO = 'var(--dc-series-2)'
 const MEMORY_COLOR = 'var(--dc-memory)'
 export const RUN_STROKE_WIDTH = 2
+export const PRESSURE_DRAWER_HEIGHT = HEIGHT + 40
 const CPU_CAP_MS = 250
 const MEMORY_LIMIT_MB = 512
 

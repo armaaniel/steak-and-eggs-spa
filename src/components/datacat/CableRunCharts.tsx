@@ -3,9 +3,10 @@ import { curveStepAfter } from 'd3-shape'
 import TimeSeriesChart, { type ChartLine } from './TimeSeriesChart'
 import { findNearestPoint } from './timeSeries'
 import { Y_LABEL_GAP } from './bucketChart'
-import { RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeMajorGcs, formatMs, formatMsPerSecond, formatPercent, toPressureLines, toResourceLines, toTime } from './runCharts'
+import { PRESSURE_DRAWER_HEIGHT, RUN_STROKE_WIDTH, SERIES_ONE, SERIES_TWO, describeMajorGcs, formatMs, formatMsPerSecond, formatPercent, toPressureLines, toResourceLines, toTime } from './runCharts'
 import type { CableCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
+import '../../stylesheets/datacat/ingester.css'
 
 interface Props {
   rows: CableCompareRow[]
@@ -20,7 +21,7 @@ interface Props {
   statsOpen?: boolean
 }
 
-type Panel = 'fanout' | 'lag' | 'resources' | 'pressure'
+type Panel = 'fanout' | 'lag' | 'resources'
 
 const NO_POINTS: RunMetricPoint[] = []
 
@@ -77,6 +78,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
   const [lagYLabelWidth, setLagYLabelWidth] = useState(0)
   const [resourcesYLabelWidth, setResourcesYLabelWidth] = useState(0)
   const [pressureYLabelWidth, setPressureYLabelWidth] = useState(0)
+  const [showPressure, setShowPressure] = useState(false)
 
   const times = useMemo(() => rows.map((row) => toTime(row.at)), [rows])
 
@@ -104,10 +106,6 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
 
   if (hasResources) {
     axisPanel = 'resources'
-  }
-
-  if (hasPressure) {
-    axisPanel = 'pressure'
   }
 
   const detailTime = pinnedTime ?? hoveredTime
@@ -215,30 +213,42 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
       )}
 
       {hasPressure && (
-        <TimeSeriesChart
-          title="CPU pressure and GC (ms/s)"
-          lines={pressureLines}
-          from={from}
-          to={to}
-          yAxis="auto"
-          formatValue={formatMsPerSecond}
-          hoveredTime={hoveredTime}
-          setHoveredTime={setHoveredTime}
-          pinnedTime={pinnedTime}
-          setPinnedTime={setPinnedTime}
-          showTimeLabels={axisPanel === 'pressure'}
-          showHoverTime={false}
-          hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.at), step) : undefined}
-          chartLeft={chartLeft}
-          setYLabelWidth={setPressureYLabelWidth}
-          strokeWidth={RUN_STROKE_WIDTH}
-          expandable
-          tooltip
-          pinTooltip
-          tooltipKeys={['pressure', 'gc']}
-          toggleLines
-          defaultHiddenKeys={['pressure']}
-        />
+        <div>
+          <button type="button" className="ing-panel-toggle" onClick={() => setShowPressure(!showPressure)} aria-expanded={showPressure}>
+            CPU pressure and GC (ms/s)
+            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`stats-v ${showPressure ? 'open' : ''}`}>
+              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          <div className={`ing-drawer ${showPressure ? 'open' : ''}`} style={{ maxHeight: showPressure ? PRESSURE_DRAWER_HEIGHT : 0 }} inert={!showPressure}>
+            <div className="lr-panels">
+              <TimeSeriesChart
+                title=""
+                lines={pressureLines}
+                from={from}
+                to={to}
+                yAxis="auto"
+                formatValue={formatMsPerSecond}
+                hoveredTime={hoveredTime}
+                setHoveredTime={setHoveredTime}
+                pinnedTime={pinnedTime}
+                setPinnedTime={setPinnedTime}
+                showTimeLabels
+                showHoverTime={false}
+                hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.at), step) : undefined}
+                chartLeft={chartLeft}
+                setYLabelWidth={setPressureYLabelWidth}
+                strokeWidth={RUN_STROKE_WIDTH}
+                tooltip
+                pinTooltip
+                tooltipKeys={['pressure', 'gc']}
+                toggleLines
+                defaultHiddenKeys={['pressure']}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       <div className={`lr-stats ${statsOpen ? 'open' : ''}`}>
