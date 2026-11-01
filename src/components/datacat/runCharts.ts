@@ -9,6 +9,7 @@ export const RUN_STROKE_WIDTH = 2
 export const PRESSURE_DRAWER_HEIGHT = HEIGHT + 40
 const CPU_CAP_MS = 250
 const MEMORY_LIMIT_MB = 512
+const RUN_SETTLE_MS = 5 * 60 * 1000
 
 export const STEP_OPTIONS = [
   { value: 5, label: '5s' },
@@ -19,6 +20,18 @@ export const STEP_OPTIONS = [
 
 export function toTime(at: string) {
   return new Date(at).getTime()
+}
+
+export function runFetchPolicy(endedAt: string | undefined) {
+  if (endedAt === undefined) {
+    return 'network-only'
+  }
+
+  if (toTime(endedAt) + RUN_SETTLE_MS <= Date.now()) {
+    return 'cache-first'
+  }
+
+  return 'network-only'
 }
 
 export function formatMs(value: number | null | undefined) {

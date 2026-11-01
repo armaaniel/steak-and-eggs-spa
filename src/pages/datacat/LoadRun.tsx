@@ -4,7 +4,7 @@ import LoadRunCharts from '../../components/datacat/LoadRunCharts'
 import LoadNav from '../../components/datacat/LoadNav'
 import Select from '../../components/datacat/Select'
 import SegmentedToggle from '../../components/datacat/SegmentedToggle'
-import { STEP_OPTIONS } from '../../components/datacat/runCharts'
+import { STEP_OPTIONS, runFetchPolicy } from '../../components/datacat/runCharts'
 import useTransition from '../../hooks/useTransition.ts'
 import type { LoadRunSummary, LoadCompareRow, RunMetricPoint } from '../../lib/types.ts'
 import '../../stylesheets/datacat/loadrun.css'
@@ -115,17 +115,22 @@ const LoadRun = () => {
   const runs = runsData?.loadRuns || []
   const current = runs.find((run) => keyOf(run) === selected) || runs[0] || null
 
+  const fetchPolicy = runFetchPolicy(current?.endedAt)
+
   const { loading, error, data } = useQuery<CompareData>(GET_LOAD_COMPARE, {
     variables: { runId: current?.runId, route: current?.route, step },
     skip: !current,
+    fetchPolicy,
   })
 
-  const { data: metricsData } = useQuery<MetricsData>(GET_RUN_METRICS, {
+  const { loading: metricsLoading, data: metricsData } = useQuery<MetricsData>(GET_RUN_METRICS, {
     variables: { runId: current?.runId, step },
     skip: !current,
+    fetchPolicy,
   })
 
-  const isLoaded = useTransition(loading, data || error)
+  const chartsLoading = loading || metricsLoading
+  const isLoaded = useTransition(chartsLoading, data || error)
   const rows = data?.loadCompare || []
   const cpu = metricsData?.cpu || []
   const memory = metricsData?.memory || []
@@ -171,7 +176,7 @@ const LoadRun = () => {
         </button>
       </div>
 
-      <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
+      <div className={`positions-container ${isLoaded && !chartsLoading ? 'loaded' : ''}`}>
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
