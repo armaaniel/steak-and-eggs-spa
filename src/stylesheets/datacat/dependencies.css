@@ -110,10 +110,6 @@
 	color:var(--dc-text);
 }
 
-.dep-node rect.dep-planned {
-	stroke-dasharray:4 3;
-}
-
 .dep-footer {
 	display:flex;
 	align-items:center;
@@ -128,14 +124,6 @@
 .dep-footer .segmented-toggle-option {
 	font-size:14px;
 	font-weight:400;
-}
-
-.dep-swatch {
-	display:inline-block;
-	width:14px;
-	height:10px;
-	border:1px dashed var(--dc-text-muted);
-	border-radius:2px;
 }
 
 .positions-container.dep-card {

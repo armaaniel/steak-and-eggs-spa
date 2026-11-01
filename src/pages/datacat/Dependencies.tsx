@@ -402,19 +402,13 @@ function Dependencies() {
 
       <div className="dep-footer">
         <div className="dep-legend">
-          {view === 'live' ? (
+          {view === 'live' &&
             LEGEND.map((status) => (
               <span key={status} className="dep-legend-item">
                 <span className={`dep-dot ${status}`} />
                 {STATUS_LABELS[status]}
               </span>
-            ))
-          ) : (
-            <span className="dep-legend-item">
-              <span className="dep-swatch" />
-              Failover copy in the other zone, not built yet
-            </span>
-          )}
+            ))}
         </div>
 
         <SegmentedToggle label="View" value={view} onChange={changeView} options={VIEW_OPTIONS} loaded={isLoaded} />

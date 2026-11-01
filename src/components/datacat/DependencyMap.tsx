@@ -163,7 +163,7 @@ const DependencyMap = ({ view, nodes, selectedId, onSelect }: Props) => {
               }
             }}
           >
-            {box.stacked && <rect x={box.x + STACK_OFFSET} y={box.y - STACK_OFFSET} width={box.w} height={BOX_HEIGHT} rx="8" className="dep-planned" />}
+            {box.stacked && <rect x={box.x + STACK_OFFSET} y={box.y - STACK_OFFSET} width={box.w} height={BOX_HEIGHT} rx="8" />}
             {cardsFor(box, node.role).map((card) => {
               const center = card.x + card.w / 2
 
