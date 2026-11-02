@@ -306,62 +306,30 @@ const buildNodes = (data: DependencyData | undefined, now: number, range: Dataca
   ]
 }
 
-const NO_CHANGE = 'No change'
+const bullets = (value: string | string[]) =>
+  Array.isArray(value) ? <ul className="dep-bullets">{value.map((line) => <li key={line}>{line}</li>)}</ul> : value
+
+const scaledNode = (id: string, title: string, role: string, change: string | string[], why: string | string[]) =>
+  makeNode(id, title, role, 'none', {
+    statusLabel: '',
+    metrics: [
+      { label: 'Change', value: bullets(change) },
+      { label: 'Why', value: bullets(why) },
+    ],
+  })
 
 const SCALED_NODES: DependencyNode[] = [
-  makeNode('vercel', 'Vercel', 'Static hosting', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('browser', 'Browser', 'Web app', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('mobile', 'React Native', 'Mobile app', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('canary', 'Canary', 'Synthetic checks', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('alb', 'ALB', 'Routes by path', 'none', {
-    statusLabel: 'One new routing rule',
-    metrics: [
-      { label: 'Change', value: '/cable goes to the ActionCable service, every other path to the API' },
-      { label: 'Clients', value: 'Same host and paths, so the web and mobile apps stay as they are' },
-      { label: 'Draining', value: 'API deploys finish in seconds, since only cable targets hold WebSockets for up to 300 s' },
-    ],
-  }),
-  makeNode('api', 'Rails API', 'HTTP requests', 'none', {
-    statusLabel: 'Second task planned',
-    metrics: [
-      { label: 'Change', value: 'desired_count = 2, one task in each zone' },
-      { label: 'Code changes', value: 'None. Auth is a JWT, and the cache and pub/sub already live in Valkey' },
-      { label: 'Next limit', value: 'Postgres connections, since each task can open up to 10' },
-    ],
-    jobs: RAILS_JOBS,
-  }),
-  makeNode('cable', 'ActionCable', 'WebSockets', 'none', {
-    statusLabel: 'Not built yet',
-    metrics: [
-      { label: 'Change', value: 'Its own ECS service, running the same image behind its own target group' },
-      { label: 'Why', value: 'On Oct 17 a cable load test overloaded the one Rails task: a signup took 79 s, the health check failed, and ECS replaced the task' },
-      { label: 'Scales on', value: 'Connections and frames per second. One task topped out around 3,500–4,000 frames/s' },
-    ],
-  }),
-  makeNode('redis', 'ElastiCache Valkey', 'Primary + replica', 'none', {
-    statusLabel: 'Replica planned',
-    metrics: [
-      { label: 'Change', value: 'A replica in the other zone, with automatic failover' },
-      { label: 'At scale', value: 'The ingester publishes each price once, and Valkey sends it to every cable task' },
-      { label: 'Cost', value: 'About $30/month, together with the Postgres standby' },
-    ],
-  }),
-  makeNode('postgres', 'RDS Postgres', 'Primary + standby', 'none', {
-    statusLabel: 'Standby planned',
-    metrics: [
-      { label: 'Change', value: "Multi-AZ, with a standby in the other zone that takes over if the primary's zone fails" },
-      { label: 'Next limit', value: "Connections. AWS's formula caps a db.t4g.micro at roughly 100, and today's peak is 5–6" },
-      { label: 'Cost', value: 'About $30/month, together with the Valkey replica' },
-    ],
-  }),
-  makeNode('polygon', 'Polygon.io', 'Market data', 'none', { statusLabel: NO_CHANGE }),
-  makeNode('ingester', 'Ingester', 'No scaling', 'none', {
-    statusLabel: 'Stays at one task',
-    metrics: [
-      { label: 'Why', value: 'Polygon allows one WebSocket per API key, so a second copy would be rejected' },
-      { label: 'Deploys', value: 'Stop-first, so each deploy loses 63–80 s of prices' },
-    ],
-  }),
+  scaledNode('vercel', 'Vercel', 'Static hosting', 'None', 'It serves static files from a CDN, which already scales'),
+  scaledNode('browser', 'Browser', 'Web app', 'None', 'Same host and paths. The ALB sends /cable to its own service behind the scenes'),
+  scaledNode('mobile', 'React Native', 'Mobile app', 'None', 'Same host and paths. The ALB sends /cable to its own service behind the scenes'),
+  scaledNode('canary', 'Canary', 'Synthetic checks', 'None', 'It only makes HTTP requests, so it covers the API but not ActionCable'),
+  scaledNode('alb', 'ALB', 'Routes by path', 'A /cable rule sends WebSockets to the ActionCable service, every other path to the API', 'HTTP and WebSockets can scale and deploy separately, and API deploys stop waiting on open sockets to drain'),
+  scaledNode('api', 'Rails API', 'HTTP requests', ['1 vCPU / 2 GB memory', 'desired_count = 2, one in each zone'], ['0.25 vCPU throttles under load', 'A crashed task or a zone outage no longer takes the API down']),
+  scaledNode('cable', 'ActionCable', 'WebSockets', 'Its own ECS service, running the same Rails image behind its own target group', 'Fan-outs compete with HTTP requests for the GVL and the CPU'),
+  scaledNode('redis', 'ElastiCache Valkey', 'Primary + replica', 'A replica in the other zone, with automatic failover', "One node in one zone holds the cache and ActionCable's pub/sub, so losing it stops live prices"),
+  scaledNode('postgres', 'RDS Postgres', 'Primary + standby', "Multi-AZ, with a standby in the other zone that takes over if the primary's zone fails", 'Postgres sits in one zone, so a zone outage takes the app down even with tasks in both'),
+  scaledNode('polygon', 'Polygon.io', 'Market data', 'None', "The ingester keeps its one socket, and the API's REST calls grow with traffic, not with tasks"),
+  scaledNode('ingester', 'Ingester', 'No scaling', 'None, it stays at one task', 'Polygon allows one WebSocket per API key, so a second copy would be rejected'),
 ]
 
 const VIEW_OPTIONS: { value: DependencyView; label: string }[] = [

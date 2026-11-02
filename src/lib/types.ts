@@ -76,7 +76,7 @@ export interface DependencyNode {
 	role:string
 	status:'good' | 'warn' | 'critical' | 'none'
 	statusLabel:string
-	metrics:{label:string; value:string}[]
+	metrics:{label:string; value:React.ReactNode}[]
 	note?:string
 	setup?:{label:string; value:string}[]
 	jobs?:{label:string; value:React.ReactNode}[]

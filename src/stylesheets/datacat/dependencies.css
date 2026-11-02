@@ -152,3 +152,8 @@
 	row-gap:0.5rem;
 	padding:1rem 0.5rem 1rem 1rem;
 }
+
+.dep-bullets {
+	padding-left:1rem;
+	list-style:disc;
+}
