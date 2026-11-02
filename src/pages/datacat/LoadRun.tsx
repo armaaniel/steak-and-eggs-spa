@@ -82,6 +82,36 @@ const GET_RUN_METRICS = gql`
       maximum
       average
     }
+    gcNofree: runMetrics(runId: $runId, kind: "load", metric: "gc_major_nofree") {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcOldgen: runMetrics(runId: $runId, kind: "load", metric: "gc_major_oldgen") {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcShady: runMetrics(runId: $runId, kind: "load", metric: "gc_major_shady") {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcForce: runMetrics(runId: $runId, kind: "load", metric: "gc_major_force") {
+      at
+      minimum
+      maximum
+      average
+    }
+    gcOldmalloc: runMetrics(runId: $runId, kind: "load", metric: "gc_major_oldmalloc") {
+      at
+      minimum
+      maximum
+      average
+    }
   }
 `
 
@@ -97,6 +127,11 @@ interface MetricsData {
   pressure: RunMetricPoint[]
   gcTime: RunMetricPoint[]
   gcMajor: RunMetricPoint[]
+  gcNofree: RunMetricPoint[]
+  gcOldgen: RunMetricPoint[]
+  gcShady: RunMetricPoint[]
+  gcForce: RunMetricPoint[]
+  gcOldmalloc: RunMetricPoint[]
 }
 
 interface CompareData {
@@ -139,6 +174,13 @@ const LoadRun = () => {
   const pressure = metricsData?.pressure || []
   const gcTime = metricsData?.gcTime || []
   const gcMajor = metricsData?.gcMajor || []
+  const gcMajorBy = {
+    nofree: metricsData?.gcNofree || [],
+    oldgen: metricsData?.gcOldgen || [],
+    shady: metricsData?.gcShady || [],
+    force: metricsData?.gcForce || [],
+    oldmalloc: metricsData?.gcOldmalloc || [],
+  }
 
   const label = (run: LoadRunSummary) => `${run.route} · ${run.samples.toLocaleString()}`
 
@@ -180,7 +222,7 @@ const LoadRun = () => {
         {error ? (
           <p className="lr-message">Unable to load this run, please try again</p>
         ) : (
-          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} cpu={cpu} memory={memory} cpuUsed={cpuUsed} memoryUsed={memoryUsed} pressure={pressure} gcTime={gcTime} gcMajor={gcMajor} statsOpen={statsOpen} />
+          <LoadRunCharts rows={rows} route={current?.route || ''} step={step} cpu={cpu} memory={memory} cpuUsed={cpuUsed} memoryUsed={memoryUsed} pressure={pressure} gcTime={gcTime} gcMajor={gcMajor} gcMajorBy={gcMajorBy} statsOpen={statsOpen} />
         )}
       </div>
     </>

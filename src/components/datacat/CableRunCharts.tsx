@@ -18,12 +18,14 @@ interface Props {
   pressure?: RunMetricPoint[]
   gcTime?: RunMetricPoint[]
   gcMajor?: RunMetricPoint[]
+  gcMajorBy?: Record<string, RunMetricPoint[]>
   statsOpen?: boolean
 }
 
 type Panel = 'fanout' | 'lag' | 'resources'
 
 const NO_POINTS: RunMetricPoint[] = []
+const NO_REASONS: Record<string, RunMetricPoint[]> = {}
 
 function formatRate(value: number) {
   return `${Math.round(value).toLocaleString()}/s`
@@ -64,7 +66,7 @@ function describeFanout(row: CableCompareRow, bucketSeconds: number) {
   return `${published === null ? '-' : formatRate(published)} published`
 }
 
-const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, memoryUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
+const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, memoryUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, gcMajorBy = NO_REASONS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].at}|${rows[rows.length - 1].at}` : ''
@@ -236,7 +238,7 @@ const CableRunCharts = ({ rows, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUs
                 setPinnedTime={setPinnedTime}
                 showTimeLabels
                 showHoverTime={false}
-                hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.at), step) : undefined}
+                hoverDetail={detailRow ? describeMajorGcs(gcMajor, gcMajorBy, toTime(detailRow.at), step) : undefined}
                 chartLeft={chartLeft}
                 setYLabelWidth={setPressureYLabelWidth}
                 strokeWidth={RUN_STROKE_WIDTH}

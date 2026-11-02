@@ -19,10 +19,12 @@ interface Props {
   pressure?: RunMetricPoint[]
   gcTime?: RunMetricPoint[]
   gcMajor?: RunMetricPoint[]
+  gcMajorBy?: Record<string, RunMetricPoint[]>
   statsOpen?: boolean
 }
 
 const NO_POINTS: RunMetricPoint[] = []
+const NO_REASONS: Record<string, RunMetricPoint[]> = {}
 
 function toRpsLines(rows: LoadCompareRow[]): ChartLine[] {
   return [{ key: 'rps', label: 'rps', color: SERIES_ONE, points: rows.map((row) => ({ time: toTime(row.bucket), value: row.rps })), fill: true, formatValue: formatWhole }]
@@ -49,7 +51,7 @@ function describeLatency(row: LoadCompareRow) {
   return `client p50 ${formatMs(row.clientP50)} · server p50 ${formatMs(row.serverP50)}`
 }
 
-const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, memoryUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, statsOpen = false }: Props) => {
+const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS, cpuUsed = NO_POINTS, memoryUsed = NO_POINTS, pressure = NO_POINTS, gcTime = NO_POINTS, gcMajor = NO_POINTS, gcMajorBy = NO_REASONS, statsOpen = false }: Props) => {
   const [hoveredTime, setHoveredTime] = useState<number | null>(null)
   const [pinnedTime, setPinnedTime] = useState<number | null>(null)
   const pinKey = rows.length > 0 ? `${rows[0].bucket}|${rows[rows.length - 1].bucket}` : ''
@@ -197,7 +199,7 @@ const LoadRunCharts = ({ rows, route, step, cpu = NO_POINTS, memory = NO_POINTS,
                 setPinnedTime={setPinnedTime}
                 showTimeLabels
                 showHoverTime={false}
-                hoverDetail={detailRow ? describeMajorGcs(gcMajor, toTime(detailRow.bucket), step) : undefined}
+                hoverDetail={detailRow ? describeMajorGcs(gcMajor, gcMajorBy, toTime(detailRow.bucket), step) : undefined}
                 chartLeft={chartLeft}
                 setYLabelWidth={setPressureYLabelWidth}
                 strokeWidth={RUN_STROKE_WIDTH}

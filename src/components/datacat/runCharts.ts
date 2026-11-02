@@ -92,11 +92,10 @@ export function toResourceLines(cpu: RunMetricPoint[], memory: RunMetricPoint[],
   return lines
 }
 
-export function describeMajorGcs(gcMajor: RunMetricPoint[], start: number, seconds: number) {
-  const end = start + seconds * 1000
+function countWithin(points: RunMetricPoint[], start: number, end: number) {
   let count = 0
 
-  for (const point of gcMajor) {
+  for (const point of points) {
     const time = toTime(point.at)
 
     if (time >= start && time < end) {
@@ -104,7 +103,33 @@ export function describeMajorGcs(gcMajor: RunMetricPoint[], start: number, secon
     }
   }
 
-  return `${count} major GC${count === 1 ? '' : 's'}`
+  return count
+}
+
+export function describeMajorGcs(gcMajor: RunMetricPoint[], gcMajorBy: Record<string, RunMetricPoint[]>, start: number, seconds: number) {
+  const end = start + seconds * 1000
+  const count = countWithin(gcMajor, start, end)
+  const total = `${count} major GC${count === 1 ? '' : 's'}`
+  const reasons = Object.entries(gcMajorBy).map(([reason, points]) => ({ reason, count: countWithin(points, start, end) })).filter((entry) => entry.count > 0)
+  const known = reasons.reduce((sum, entry) => sum + entry.count, 0)
+
+  if (!count) {
+    return total
+  }
+
+  if (!known) {
+    return `${total}, reason unknown`
+  }
+
+  if (reasons.length === 1 && known === count) {
+    return `${total}, ${count === 1 ? '' : 'all '}${reasons[0].reason}`
+  }
+
+  if (known < count) {
+    reasons.push({ reason: 'unknown', count: count - known })
+  }
+
+  return `${total}: ${reasons.map((entry) => `${entry.count} ${entry.reason}`).join(', ')}`
 }
 
 export function toPressureLines(pressure: RunMetricPoint[], gcTime: RunMetricPoint[]): ChartLine[] {
