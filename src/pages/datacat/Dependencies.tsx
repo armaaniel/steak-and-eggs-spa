@@ -174,7 +174,7 @@ const POSTGRES_SETUP = [
 ]
 
 const INGESTER_SETUP = [
-  { label: 'Task size', value: TASK_SIZE },
+  { label: 'Task size', value: '0.5 vCPU · 1 GB · ARM64' },
   { label: 'Tasks', value: '1 on Fargate' },
   { label: 'Deploys', value: 'Recreate, brief downtime' },
 ]
@@ -326,8 +326,8 @@ const SCALED_NODES: DependencyNode[] = [
   scaledNode('alb', 'ALB', 'Routes by path', 'A /cable rule sends WebSockets to the ActionCable service, every other path to the API', 'HTTP and WebSockets can scale and deploy separately, and API deploys stop waiting on open sockets to drain'),
   scaledNode('api', 'Rails API', 'HTTP requests', ['1 vCPU / 2 GB memory', 'desired_count = 2, one in each zone'], ['0.25 vCPU throttles under load', 'A crashed task or a zone outage no longer takes the API down']),
   scaledNode('cable', 'ActionCable', 'WebSockets', 'Its own ECS service, running the same Rails image behind its own target group', 'Fan-outs compete with HTTP requests for the GVL and the CPU'),
-  scaledNode('redis', 'ElastiCache Valkey', 'Primary + replica', 'A replica in the other zone, with automatic failover', "One node in one zone holds the cache and ActionCable's pub/sub, so losing it stops live prices"),
-  scaledNode('postgres', 'RDS Postgres', 'Primary + standby', "Multi-AZ, with a standby in the other zone that takes over if the primary's zone fails", 'Postgres sits in one zone, so a zone outage takes the app down even with tasks in both'),
+  scaledNode('redis', 'ElastiCache Valkey', 'Primary + replica', 'A replica in the other zone, with automatic failover', 'Survives a zone outage, and everything in it can be rebuilt'),
+  scaledNode('postgres', 'RDS Postgres', 'Primary + standby', "Multi-AZ, with a standby in the other zone that takes over if the primary's zone fails", 'Survives a zone outage with no lost writes'),
   scaledNode('polygon', 'Polygon.io', 'Market data', 'None', "The ingester keeps its one socket, and the API's REST calls grow with traffic, not with tasks"),
   scaledNode('ingester', 'Ingester', 'No scaling', 'None, it stays at one task', 'Polygon allows one WebSocket per API key, so a second copy would be rejected'),
 ]
