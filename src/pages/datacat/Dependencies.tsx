@@ -149,9 +149,9 @@ const RAILS_SETUP = [
 ]
 
 const RAILS_JOBS = [
-  { label: 'tickers', value: `${formatDailyTime(4)} · adds new listings, flags delistings` },
-  { label: 'record', value: `${formatDailyTime(5)} · snapshots portfolio values` },
-  { label: 'prune_traces', value: `${formatDailyTime(6)} · deletes traces and ingester samples older than 30 days` },
+  { label: 'tickers', value: <>Upserts active tickers from Polygon and marks the rest delisted<br />{formatDailyTime(4)}</> },
+  { label: 'record', value: <>Upserts each user's portfolio value as today's record<br />{formatDailyTime(5)}</> },
+  { label: 'prune_traces', value: <>Deletes traces and ingester samples older than 30 days<br />{formatDailyTime(6)}</> },
 ]
 
 const JOBS_SETUP = [

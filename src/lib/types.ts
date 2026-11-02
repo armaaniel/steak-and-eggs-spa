@@ -79,7 +79,7 @@ export interface DependencyNode {
 	metrics:{label:string; value:string}[]
 	note?:string
 	setup?:{label:string; value:string}[]
-	jobs?:{label:string; value:string}[]
+	jobs?:{label:string; value:React.ReactNode}[]
 }
 
 export type DependencyView = 'live' | 'scaled'
