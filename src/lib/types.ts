@@ -164,6 +164,7 @@ export interface JobBucket {
 	name:string
 	bucket:string
 	bucketEnd:string
+	dueAt:string
 	started:number
 	completed:number
 	failures:number
@@ -180,14 +181,21 @@ export interface JobRun {
 	status:'running' | 'succeeded' | 'failed'
 }
 
+export type JobDayState = 'succeeded' | 'failed' | 'missed' | 'running' | 'upcoming' | 'untracked'
+
+export interface JobDay {
+	bucket:string
+	dueAt:string
+	state:JobDayState
+	runs:JobRun[]
+}
+
 export interface JobSummary {
 	name:string
 	label:string
-	runs:JobRun[]
-	missed:string[]
-	succeeded:number
-	failed:number
-	state:'good' | 'warn' | 'critical'
+	days:JobDay[]
+	state:'good' | 'critical'
+	note:string
 }
 
 export interface SyntheticRun {

@@ -18,6 +18,20 @@
 	background-color:var(--dc-series-2);
 }
 
+.uptime-swatch.missed {
+	box-sizing:border-box;
+	border:1.5px solid var(--dc-series-2);
+	background-color:transparent;
+}
+
+.uptime-swatch.pending {
+	background-color:color-mix(in srgb, var(--dc-healthy) 30%, transparent);
+}
+
+.uptime-swatch.none {
+	background-color:color-mix(in srgb, var(--dc-text-muted) 35%, transparent);
+}
+
 .uptime-runs-title {
 	font-family: var(--font-ui);
 	font-weight:500;
@@ -204,10 +218,6 @@
 	background-color:#95BA78;
 }
 
-.uptime-job.warn {
-	background-color:var(--dc-status-warn);
-}
-
 .uptime-job.critical {
 	background-color:var(--dc-series-2);
 }
@@ -215,6 +225,66 @@
 .uptime-job.selected {
 	outline:2px solid var(--dc-text);
 	outline-offset:2px;
+}
+
+.job-strip-container {
+	position:relative;
+}
+
+.job-strip {
+	display:grid;
+	column-gap:3px;
+}
+
+.job-strip-cell {
+	box-sizing:border-box;
+	height:24px;
+	padding:0;
+	border:none;
+	border-radius:2px;
+	background-color:var(--dc-surface-2);
+	cursor:pointer;
+}
+
+.job-strip-cell.succeeded {
+	background-color:#95BA78;
+}
+
+.job-strip-cell.failed {
+	background-color:var(--dc-series-2);
+}
+
+.job-strip-cell.missed {
+	border:1.5px solid var(--dc-series-2);
+	background-color:transparent;
+}
+
+.job-strip-cell.running {
+	background-color:color-mix(in srgb, var(--dc-healthy) 30%, transparent);
+}
+
+.job-strip-cell.upcoming {
+	border:1px dashed var(--dc-text-muted);
+	background-color:transparent;
+}
+
+.job-strip-cell.selected {
+	outline:2px solid var(--dc-text);
+	outline-offset:1px;
+}
+
+.job-strip-labels {
+	display:flex;
+	justify-content:space-between;
+	margin-top:6px;
+	font-size:11px;
+	color:var(--dc-text-muted);
+}
+
+.job-strip-tooltip {
+	top:0;
+	z-index:2;
+	pointer-events:none;
 }
 
 .uptime-job-entry {

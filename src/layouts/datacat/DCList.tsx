@@ -12,7 +12,7 @@ import DependencyDetailsPanel from '../../components/datacat/DependencyDetailsPa
 import JobDetailsPanel from '../../components/datacat/JobDetailsPanel'
 import StatsPanel from '../../components/datacat/StatsPanel'
 import useEndpoint from '../../hooks/useEndpoint'
-import useDatacatRange, { type DatacatRange } from '../../hooks/useDatacatRange'
+import useDatacatRange from '../../hooks/useDatacatRange'
 import type { Detail, TraceStats } from '../../lib/types.ts'
 
 const GET_STATS = gql`
@@ -33,7 +33,7 @@ interface CacheFlags {
   usedApi: boolean
 }
 
-const DetailPanel = ({ detail, range }: { detail: Detail; range: DatacatRange }) => {
+const DetailPanel = ({ detail }: { detail: Detail }) => {
   switch (detail.kind) {
     case 'trace':
       return <TraceDetailsPanel trace={detail.trace} />
@@ -42,7 +42,7 @@ const DetailPanel = ({ detail, range }: { detail: Detail; range: DatacatRange })
     case 'dependency':
       return <DependencyDetailsPanel node={detail.node} />
     case 'job':
-      return <JobDetailsPanel name={detail.name} range={range} />
+      return <JobDetailsPanel name={detail.name} />
     case 'boot':
     case 'connection':
       return <IngesterDetailsPanel detail={detail} />
@@ -233,7 +233,7 @@ function DCList() {
           )}
 
           {detail ? (
-            <DetailPanel detail={detail} range={range} />
+            <DetailPanel detail={detail} />
           ) : (
             <>
               <Sidebar onHome={onHome} />

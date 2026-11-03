@@ -190,7 +190,7 @@ function Uptime() {
               <p className="uptime-slo-detail">{slo.budgetUsed.toLocaleString()} of {slo.budgetAllowed.toLocaleString()} bad runs used, last 30 days</p>
             </div>
 
-            <JobBoxes range={range} selectedName={selectedJob} selectJob={selectJob} />
+            <JobBoxes selectedName={selectedJob} selectJob={selectJob} />
           </div>
         </div>
       )}
