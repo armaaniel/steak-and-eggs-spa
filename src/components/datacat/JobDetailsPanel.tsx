@@ -209,7 +209,7 @@ const JobDetailsPanel = ({ name }: Props) => {
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
-        <p className="dc-detail-muted">
+        <p className="dc-detail-muted job-schedule">
           {formatSchedule(days[days.length - 1].dueAt)} · rake {name}
         </p>
 
