@@ -1,4 +1,4 @@
-import { gql, useQuery } from '@apollo/client'
+import { gql, useQuery, type WatchQueryFetchPolicy } from '@apollo/client'
 import { useMemo, useState } from 'react'
 import { toDuration } from '../lib/utils.ts'
 import type { JobBucket, JobDay, JobDayState, JobRun, JobSummary } from '../lib/types.ts'
@@ -155,11 +155,12 @@ function summarize(job: Job, data: JobsData, now: number): JobSummary {
   return { ...summary, state: 'good', note: describeLatestRun(latestRun) }
 }
 
-const useJobs = () => {
+const useJobs = (fetchPolicy: WatchQueryFetchPolicy = 'network-only') => {
   const [timeWindow] = useState(() => findWindow(Date.now()))
 
   const { loading, error, data, previousData } = useQuery<JobsData>(GET_JOBS, {
     variables: { from: new Date(timeWindow.from).toISOString(), to: new Date(timeWindow.to).toISOString() },
+    fetchPolicy,
   })
 
   const source = data ?? previousData

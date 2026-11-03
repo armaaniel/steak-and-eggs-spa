@@ -155,7 +155,7 @@ function renderTooltip(day: JobDay) {
 }
 
 const JobDetailsPanel = ({ name }: Props) => {
-  const { error, jobs } = useJobs()
+  const { error, jobs } = useJobs('cache-first')
   const [picked, setPicked] = useState<{ name: string; bucket: string } | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
