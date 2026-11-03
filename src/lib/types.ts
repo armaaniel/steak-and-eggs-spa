@@ -88,6 +88,7 @@ export type Detail =
 	| {kind:'trace'; trace:Trace}
 	| {kind:'cable'; connection:ConnectionWithID}
 	| {kind:'dependency'; node:DependencyNode}
+	| {kind:'job'; name:string; label:string}
 	| IngesterDetail
 
 export interface TraceStats {
@@ -157,6 +158,36 @@ export interface ServiceBucket {
 	p50:number | null
 	p95:number | null
 	p99:number | null
+}
+
+export interface JobBucket {
+	name:string
+	bucket:string
+	bucketEnd:string
+	started:number
+	completed:number
+	failures:number
+	expected:number
+}
+
+export interface JobRun {
+	id:string
+	name:string
+	startedAt:string
+	finishedAt:string | null
+	errorClass:string | null
+	sentryEventId:string | null
+	status:'running' | 'succeeded' | 'failed'
+}
+
+export interface JobSummary {
+	name:string
+	label:string
+	runs:JobRun[]
+	missed:string[]
+	succeeded:number
+	failed:number
+	state:'good' | 'warn' | 'critical'
 }
 
 export interface SyntheticRun {

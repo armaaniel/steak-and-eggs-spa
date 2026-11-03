@@ -3,12 +3,13 @@ import { gql, useQuery } from '@apollo/client'
 import { useEffect, useRef, useState } from 'react'
 import UptimeChart from '../../components/datacat/UptimeChart'
 import SyntheticRunRow from '../../components/datacat/SyntheticRunRow'
+import JobBoxes from '../../components/datacat/JobBoxes'
 import useTransition from '../../hooks/useTransition.ts'
 import type { DatacatRange } from '../../hooks/useDatacatRange'
 import { toBucketLabel } from '../../lib/utils.ts'
 import { Y_LABEL_GAP, type Hover } from '../../components/datacat/bucketChart'
 import '../../stylesheets/datacat/uptime.css'
-import type { SyntheticBucket, SyntheticRun, OutletContextType, Trace, CanarySlo } from '../../lib/types.ts'
+import type { SyntheticBucket, SyntheticRun, OutletContextType, Trace, CanarySlo, JobSummary } from '../../lib/types.ts'
 
 const GET_BUCKETS = gql`
   query getSyntheticBuckets($range: String!) {
@@ -65,6 +66,8 @@ function Uptime() {
   const { detail, setDetail, range } = useOutletContext<OutletContextType>()
   const selectedTrace = detail?.kind === 'trace' ? detail.trace : null
   const selectTrace = (trace: Trace) => setDetail({ kind: 'trace', trace })
+  const selectedJob = detail?.kind === 'job' ? detail.name : null
+  const selectJob = (job: JobSummary) => setDetail(selectedJob === job.name ? null : { kind: 'job', name: job.name, label: job.label })
 
   const [picked, setPicked] = useState<{ range: DatacatRange; bucket: SyntheticBucket } | null>(null)
   const selectedBucket = picked?.range === range ? picked.bucket : null
@@ -186,6 +189,8 @@ function Uptime() {
               <p className={`uptime-slo-value ${budgetSpent ? 'critical' : ''}`}>{budgetLeft === null ? '-' : `${budgetLeft.toFixed(0)}% left`}</p>
               <p className="uptime-slo-detail">{slo.budgetUsed.toLocaleString()} of {slo.budgetAllowed.toLocaleString()} bad runs used, last 30 days</p>
             </div>
+
+            <JobBoxes range={range} selectedName={selectedJob} selectJob={selectJob} />
           </div>
         </div>
       )}

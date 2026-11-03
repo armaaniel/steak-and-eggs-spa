@@ -175,3 +175,50 @@
 	font-size:12px;
 	color:var(--dc-text-muted);
 }
+
+.uptime-jobs {
+	display:flex;
+	flex-direction:column;
+	row-gap:0.5rem;
+	margin-inline:auto;
+}
+
+.uptime-job-row {
+	display:flex;
+	align-items:center;
+	column-gap:1.5rem;
+}
+
+.uptime-job {
+	box-sizing:border-box;
+	width:18px;
+	height:18px;
+	padding:0;
+	border:1px solid var(--dc-border);
+	border-radius:4px;
+	background-color:var(--dc-surface-2);
+	cursor:pointer;
+}
+
+.uptime-job.good {
+	background-color:#95BA78;
+}
+
+.uptime-job.warn {
+	background-color:var(--dc-status-warn);
+}
+
+.uptime-job.critical {
+	background-color:var(--dc-series-2);
+}
+
+.uptime-job.selected {
+	outline:2px solid var(--dc-text);
+	outline-offset:2px;
+}
+
+.uptime-job-entry {
+	display:inline-flex;
+	align-items:center;
+	column-gap:0.5rem;
+}

@@ -1,12 +1,10 @@
 import DetailRows, { type DetailRow } from './DetailRows'
-import { toShortTime } from '../../lib/utils.ts'
+import { SENTRY_EVENT_SEARCH_URL, toShortTime } from '../../lib/utils.ts'
 import type { Breakdown, Trace } from '../../lib/types.ts'
 
 interface Props {
   trace: Trace
 }
-
-const SENTRY_EVENT_SEARCH_URL = 'https://armaaniel.sentry.io/issues/?query='
 
 function formatMs(ms: number, digits = 0) {
   return `${ms.toLocaleString('en-us', { maximumFractionDigits: digits })} ms`

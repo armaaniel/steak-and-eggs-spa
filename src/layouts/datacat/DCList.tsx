@@ -9,9 +9,10 @@ import TraceDetailsPanel from '../../components/datacat/TraceDetailsPanel'
 import CableConnectionDetailsPanel from '../../components/datacat/CableConnectionDetailsPanel'
 import IngesterDetailsPanel from '../../components/datacat/IngesterDetailsPanel'
 import DependencyDetailsPanel from '../../components/datacat/DependencyDetailsPanel'
+import JobDetailsPanel from '../../components/datacat/JobDetailsPanel'
 import StatsPanel from '../../components/datacat/StatsPanel'
 import useEndpoint from '../../hooks/useEndpoint'
-import useDatacatRange from '../../hooks/useDatacatRange'
+import useDatacatRange, { type DatacatRange } from '../../hooks/useDatacatRange'
 import type { Detail, TraceStats } from '../../lib/types.ts'
 
 const GET_STATS = gql`
@@ -32,7 +33,7 @@ interface CacheFlags {
   usedApi: boolean
 }
 
-const DetailPanel = ({ detail }: { detail: Detail }) => {
+const DetailPanel = ({ detail, range }: { detail: Detail; range: DatacatRange }) => {
   switch (detail.kind) {
     case 'trace':
       return <TraceDetailsPanel trace={detail.trace} />
@@ -40,6 +41,8 @@ const DetailPanel = ({ detail }: { detail: Detail }) => {
       return <CableConnectionDetailsPanel connection={detail.connection} />
     case 'dependency':
       return <DependencyDetailsPanel node={detail.node} />
+    case 'job':
+      return <JobDetailsPanel name={detail.name} range={range} />
     case 'boot':
     case 'connection':
       return <IngesterDetailsPanel detail={detail} />
@@ -219,7 +222,7 @@ function DCList() {
         <div ref={sidebarRef} className={`home-left-two ${onHome ? 'sticky' : ''} ${onIngester ? 'narrow' : ''}`}>
           {detail && (
             <div className="dc-side-header-container">
-              <h3 className="catlas-text">{detail.kind === 'dependency' ? detail.node.title : 'Details'}</h3>
+              <h3 className="catlas-text">{detail.kind === 'dependency' ? detail.node.title : detail.kind === 'job' ? detail.label : 'Details'}</h3>
               <div className="dc-back-button-container">
                 <button className="dc-back-button" onClick={closeDetails}>
                   {' '}
@@ -230,7 +233,7 @@ function DCList() {
           )}
 
           {detail ? (
-            <DetailPanel detail={detail} />
+            <DetailPanel detail={detail} range={range} />
           ) : (
             <>
               <Sidebar onHome={onHome} />

@@ -1,3 +1,5 @@
+export const SENTRY_EVENT_SEARCH_URL = 'https://armaaniel.sentry.io/issues/?query='
+
 export const toReadable = (value:number | null | string | undefined) => {
 	
 	if (value === null || value === undefined) {
