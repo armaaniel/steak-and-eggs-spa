@@ -119,7 +119,7 @@ function renderEmptyDay(day: JobDay) {
 
 const JobDetailsPanel = ({ name }: Props) => {
   const { error, jobs } = useJobs('cache-first')
-  const [picked, setPicked] = useState<{ name: string; bucket: string } | null>(null)
+  const [pickedBucket, setPickedBucket] = useState<string | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const job = jobs?.find((summary) => summary.name === name)
@@ -137,14 +137,14 @@ const JobDetailsPanel = ({ name }: Props) => {
   const days = job.days
   let selectedDay = findOpeningDay(days)
 
-  if (picked !== null && picked.name === name) {
-    selectedDay = days.find((day) => day.bucket === picked.bucket) ?? selectedDay
+  if (pickedBucket !== null) {
+    selectedDay = days.find((day) => day.bucket === pickedBucket) ?? selectedDay
   }
 
-  let hoveredDate = ''
+  let shownDay = selectedDay
 
   if (hoveredIndex !== null && days[hoveredIndex] !== undefined) {
-    hoveredDate = toDayLabel(days[hoveredIndex].dueAt)
+    shownDay = days[hoveredIndex]
   }
 
   function renderCell(day: JobDay, index: number) {
@@ -155,7 +155,7 @@ const JobDetailsPanel = ({ name }: Props) => {
         key={day.bucket}
         type="button"
         className={`job-strip-cell ${day.state} ${isSelected ? 'selected' : ''}`}
-        onClick={() => setPicked({ name, bucket: day.bucket })}
+        onClick={() => setPickedBucket(day.bucket)}
         onPointerEnter={() => setHoveredIndex(index)}
         aria-pressed={isSelected}
         aria-label={`${toBucketLabel(day.dueAt)}: ${DAY_LABELS[day.state]}`}
@@ -163,10 +163,10 @@ const JobDetailsPanel = ({ name }: Props) => {
     )
   }
 
-  let selectedDetails = renderEmptyDay(selectedDay)
+  let dayDetails = renderEmptyDay(shownDay)
 
-  if (selectedDay.runs.length > 0) {
-    selectedDetails = <div className="dc-detail-list">{selectedDay.runs.map(renderRun)}</div>
+  if (shownDay.runs.length > 0) {
+    dayDetails = <div className="dc-detail-list">{shownDay.runs.map(renderRun)}</div>
   }
 
   return (
@@ -174,7 +174,6 @@ const JobDetailsPanel = ({ name }: Props) => {
       <div className="trace-details">
         <p className="dc-detail-muted job-schedule">
           {formatSchedule(days[days.length - 1].dueAt)} · rake {name}
-          {hoveredDate && ` · ${hoveredDate}`}
         </p>
 
         <div>
@@ -190,7 +189,7 @@ const JobDetailsPanel = ({ name }: Props) => {
 
         <hr className="dc-detail-divider" />
 
-        {selectedDetails}
+        {dayDetails}
       </div>
     </div>
   )

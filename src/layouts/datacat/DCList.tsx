@@ -42,7 +42,7 @@ const DetailPanel = ({ detail }: { detail: Detail }) => {
     case 'dependency':
       return <DependencyDetailsPanel node={detail.node} />
     case 'job':
-      return <JobDetailsPanel name={detail.name} />
+      return <JobDetailsPanel key={detail.name} name={detail.name} />
     case 'boot':
     case 'connection':
       return <IngesterDetailsPanel detail={detail} />
