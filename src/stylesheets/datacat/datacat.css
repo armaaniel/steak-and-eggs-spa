@@ -254,8 +254,9 @@
 
 .dc-back-button-container {
 	display:flex;
-	flex:0.95;
+	flex:1;
 	justify-content:end;
+	padding-right:calc(5% - 3.8px);
 }
 
 .dc-theme-toggle {
