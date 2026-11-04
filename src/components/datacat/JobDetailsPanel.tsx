@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import useJobs, { isProblemDay, runSeconds, toDayLabel } from '../../hooks/useJobs.ts'
 import { SENTRY_EVENT_SEARCH_URL, toBucketLabel, toDuration } from '../../lib/utils.ts'
 import type { JobDay, JobDayState, JobRun } from '../../lib/types.ts'
@@ -47,9 +47,6 @@ const RUN_SWATCHES: Record<JobRun['status'], string> = {
   running: 'pending',
 }
 
-const EDGE_CELLS = 5
-const TOOLTIP_LIFT = 'calc(-100% - 6px)'
-
 function findOpeningDay(days: JobDay[]) {
   for (let index = days.length - 1; index >= 0; index--) {
     if (isProblemDay(days[index])) {
@@ -80,18 +77,6 @@ function describeRunTime(run: JobRun) {
   }
 
   return 'Never finished'
-}
-
-function findTooltipStyle(index: number, cellCount: number): CSSProperties {
-  if (index < EDGE_CELLS) {
-    return { left: `${(index / cellCount) * 100}%`, transform: `translateY(${TOOLTIP_LIFT})` }
-  }
-
-  if (index >= cellCount - EDGE_CELLS) {
-    return { right: `${((cellCount - index - 1) / cellCount) * 100}%`, transform: `translateY(${TOOLTIP_LIFT})` }
-  }
-
-  return { left: `${((index + 0.5) / cellCount) * 100}%`, transform: `translate(-50%, ${TOOLTIP_LIFT})` }
 }
 
 function renderRun(run: JobRun) {
@@ -132,28 +117,6 @@ function renderEmptyDay(day: JobDay) {
   )
 }
 
-function renderTooltip(day: JobDay) {
-  const latestRun = day.runs[day.runs.length - 1]
-
-  if (latestRun === undefined) {
-    return (
-      <>
-        <p className="dc-tooltip-time">{toBucketLabel(day.dueAt)}</p>
-        <p>{DAY_LABELS[day.state]}</p>
-      </>
-    )
-  }
-
-  return (
-    <>
-      <p className="dc-tooltip-time">{toBucketLabel(latestRun.startedAt)}</p>
-      <p>
-        {DAY_LABELS[day.state]} · {describeRunTime(latestRun)}
-      </p>
-    </>
-  )
-}
-
 const JobDetailsPanel = ({ name }: Props) => {
   const { error, jobs } = useJobs('cache-first')
   const [picked, setPicked] = useState<{ name: string; bucket: string } | null>(null)
@@ -178,10 +141,10 @@ const JobDetailsPanel = ({ name }: Props) => {
     selectedDay = days.find((day) => day.bucket === picked.bucket) ?? selectedDay
   }
 
-  let hoveredDay: JobDay | null = null
+  let hoveredDate = ''
 
-  if (hoveredIndex !== null) {
-    hoveredDay = days[hoveredIndex] ?? null
+  if (hoveredIndex !== null && days[hoveredIndex] !== undefined) {
+    hoveredDate = toDayLabel(days[hoveredIndex].dueAt)
   }
 
   function renderCell(day: JobDay, index: number) {
@@ -211,18 +174,13 @@ const JobDetailsPanel = ({ name }: Props) => {
       <div className="trace-details">
         <p className="dc-detail-muted job-schedule">
           {formatSchedule(days[days.length - 1].dueAt)} · rake {name}
+          {hoveredDate && ` · ${hoveredDate}`}
         </p>
 
-        <div className="job-strip-container">
+        <div>
           <div className="job-strip" style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }} onPointerLeave={() => setHoveredIndex(null)}>
             {days.map(renderCell)}
           </div>
-
-          {hoveredDay !== null && hoveredIndex !== null && (
-            <div className="dc-tooltip job-strip-tooltip" style={findTooltipStyle(hoveredIndex, days.length)}>
-              {renderTooltip(hoveredDay)}
-            </div>
-          )}
 
           <div className="job-strip-labels">
             <span>{toDayLabel(days[0].dueAt)}</span>

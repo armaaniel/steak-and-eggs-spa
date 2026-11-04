@@ -223,17 +223,14 @@
 	background-color:var(--dc-series-2);
 }
 
+.uptime-job.good:hover,
+.uptime-job.critical:hover,
 .uptime-job.selected {
-	outline:2px solid var(--dc-text);
-	outline-offset:2px;
+	filter:brightness(1.15);
 }
 
 .job-schedule {
 	font-variant-numeric:tabular-nums;
-}
-
-.job-strip-container {
-	position:relative;
 }
 
 .job-strip {
@@ -273,9 +270,14 @@
 	background-color:transparent;
 }
 
+.job-strip-cell:hover,
 .job-strip-cell.selected {
-	outline:2px solid var(--dc-text);
-	outline-offset:1px;
+	filter:brightness(1.15);
+}
+
+.job-strip-cell.untracked:hover,
+.job-strip-cell.untracked.selected {
+	background-color:color-mix(in srgb, var(--dc-text-muted) 35%, transparent);
 }
 
 .job-strip-labels {
@@ -284,12 +286,6 @@
 	margin-top:6px;
 	font-size:11px;
 	color:var(--dc-text-muted);
-}
-
-.job-strip-tooltip {
-	top:0;
-	z-index:2;
-	pointer-events:none;
 }
 
 .uptime-job-entry {
