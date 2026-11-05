@@ -14,16 +14,6 @@ type Job = (typeof JOBS)[number]
 type JobsData = { jobBuckets: JobBucket[] } & Record<Job['key'], JobRun[]>
 
 const GET_JOBS = gql`
-  fragment JobRunFields on JobRun {
-    id
-    name
-    startedAt
-    finishedAt
-    errorClass
-    sentryEventId
-    status
-  }
-
   query getJobs($from: ISO8601DateTime!, $to: ISO8601DateTime!) {
     jobBuckets {
       name
@@ -36,13 +26,31 @@ const GET_JOBS = gql`
       expected
     }
     tickersSync: jobRuns(name: "tickers:sync", bucket: $from, bucketEnd: $to) {
-      ...JobRunFields
+      id
+      name
+      startedAt
+      finishedAt
+      errorClass
+      sentryEventId
+      status
     }
     record: jobRuns(name: "record", bucket: $from, bucketEnd: $to) {
-      ...JobRunFields
+      id
+      name
+      startedAt
+      finishedAt
+      errorClass
+      sentryEventId
+      status
     }
     pruneTraces: jobRuns(name: "prune_traces", bucket: $from, bucketEnd: $to) {
-      ...JobRunFields
+      id
+      name
+      startedAt
+      finishedAt
+      errorClass
+      sentryEventId
+      status
     }
   }
 `
