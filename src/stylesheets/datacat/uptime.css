@@ -266,18 +266,15 @@
 	background-color:color-mix(in srgb, var(--dc-healthy) 30%, transparent);
 }
 
-.job-strip-cell.upcoming {
-	border:1px dashed var(--dc-text-muted);
-	background-color:transparent;
-}
-
 .job-strip-cell:hover,
 .job-strip-cell.selected {
 	filter:brightness(1.15);
 }
 
 .job-strip-cell.untracked:hover,
-.job-strip-cell.untracked.selected {
+.job-strip-cell.untracked.selected,
+.job-strip-cell.upcoming:hover,
+.job-strip-cell.upcoming.selected {
 	background-color:color-mix(in srgb, var(--dc-text-muted) 35%, transparent);
 }
 
