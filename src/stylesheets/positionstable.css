@@ -104,3 +104,13 @@ font-family: var(--font-body);
 .quantity-header-one:nth-child(3){width:12.5%;}
 .quantity-header-one:nth-child(4){width:12.5%;}
 .quantity-header-one:nth-child(5){width:12.5%;}
+
+.header-break {
+	display:none;
+}
+
+@media (max-width:1375px) {
+	.header-break {
+		display:inline;
+	}
+}
