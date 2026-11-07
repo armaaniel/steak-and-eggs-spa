@@ -8,7 +8,8 @@ export default function usePagination<T>(items: T[], perPage: number) {
 	}, [items.length])
 
 	const totalPages = Math.max(1, Math.ceil(items.length / perPage))
-	const start = (currentPage - 1) * perPage
+	const shownPage = Math.min(currentPage, totalPages)
+	const start = (shownPage - 1) * perPage
 	const end = start + perPage
 	const currentItems = items.slice(start, end)
 
@@ -16,5 +17,5 @@ export default function usePagination<T>(items: T[], perPage: number) {
 	const prev = () => setCurrentPage((p) => Math.max(p - 1, 1))
 	const reset = () => setCurrentPage(1)
 
-	return { currentItems, currentPage, totalPages, next, prev, reset }
+	return { currentItems, currentPage: shownPage, totalPages, next, prev, reset }
 }

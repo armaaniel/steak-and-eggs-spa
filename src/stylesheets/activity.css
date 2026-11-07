@@ -4,6 +4,7 @@
 	padding:0 17px 2rem 1rem;
 	column-gap:1.5rem;
 	height:100%;
+	min-height:0;
 }
 
 .activity-container {
@@ -19,6 +20,11 @@
 
 .activity-container.loaded {
 	opacity:1;
+}
+
+.activity-table-area {
+	flex:1;
+	min-height:0;
 }
 
 .activity-row,
