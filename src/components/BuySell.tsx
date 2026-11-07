@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { toCurrency } from '../lib/utils.ts'
 import type { Position } from '../lib/types.ts'
 import { NumericFormat } from 'react-number-format'
@@ -176,7 +177,7 @@ const BuySell = ({ demo, isAuthenticated, onComplete, balance, position, price, 
                     <div className={`bs-available ${isUserDataLoaded ? 'loaded' : ''}`}>{isBuy ? <p className="est-cost"> ${toCurrency(balance)} USD </p> : <p>{position?.shares?.toLocaleString() || 0}</p>}</div>
                   </>
                 ) : (
-                  <p>Login or sign up to get started</p>
+                  <p><Link to="/login" className="bs-auth-link">Login</Link> or <Link to="/signup" className="bs-auth-link">sign up</Link> to get started</p>
                 )}
               </div>
             </div>

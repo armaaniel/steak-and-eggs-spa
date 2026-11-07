@@ -64,6 +64,15 @@
 	width:50%;
 }
 
+.bs-auth-link {
+	color:var(--chart-line);
+	text-decoration:none;
+}
+
+.bs-auth-link:hover {
+	text-decoration:underline;
+}
+
 .bs-containers > .bs-width-wrapper:first-child {
 	color:var(--text-muted);
 }
