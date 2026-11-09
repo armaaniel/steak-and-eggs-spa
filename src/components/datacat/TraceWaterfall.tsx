@@ -1,4 +1,4 @@
-import { useMemo, useState, type MouseEvent } from 'react'
+import { useMemo, useState } from 'react'
 import type { Span, SpanCategory, Trace } from '../../lib/types.ts'
 import '../../stylesheets/datacat/waterfall.css'
 
@@ -11,12 +11,6 @@ interface Node {
   span: Span
   label: string
   children: Node[]
-}
-
-interface Tip {
-  text: string
-  x: number
-  y: number
 }
 
 const CATEGORIES: { key: SpanCategory, label: string, field: keyof Trace }[] = [
@@ -109,15 +103,10 @@ function collapsedByDefault(nodes: Node[], keys = new Set<string>()) {
   return keys
 }
 
-function ownTime(node: Node) {
-  return node.span.duration - node.children.reduce((sum, child) => sum + child.span.duration, 0)
-}
-
 const TraceWaterfall = ({ trace }: Props) => {
   const total = trace.duration
   const tree = useMemo(() => buildTree(trace.spans ?? []), [trace.spans])
   const [collapsed, setCollapsed] = useState(() => collapsedByDefault(tree))
-  const [tip, setTip] = useState<Tip | null>(null)
 
   const parts = CATEGORIES
     .map((category) => ({ ...category, ms: Number(trace[category.field] ?? 0) }))
@@ -132,8 +121,6 @@ const TraceWaterfall = ({ trace }: Props) => {
     })
   }
 
-  const showTip = (event: MouseEvent, text: string) => setTip({ text, x: event.clientX, y: event.clientY })
-
   function renderNode(node: Node, depth: number) {
     const { span } = node
     const expandable = node.children.length > 0
@@ -141,11 +128,10 @@ const TraceWaterfall = ({ trace }: Props) => {
     const detail = describe(span)
     const indent = { paddingLeft: `${depth * 0.75}rem` }
     const detailIndent = { paddingLeft: `calc(${depth * 0.75 + 0.75}rem + 6px)` }
-    const tipText = `${formatMs(span.start)} → ${formatMs(span.start + span.duration)}${expandable ? ` · own time ${formatMs(ownTime(node))}` : ''}`
 
     return (
       <div key={node.key}>
-        <div className="dc-waterfall-row" onMouseMove={(event) => showTip(event, tipText)}>
+        <div className="dc-waterfall-row">
           <button
             type="button"
             className={`dc-waterfall-label ${expandable ? 'expandable' : ''}`}
@@ -208,16 +194,10 @@ const TraceWaterfall = ({ trace }: Props) => {
       </div>
 
       <div className="dc-detail-list">
-        <div className="dc-waterfall-rows" onMouseLeave={() => setTip(null)}>
+        <div className="dc-waterfall-rows">
           {tree.map((node) => renderNode(node, 0))}
         </div>
       </div>
-
-      {tip && (
-        <div className="dc-waterfall-tip" style={{ left: tip.x + 12, top: tip.y + 12 }}>
-          {tip.text}
-        </div>
-      )}
     </>
   )
 }

@@ -174,17 +174,3 @@
 	height:100%;
 	border-radius:3px;
 }
-
-.dc-waterfall-tip {
-	position:fixed;
-	z-index:20;
-	pointer-events:none;
-	padding:6px 8px;
-	border-radius:6px;
-	background-color:var(--dc-surface);
-	box-shadow:var(--dc-shadow-card);
-	color:var(--dc-text);
-	font-family:var(--font-ui);
-	font-size:12px;
-	white-space:nowrap;
-}
