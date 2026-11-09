@@ -49,7 +49,7 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
     { label: 'Duration', value: formatMs(trace.duration, 1) },
   ]
 
-  if (!hasSpans) timingRows.push({ label: 'DB runtime', value: formatMs(trace.dbRuntime, 1) })
+  if (!loading && !hasSpans) timingRows.push({ label: 'DB runtime', value: formatMs(trace.dbRuntime, 1) })
 
   const errorRows: DetailRow[] = []
 
@@ -82,7 +82,6 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
         <DetailRows rows={timingRows} inline />
         <DetailRows rows={errorRows} />
 
-        {loading && <p className="dc-detail-muted">Loading the timeline</p>}
         {error && <p className="dc-detail-muted">Unable to load the timeline, please try again</p>}
 
         {hasSpans && <TraceWaterfall key={trace.id} trace={trace} />}
