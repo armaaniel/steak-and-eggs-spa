@@ -84,10 +84,11 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
         {waterfallTrace && (
           <div className="waterfall-fade">
             <TraceWaterfall trace={waterfallTrace} />
+            <DetailRows rows={errorRows} />
           </div>
         )}
 
-        <DetailRows rows={errorRows} />
+        {!waterfallTrace && !loading && <DetailRows rows={errorRows} />}
       </div>
     </div>
   )
