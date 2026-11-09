@@ -107,10 +107,15 @@ const TraceWaterfall = ({ trace }: Props) => {
   const total = trace.duration
   const tree = useMemo(() => buildTree(trace.spans ?? []), [trace.spans])
   const [collapsed, setCollapsed] = useState(() => collapsedByDefault(tree))
+  const [shownTraceId, setShownTraceId] = useState(trace.id)
 
-  const parts = CATEGORIES
-    .map((category) => ({ ...category, ms: Number(trace[category.field] ?? 0) }))
-    .filter((part) => part.ms > 0)
+  if (trace.id !== shownTraceId) {
+    setShownTraceId(trace.id)
+    setCollapsed(collapsedByDefault(tree))
+  }
+
+  const timeByCategory = CATEGORIES.map((category) => ({ ...category, ms: Number(trace[category.field] ?? 0) }))
+  const parts = timeByCategory.filter((part) => part.ms > 0)
 
   const toggle = (key: string) => {
     setCollapsed((current) => {
@@ -179,8 +184,8 @@ const TraceWaterfall = ({ trace }: Props) => {
       <div className="dc-detail-list">
         <p className="dc-detail-label">Where the time went</p>
         <div className="dc-waterfall-stack">
-          {parts.map((part) => (
-            <div key={part.key} className={`dc-waterfall-segment ${part.key}`} style={{ flexGrow: part.ms }} />
+          {timeByCategory.map((part) => (
+            <div key={part.key} className={`dc-waterfall-segment ${part.key} ${part.ms > 0 ? '' : 'empty'}`} style={{ flexGrow: part.ms }} />
           ))}
         </div>
         <div className="dc-waterfall-legend">
@@ -194,7 +199,7 @@ const TraceWaterfall = ({ trace }: Props) => {
       </div>
 
       <div className="dc-detail-list">
-        <div className="dc-waterfall-rows">
+        <div className="dc-waterfall-rows" key={trace.id}>
           {tree.map((node) => renderNode(node, 0))}
         </div>
       </div>

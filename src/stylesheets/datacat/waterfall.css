@@ -26,23 +26,24 @@
 .dc-waterfall-stack {
 	display:flex;
 	height:10px;
+	border-radius:2px;
+	overflow:hidden;
 }
 
 .dc-waterfall-segment {
 	min-width:2px;
 	height:100%;
+	transition:flex-grow 200ms, min-width 200ms;
 }
 
-.dc-waterfall-segment:first-child {
-	border-radius:2px 0 0 2px;
+.dc-waterfall-segment.empty {
+	min-width:0;
 }
 
-.dc-waterfall-segment:last-child {
-	border-radius:0 2px 2px 0;
-}
-
-.dc-waterfall-segment:only-child {
-	border-radius:2px;
+@media (prefers-reduced-motion: reduce) {
+	.dc-waterfall-segment {
+		transition:none;
+	}
 }
 
 .dc-waterfall-legend {

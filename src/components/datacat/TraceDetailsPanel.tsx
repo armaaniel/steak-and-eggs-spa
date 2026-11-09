@@ -84,7 +84,7 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
 
         {waterfallTrace && (
           <div className="waterfall-fade">
-            <TraceWaterfall key={waterfallTrace.id} trace={waterfallTrace} />
+            <TraceWaterfall trace={waterfallTrace} />
           </div>
         )}
       </div>
