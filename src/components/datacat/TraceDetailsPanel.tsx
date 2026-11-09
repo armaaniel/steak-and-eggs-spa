@@ -8,6 +8,7 @@ const GET_TRACE_WATERFALL = gql`
   query getTraceWaterfall($id: ID!) {
     trace(id: $id) {
       id
+      duration
       spans { name category start duration parent sql cached hit dropped }
       appMs
       sqlMs
@@ -27,6 +28,10 @@ function formatMs(ms: number, digits = 0) {
   return `${ms.toLocaleString('en-us', { maximumFractionDigits: digits })} ms`
 }
 
+function hasAnySpans(trace: Trace) {
+  return (trace.spans?.length ?? 0) > 0
+}
+
 function describeCall(call: Breakdown) {
   const parts: string[] = []
 
@@ -40,9 +45,17 @@ function describeCall(call: Breakdown) {
 }
 
 const TraceDetailsPanel = ({ trace: listed }: Props) => {
-  const { loading, error, data } = useQuery<{ trace: Trace | null }>(GET_TRACE_WATERFALL, { variables: { id: listed.id } })
+  const { loading, error, data, previousData } = useQuery<{ trace: Trace | null }>(GET_TRACE_WATERFALL, { variables: { id: listed.id } })
   const trace = { ...listed, ...data?.trace }
-  const hasSpans = (trace.spans?.length ?? 0) > 0
+  const hasSpans = hasAnySpans(trace)
+  const previousTrace = previousData?.trace ?? null
+  let waterfallTrace: Trace | null = null
+
+  if (hasSpans) {
+    waterfallTrace = trace
+  } else if (loading && previousTrace !== null && hasAnySpans(previousTrace)) {
+    waterfallTrace = previousTrace
+  }
 
   const timingRows: DetailRow[] = [
     { label: 'Status', value: trace.status },
@@ -80,11 +93,10 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
         </div>
 
         <DetailRows rows={timingRows} inline />
-        <DetailRows rows={errorRows} />
 
         {error && <p className="dc-detail-muted">Unable to load the timeline, please try again</p>}
 
-        {hasSpans && <TraceWaterfall key={trace.id} trace={trace} />}
+        {waterfallTrace && <TraceWaterfall key={waterfallTrace.id} trace={waterfallTrace} />}
 
         {!loading && !hasSpans && calls.length > 0 && (
           <div className="dc-detail-list">
@@ -100,6 +112,8 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
             ))}
           </div>
         )}
+
+        <DetailRows rows={errorRows} />
 
         <DetailRows
           rows={[

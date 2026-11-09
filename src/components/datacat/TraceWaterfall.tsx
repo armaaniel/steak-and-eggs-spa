@@ -102,7 +102,7 @@ function buildTree(spans: Span[]) {
 
 function collapsedByDefault(nodes: Node[], keys = new Set<string>()) {
   nodes.forEach((node) => {
-    if (node.children.length >= 3 && node.children.every((child) => child.children.length === 0)) keys.add(node.key)
+    if (node.children.length > 0) keys.add(node.key)
     collapsedByDefault(node.children, keys)
   })
 
@@ -179,7 +179,7 @@ const TraceWaterfall = ({ trace }: Props) => {
             const expandable = node.children.length > 0
             const detail = describe(span)
             const indent = { paddingLeft: `${depth * 0.75}rem` }
-            const detailIndent = { paddingLeft: `calc(${depth * 0.75 + 0.75}rem + 20px)` }
+            const detailIndent = { paddingLeft: `calc(${depth * 0.75 + 0.75}rem + 6px)` }
             const tipText = `${formatMs(span.start)} → ${formatMs(span.start + span.duration)}${expandable ? ` · own time ${formatMs(ownTime(node))}` : ''}`
 
             return (
@@ -193,7 +193,6 @@ const TraceWaterfall = ({ trace }: Props) => {
                   onClick={() => toggle(node.key)}
                 >
                   <span className="dc-waterfall-caret">{expandable ? (collapsed.has(node.key) ? '▸' : '▾') : ''}</span>
-                  <span className={`dc-waterfall-swatch ${span.category}`} />
                   <span className="dc-waterfall-name">
                     {PREFIX[span.category] && <span className="dc-detail-muted">{PREFIX[span.category]} </span>}
                     {node.label}
