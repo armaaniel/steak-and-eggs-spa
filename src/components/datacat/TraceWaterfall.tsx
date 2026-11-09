@@ -32,11 +32,22 @@ function formatMs(ms: number) {
 function describe(span: Span) {
   const parts: string[] = []
 
-  if (span.hit !== null && span.hit !== undefined) parts.push(span.hit ? 'hit' : 'miss')
   if (span.cached) parts.push('answered by the query cache')
   if (span.dropped) parts.push(`${span.dropped.toLocaleString('en-us')} more spans weren't stored`)
 
   return parts.join(' · ')
+}
+
+function describeCacheResult(span: Span) {
+  if (span.hit === true) {
+    return 'hit'
+  }
+
+  if (span.hit === false) {
+    return 'miss'
+  }
+
+  return ''
 }
 
 function groupKey(span: Span) {
@@ -131,6 +142,7 @@ const TraceWaterfall = ({ trace }: Props) => {
     const expandable = node.children.length > 0
     const isOpen = !collapsed.has(node.key)
     const detail = describe(span)
+    const cacheResult = describeCacheResult(span)
     const indent = { paddingLeft: `${depth * 0.75}rem` }
     const detailIndent = { paddingLeft: `calc(${depth * 0.75 + 0.75}rem + 6px)` }
 
@@ -156,7 +168,10 @@ const TraceWaterfall = ({ trace }: Props) => {
               {PREFIX[span.category] && <span className="dc-detail-muted">{PREFIX[span.category]} </span>}
               {node.label}
             </span>
-            <span className="dc-waterfall-ms">{formatMs(span.duration)}</span>
+            <span className="dc-waterfall-ms">
+              {cacheResult && `${cacheResult} · `}
+              {formatMs(span.duration)}
+            </span>
           </button>
           {span.sql && <p className="dc-waterfall-sql" style={detailIndent}>{span.sql}</p>}
           {detail && <p className="dc-detail-muted" style={detailIndent}>{detail}</p>}
