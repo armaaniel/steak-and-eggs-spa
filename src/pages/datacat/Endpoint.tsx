@@ -25,7 +25,8 @@ const GET_TRACES = gql`
       controller
       action
       status
-      breakdown
+      cacheHits
+      cacheMisses
       errorClass
       errorLocation
       sentryEventId
@@ -72,7 +73,6 @@ const GET_TRACE = gql`
       controller
       action
       status
-      breakdown
       errorClass
       errorLocation
       sentryEventId
@@ -90,7 +90,6 @@ const GET_CAPPED_TRACES = gql`
       controller
       action
       status
-      breakdown
       errorClass
       errorLocation
       sentryEventId
@@ -115,9 +114,9 @@ interface ChartsData {
   traceStats: TraceStats
 }
 
-const usedCache = (trace: Trace) => Object.values(trace.breakdown ?? {}).some((call) => call.used_redis === true)
+const usedCache = (trace: Trace) => (trace.cacheHits ?? 0) > 0
 
-const usedDbOrApi = (trace: Trace) => Object.values(trace.breakdown ?? {}).some((call) => call.used_db === true || call.used_api === true)
+const usedDbOrApi = (trace: Trace) => (trace.cacheMisses ?? 0) > 0
 
 const inBucket = (trace: Trace, bucket: ServiceBucket) => {
   const t = new Date(trace.createdAt).getTime()

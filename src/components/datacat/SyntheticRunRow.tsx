@@ -13,7 +13,6 @@ const GET_RUN_TRACES = gql`
       controller
       action
       status
-      breakdown
       errorClass
       errorLocation
       sentryEventId

@@ -6,15 +6,6 @@ export interface Position {
 	symbol: string
 }
 
-export interface Breakdown {
-	duration:number
-	used_redis?:boolean
-	used_db?:boolean
-	used_api?:boolean
-	operation?:string	
-	range?:string
-}
-
 export interface ChartData {
 	date:string
 	value:number
@@ -48,7 +39,8 @@ export interface Trace {
 	controller:string
 	action:string
 	status:number
-	breakdown?: Record<string, Breakdown>
+	cacheHits?:number | null
+	cacheMisses?:number | null
 	errorClass?:string | null
 	errorLocation?:string | null
 	sentryEventId?:string | null

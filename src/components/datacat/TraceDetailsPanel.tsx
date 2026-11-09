@@ -2,7 +2,7 @@ import { gql, useQuery } from '@apollo/client'
 import DetailRows, { type DetailRow } from './DetailRows'
 import TraceWaterfall from './TraceWaterfall'
 import { SENTRY_EVENT_SEARCH_URL, toShortTime } from '../../lib/utils.ts'
-import type { Breakdown, Trace } from '../../lib/types.ts'
+import type { Trace } from '../../lib/types.ts'
 
 const GET_TRACE_WATERFALL = gql`
   query getTraceWaterfall($id: ID!) {
@@ -30,18 +30,6 @@ function formatMs(ms: number, digits = 0) {
 
 function hasAnySpans(trace: Trace) {
   return (trace.spans?.length ?? 0) > 0
-}
-
-function describeCall(call: Breakdown) {
-  const parts: string[] = []
-
-  if (call.operation !== undefined) parts.push(call.operation)
-  if (call.range !== undefined) parts.push(call.range)
-  if (call.used_redis !== undefined) parts.push(call.used_redis ? 'cache hit' : 'cache miss')
-  if (call.used_db) parts.push('db')
-  if (call.used_api) parts.push('api')
-
-  return parts.join(' · ')
 }
 
 const TraceDetailsPanel = ({ trace: listed }: Props) => {
@@ -78,8 +66,6 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
     })
   }
 
-  const calls = Object.entries(trace.breakdown ?? {})
-
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
@@ -97,21 +83,6 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
         {error && <p className="dc-detail-muted">Unable to load the timeline, please try again</p>}
 
         {waterfallTrace && <TraceWaterfall key={waterfallTrace.id} trace={waterfallTrace} />}
-
-        {!loading && !hasSpans && calls.length > 0 && (
-          <div className="dc-detail-list">
-            <p className="dc-detail-label">Service calls</p>
-            {calls.map(([name, call]) => (
-              <div key={name}>
-                <p className="dc-detail-item">
-                  <span>{name}</span>
-                  <span>{formatMs(call.duration, 1)}</span>
-                </p>
-                {describeCall(call) !== '' && <p className="dc-detail-muted">{describeCall(call)}</p>}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
