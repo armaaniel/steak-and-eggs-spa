@@ -192,14 +192,9 @@ const TraceWaterfall = ({ trace }: Props) => {
     <>
       <div className="dc-detail-list">
         <p className="dc-detail-label">Where the time went</p>
-        <div className="dc-waterfall-stack" onMouseLeave={() => setTip(null)}>
+        <div className="dc-waterfall-stack">
           {parts.map((part) => (
-            <div
-              key={part.key}
-              className={`dc-waterfall-segment ${part.key}`}
-              style={{ flexGrow: part.ms }}
-              onMouseMove={(event) => showTip(event, `${part.label} · ${formatMs(part.ms)} · ${Math.round((part.ms / total) * 100)}% of ${formatMs(total)}`)}
-            />
+            <div key={part.key} className={`dc-waterfall-segment ${part.key}`} style={{ flexGrow: part.ms }} />
           ))}
         </div>
         <div className="dc-waterfall-legend">
