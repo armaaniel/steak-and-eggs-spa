@@ -213,11 +213,6 @@ const TraceWaterfall = ({ trace }: Props) => {
       </div>
 
       <div className="dc-detail-list">
-        <p className="dc-detail-label">Timeline</p>
-        <div className="dc-waterfall-axis">
-          <span>0 ms</span>
-          <span>{formatMs(total)}</span>
-        </div>
         <div className="dc-waterfall-rows" onMouseLeave={() => setTip(null)}>
           {tree.map((node) => renderNode(node, 0))}
         </div>
