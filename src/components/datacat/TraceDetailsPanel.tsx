@@ -78,7 +78,6 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
         </div>
 
         <DetailRows rows={timingRows} inline />
-        <DetailRows rows={errorRows} />
 
         {error && <p className="dc-detail-muted">Unable to load the timeline, please try again</p>}
 
@@ -87,6 +86,8 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
             <TraceWaterfall trace={waterfallTrace} />
           </div>
         )}
+
+        <DetailRows rows={errorRows} />
       </div>
     </div>
   )
