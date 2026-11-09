@@ -1,0 +1,173 @@
+:root {
+	--dc-span-app: #2a78d6;
+	--dc-span-sql: #eb6834;
+	--dc-span-redis: #1baf7a;
+	--dc-span-http: #eda100;
+	--dc-span-callbacks: #e87ba4;
+	--dc-span-render: #6250d6;
+}
+
+[data-theme="dark"] {
+	--dc-span-app: #3987e5;
+	--dc-span-sql: #d95926;
+	--dc-span-redis: #199e70;
+	--dc-span-http: #c98500;
+	--dc-span-callbacks: #d55181;
+	--dc-span-render: #9085e9;
+}
+
+.dc-waterfall-swatch.app, .dc-waterfall-segment.app, .dc-waterfall-bar.app { background-color:var(--dc-span-app); }
+.dc-waterfall-swatch.sql, .dc-waterfall-segment.sql, .dc-waterfall-bar.sql { background-color:var(--dc-span-sql); }
+.dc-waterfall-swatch.redis, .dc-waterfall-segment.redis, .dc-waterfall-bar.redis { background-color:var(--dc-span-redis); }
+.dc-waterfall-swatch.http, .dc-waterfall-segment.http, .dc-waterfall-bar.http { background-color:var(--dc-span-http); }
+.dc-waterfall-swatch.callbacks, .dc-waterfall-segment.callbacks, .dc-waterfall-bar.callbacks { background-color:var(--dc-span-callbacks); }
+.dc-waterfall-swatch.render, .dc-waterfall-segment.render, .dc-waterfall-bar.render { background-color:var(--dc-span-render); }
+
+.dc-waterfall-stack {
+	display:flex;
+	column-gap:2px;
+	height:10px;
+}
+
+.dc-waterfall-segment {
+	min-width:2px;
+	height:100%;
+}
+
+.dc-waterfall-segment:first-child {
+	border-radius:4px 0 0 4px;
+}
+
+.dc-waterfall-segment:last-child {
+	border-radius:0 4px 4px 0;
+}
+
+.dc-waterfall-segment:only-child {
+	border-radius:4px;
+}
+
+.dc-waterfall-legend {
+	display:flex;
+	flex-wrap:wrap;
+	column-gap:0.75rem;
+	row-gap:0.25rem;
+	font-size:13px;
+}
+
+.dc-waterfall-legend > span {
+	display:inline-flex;
+	align-items:center;
+	column-gap:5px;
+	white-space:nowrap;
+}
+
+.dc-waterfall-swatch {
+	flex-shrink:0;
+	width:8px;
+	height:8px;
+	border-radius:2px;
+}
+
+.dc-waterfall-axis {
+	display:flex;
+	justify-content:space-between;
+	font-size:12px;
+	color:var(--dc-text-muted);
+}
+
+.dc-waterfall-rows {
+	display:flex;
+	flex-direction:column;
+}
+
+.dc-waterfall-row {
+	display:flex;
+	flex-direction:column;
+	row-gap:3px;
+	padding:5px 4px;
+	border-radius:4px;
+}
+
+.dc-waterfall-row:hover {
+	background-color:var(--dc-hover);
+}
+
+.dc-waterfall-label {
+	display:flex;
+	align-items:center;
+	column-gap:6px;
+	width:100%;
+	padding-top:0;
+	padding-bottom:0;
+	padding-right:0;
+	background:none;
+	border:none;
+	font:inherit;
+	font-size:14px;
+	color:inherit;
+	text-align:left;
+}
+
+.dc-waterfall-label:disabled {
+	cursor:default;
+	color:inherit;
+}
+
+.dc-waterfall-label.expandable {
+	cursor:pointer;
+}
+
+.dc-waterfall-caret {
+	flex-shrink:0;
+	width:0.75rem;
+	font-size:11px;
+	color:var(--dc-text-muted);
+}
+
+.dc-waterfall-name {
+	flex:1;
+	min-width:0;
+	overflow-wrap:anywhere;
+}
+
+.dc-waterfall-ms {
+	white-space:nowrap;
+	font-variant-numeric:tabular-nums;
+	color:var(--dc-text-muted);
+}
+
+.dc-waterfall-sql {
+	font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size:11px;
+	line-height:1.4;
+	color:var(--dc-text-muted);
+	overflow-wrap:anywhere;
+}
+
+.dc-waterfall-track {
+	position:relative;
+	height:6px;
+	border-radius:3px;
+	background-color:var(--dc-surface-2);
+}
+
+.dc-waterfall-bar {
+	position:absolute;
+	top:0;
+	height:100%;
+	border-radius:3px;
+}
+
+.dc-waterfall-tip {
+	position:fixed;
+	z-index:20;
+	pointer-events:none;
+	padding:6px 8px;
+	border-radius:6px;
+	background-color:var(--dc-surface);
+	box-shadow:var(--dc-shadow-card);
+	color:var(--dc-text);
+	font-family:var(--font-ui);
+	font-size:12px;
+	white-space:nowrap;
+}

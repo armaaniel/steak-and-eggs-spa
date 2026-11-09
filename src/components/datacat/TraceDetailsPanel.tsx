@@ -1,6 +1,23 @@
+import { gql, useQuery } from '@apollo/client'
 import DetailRows, { type DetailRow } from './DetailRows'
+import TraceWaterfall from './TraceWaterfall'
 import { SENTRY_EVENT_SEARCH_URL, toShortTime } from '../../lib/utils.ts'
 import type { Breakdown, Trace } from '../../lib/types.ts'
+
+const GET_TRACE_WATERFALL = gql`
+  query getTraceWaterfall($id: ID!) {
+    trace(id: $id) {
+      id
+      spans { name category start duration parent sql cached hit dropped }
+      appMs
+      sqlMs
+      redisMs
+      httpMs
+      callbacksMs
+      renderMs
+    }
+  }
+`
 
 interface Props {
   trace: Trace
@@ -22,12 +39,17 @@ function describeCall(call: Breakdown) {
   return parts.join(' · ')
 }
 
-const TraceDetailsPanel = ({ trace }: Props) => {
+const TraceDetailsPanel = ({ trace: listed }: Props) => {
+  const { loading, error, data } = useQuery<{ trace: Trace | null }>(GET_TRACE_WATERFALL, { variables: { id: listed.id } })
+  const trace = { ...listed, ...data?.trace }
+  const hasSpans = (trace.spans?.length ?? 0) > 0
+
   const timingRows: DetailRow[] = [
     { label: 'Status', value: trace.status },
-    { label: 'Duration', value: formatMs(trace.duration) },
-    { label: 'DB runtime', value: formatMs(trace.dbRuntime) },
+    { label: 'Duration', value: formatMs(trace.duration, 1) },
   ]
+
+  if (!hasSpans) timingRows.push({ label: 'DB runtime', value: formatMs(trace.dbRuntime, 1) })
 
   const errorRows: DetailRow[] = []
 
@@ -60,7 +82,12 @@ const TraceDetailsPanel = ({ trace }: Props) => {
         <DetailRows rows={timingRows} inline />
         <DetailRows rows={errorRows} />
 
-        {calls.length > 0 && (
+        {loading && <p className="dc-detail-muted">Loading the timeline</p>}
+        {error && <p className="dc-detail-muted">Unable to load the timeline, please try again</p>}
+
+        {hasSpans && <TraceWaterfall key={trace.id} trace={trace} />}
+
+        {!loading && !hasSpans && calls.length > 0 && (
           <div className="dc-detail-list">
             <p className="dc-detail-label">Service calls</p>
             {calls.map(([name, call]) => (

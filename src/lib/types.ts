@@ -53,6 +53,27 @@ export interface Trace {
 	errorClass?:string | null
 	errorLocation?:string | null
 	sentryEventId?:string | null
+	spans?:Span[] | null
+	appMs?:number | null
+	sqlMs?:number | null
+	redisMs?:number | null
+	httpMs?:number | null
+	callbacksMs?:number | null
+	renderMs?:number | null
+}
+
+export type SpanCategory = 'app' | 'sql' | 'redis' | 'http' | 'callbacks' | 'render'
+
+export interface Span {
+	name:string
+	category:SpanCategory
+	start:number
+	duration:number
+	parent:number | null
+	sql?:string | null
+	cached?:boolean | null
+	hit?:boolean | null
+	dropped?:number | null
 }
 
 export interface Connection {
