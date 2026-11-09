@@ -3,7 +3,7 @@
 	--dc-span-sql: var(--dc-cpu);
 	--dc-span-redis: #1baf7a;
 	--dc-span-http: #eda100;
-	--dc-span-callbacks: #e87ba4;
+	--dc-span-callbacks: var(--dc-series-2);
 	--dc-span-render: #6250d6;
 }
 
@@ -12,7 +12,7 @@
 	--dc-span-sql: var(--dc-cpu);
 	--dc-span-redis: #199e70;
 	--dc-span-http: #c98500;
-	--dc-span-callbacks: #d55181;
+	--dc-span-callbacks: var(--dc-series-2);
 	--dc-span-render: #9085e9;
 }
 
