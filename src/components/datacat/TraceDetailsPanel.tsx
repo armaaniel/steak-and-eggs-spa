@@ -60,9 +60,8 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
   const timingRows: DetailRow[] = [
     { label: 'Status', value: trace.status },
     { label: 'Duration', value: formatMs(trace.duration, 1) },
+    { label: 'DB runtime', value: formatMs(trace.dbRuntime, 1) },
   ]
-
-  if (!loading && !hasSpans) timingRows.push({ label: 'DB runtime', value: formatMs(trace.dbRuntime, 1) })
 
   const errorRows: DetailRow[] = []
 
@@ -90,9 +89,11 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
           <p className="dc-detail-muted">
             {trace.controller}#{trace.action}
           </p>
+          <p className="dc-detail-muted">{toShortTime(trace.createdAt)}</p>
         </div>
 
         <DetailRows rows={timingRows} inline />
+        <DetailRows rows={errorRows} />
 
         {error && <p className="dc-detail-muted">Unable to load the timeline, please try again</p>}
 
@@ -112,16 +113,6 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
             ))}
           </div>
         )}
-
-        <DetailRows rows={errorRows} />
-
-        <DetailRows
-          rows={[
-            { label: 'Created', value: toShortTime(trace.createdAt) },
-            { label: 'ID', value: trace.id },
-          ]}
-          inline
-        />
       </div>
     </div>
   )
