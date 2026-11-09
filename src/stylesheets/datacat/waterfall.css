@@ -124,6 +124,16 @@
 	color:var(--dc-text-muted);
 }
 
+.dc-waterfall-chevron {
+	display:block;
+	transition:transform 0.2s ease;
+	transform:rotate(-90deg);
+}
+
+.dc-waterfall-chevron.open {
+	transform:rotate(0deg);
+}
+
 .dc-waterfall-name {
 	flex:1;
 	min-width:0;

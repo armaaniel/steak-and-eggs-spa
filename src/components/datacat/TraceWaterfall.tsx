@@ -192,7 +192,13 @@ const TraceWaterfall = ({ trace }: Props) => {
                   aria-expanded={expandable ? !collapsed.has(node.key) : undefined}
                   onClick={() => toggle(node.key)}
                 >
-                  <span className="dc-waterfall-caret">{expandable ? (collapsed.has(node.key) ? '▸' : '▾') : ''}</span>
+                  <span className="dc-waterfall-caret">
+                    {expandable && (
+                      <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`dc-waterfall-chevron ${collapsed.has(node.key) ? '' : 'open'}`}>
+                        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </span>
                   <span className="dc-waterfall-name">
                     {PREFIX[span.category] && <span className="dc-detail-muted">{PREFIX[span.category]} </span>}
                     {node.label}
