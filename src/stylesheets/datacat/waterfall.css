@@ -4,7 +4,7 @@
 	--dc-span-redis: #1baf7a;
 	--dc-span-http: #eda100;
 	--dc-span-callbacks: var(--dc-series-2);
-	--dc-span-render: #6250d6;
+	--dc-span-render: var(--dc-latency-p50);
 }
 
 [data-theme="dark"] {
@@ -13,7 +13,7 @@
 	--dc-span-redis: #199e70;
 	--dc-span-http: #c98500;
 	--dc-span-callbacks: var(--dc-series-2);
-	--dc-span-render: #9085e9;
+	--dc-span-render: var(--dc-latency-p50);
 }
 
 .dc-waterfall-swatch.app, .dc-waterfall-segment.app, .dc-waterfall-bar.app { background-color:var(--dc-span-app); }
