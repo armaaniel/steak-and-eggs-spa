@@ -1,6 +1,6 @@
 :root {
-	--dc-span-app: #2a78d6;
-	--dc-span-sql: #eb6834;
+	--dc-span-app: #8E87C2;
+	--dc-span-sql: var(--dc-cpu);
 	--dc-span-redis: #1baf7a;
 	--dc-span-http: #eda100;
 	--dc-span-callbacks: #e87ba4;
@@ -8,8 +8,8 @@
 }
 
 [data-theme="dark"] {
-	--dc-span-app: #3987e5;
-	--dc-span-sql: #d95926;
+	--dc-span-app: #8E87C2;
+	--dc-span-sql: var(--dc-cpu);
 	--dc-span-redis: #199e70;
 	--dc-span-http: #c98500;
 	--dc-span-callbacks: #d55181;
