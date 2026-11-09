@@ -82,7 +82,11 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
 
         {error && <p className="dc-detail-muted">Unable to load the timeline, please try again</p>}
 
-        {waterfallTrace && <TraceWaterfall key={waterfallTrace.id} trace={waterfallTrace} />}
+        {waterfallTrace && (
+          <div className="waterfall-fade">
+            <TraceWaterfall key={waterfallTrace.id} trace={waterfallTrace} />
+          </div>
+        )}
       </div>
     </div>
   )
