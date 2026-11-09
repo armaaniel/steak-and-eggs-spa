@@ -48,7 +48,6 @@ export interface Trace {
 	controller:string
 	action:string
 	status:number
-	dbRuntime:number
 	breakdown?: Record<string, Breakdown>
 	errorClass?:string | null
 	errorLocation?:string | null

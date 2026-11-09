@@ -13,7 +13,6 @@ const GET_RUN_TRACES = gql`
       controller
       action
       status
-      dbRuntime
       breakdown
       errorClass
       errorLocation

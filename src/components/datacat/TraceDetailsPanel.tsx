@@ -60,7 +60,6 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
   const timingRows: DetailRow[] = [
     { label: 'Status', value: trace.status },
     { label: 'Duration', value: formatMs(trace.duration, 1) },
-    { label: 'DB runtime', value: formatMs(trace.dbRuntime, 1) },
   ]
 
   const errorRows: DetailRow[] = []
