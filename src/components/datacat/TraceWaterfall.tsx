@@ -123,15 +123,6 @@ const TraceWaterfall = ({ trace }: Props) => {
     .map((category) => ({ ...category, ms: Number(trace[category.field] ?? 0) }))
     .filter((part) => part.ms > 0)
 
-  const rows: { node: Node, depth: number }[] = []
-  const visit = (nodes: Node[], depth: number) => {
-    nodes.forEach((node) => {
-      rows.push({ node, depth })
-      if (!collapsed.has(node.key)) visit(node.children, depth + 1)
-    })
-  }
-  visit(tree, 0)
-
   const toggle = (key: string) => {
     setCollapsed((current) => {
       const next = new Set(current)
@@ -142,6 +133,60 @@ const TraceWaterfall = ({ trace }: Props) => {
   }
 
   const showTip = (event: MouseEvent, text: string) => setTip({ text, x: event.clientX, y: event.clientY })
+
+  function renderNode(node: Node, depth: number) {
+    const { span } = node
+    const expandable = node.children.length > 0
+    const isOpen = !collapsed.has(node.key)
+    const detail = describe(span)
+    const indent = { paddingLeft: `${depth * 0.75}rem` }
+    const detailIndent = { paddingLeft: `calc(${depth * 0.75 + 0.75}rem + 6px)` }
+    const tipText = `${formatMs(span.start)} → ${formatMs(span.start + span.duration)}${expandable ? ` · own time ${formatMs(ownTime(node))}` : ''}`
+
+    return (
+      <div key={node.key}>
+        <div className="dc-waterfall-row" onMouseMove={(event) => showTip(event, tipText)}>
+          <button
+            type="button"
+            className={`dc-waterfall-label ${expandable ? 'expandable' : ''}`}
+            style={indent}
+            disabled={!expandable}
+            aria-expanded={expandable ? isOpen : undefined}
+            onClick={() => toggle(node.key)}
+          >
+            <span className="dc-waterfall-caret">
+              {expandable && (
+                <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`dc-waterfall-chevron ${isOpen ? 'open' : ''}`}>
+                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </span>
+            <span className="dc-waterfall-name">
+              {PREFIX[span.category] && <span className="dc-detail-muted">{PREFIX[span.category]} </span>}
+              {node.label}
+            </span>
+            <span className="dc-waterfall-ms">{formatMs(span.duration)}</span>
+          </button>
+          {span.sql && <p className="dc-waterfall-sql" style={detailIndent}>{span.sql}</p>}
+          {detail && <p className="dc-detail-muted" style={detailIndent}>{detail}</p>}
+          <div className="dc-waterfall-track">
+            <div
+              className={`dc-waterfall-bar ${span.category}`}
+              style={{ left: `${(span.start / total) * 100}%`, width: `max(2px, ${(span.duration / total) * 100}%)` }}
+            />
+          </div>
+        </div>
+
+        {expandable && (
+          <div className={`dc-waterfall-children ${isOpen ? 'open' : ''}`} inert={!isOpen}>
+            <div className="dc-waterfall-children-inner">
+              {node.children.map((child) => renderNode(child, depth + 1))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <>
@@ -174,48 +219,7 @@ const TraceWaterfall = ({ trace }: Props) => {
           <span>{formatMs(total)}</span>
         </div>
         <div className="dc-waterfall-rows" onMouseLeave={() => setTip(null)}>
-          {rows.map(({ node, depth }) => {
-            const { span } = node
-            const expandable = node.children.length > 0
-            const detail = describe(span)
-            const indent = { paddingLeft: `${depth * 0.75}rem` }
-            const detailIndent = { paddingLeft: `calc(${depth * 0.75 + 0.75}rem + 6px)` }
-            const tipText = `${formatMs(span.start)} → ${formatMs(span.start + span.duration)}${expandable ? ` · own time ${formatMs(ownTime(node))}` : ''}`
-
-            return (
-              <div key={node.key} className="dc-waterfall-row" onMouseMove={(event) => showTip(event, tipText)}>
-                <button
-                  type="button"
-                  className={`dc-waterfall-label ${expandable ? 'expandable' : ''}`}
-                  style={indent}
-                  disabled={!expandable}
-                  aria-expanded={expandable ? !collapsed.has(node.key) : undefined}
-                  onClick={() => toggle(node.key)}
-                >
-                  <span className="dc-waterfall-caret">
-                    {expandable && (
-                      <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className={`dc-waterfall-chevron ${collapsed.has(node.key) ? '' : 'open'}`}>
-                        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="dc-waterfall-name">
-                    {PREFIX[span.category] && <span className="dc-detail-muted">{PREFIX[span.category]} </span>}
-                    {node.label}
-                  </span>
-                  <span className="dc-waterfall-ms">{formatMs(span.duration)}</span>
-                </button>
-                {span.sql && <p className="dc-waterfall-sql" style={detailIndent}>{span.sql}</p>}
-                {detail && <p className="dc-detail-muted" style={detailIndent}>{detail}</p>}
-                <div className="dc-waterfall-track">
-                  <div
-                    className={`dc-waterfall-bar ${span.category}`}
-                    style={{ left: `${(span.start / total) * 100}%`, width: `max(2px, ${(span.duration / total) * 100}%)` }}
-                  />
-                </div>
-              </div>
-            )
-          })}
+          {tree.map((node) => renderNode(node, 0))}
         </div>
       </div>
 

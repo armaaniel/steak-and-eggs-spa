@@ -134,6 +134,21 @@
 	transform:rotate(0deg);
 }
 
+.dc-waterfall-children {
+	display:grid;
+	grid-template-rows:0fr;
+	transition:grid-template-rows 250ms ease-out;
+}
+
+.dc-waterfall-children.open {
+	grid-template-rows:1fr;
+}
+
+.dc-waterfall-children-inner {
+	min-height:0;
+	overflow:hidden;
+}
+
 .dc-waterfall-name {
 	flex:1;
 	min-width:0;
