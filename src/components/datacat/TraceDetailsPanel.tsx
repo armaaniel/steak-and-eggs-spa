@@ -16,6 +16,9 @@ const GET_TRACE_WATERFALL = gql`
       httpMs
       callbacksMs
       renderMs
+      errorClass
+      errorLocation
+      sentryEventId
     }
   }
 `
@@ -30,6 +33,26 @@ function formatMs(ms: number, digits = 0) {
 
 function hasAnySpans(trace: Trace) {
   return (trace.spans?.length ?? 0) > 0
+}
+
+function buildErrorRows(trace: Trace) {
+  const rows: DetailRow[] = []
+
+  if (trace.errorClass) rows.push({ label: 'Error', value: trace.errorClass })
+  if (trace.errorLocation) rows.push({ label: 'Error location', value: trace.errorLocation })
+
+  if (trace.sentryEventId) {
+    rows.push({
+      label: 'Sentry',
+      value: (
+        <a href={`${SENTRY_EVENT_SEARCH_URL}${trace.sentryEventId}`} target="_blank" rel="noreferrer">
+          {trace.sentryEventId}
+        </a>
+      ),
+    })
+  }
+
+  return rows
 }
 
 const TraceDetailsPanel = ({ trace: listed }: Props) => {
@@ -50,22 +73,6 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
     { label: 'Duration', value: formatMs(trace.duration, 1) },
   ]
 
-  const errorRows: DetailRow[] = []
-
-  if (trace.errorClass) errorRows.push({ label: 'Error', value: trace.errorClass })
-  if (trace.errorLocation) errorRows.push({ label: 'Error location', value: trace.errorLocation })
-
-  if (trace.sentryEventId) {
-    errorRows.push({
-      label: 'Sentry',
-      value: (
-        <a href={`${SENTRY_EVENT_SEARCH_URL}${trace.sentryEventId}`} target="_blank" rel="noreferrer">
-          {trace.sentryEventId}
-        </a>
-      ),
-    })
-  }
-
   return (
     <div className="sidebar-button-container two">
       <div className="trace-details">
@@ -84,11 +91,11 @@ const TraceDetailsPanel = ({ trace: listed }: Props) => {
         {waterfallTrace && (
           <div className="waterfall-fade">
             <TraceWaterfall trace={waterfallTrace} />
-            <DetailRows rows={errorRows} />
+            <DetailRows rows={buildErrorRows(waterfallTrace)} />
           </div>
         )}
 
-        {!waterfallTrace && !loading && <DetailRows rows={errorRows} />}
+        {!waterfallTrace && !loading && <DetailRows rows={buildErrorRows(trace)} />}
       </div>
     </div>
   )
