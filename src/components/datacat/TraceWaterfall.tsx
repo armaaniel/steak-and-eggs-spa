@@ -105,27 +105,15 @@ function buildTree(spans: Span[]) {
   return roots.map(groupRuns)
 }
 
-function collapsedBelowTopLevel(nodes: Node[], keys = new Set<string>()) {
-  nodes.forEach((node) => {
-    node.children.forEach((child) => {
-      if (child.children.length > 0) keys.add(child.key)
-    })
-
-    collapsedBelowTopLevel(node.children, keys)
-  })
-
-  return keys
-}
-
 const TraceWaterfall = ({ trace }: Props) => {
   const total = trace.duration
   const tree = useMemo(() => buildTree(trace.spans ?? []), [trace.spans])
-  const [collapsed, setCollapsed] = useState(() => collapsedBelowTopLevel(tree))
+  const [collapsed, setCollapsed] = useState(() => new Set<string>())
   const [shownTraceId, setShownTraceId] = useState(trace.id)
 
   if (trace.id !== shownTraceId) {
     setShownTraceId(trace.id)
-    setCollapsed(collapsedBelowTopLevel(tree))
+    setCollapsed(new Set<string>())
   }
 
   const timeByCategory = CATEGORIES.map((category) => ({ ...category, ms: Number(trace[category.field] ?? 0) }))
