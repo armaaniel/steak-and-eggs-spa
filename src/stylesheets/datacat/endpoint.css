@@ -52,6 +52,7 @@
 	position:sticky;
 	top:calc(50vh - 0.75rem);
 	padding:0.25rem 0;
+	font-size:14px;
 	line-height:1rem;
 	background-color:var(--dc-page-bg);
 	opacity:0;
