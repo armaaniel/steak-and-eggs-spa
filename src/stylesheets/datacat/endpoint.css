@@ -11,7 +11,7 @@
 }
 
 .home-left-two.resizing {
-	transition:width 300ms ease-out;
+	transition:width 300ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
