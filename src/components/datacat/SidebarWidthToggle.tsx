@@ -5,16 +5,16 @@ interface Props {
 
 const SidebarWidthToggle = ({ wide, onToggle }: Props) => {
   let label = 'Widen sidebar'
-  let arrow = '>'
+  let arrowClassName = 'dc-sidebar-edge-arrow'
 
   if (wide) {
     label = 'Narrow sidebar'
-    arrow = '<'
+    arrowClassName = 'dc-sidebar-edge-arrow wide'
   }
 
   return (
     <button type="button" className="dc-sidebar-edge" onClick={onToggle} aria-label={label}>
-      <span className="dc-sidebar-edge-arrow">{arrow}</span>
+      <span className={arrowClassName}>{'>'}</span>
     </button>
   )
 }
