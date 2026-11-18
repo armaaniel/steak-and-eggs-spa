@@ -11,6 +11,7 @@ import IngesterDetailsPanel from '../../components/datacat/IngesterDetailsPanel'
 import DependencyDetailsPanel from '../../components/datacat/DependencyDetailsPanel'
 import JobDetailsPanel from '../../components/datacat/JobDetailsPanel'
 import StatsPanel from '../../components/datacat/StatsPanel'
+import SidebarWidthToggle from '../../components/datacat/SidebarWidthToggle'
 import useEndpoint from '../../hooks/useEndpoint'
 import useDatacatRange from '../../hooks/useDatacatRange'
 import type { Detail, TraceStats } from '../../lib/types.ts'
@@ -215,11 +216,34 @@ function DCList() {
 
   const closeDetails = () => setDetail(null)
 
+  const [sidebarWide, setSidebarWide] = useState(false)
+  const [resizingSidebar, setResizingSidebar] = useState(false)
+
+  if (!hasDetail && sidebarWide) {
+    setSidebarWide(false)
+    setResizingSidebar(true)
+  }
+
+  function toggleSidebarWidth() {
+    setSidebarWide(!sidebarWide)
+    setResizingSidebar(true)
+  }
+
+  function finishResizingSidebar(event: React.TransitionEvent<HTMLDivElement>) {
+    if (event.target === event.currentTarget && event.propertyName === 'width') {
+      setResizingSidebar(false)
+    }
+  }
+
   return (
     <div className="dc-root">
       <DCNavbar />
       <div ref={pageRef} className="dc-home-parent">
-        <div ref={sidebarRef} className={`home-left-two ${onHome ? 'sticky' : ''} ${onIngester ? 'narrow' : ''}`}>
+        <div
+          ref={sidebarRef}
+          className={`home-left-two ${onHome ? 'sticky' : ''} ${onIngester ? 'narrow' : ''} ${sidebarWide ? 'wide' : ''} ${resizingSidebar ? 'resizing' : ''}`}
+          onTransitionEnd={finishResizingSidebar}
+        >
           {detail && (
             <div className="dc-side-header-container">
               <h3 className="catlas-text">{detail.kind === 'dependency' ? detail.node.title : detail.kind === 'job' ? detail.label : 'Details'}</h3>
@@ -266,6 +290,8 @@ function DCList() {
             </>
           )}
         </div>
+
+        {detail && <SidebarWidthToggle wide={sidebarWide} onToggle={toggleSidebarWidth} />}
 
         <div className="dc-home-right">
           <Outlet context={{ detail, setDetail, range, setRange, usedRedis: lastStats?.usedRedis ?? false, usedApi: lastStats?.usedApi ?? false, setEndpointStats }} />
