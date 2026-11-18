@@ -11,6 +11,7 @@ interface Node {
   span: Span
   label: string
   children: Node[]
+  isGroup: boolean
 }
 
 const CATEGORIES: { key: SpanCategory, label: string, field: keyof Trace }[] = [
@@ -68,6 +69,7 @@ function groupRuns(node: Node): Node {
         label: `${groupKey(first)} × ${run.length}`,
         span: { ...first, duration: last.start + last.duration - first.start, sql: null, cached: null, hit: null, dropped: null },
         children: run,
+        isGroup: true,
       })
     } else {
       children.push(...run)
@@ -90,7 +92,7 @@ function groupRuns(node: Node): Node {
 }
 
 function buildTree(spans: Span[]) {
-  const nodes: Node[] = spans.map((span, index) => ({ key: String(index), span, label: span.name, children: [] }))
+  const nodes: Node[] = spans.map((span, index) => ({ key: String(index), span, label: span.name, children: [], isGroup: false }))
   const roots: Node[] = []
 
   nodes.forEach((node) => {
@@ -105,6 +107,28 @@ function buildTree(spans: Span[]) {
   return roots.map(groupRuns)
 }
 
+function findStoredSpans(node: Node) {
+  if (node.isGroup) {
+    return node.children.map((child) => child.span)
+  }
+
+  return [node.span]
+}
+
+function findSelfMs(node: Node) {
+  if (node.isGroup || node.children.length === 0) {
+    return null
+  }
+
+  const childMs = node.children.flatMap(findStoredSpans).reduce((sum, span) => sum + span.duration, 0)
+
+  return Math.max(0, node.span.duration - childMs)
+}
+
+function hasDroppedSpans(trace: Trace) {
+  return (trace.spans?.[0]?.dropped ?? 0) > 0
+}
+
 const TraceWaterfall = ({ trace }: Props) => {
   const total = trace.duration
   const tree = useMemo(() => buildTree(trace.spans ?? []), [trace.spans])
@@ -116,6 +140,7 @@ const TraceWaterfall = ({ trace }: Props) => {
     setCollapsed(new Set<string>())
   }
 
+  const spansDropped = hasDroppedSpans(trace)
   const timeByCategory = CATEGORIES.map((category) => ({ ...category, ms: Number(trace[category.field] ?? 0) }))
   const parts = timeByCategory.filter((part) => part.ms > 0)
 
@@ -136,6 +161,11 @@ const TraceWaterfall = ({ trace }: Props) => {
     const cacheResult = describeCacheResult(span)
     const indent = { paddingLeft: `${depth * 0.75}rem` }
     const detailIndent = { paddingLeft: `calc(${depth * 0.75 + 0.75}rem + 6px)` }
+    let selfMs: number | null = null
+
+    if (!spansDropped) {
+      selfMs = findSelfMs(node)
+    }
 
     return (
       <div key={node.key}>
@@ -164,6 +194,7 @@ const TraceWaterfall = ({ trace }: Props) => {
               {formatMs(span.duration)}
             </span>
           </button>
+          {selfMs !== null && <p className="dc-detail-muted dc-waterfall-self">self {formatMs(selfMs)}</p>}
           {span.sql && <p className="dc-waterfall-sql" style={detailIndent}>{span.sql}</p>}
           {detail && <p className="dc-detail-muted" style={detailIndent}>{detail}</p>}
           <div className="dc-waterfall-track">

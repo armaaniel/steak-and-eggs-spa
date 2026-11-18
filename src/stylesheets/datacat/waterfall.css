@@ -154,6 +154,11 @@
 	color:var(--dc-text-muted);
 }
 
+.dc-waterfall-self {
+	text-align:right;
+	font-variant-numeric:tabular-nums;
+}
+
 .dc-waterfall-sql {
 	font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
 	font-size:11px;
