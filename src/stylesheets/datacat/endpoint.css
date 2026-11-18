@@ -36,32 +36,17 @@
 	cursor:pointer;
 }
 
-.dc-sidebar-edge::before {
-	content:'';
-	position:absolute;
-	top:0;
-	bottom:0;
-	left:50%;
-	width:1px;
-	background-color:var(--dc-border);
-	opacity:0;
-	transition:opacity 150ms;
-}
-
 .dc-sidebar-edge-arrow {
 	position:sticky;
 	top:calc(50vh - 0.75rem);
 	padding:0.25rem 0;
 	font-size:14px;
 	line-height:1rem;
-	background-color:var(--dc-page-bg);
 	opacity:0;
 	transition:opacity 150ms;
 }
 
-.dc-sidebar-edge:hover::before,
 .dc-sidebar-edge:hover .dc-sidebar-edge-arrow,
-.dc-sidebar-edge:focus-visible::before,
 .dc-sidebar-edge:focus-visible .dc-sidebar-edge-arrow {
 	opacity:1;
 }
