@@ -65,10 +65,6 @@
 	opacity:1;
 }
 
-.dc-sidebar-edge:hover .dc-sidebar-edge-arrow {
-	color:var(--dc-text);
-}
-
 .home-left-two.sticky {
 	position:sticky;
 	top:1rem;
