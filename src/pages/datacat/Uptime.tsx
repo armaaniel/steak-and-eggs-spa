@@ -184,7 +184,7 @@ function Uptime() {
               <p className="uptime-slo-detail">{slo.periodGood.toLocaleString()} / {slo.periodExpected.toLocaleString()} runs passed</p>
             </div>
 
-            <div>
+            <div className="uptime-slo-budget">
               <p className="uptime-slo-label">Error budget</p>
               <p className={`uptime-slo-value ${budgetSpent ? 'critical' : ''}`}>{budgetLeft === null ? '-' : `${budgetLeft.toFixed(0)}% left`}</p>
               <p className="uptime-slo-detail">{slo.budgetUsed.toLocaleString()} of {slo.budgetAllowed.toLocaleString()} bad runs used, last 30 days</p>

@@ -190,6 +190,11 @@
 	color:var(--dc-text-muted);
 }
 
+.uptime-slo-budget {
+	flex:1 1 0;
+	min-width:10rem;
+}
+
 .uptime-jobs {
 	display:flex;
 	flex-direction:column;
