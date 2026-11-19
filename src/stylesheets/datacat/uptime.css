@@ -202,6 +202,17 @@
 	row-gap:0.5rem;
 	margin-left:auto;
 	margin-right:4rem;
+	transition:margin-right 300ms ease;
+}
+
+.home-left-two.wide ~ .dc-home-right .uptime-jobs {
+	margin-right:2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.uptime-jobs {
+		transition:none;
+	}
 }
 
 .uptime-job-row {
