@@ -44,7 +44,7 @@ const TraceOverviewTable = ({ traceData, recordsPerPage, error }: { traceData: T
 
   const handleSort = (field: keyof TraceSummary) => {
     setSorted(true)
-    if (sortField === field) {
+    if (sorted && sortField === field) {
       setDirection(direction === 'asc' ? 'desc' : 'asc')
     } else {
       setSortField(field)
