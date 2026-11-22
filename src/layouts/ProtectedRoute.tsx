@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar'
 function ProtectedRoute() {
 	const token = localStorage.getItem('authToken')
 	
-	if (!token) return <Navigate to ="/login" />
+	if (!token) return <Navigate to="/" replace />
 	
 	return (
 		<>
