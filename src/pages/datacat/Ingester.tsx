@@ -100,6 +100,7 @@ const RESOURCES_DRAWER_HEIGHT = HEIGHT + 40
 const NO_RATE: IngesterRatePoint[] = []
 const NO_LAG: IngesterLagPoint[] = []
 const NO_RESOURCES: ResourcePoint[] = []
+const MINUTE_MS = 60 * 1000
 
 function toTime(at: string) {
   return new Date(at).getTime()
@@ -185,12 +186,13 @@ function Ingester() {
   const [sessionsBack, setSessionsBack] = useState<number | null>(0)
 
   const timeWindow = useMemo(() => {
+    const now = Math.floor(Date.now() / MINUTE_MS) * MINUTE_MS
+
     if (sessionsBack !== null) {
-      return findSession(Date.now(), sessionsBack)
+      return findSession(now, sessionsBack)
     }
 
-    const to = Date.now()
-    return { from: to - DATACAT_RANGE_MS[range], to }
+    return { from: now - DATACAT_RANGE_MS[range], to: now }
   }, [sessionsBack, range])
 
   const changeRange = (nextRange: DatacatRange) => {
