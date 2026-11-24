@@ -12,6 +12,10 @@
 	position:relative;
 }
 
+.buy-sell-text {
+	transition: color 100ms;
+}
+
 .buy-sell-button:hover {
 	color: var(--accent-emphasis);
 }
