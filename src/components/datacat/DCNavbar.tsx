@@ -9,7 +9,7 @@ const DCNavbar = () => {
       <NavLink to="/datacat" className="catlas-text">
         DataCat
       </NavLink>
-      <NavLink to={authBoolean ? '/home' : '/'} className="catlas-text">
+      <NavLink to={authBoolean ? '/home' : '/'} className="catlas-text catlas-link">
         Steak&Eggs
       </NavLink>
     </div>

@@ -43,6 +43,14 @@
   color: inherit;
 }
 
+.catlas-link {
+	transition: color 100ms;
+}
+
+.catlas-link:hover {
+	color: var(--dc-latency-p99);
+}
+
 .side-button {
 	font-family: var(--font-ui);
 	font-weight:400;
