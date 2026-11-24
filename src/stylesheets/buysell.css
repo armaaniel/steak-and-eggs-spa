@@ -13,7 +13,7 @@
 }
 
 .buy-sell-button:hover {
-	background-color: var(--hover);
+	color: var(--accent-emphasis);
 }
 
 .buy-sell-text.active {
@@ -149,7 +149,7 @@
 }
 
 .bs-back-button:hover {
-	background-color: var(--hover);
+	color: var(--accent-emphasis);
 }
 
 .bs-line {
