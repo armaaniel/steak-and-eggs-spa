@@ -285,7 +285,7 @@ const TimeSeriesChart = ({ title, lines, from, to, yAxis, formatValue, hoveredTi
   let xLabelDates: Date[] = []
 
   if (showTimeLabels) {
-    xLabelDates = xScale.ticks(Math.max(2, Math.floor(plotWidth / 100)))
+    xLabelDates = xScale.ticks(Math.max(2, Math.floor(plotWidth / 100))).filter((date) => date.getSeconds() === 0)
   }
 
   function formatLineValue(chartLine: ChartLine, value: number) {

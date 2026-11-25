@@ -195,6 +195,8 @@ function Ingester() {
     return { from: now - DATACAT_RANGE_MS[range], to: now }
   }, [sessionsBack, range])
 
+  const shownTo = timeWindow.to - MINUTE_MS
+
   const changeRange = (nextRange: DatacatRange) => {
     setDetail(null)
     setPinnedTime(null)
@@ -301,7 +303,7 @@ function Ingester() {
               </div>
             </div>
 
-            <IngesterTimeline spans={spans} from={timeWindow.from} to={timeWindow.to} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} pinnedTime={pinnedTime} setPinnedTime={setPinnedTime} />
+            <IngesterTimeline spans={spans} from={timeWindow.from} to={shownTo} chartLeft={chartLeft} hoveredTime={hoveredTime} setHoveredTime={setHoveredTime} pinnedTime={pinnedTime} setPinnedTime={setPinnedTime} />
           </div>
 
           <div className={`positions-container ${isLoaded && !loading ? 'loaded' : ''}`}>
@@ -312,7 +314,7 @@ function Ingester() {
                 drawIn
                 lines={rateLines}
                 from={timeWindow.from}
-                to={timeWindow.to}
+                to={shownTo}
                 yAxis="auto"
                 formatValue={formatRate}
                 hoveredTime={hoveredTime}
@@ -335,7 +337,7 @@ function Ingester() {
                 drawIn
                 lines={lagLines}
                 from={timeWindow.from}
-                to={timeWindow.to}
+                to={shownTo}
                 yAxis="auto"
                 formatValue={formatLag}
                 hoveredTime={hoveredTime}
@@ -366,7 +368,7 @@ function Ingester() {
                     title=""
                     lines={resourceLines}
                     from={timeWindow.from}
-                    to={timeWindow.to}
+                    to={shownTo}
                     yAxis="percent"
                     curve={curveLinear}
                     formatValue={formatPercent}

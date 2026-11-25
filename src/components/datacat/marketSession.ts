@@ -2,6 +2,7 @@ const MARKET_ZONE = 'America/New_York'
 const SESSION_START_MINUTE = 9 * 60 + 30
 const SESSION_END_MINUTE = 16 * 60 + 30
 const DAYS_TO_SEARCH = 7
+const MIN_SESSION_MS = 2 * 60 * 1000
 
 const marketOffset = (ms: number) => {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -53,7 +54,7 @@ export const findSession = (now: number, sessionsBack: number) => {
     const date = day.getUTCDate()
     const from = toMarketInstant(year, month, date, SESSION_START_MINUTE)
 
-    if (from > now) continue
+    if (now - from < MIN_SESSION_MS) continue
 
     if (sessionsSkipped < sessionsBack) {
       sessionsSkipped += 1
