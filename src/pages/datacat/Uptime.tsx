@@ -54,6 +54,12 @@ interface RunsData {
   syntheticRuns: SyntheticRun[]
 }
 
+const RUN_GROUPS: { label: string; result: SyntheticRun['result'] }[] = [
+  { label: 'Failed', result: 'fail' },
+  { label: 'Passed', result: 'pass' },
+  { label: 'No verdict', result: null },
+]
+
 function renderPlaceholderRun(_: unknown, index: number) {
   return (
     <div key={index} className="uptime-run">
@@ -158,6 +164,26 @@ function Uptime() {
   const shownData = data ?? previousData
   const buckets = shownData?.syntheticBuckets || []
   const runs = runsData?.syntheticRuns || []
+  const hasFailedRun = runs.some((run) => run.result === 'fail')
+
+  function renderRun(run: SyntheticRun) {
+    return <SyntheticRunRow key={run.runId} run={run} isOpen={openRunIds.includes(run.runId)} toggleOpen={() => toggleRun(run.runId)} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} />
+  }
+
+  function renderRunGroup(group: (typeof RUN_GROUPS)[number]) {
+    const groupRuns = runs.filter((run) => run.result === group.result)
+
+    if (groupRuns.length === 0) {
+      return null
+    }
+
+    return (
+      <div key={group.label} className="uptime-runs">
+        <p className="uptime-run-group-label">{group.label} ({groupRuns.length})</p>
+        {groupRuns.map(renderRun)}
+      </div>
+    )
+  }
 
   const slo = shownData?.canarySlo
   const sli = slo && slo.expected > 0 ? (slo.good / slo.expected) * 100 : null
@@ -217,11 +243,11 @@ function Uptime() {
               </div>
             ) : runs.length === 0 ? (
               <p className="uptime-message">No runs in this bucket</p>
+            ) : hasFailedRun ? (
+              RUN_GROUPS.map(renderRunGroup)
             ) : (
               <div className="uptime-runs">
-                {runs.map((run) => (
-                  <SyntheticRunRow key={run.runId} run={run} isOpen={openRunIds.includes(run.runId)} toggleOpen={() => toggleRun(run.runId)} selectedTrace={selectedTrace} setSelectedTrace={selectTrace} />
-                ))}
+                {runs.map(renderRun)}
               </div>
             )}
           </div>
