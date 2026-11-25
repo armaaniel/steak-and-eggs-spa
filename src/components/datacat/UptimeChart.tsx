@@ -20,7 +20,7 @@ const PENDING_COLOR = 'color-mix(in srgb, var(--dc-healthy) 30%, transparent)'
 
 const UPTIME_SERIES: BarSeries[] = [
   { key: 'healthy', label: 'healthy', color: HEALTHY_COLOR, hoverColor: HEALTHY_HOVER_COLOR },
-  { key: 'incomplete', label: 'incomplete', color: INCOMPLETE_COLOR },
+  { key: 'incomplete', label: 'incomplete', color: INCOMPLETE_COLOR, minHeight: 2.5 },
   { key: 'failing', label: 'failing', color: FAILING_COLOR, minHeight: 2.5 },
   { key: 'pending', label: 'pending', color: PENDING_COLOR, hideInLegend: true }
 ]
@@ -53,18 +53,9 @@ function toUptimeBar(bucket: SyntheticBucket, runsPerBucket: number): ChartBar {
   const start = new Date(bucket.bucket).getTime()
   const end = new Date(bucket.bucketEnd).getTime()
 
-  const height = Math.max(bucket.started, bucket.expected)
   const unfinishedRuns = Math.max(0, bucket.expected - bucket.completed - bucket.failures)
 
-  let segments: Record<string, number> = { healthy: height }
-
-  if (unfinishedRuns > 0) {
-    segments = { incomplete: height }
-  }
-
-  if (bucket.failures > 0) {
-    segments = { healthy: bucket.completed, failing: bucket.failures }
-  }
+  let segments: Record<string, number> = { healthy: bucket.completed, incomplete: unfinishedRuns, failing: bucket.failures }
 
   if (runsPerBucket === 1 && bucket.started === 0 && isInProgress(bucket)) {
     segments = { pending: 1 }
