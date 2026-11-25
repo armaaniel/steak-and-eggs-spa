@@ -21,7 +21,7 @@ const PENDING_COLOR = 'color-mix(in srgb, var(--dc-healthy) 30%, transparent)'
 const UPTIME_SERIES: BarSeries[] = [
   { key: 'healthy', label: 'healthy', color: HEALTHY_COLOR, hoverColor: HEALTHY_HOVER_COLOR },
   { key: 'incomplete', label: 'incomplete', color: INCOMPLETE_COLOR },
-  { key: 'failing', label: 'failing', color: FAILING_COLOR },
+  { key: 'failing', label: 'failing', color: FAILING_COLOR, minHeight: 2.5 },
   { key: 'pending', label: 'pending', color: PENDING_COLOR, hideInLegend: true }
 ]
 
@@ -63,7 +63,7 @@ function toUptimeBar(bucket: SyntheticBucket, runsPerBucket: number): ChartBar {
   }
 
   if (bucket.failures > 0) {
-    segments = { failing: height }
+    segments = { healthy: bucket.completed, failing: bucket.failures }
   }
 
   if (runsPerBucket === 1 && bucket.started === 0 && isInProgress(bucket)) {
